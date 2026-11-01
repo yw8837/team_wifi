@@ -1,11 +1,14 @@
-# 모두육아 · team_wifi
+# 모두의 육아 - 육아템 공동구매,핫딜 · team_wifi
 
-육아용품 공동구매와 흩어진 핫딜 정보를 확인하고, 조건을 비교하며 함께 참여하는 커뮤니티 앱입니다. 서비스명은 **모두육아**, 저장소는 `yw8837/team_wifi`입니다. 개발 브랜치는 `codex/modu-yuga`입니다.
+육아용품 공동구매와 흩어진 핫딜 정보를 확인하고, 조건을 비교하며 함께 참여하는 커뮤니티 앱입니다. 정식 앱명은 **모두의 육아 - 육아템 공동구매,핫딜**, 로고 표기는 **모두의육아**, 개발자 표기는 **Team_Wifi**입니다. 패키지 `kr.moduyuga.app`, 저장소 `yw8837/team_wifi`, 개발 브랜치 `codex/modu-yuga`를 유지합니다.
 
 현재 코드는 제품의 첫 개발 빌드입니다. 가입·판매자 검토·모집·질문/신고·쿠폰/포인트와 공개 데이터 실험을 실제 API와 연결했습니다. 예시 상품·개발용 주문으로 검증하며 **실결제, 배송, 사업자 인증, Play 출시가 완료된 상태는 아닙니다.** 실제 개인정보나 사업자 서류를 넣지 마세요.
 
 ## 먼저 볼 문서
 
+- [최신 디자인 기준·원본 자산](docs/design/brand/README.md)
+- [v0.6 화면설계서 50개 화면과 현재 구현 대조](docs/design/screen-spec-v0.6.md)
+- [브랜드 적용 검증 기록](docs/build/brand-20261101/VERIFICATION.md)
 - [실행·검증 결과](docs/build/DELIVERY.md)
 - [팀 실행과 공유 방법](docs/build/TEAM.md)
 - [Google Play 앱 등록 결과·출시 조건](docs/build/PLAY-CONSOLE.md)

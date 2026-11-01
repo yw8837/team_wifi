@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { BrandLockup } from "./brand";
+import { IconArrowRight, IconBuildingStore } from "@tabler/icons-react";
 import {
   Link,
   useLocation,
@@ -17,54 +19,26 @@ import {
 } from "./shared";
 type AuthResponse = { access_token: string; user: User };
 export function Welcome() {
-  function seen() {
-    localStorage.setItem("moduyuga.intro", "seen");
-  }
+  function seen() { localStorage.setItem("moduyuga.intro", "seen"); }
   return (
     <section className="welcome">
+      <div className="welcome-emblem" aria-hidden="true">
+        <img src="/brand/symbol.svg" alt="" width="860" height="714" />
+      </div>
       <p className="eyebrow">함께 고르는 육아생활</p>
-      <h1>
-        필요한 육아템,
-        <br />
-        함께 준비해요.
-      </h1>
-      <p className="lead">
-        공동구매의 조건은 꼼꼼하게,
-        <br />
-        육아 핫딜과 혜택은 한곳에서.
-      </p>
+      <h1>필요한 육아템,<br />함께 준비해요.</h1>
+      <p className="lead">공동구매의 조건은 꼼꼼하게,<br />육아 핫딜과 혜택은 한곳에서.</p>
+      <div className="stack">
+        <Link onClick={seen} className="button" to="/">육아템 둘러보기 <IconArrowRight size={20} aria-hidden="true" /></Link>
+        <Link onClick={seen} className="button secondary" to="/signup?track=buyer">구매자로 시작</Link>
+        <Link onClick={seen} className="seller-entry" to="/signup?track=seller"><IconBuildingStore size={18} aria-hidden="true" /> 판매자로 입점</Link>
+        <Link onClick={seen} to="/login">기존 회원 로그인</Link>
+      </div>
       <div className="welcome-note">
         <strong>먼저 살펴보고 결정하세요</strong>
-        <p>
-          가입 없이 가격·배송·환불 조건을 볼 수 있어요. 공동구매 참여는 결제가
-          아닌 모집 의사 표시입니다.
-        </p>
+        <p>가입 없이 가격·배송·환불 조건을 볼 수 있어요. 공동구매 참여는 결제가 아닌 모집 의사 표시입니다.</p>
       </div>
-      <div className="stack">
-        <Link onClick={seen} className="button" to="/">
-          육아템 둘러보기
-        </Link>
-        <Link
-          onClick={seen}
-          className="button secondary"
-          to="/signup?track=buyer"
-        >
-          구매자로 시작
-        </Link>
-        <Link
-          onClick={seen}
-          className="button secondary"
-          to="/signup?track=seller"
-        >
-          판매자로 입점
-        </Link>
-        <Link onClick={seen} to="/login">
-          기존 회원 로그인
-        </Link>
-      </div>
-      <p className="muted">
-        개발용 서비스 · 실제 거래와 결제는 발생하지 않습니다.
-      </p>
+      <p className="muted">개발용 서비스 · 실제 거래와 결제는 발생하지 않습니다.</p>
     </section>
   );
 }
@@ -79,6 +53,7 @@ export function Login() {
   const to = safeReturnPath(params.get("returnTo"));
   return (
     <div className="narrow">
+      <div className="auth-brand"><BrandLockup stacked /></div>
       <PageTitle title="다시 만나 반가워요">
         <p>로그인 후 보던 화면으로 돌아갑니다.</p>
       </PageTitle>

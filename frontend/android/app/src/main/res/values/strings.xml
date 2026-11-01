@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">모두육아</string>
-    <string name="title_activity_main">모두육아</string>
+    <string name="app_name">모두의 육아 - 육아템 공동구매,핫딜</string>
+    <string name="title_activity_main">모두의 육아 - 육아템 공동구매,핫딜</string>
     <string name="package_name">kr.moduyuga.app</string>
     <string name="custom_url_scheme">kr.moduyuga.app</string>
 </resources>

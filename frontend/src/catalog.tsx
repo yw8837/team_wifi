@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { CategoryIcon } from "./brand";
+import { IconArrowRight, IconBabyBottle, IconSearch } from "@tabler/icons-react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   api,
@@ -27,6 +29,7 @@ export function CampaignCard({ item }: { item: Campaign }) {
   return (
     <article className="product">
       <Link className="product-link" to={"/campaigns/" + item.id}>
+        <div className="category-art" aria-hidden="true"><CategoryIcon category={item.category} size={60} /><span>상품 이미지 준비 중</span></div>
         <div className="product-label">
           <span>{item.category}</span>
           <span className="badge">
@@ -92,12 +95,13 @@ function Filters({ hotdeal = false }: { hotdeal?: boolean }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
-        <button>검색</button>
+        <button aria-label="검색"><IconSearch size={22} aria-hidden="true" /></button>
       </form>
       <div className="categories" aria-label="카테고리">
         {["", ...categories].map((c) => (
           <button
             key={c}
+            aria-pressed={(params.get("category") || "") === c}
             className={
               (params.get("category") || "") === c ? "chip selected" : "chip"
             }
@@ -117,35 +121,31 @@ function Filters({ hotdeal = false }: { hotdeal?: boolean }) {
 }
 export function Home() {
   const [params] = useSearchParams();
-  const result = useResource<{ items: Campaign[] }>(
-    "/campaigns?" + params.toString(),
-  );
+  const result = useResource<{ items: Campaign[] }>("/campaigns?" + params.toString());
   return (
-    <>
-      <PageTitle
-        eyebrow="함께 준비하는 육아생활"
-        title="우리에게 필요한 공동구매"
-      >
-        <p>참여하기 전에 가격과 배송·환불 조건을 확인하세요.</p>
-      </PageTitle>
+    <div className="home-catalog">
+      <h1 className="sr-only">우리에게 필요한 공동구매</h1>
       <Filters />
+      {!params.get("q") && !params.get("category") && (
+        <section className="home-feature" aria-label="수유용품 공동구매 안내">
+          <div>
+            <p>매일 쓰는 육아용품</p>
+            <h2>함께 고르고<br />가볍게 준비해요.</h2>
+            <Link to={"/?category=" + encodeURIComponent("수유·이유식")}>수유·이유식 살펴보기 <IconArrowRight size={17} aria-hidden="true" /></Link>
+          </div>
+          <IconBabyBottle className="feature-illustration" size={112} stroke={1.1} aria-hidden="true" />
+        </section>
+      )}
+      <p className="catalog-note">참여 전 가격·배송·환불 조건을 확인해 주세요.</p>
       <div className="section-heading">
         <h2>지금 모집 중</h2>
         <span className="muted">결제 없는 모집 단계</span>
       </div>
-      <ResourceState
-        {...result}
-        retry={result.reload}
-        empty={result.data?.items.length === 0}
-      />
+      <ResourceState {...result} retry={result.reload} empty={result.data?.items.length === 0} />
       <div className="product-grid">
-        {!result.loading &&
-          !result.error &&
-          result.data?.items.map((item) => (
-            <CampaignCard key={item.id} item={item} />
-          ))}
+        {!result.loading && !result.error && result.data?.items.map((item) => <CampaignCard key={item.id} item={item} />)}
       </div>
-    </>
+    </div>
   );
 }
 export function Hotdeals() {

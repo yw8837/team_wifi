@@ -20,7 +20,10 @@ import {
   SellerReservations,
 } from "./seller";
 import { Admin } from "./admin";
+import { BrandLockup, APP_NAME } from "./brand";
+import { IconHome, IconFlame, IconBuildingStore, IconGift, IconUser } from "@tabler/icons-react";
 import "./styles.css";
+import "./brand-theme.css";
 function Layout() {
   const loc = useLocation(),
     { user } = useAuth();
@@ -62,8 +65,8 @@ function Layout() {
         ? "공동구매 상세"
         : loc.pathname.startsWith("/brands/")
           ? "브랜드 상세"
-          : "모두육아");
-    document.title = title === "모두육아" ? title : `${title} | 모두육아`;
+          : "모두의육아");
+    document.title = title === "모두의육아" ? APP_NAME : `${title} | ${APP_NAME}`;
   }, [loc.pathname]);
   return (
     <>
@@ -71,7 +74,7 @@ function Layout() {
         본문으로 이동
       </a>
       <div className="demo-banner">
-        모두육아 · 첫 개발 빌드 · 실제 거래·결제 없음
+        모두의육아 · 첫 개발 빌드 · 실제 거래·결제 없음
       </div>
       {offline && (
         <div role="alert" className="offline">
@@ -81,13 +84,13 @@ function Layout() {
       )}
       <header className="app-header">
         <Link className="wordmark" to="/">
-          모두육아<span>함께 준비하는 오늘</span>
+          <BrandLockup />
         </Link>
         <Link className="header-account" to={user ? "/my" : "/login"}>
           {user ? user.nickname : "로그인"}
         </Link>
       </header>
-      <main id="main">
+      <main id="main" className={["/welcome", "/login", "/signup", "/reset"].includes(loc.pathname) ? "auth-main" : undefined}>
         <Routes>
           <Route path="/welcome" element={<Welcome />} />
           <Route
@@ -184,7 +187,7 @@ function Layout() {
           />
         </Routes>
       </main>
-      <nav className="bottom-nav" aria-label="주요 메뉴">
+      <nav className="bottom-nav" aria-label="주요 메뉴" hidden={["/welcome", "/login", "/signup", "/reset"].includes(loc.pathname)}>
         {[
           ["/", "공동구매", "홈"],
           ["/hotdeals", "핫딜 모음", "딜"],
@@ -194,7 +197,7 @@ function Layout() {
         ].map(([to, label, icon]) => (
           <NavLink end={to === "/"} to={to} key={to}>
             <span className="nav-icon" aria-hidden="true">
-              {icon}
+              {icon === "홈" ? <IconHome size={23} stroke={1.7} /> : icon === "딜" ? <IconFlame size={23} stroke={1.7} /> : icon === "브" ? <IconBuildingStore size={23} stroke={1.7} /> : icon === "혜" ? <IconGift size={23} stroke={1.7} /> : <IconUser size={23} stroke={1.7} />}
             </span>
             <span>{label}</span>
           </NavLink>

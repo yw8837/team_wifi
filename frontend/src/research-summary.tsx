@@ -201,7 +201,7 @@ export function ResearchEvidence({ summary }: { summary: ResearchSummary }) {
       <div className="notice">
         <strong>과거 공개 데이터의 실험 결과</strong>
         <p>
-          실제 모두육아 고객 데이터·국내 육아 시장 조사·현재 상품 추천 성능과
+          실제 모두의육아 고객 데이터·국내 육아 시장 조사·현재 상품 추천 성능과
           구분해서 읽어주세요. 개인별 원자료를 앱 고객과 연결하지 않습니다.
         </p>
       </div>
@@ -470,7 +470,7 @@ function BundleExamples() {
       <h4>원상품 코드로 보는 번들 예시</h4>
       <p className="muted">
         원 StockCode와 영문 상품명을 유지했습니다. 영국 선물용품의 규칙이며
-        모두육아 상품과 매칭하거나 구매 링크로 연결하지 않습니다.
+        모두의육아 상품과 매칭하거나 구매 링크로 연결하지 않습니다.
       </p>
       <ResourceState
         {...result}

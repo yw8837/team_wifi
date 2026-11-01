@@ -27,7 +27,7 @@ async def lifespan(app):
     yield
 
 
-app = FastAPI(title='모두육아 개발 API', version='0.1.0', lifespan=lifespan)
+app = FastAPI(title='모두의 육아 - 육아템 공동구매,핫딜 개발 API', version='0.1.0', lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=['http://127.0.0.1:5173', 'http://localhost:5173', 'https://localhost', 'http://localhost'],
                    allow_credentials=False, allow_methods=['GET', 'POST', 'PUT', 'DELETE'], allow_headers=['Authorization', 'Content-Type'])
 
@@ -698,7 +698,7 @@ def public_html(id: str, db=Depends(get_db)):
     # Development fixtures are explicitly excluded from indexing. No fake merchant Product offers.
     schema = {'@context': 'https://schema.org', '@type': 'WebPage', 'name': c['title'], 'description': c['description'], 'inLanguage': 'ko'}
     encoded = json.dumps(schema, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
-    return '<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escape(c['title'])+' | 모두육아 개발 미리보기</title><script type="application/ld+json">'+encoded+'</script><body><main><p>개발용 예시 · 실제 구매 불가</p><h1>'+escape(c['title'])+'</h1><p>'+escape(c['description'])+'</p><dl><dt>예시 단가</dt><dd>'+str(c['price'])+'원</dd><dt>배송비</dt><dd>'+str(c['shipping_fee'])+'원</dd><dt>단위</dt><dd>'+escape(c['unit'])+'</dd><dt>마감</dt><dd>'+escape(c['ends_at'])+'</dd></dl><h2>배송 조건</h2><p>'+escape(c['shipping_policy'])+'</p><h2>교환·반품</h2><p>'+escape(c['refund_policy'])+'</p><p>예약은 결제가 아닙니다. 모집 성립·실거래 여부를 보장하지 않습니다.</p></main></body></html>'
+    return '<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escape(c['title'])+' | 모두의 육아 - 육아템 공동구매,핫딜 개발 미리보기</title><script type="application/ld+json">'+encoded+'</script><body><main><p>개발용 예시 · 실제 구매 불가</p><h1>'+escape(c['title'])+'</h1><p>'+escape(c['description'])+'</p><dl><dt>예시 단가</dt><dd>'+str(c['price'])+'원</dd><dt>배송비</dt><dd>'+str(c['shipping_fee'])+'원</dd><dt>단위</dt><dd>'+escape(c['unit'])+'</dd><dt>마감</dt><dd>'+escape(c['ends_at'])+'</dd></dl><h2>배송 조건</h2><p>'+escape(c['shipping_policy'])+'</p><h2>교환·반품</h2><p>'+escape(c['refund_policy'])+'</p><p>예약은 결제가 아닙니다. 모집 성립·실거래 여부를 보장하지 않습니다.</p></main></body></html>'
 
 
 @app.get('/robots.txt', response_class=PlainTextResponse)
