@@ -46,12 +46,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void refresh();
   }, [refresh]);
   useEffect(() => {
-    const expired = () => {
+    const expired = (event: Event) => {
       clear();
-      if (!["/login", "/signup", "/reset"].includes(loc.pathname))
+      const shouldRedirect = (event as CustomEvent<{ redirect?: boolean }>).detail?.redirect === true;
+      if (shouldRedirect && !["/login", "/signup", "/reset"].includes(loc.pathname))
         navigate(
           "/login?returnTo=" +
-            encodeURIComponent(safeReturnPath(loc.pathname + loc.search)),
+            encodeURIComponent(safeReturnPath(loc.pathname + loc.search + loc.hash)),
           { replace: true, state: { expired: true } },
         );
     };
@@ -69,10 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     },
     requireLogin: () => {
-      if (user) return true;
+      if (user && sessionStorage.getItem(TOKEN_KEY)) return true;
       navigate(
         "/login?returnTo=" +
-          encodeURIComponent(safeReturnPath(loc.pathname + loc.search)),
+          encodeURIComponent(safeReturnPath(loc.pathname + loc.search + loc.hash)),
       );
       return false;
     },
@@ -259,7 +260,7 @@ export function Protected({
           className="button"
           to={
             "/login?returnTo=" +
-            encodeURIComponent(safeReturnPath(loc.pathname + loc.search))
+            encodeURIComponent(safeReturnPath(loc.pathname + loc.search + loc.hash))
           }
         >
           로그인

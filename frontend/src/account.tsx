@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LegalLinks } from "./beta";
 import { Link, useNavigate } from "react-router-dom";
 import { api, date, money, statusName } from "./api";
 import type { Campaign, Coupon, Reservation, Wallet } from "./types";
@@ -197,6 +198,7 @@ export function My() {
           </p>
         </section>
       )}
+      <LegalLinks />
       <Link to="/welcome">서비스 소개 다시 보기</Link>
     </>
   );

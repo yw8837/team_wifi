@@ -8,6 +8,8 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { api, safeReturnPath } from "./api";
+import { BETA_MODE, BETA_NOTICE, BetaRecover, LegalLinks, RecoveryCodeNotice } from "./beta";
+import { signupDestination } from "./beta-policy";
 import type { User } from "./types";
 import {
   Field,
@@ -17,7 +19,7 @@ import {
   useAction,
   useAuth,
 } from "./shared";
-type AuthResponse = { access_token: string; user: User };
+type AuthResponse = { access_token: string; user: User; recovery_code?: string };
 export function Welcome() {
   function seen() { localStorage.setItem("moduyuga.intro", "seen"); }
   return (
@@ -38,7 +40,8 @@ export function Welcome() {
         <strong>먼저 살펴보고 결정하세요</strong>
         <p>가입 없이 가격·배송·환불 조건을 볼 수 있어요. 공동구매 참여는 결제가 아닌 모집 의사 표시입니다.</p>
       </div>
-      <p className="muted">개발용 서비스 · 실제 거래와 결제는 발생하지 않습니다.</p>
+      <p className="muted">{BETA_MODE ? BETA_NOTICE : "개발용 서비스 · 실제 거래와 결제는 발생하지 않습니다."}</p>
+      <LegalLinks />
     </section>
   );
 }
@@ -102,8 +105,7 @@ export function Login() {
         <Link to="/reset">비밀번호 재설정</Link>
       </div>
       <p className="muted">
-        이 개발 빌드는 이메일 인증·소셜 로그인을 제공하지 않습니다. 세션은 현재
-        탭 또는 앱 실행 동안 유지됩니다.
+        {BETA_MODE ? "이 베타는 이메일 인증·소셜 로그인을 제공하지 않습니다. 비밀번호 분실 시 보관한 복구코드가 필요합니다." : "이 개발 빌드는 이메일 인증·소셜 로그인을 제공하지 않습니다."} 세션은 현재 탭 또는 앱 실행 동안 유지됩니다.
       </p>
     </div>
   );
@@ -121,8 +123,16 @@ export function Signup() {
     terms_accepted: false,
     privacy_accepted: false,
     marketing_opt_in: false,
+    invite_code: "",
+    adult_confirmed: false,
   });
+  const [pending, setPending] = useState<AuthResponse | null>(null);
   const to = safeReturnPath(params.get("returnTo"));
+  if (pending?.recovery_code) return <div className="narrow"><RecoveryCodeNotice code={pending.recovery_code} onContinue={() => {
+    setSession(pending.access_token, pending.user);
+    setPending(null);
+    nav(signupDestination(track, to), { replace: true });
+  }} /></div>;
   return (
     <div className="narrow">
       <PageTitle
@@ -158,8 +168,14 @@ export function Signup() {
               ...form,
               track,
             });
-            setSession(result.access_token, result.user);
-            nav(track === "seller" ? "/seller" : to, { replace: true });
+            setForm({ ...form, password: "", invite_code: "" });
+            if (BETA_MODE) {
+              if (!result.recovery_code) throw new Error("복구코드를 받지 못했습니다. 지원·문의에서 안내를 확인해 주세요.");
+              setPending(result);
+            } else {
+              setSession(result.access_token, result.user);
+              nav(signupDestination(track, to), { replace: true });
+            }
           });
         }}
       >
@@ -192,7 +208,14 @@ export function Signup() {
           value={form.nickname}
           onChange={(e) => setForm({ ...form, nickname: e.target.value })}
         />
-        <details>
+        {BETA_MODE ? <>
+          <Field label="초대코드" name="invite_code" autoComplete="off" autoCapitalize="none" spellCheck={false} required
+            value={form.invite_code} onChange={(e) => setForm({ ...form, invite_code: e.target.value })} />
+          <label className="check"><input type="checkbox" required checked={form.adult_confirmed}
+            onChange={(e) => setForm({ ...form, adult_confirmed: e.target.checked })} /><span>[필수] 만 18세 이상입니다.</span></label>
+          <p className="notice">{BETA_NOTICE}. 실제 사업자 정보와 민감정보는 입력하지 마세요.</p>
+          <LegalLinks />
+        </> : <details>
           <summary>개발용 이용약관 및 개인정보 안내</summary>
           <p>
             이 앱은 공동구매 모집·저장·질문과 개발용 혜택 흐름을 시험하는 로컬
@@ -201,9 +224,9 @@ export function Signup() {
             익명화되며 운영 기록은 남을 수 있습니다. 실제 개인정보와 사업자
             서류는 입력하지 마세요.
           </p>
-        </details>
+        </details>}
         {(
-          ["terms_accepted", "privacy_accepted", "marketing_opt_in"] as const
+          (BETA_MODE ? ["terms_accepted", "privacy_accepted"] : ["terms_accepted", "privacy_accepted", "marketing_opt_in"]) as ("terms_accepted" | "privacy_accepted" | "marketing_opt_in")[]
         ).map((key, i) => (
           <label className="check" key={key}>
             <input
@@ -244,6 +267,7 @@ export function Reset() {
   const [email, setEmail] = useState(""),
     [token, setToken] = useState(""),
     [password, setPassword] = useState("");
+  if (BETA_MODE) return <BetaRecover />;
   return (
     <div className="narrow">
       <PageTitle title="비밀번호 재설정">

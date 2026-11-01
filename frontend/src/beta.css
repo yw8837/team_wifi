@@ -1,0 +1,9 @@
+.legal-links { display: flex; flex-wrap: wrap; gap: .65rem 1rem; margin: 1.25rem 0; }
+.legal-links a { overflow-wrap: anywhere; }
+.recovery-notice { min-width: 0; }
+.recovery-notice h1 { font-size: clamp(1.3rem, 5vw, 1.8rem); line-height: 1.45; }
+.recovery-code { display: block; width: 100%; box-sizing: border-box; padding: 1rem; margin: 1.25rem 0; background: var(--bg, #fff8f1); border: 1px solid currentColor; border-radius: .4rem; font-size: 1.15rem; line-height: 1.7; letter-spacing: .07em; overflow-wrap: anywhere; word-break: break-all; user-select: all; }
+.recovery-notice .check { align-items: flex-start; }
+.recovery-notice .check input { flex-shrink: 0; margin-top: .25rem; }
+.recovery-notice .check span { min-width: 0; overflow-wrap: anywhere; }
+.recovery-notice button { width: 100%; white-space: normal; }

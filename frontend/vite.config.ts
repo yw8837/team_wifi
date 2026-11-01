@@ -1,13 +1,17 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
+import { buildCsp } from "./src/beta-policy";
 import react from "@vitejs/plugin-react";
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "VITE_");
+  const csp = buildCsp(env.VITE_BETA_MODE === "1", env.VITE_API_BASE_URL);
+  return ({
   plugins: [react(), {
     name: "production-content-security-policy",
     apply: "build",
     transformIndexHtml() {
       return [{ tag: "meta", attrs: {
         "http-equiv": "Content-Security-Policy",
-        content: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' http://10.0.2.2:8000 http://127.0.0.1:8000; object-src 'none'; base-uri 'none'; form-action 'self'",
+        content: csp,
       }, injectTo: "head-prepend" }];
     },
   }],
@@ -18,4 +22,5 @@ export default defineConfig({
     strictPort: true,
     proxy: { "/api": { target: "http://127.0.0.1:8000", changeOrigin: true } },
   },
+});
 });

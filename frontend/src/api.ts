@@ -1,3 +1,4 @@
+import { isPublicRead } from "./beta-policy";
 export const TOKEN_KEY = "moduyuga.session";
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(
   /\/$/,
@@ -62,31 +63,42 @@ export async function api<T>(
   body?: unknown,
 ): Promise<T> {
   const token = sessionStorage.getItem(TOKEN_KEY);
-  let response: Response;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15_000);
   try {
-    response = await fetch(API_BASE + path, {
-      method,
-      headers: {
-        ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-  } catch {
-    throw new ApiError(
-      0,
-      "서버에 연결할 수 없습니다. 인터넷과 개발 서버 연결을 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다.",
-    );
-  }
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    if (response.status === 401) {
-      sessionStorage.removeItem(TOKEN_KEY);
-      window.dispatchEvent(new CustomEvent("auth-expired"));
+    let response: Response;
+    try {
+      response = await fetch(API_BASE + path, {
+        method,
+        headers: {
+          ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: body !== undefined ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      });
+    } catch {
+      throw new ApiError(0, controller.signal.aborted
+        ? "응답 시간이 초과되었습니다. 처리 여부를 먼저 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다."
+        : "서버에 연결할 수 없습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다.");
     }
-    throw new ApiError(response.status, formatError(data.detail));
+    const data = await response.json().catch(() => {
+      if (controller.signal.aborted) throw new ApiError(0, "응답 시간이 초과되었습니다. 처리 여부를 확인한 뒤 다시 시도해 주세요.");
+      return {};
+    });
+    if (!response.ok) {
+      if (response.status === 401 && token) {
+        sessionStorage.removeItem(TOKEN_KEY);
+        window.dispatchEvent(new CustomEvent("auth-expired", {
+          detail: { redirect: method !== "GET", publicRead: isPublicRead(path, method) },
+        }));
+      }
+      throw new ApiError(response.status, formatError(data.detail));
+    }
+    return data;
+  } finally {
+    clearTimeout(timeout);
   }
-  return data;
 }
 export const money = (value: number) =>
   new Intl.NumberFormat("ko-KR").format(value) + "원";

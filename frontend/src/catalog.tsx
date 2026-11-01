@@ -529,6 +529,9 @@ export function CampaignDetail() {
                     >
                       신고
                     </button>
+                    {q.author_id !== user?.id && <button className="text-button" onClick={() => {
+                      if (requireLogin()) setReport({ type: "user", id: q.author_id });
+                    }}>작성자 신고</button>}
                     {q.author_id !== user?.id && (
                       <button
                         className="text-button"

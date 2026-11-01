@@ -22,8 +22,10 @@ import {
 import { Admin } from "./admin";
 import { BrandLockup, APP_NAME } from "./brand";
 import { IconHome, IconFlame, IconBuildingStore, IconGift, IconUser } from "@tabler/icons-react";
+import { BETA_MODE, BETA_NOTICE } from "./beta";
 import "./styles.css";
 import "./brand-theme.css";
+import "./beta.css";
 function Layout() {
   const loc = useLocation(),
     { user } = useAuth();
@@ -74,7 +76,7 @@ function Layout() {
         본문으로 이동
       </a>
       <div className="demo-banner">
-        모두의육아 · 첫 개발 빌드 · 실제 거래·결제 없음
+        {BETA_MODE ? BETA_NOTICE : "모두의육아 · 첫 개발 빌드 · 실제 거래·결제 없음"}
       </div>
       {offline && (
         <div role="alert" className="offline">

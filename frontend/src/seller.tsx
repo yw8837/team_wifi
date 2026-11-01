@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BETA_MODE } from "./beta";
 import { Link } from "react-router-dom";
 import { api, categories, date, money, statusName } from "./api";
 import type { Application, Campaign, Reservation } from "./types";
@@ -29,6 +30,78 @@ const operatingFields = [
   ["refund_policy", "교환·환불 정책"],
 ];
 export function Seller() {
+  return BETA_MODE ? <BetaSeller /> : <DevelopmentSeller />;
+}
+
+function BetaSeller() {
+  const { user, refresh } = useAuth();
+  const result = useResource<Application>("/seller/application"), action = useAction();
+  const [form, setForm] = useState({ brand_name: "", brand_description: "", seller_terms_accepted: false });
+  const [dirty, setDirty] = useState(false);
+  useEffect(() => {
+    if (result.data) {
+      setForm({
+        brand_name: String(result.data.fields.brand_name || ""),
+        brand_description: String(result.data.fields.brand_description || ""),
+        seller_terms_accepted: !!result.data.fields.seller_terms_accepted,
+      });
+      setDirty(false);
+    }
+  }, [result.data]);
+  useEffect(() => {
+    const warn = (e: BeforeUnloadEvent) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+  const status = result.data?.status || user?.seller_status || "draft";
+  const locked = ["pending", "approved", "suspended"].includes(status);
+  return <>
+    <PageTitle eyebrow="판매자센터" title="베타 판매자 체험">
+      <p>가상의 브랜드 정보로 입점 과정을 시험합니다. 실제 사업자번호·연락처·주소·서류를 입력하지 마세요.</p>
+    </PageTitle>
+    <p className="notice">실제 결제·배송·사업자 인증은 제공하지 않습니다. 사업자 정보와 배송·환불 정책에는 서버가 가상 시험 정보를 사용합니다.</p>
+    <Feedback {...action} /><ResourceState {...result} retry={result.reload} />
+    {!result.loading && !result.error && <>
+      <section className="panel"><h2>입점 상태: {statusName[status]}</h2>
+        <button className="secondary" type="button" onClick={() => { result.reload(); void refresh(); }}>심사 상태 새로 확인</button>
+        {result.data?.review_note && <p className="notice">심사 의견: {result.data.review_note}</p>}
+        {status === "approved" && <div className="actions">
+          <Link className="button" to="/seller/campaigns">공구 관리</Link>
+          <Link className="button secondary" to="/seller/coupons">쿠폰 발행</Link>
+          <Link className="button secondary" to="/seller/reservations">내 공구 참여자</Link>
+        </div>}
+        {status === "pending" && <p>베타 신청을 검토 중입니다. 심사 중에는 수정할 수 없습니다.</p>}
+        {status === "suspended" && <p>판매 기능이 정지되어 있습니다. 심사 의견을 확인하세요.</p>}
+      </section>
+      <form className="narrow" onSubmit={(e) => {
+        e.preventDefault();
+        const submit = (e.nativeEvent as SubmitEvent).submitter?.getAttribute("value") === "submit";
+        void action.run(async () => {
+          if (submit && !form.seller_terms_accepted) throw new Error("판매자 운영 조건에 동의해 주세요.");
+          await api("/seller/application/beta", "POST", form);
+          setDirty(false);
+          if (submit) await api("/seller/application/submit", "POST");
+          result.reload();
+          await refresh();
+        }, submit ? "베타 입점 신청을 접수했습니다." : "가상 브랜드 정보를 임시저장했습니다.");
+      }}>
+        <fieldset disabled={locked || action.busy}><legend>가상 브랜드 정보</legend>
+          <Field label="가상 브랜드명" name="brand_name" autoComplete="off" required minLength={2} maxLength={100}
+            value={form.brand_name} onChange={(e) => { setForm({ ...form, brand_name: e.target.value }); setDirty(true); }} />
+          <label className="field"><span>가상 브랜드 소개</span><textarea name="brand_description" maxLength={2000}
+            value={form.brand_description} onChange={(e) => { setForm({ ...form, brand_description: e.target.value }); setDirty(true); }} /></label>
+          <label className="check"><input type="checkbox" checked={form.seller_terms_accepted}
+            onChange={(e) => { setForm({ ...form, seller_terms_accepted: e.target.checked }); setDirty(true); }} />
+            <span>[신청 시 필수] 가상 정보만 사용하고 베타 판매자 운영 조건에 동의합니다.</span></label>
+          <div className="actions"><button type="submit" value="draft">임시저장</button>
+            <button type="submit" value="submit">저장하고 베타 입점 신청</button></div>
+        </fieldset>
+        {dirty && <p className="hint">저장하지 않은 변경이 있습니다. 이동 전에 임시저장하세요.</p>}
+      </form>
+    </>}
+  </>;
+}
+function DevelopmentSeller() {
   const { user, refresh } = useAuth();
   const result = useResource<Application>("/seller/application"),
     action = useAction();
