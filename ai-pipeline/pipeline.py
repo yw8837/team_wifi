@@ -389,7 +389,7 @@ def run(data_root, out):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-root", type=Path, default=Path("D:/파이널프로젝트/data"))
+    parser.add_argument("--data-root", type=Path, default=HERE.parent / "_archive" / "legacy-project" / "data")
     parser.add_argument("--output", type=Path, default=HERE / "artifacts")
     args = parser.parse_args()
     run(args.data_root, args.output)

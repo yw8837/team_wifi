@@ -22,6 +22,8 @@
 - [보안 검토](docs/build/security-review.md) / [개인정보·운영 전 조건](docs/build/SECURITY.md)
 - [기존 101개 요구와 구현 대조](docs/build/requirements-status.md)
 - [자료 활용·실험 결과](ai-pipeline/IMPLEMENTATION.md)
+- [제공 데이터·기업 자료 활용 감사와 앱 연결의 한계](docs/build/release-20261101/DATA-USAGE-AUDIT.md)
+- [공개 출시 필수 항목·실제 심사 제출 상태](docs/build/release-20261101/READINESS.md)
 - [출처·벤치마크 적용](docs/build/SOURCES.md)
 - [사업모델과 후속 개발](docs/build/PRODUCT.md)
 

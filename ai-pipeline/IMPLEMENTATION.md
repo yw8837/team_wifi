@@ -4,11 +4,12 @@
 
 ## 실행
 
-작업 위치는 `<repo>`다. 원본 자료는 읽기 전용으로 `D:/파이널프로젝트/data`에서 사용한다. 원본 100MB 이상을 다시 내려받지 않는다.
+이 PC의 작업 위치는 `E:/Team_Wifi`다. 원본 자료는 이 프로젝트 안에 보존된 `_archive/legacy-project/data`를 읽기 전용으로 사용한다. `data/`에는 공유용 안내만 있으며 원본은 없다. 분석·검증 스크립트의 기본 입력 경로도 저장소 기준의 이 보존 폴더다. 팀원이 별도 자료를 받은 경우에만 `--data-root`로 위치를 지정한다. 원본은 Git에 올리거나 다시 내려받지 않는다. 과거 실행 당시 D: 경로가 담긴 출처 매니페스트는 역사 기록으로 보존한다.
 
 ```powershell
-.\backend\.venv\Scripts\python.exe -u ai-pipeline/pipeline.py --data-root 'D:/파이널프로젝트/data' *> ai-pipeline/pipeline-run.log
-.\backend\.venv\Scripts\python.exe ai-pipeline/verify_outputs.py --data-root 'D:/파이널프로젝트/data' *> ai-pipeline/verify-run.log
+. ./scripts/use-workspace.ps1
+.\backend\.venv\Scripts\python.exe -u ai-pipeline/pipeline.py *> ai-pipeline/pipeline-run.log
+.\backend\.venv\Scripts\python.exe ai-pipeline/verify_outputs.py *> ai-pipeline/verify-run.log
 Get-Content ai-pipeline/verify-run.log
 ```
 
