@@ -4,7 +4,6 @@ import {
   BrowserRouter,
   Link,
   NavLink,
-  Navigate,
   Route,
   Routes,
   useLocation,
@@ -95,16 +94,7 @@ function Layout() {
       <main id="main" className={["/welcome", "/login", "/signup", "/reset"].includes(loc.pathname) ? "auth-main" : undefined}>
         <Routes>
           <Route path="/welcome" element={<Welcome />} />
-          <Route
-            path="/"
-            element={
-              !localStorage.getItem("moduyuga.intro") ? (
-                <Navigate to="/welcome" replace />
-              ) : (
-                <Home />
-              )
-            }
-          />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/reset" element={<Reset />} />

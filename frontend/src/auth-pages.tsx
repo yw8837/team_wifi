@@ -3,6 +3,7 @@ import { BrandLockup } from "./brand";
 import { IconArrowRight, IconBuildingStore } from "@tabler/icons-react";
 import {
   Link,
+  matchRoutes,
   useLocation,
   useNavigate,
   useSearchParams,
@@ -20,6 +21,10 @@ import {
   useAuth,
 } from "./shared";
 type AuthResponse = { access_token: string; user: User; recovery_code?: string };
+// Guest navigation must lead to an existing page outside Protected/auth routes.
+const guestBrowseRoutes = [
+  "/", "/welcome", "/hotdeals", "/brands", "/brands/:id", "/campaigns/:id", "/benefits", "/my",
+].map((path) => ({ path }));
 export function Welcome() {
   function seen() { localStorage.setItem("moduyuga.intro", "seen"); }
   return (
@@ -60,6 +65,7 @@ export function Login() {
       <PageTitle title="다시 만나 반가워요">
         <p>로그인 후 보던 화면으로 돌아갑니다.</p>
       </PageTitle>
+      <Link className="button secondary" to={matchRoutes(guestBrowseRoutes, to) ? to : "/"}>로그인 없이 둘러보기</Link>
       {location.state?.expired && (
         <p role="status" className="notice">
           로그인 세션이 만료되었습니다. 다시 로그인하면 보던 화면으로
