@@ -1,0 +1,12 @@
+.git
+**/.venv
+**/node_modules
+**/runtime
+**/.env*
+**/__pycache__
+data
+frontend
+**/company_source_extract.json
+**/materials_inventory.json
+**/requirements_source.json
+**/requirements_traceability.*

@@ -1,0 +1,29 @@
+{
+  "method": "actual exact 8-column canonical tuple multiset, multiplicity preserved; no concatenation",
+  "d2_rows": 541909,
+  "d3_rows": 1067371,
+  "d3_second_sheet_rows": 541910,
+  "matched_rows": 541909,
+  "d2_only_rows": 0,
+  "d3_second_sheet_only_rows": 1,
+  "extra_rows_nonpersonal": [
+    {
+      "InvoiceNo": "581587",
+      "StockCode": "POST",
+      "Description": "POSTAGE",
+      "quantity": "1",
+      "date": "2011-12-09 12:50:00",
+      "unit_price": "18",
+      "country": "France",
+      "multiplicity": 1
+    }
+  ],
+  "d2_duplicate_business_rows": 5268,
+  "d3_duplicate_business_rows": 34335,
+  "sheet_counts": {
+    "Year 2009-2010": 525461,
+    "Year 2010-2011": 541910
+  },
+  "normalized_sha256": "366d3fa614325357e8b235979f27b5a947cb00048b6b56bc72869a1b7fd15054",
+  "source_mapping_verified": "restored XLSX manifest hash (absPath removed) + normalized manifest hash + exact contiguous source sheet row mapping"
+}

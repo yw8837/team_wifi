@@ -1,68 +1,93 @@
-# 🛒 team_wifi — AI 기반 공동구매 커뮤니티 플랫폼
+# 모두의 육아 - 육아템 공동구매,핫딜 · team_wifi
 
-> **중소벤처기업부 이어드림스쿨 6기 산업 특화 연계 파이널 프로젝트 (핀테크)**  
-> **참여 기업:** 모바일앱개발협동조합  
-> **프로젝트 기간:** 2026. 10. 30 ~ 2026. 11. 26 (4주)
+육아용품 공동구매와 흩어진 핫딜 정보를 확인하고, 조건을 비교하며 함께 참여하는 커뮤니티 앱입니다. 정식 앱명은 **모두의 육아 - 육아템 공동구매,핫딜**, 로고 표기는 **모두의육아**, 개발자 표기는 **Team_Wifi**입니다. 패키지 `kr.moduyuga.app`, 저장소 `yw8837/team_wifi`, 개발 브랜치 `codex/modu-yuga`를 유지합니다.
 
----
+현재 코드는 제품의 첫 개발 빌드입니다. 가입·판매자 검토·모집·질문/신고·쿠폰/포인트와 공개 데이터 실험을 실제 API와 연결했습니다. 예시 상품·개발용 주문으로 검증하며 **실결제, 배송, 사업자 인증, Play 출시가 완료된 상태는 아닙니다.** 실제 개인정보나 사업자 서류를 넣지 마세요.
 
-## 👥 팀원 구성 (Team wifi)
+## 먼저 볼 문서
 
-| 이름 | GitHub | 역할 | 주요 담당 |
-| :--- | :--- | :--- | :--- |
-| **최용우** | [@yw8837](https://github.com/yw8837) | Full-Stack / Architecture | 서비스 아키텍처 설계, 백엔드 API & GEO 엔진 구현 |
-| **최유정** | [@cheezcyj](https://github.com/cheezcyj) | Frontend / UI·UX | 모바일 반응형 웹 인터페이스, 동적 인터랙션 및 CTA |
-| **이승현** | [@LEES999](https://github.com/LEES999) | AI & Data Engineering | 이커머스 트랜잭션 분석, 군집화 및 수요·이탈 예측 모델 |
+**현재 무료 시험 서버:** https://moduyuga-beta.onrender.com — 로그인 없이 둘러볼 수 있습니다. 가입은 초대코드가 필요하고 실제 결제·배송은 없습니다. Play 내부 테스트와 실제 Android release 설치 검증의 완료 여부는 아래 베타 현황에서 확인하세요.
 
----
+이 PC의 작업 경로는 **`E:/Team_Wifi`**로 통일했습니다. 이전 기획·회의·데이터는 `_archive/legacy-project`에 보존했습니다. 새 터미널에서는 `. ./scripts/use-workspace.ps1`로 프로젝트 캐시·임시 경로를 설정합니다. 기존 SDK/JDK를 재사용하며 에뮬레이터를 자동 기동하지 않습니다.
 
-## 💡 프로젝트 개요 (Overview)
+- [외부 베타 준비 현황·검증 결과·남은 배포 조건](docs/build/beta-20261101/STATUS.md)
+- [최신 디자인 기준·원본 자산](docs/design/brand/README.md)
+- [v0.6 화면설계서 50개 화면과 현재 구현 대조](docs/design/screen-spec-v0.6.md)
+- [추가 제공한 57개 화면과 현재 구현 대조](docs/design/screen-spec-20261101-57.md)
+- [브랜드 적용 검증 기록](docs/build/brand-20261101/VERIFICATION.md)
+- [실행·검증 결과](docs/build/DELIVERY.md)
+- [팀 실행과 공유 방법](docs/build/TEAM.md)
+- [Google Play 앱 등록 결과·출시 조건](docs/build/PLAY-CONSOLE.md)
+- [기능과 API 계약](docs/build/CONTRACT.md)
+- [보안 검토](docs/build/security-review.md) / [개인정보·운영 전 조건](docs/build/SECURITY.md)
+- [기존 101개 요구와 구현 대조](docs/build/requirements-status.md)
+- [자료 활용·실험 결과](ai-pipeline/IMPLEMENTATION.md)
+- [제공 데이터·기업 자료 활용 감사와 앱 연결의 한계](docs/build/release-20261101/DATA-USAGE-AUDIT.md)
+- [공개 출시 필수 항목·실제 심사 제출 상태](docs/build/release-20261101/READINESS.md)
+- [출처·벤치마크 적용](docs/build/SOURCES.md)
+- [사업모델과 후속 개발](docs/build/PRODUCT.md)
 
-### 📌 주제: 다양한 형태의 서비스와 물품을 공동구매할 수 있는 커뮤니티 앱
-기존 나열식 공동구매의 낮은 참여율과 SEO 인덱싱 지연 한계를 극복하기 위해, **생성형 AI 검색(GEO) 인바운드 트리거**와 **실시간 이탈 방지 동적 CTA**를 결합한 차세대 핀테크 이커머스 커뮤니티 플랫폼입니다.
+## 로컬 실행
 
-### 🚀 핵심 솔루션 (Key Features)
-1. **GEO(Generative Engine Optimization) 노출 유도 트리거**
-   - 신규 공구 딜 생성 시 LLM 기반 구조화 데이터(JSON-LD, Schema.org) 자동 생성
-   - ChatGPT Search, Perplexity 등 대화형 AI 검색 엔진의 실시간 최저가 답변 1순위 인용(Citation) 유도
-2. **소비자 성향 기반 번들(세트) 공구 추천**
-   - 트랜잭션 연관 규칙(Apriori/FP-Growth) 분석을 통한 맞춤형 묶음 공구 제안 (CTR 극대화)
-3. **이탈 방지 실시간 동적 CTA 엔진**
-   - 세션 행동 데이터 기반 실시간 구매 전환 의도 예측 및 맞춤형 혜택 넛지 (CVR 극대화)
+필요 환경: Python 3.11, Node.js 22 이상(팀 기본 Node.js 24 LTS), Chrome. Android 빌드는 JDK 21과 Android SDK가 추가로 필요합니다.
 
----
-
-## 📊 활용 데이터셋 (Datasets)
-- **Ecommerce Consumer Behavior Analysis Data (Kaggle)**: 소비자 특성 군집화 및 개인 맞춤형 피드 추천
-- **Online Retail Transaction Data (UCI & Kaggle)**: 장바구니 연관 규칙 분석 및 세트 공구 번들링
-- **Online Shoppers Purchasing Intention (UCI)**: 실시간 구매 전환 예측 및 동적 CTA 트리거
-
----
-
-## 🛠️ 기술 스택 (Tech Stack)
-
-- **Frontend:** Next.js / React, TypeScript, Tailwind CSS
-- **Backend:** Python (FastAPI), SQLAlchemy, PostgreSQL
-- **AI / Data:** Scikit-learn, LightGBM, Pandas, NumPy
-- **Infra & DevOps:** Docker, GitHub Actions
-
----
-
-## 📁 프로젝트 구조 (Repository Structure)
-
-```text
-├── backend/          # FastAPI 백엔드 API 서버 & GEO 트리거 모듈
-├── frontend/         # Next.js 반응형 웹 애플리케이션
-├── ai-pipeline/      # 데이터 전처리, EDA 및 예측 모델 서빙
-├── data/             # 데이터 명세 및 샘플 데이터셋 (.gitignore 처리)
-└── docs/             # 요구사항 정의서, 와이어프레임, 회의록
+```powershell
+git clone https://github.com/yw8837/team_wifi.git
+cd team_wifi
+git switch codex/modu-yuga
+python -m venv backend/.venv
+backend/.venv/Scripts/python -m pip install -r backend/requirements.txt
+cd backend
+.venv/Scripts/python -m app.seed --demo
+.venv/Scripts/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log
 ```
 
----
+다른 터미널에서:
 
-## 📅 프로젝트 마일스톤 (Milestones)
+```powershell
+cd frontend
+npm ci
+npm run dev
+```
 
-- **1주차 (10/30 ~ 11/05):** 기획 구체화, 데이터셋 EDA 및 파이프라인 구축, DB 스키마 설계
-- **2주차 (11/06 ~ 11/11):** 핵심 공구 API 구현, AI 추천 모델 1차 서빙, **중간평가(11/11)**
-- **3주차 (11/12 ~ 11/19):** GEO 시맨틱 마크업 자동 생성기 연동, 동적 CTA 인터랙션 구현
-- **4주차 (11/20 ~ 11/26):** E2E 통합 테스트, 서비스 배포 및 데모 시연 준비, **최종평가(11/26)**
+브라우저에서 `http://127.0.0.1:5173`을 엽니다. API 문서는 `http://127.0.0.1:8000/docs`입니다. Mac/Linux에서는 `.venv/Scripts/python`을 `.venv/bin/python`으로 바꿉니다.
+
+초기 계정의 비밀번호는 매번 임의 생성되어 **자기 PC의** `backend/runtime/demo-accounts.json`에만 저장됩니다. 채팅·이슈·Git에 복사하지 마세요. 관리자 계정을 회원가입 화면에서 만들 수 없습니다. 시드는 데이터가 있는 DB를 덮어쓰지 않습니다.
+
+## 검증
+
+```powershell
+cd backend
+.venv/Scripts/python -m pytest tests -q
+cd ../frontend
+npm test
+npm run build
+npm audit
+cd ..
+node scripts/e2e.cjs
+```
+
+E2E는 위 두 로컬 서버와 시드 파일이 있어야 합니다. 가상 계정/공구/쿠폰을 만드는 실제 브라우저 시험입니다. 스크린샷·결과는 Git에서 제외된 `artifacts/e2e`에 저장됩니다. 데이터 원본은 Git에 올리지 않습니다. 별도로 확보한 제공 자료에 대해서만 `ai-pipeline/pipeline.py --data-root <자료폴더>`와 `verify_outputs.py --data-root <자료폴더>`를 실행합니다.
+
+## Android
+
+```powershell
+$env:JAVA_HOME = '<JDK 21 설치 경로>'
+$env:ANDROID_HOME = '<Android SDK 경로>'
+./scripts/build-android.ps1
+```
+
+결과: `artifacts/android/modu-yuga-debug.apk`. 이 파일은 `10.0.2.2:8000`의 로컬 API에 연결하는 **에뮬레이터용 debug APK**입니다. 일반 휴대전화 배포나 Play 제출용 파일이 아닙니다. release에서 HTTP를 허용하지 않으며, debug에서 에뮬레이터 호스트 하나에만 허용합니다.
+
+## 구조
+
+| 폴더 | 내용 |
+|---|---|
+| `frontend` | React·TypeScript UI, Capacitor Android 프로젝트 |
+| `backend` | FastAPI·SQLAlchemy, 인증/권한·모집·혜택·운영 API와 시험 |
+| `ai-pipeline` | 제공 데이터 분석·모델·집계·무결성 검증 |
+| `docs/build` | 구현·출처·보안·요구사항·후속 개발 기록 |
+| `scripts` | 공유 전 검사·실제 E2E·Android 재현 명령 |
+| `artifacts` | 로컬 실행 증거·APK, Git 제외 |
+
+초기 계획의 Next.js는 이 Android 클라이언트에서 React/Vite/Capacitor로 구체화했습니다. 공개 상세 HTML은 FastAPI가 생성하며 시험 데이터는 noindex입니다. Neon PostgreSQL + Render Free의 공개 HTTPS 배포와 API 검증을 진행했습니다. 서명 APK/AAB는 `artifacts/android/release`에 보관하며 Play 배포·실제 기기 설치 검증과 구분합니다. 기존 기획서와 회의 원문은 수정하지 않습니다.
