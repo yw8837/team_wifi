@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -40,17 +41,31 @@ def run(extra_checks=None, evidence_name='postgres-results.json'):
             # pg_ctl descendants can inherit PIPE handles on Windows and keep communicate()
             # waiting after pg_ctl exits. A regular file avoids that pipe-lifetime trap.
             output = scratch / 'command.log'
+            def diagnostic():
+                detail = output.read_text(encoding='cp949' if os.name == 'nt' else 'utf-8', errors='replace').replace(password, '[REDACTED]')[-1500:]
+                server_log = scratch / 'postgres.log'
+                if name == 'pg_ctl' and 'start' in values and server_log.is_file():
+                    detail += '\nPostgreSQL log tail:\n' + server_log.read_text(encoding='utf-8', errors='replace').replace(password, '[REDACTED]')[-3000:]
+                return detail
             with output.open('w', encoding='utf-8') as log:
-                completed = subprocess.run([str(pg / (name+'.exe' if os.name == 'nt' else name)), *map(str, values)],
-                    stdin=subprocess.DEVNULL, stdout=log, stderr=log, timeout=60,
-                    creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+                try:
+                    completed = subprocess.run([str(pg / (name+'.exe' if os.name == 'nt' else name)), *map(str, values)],
+                        stdin=subprocess.DEVNULL, stdout=log, stderr=log, timeout=60,
+                        creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0)
+                except subprocess.TimeoutExpired:
+                    log.flush()
+                    raise RuntimeError(f'{name} timed out: ' + diagnostic()) from None
             if completed.returncode:
-                raise RuntimeError(f'{name} failed: '+output.read_text(encoding='cp949' if os.name == 'nt' else 'utf-8', errors='replace')[-1500:])
+                raise RuntimeError(f'{name} failed: ' + diagnostic())
             return completed
         command('initdb', '-D', data, '-U', 'beta_test', '-A', 'scram-sha-256', '--pwfile', pw, '--encoding=UTF8', '--locale=C')
         started = False
         try:
-            command('pg_ctl', '-D', data, '-l', scratch/'postgres.log', '-o', f'-h 127.0.0.1 -p {port} -c shared_buffers=32MB -c max_connections=25', '-w', 'start')
+            server_options = f'-h 127.0.0.1 -p {port} -c shared_buffers=32MB -c max_connections=25'
+            if os.name != 'nt':
+                # Debian's shared socket directory is not owned by the CI runner.
+                server_options += ' -k ' + shlex.quote(str(scratch))
+            command('pg_ctl', '-D', data, '-l', scratch/'postgres.log', '-o', server_options, '-w', 'start')
             started = True
             os.environ.update(MODU_ENV='beta', PUBLIC_ORIGIN='https://beta.example.test',
                 DATABASE_URL=f'postgresql+psycopg://beta_test:{password}@127.0.0.1:{port}/postgres',

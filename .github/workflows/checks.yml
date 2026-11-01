@@ -59,6 +59,7 @@ jobs:
       - run: npm audit --audit-level=moderate
         working-directory: frontend
   unsigned-android:
+    if: github.event_name == 'push'
     needs: [api, ui]
     runs-on: ubuntu-latest
     timeout-minutes: 20
