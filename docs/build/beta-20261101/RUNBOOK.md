@@ -14,13 +14,13 @@ Render의 30일 만료 무료 PostgreSQL은 사용하지 않습니다. Render의
 
 ## 배포 순서
 
-1. Neon Console 신규 GitHub 로그인에 요청된 이메일 읽기 권한을 사용자 확인 후 연결합니다. 현재 이 단계가 대기 중입니다. 이후 별도 약관 동의가 나오면 해당 내용을 확인합니다.
-2. 모두의 육아 전용 **Free 프로젝트**와 PostgreSQL DB를 만듭니다. 기존 앱 DB를 재사용하지 않습니다. 리전과 실제 무료 한도를 기록합니다.
+1. Neon Console 신규 GitHub 로그인에 요청된 이메일 읽기 권한은 사용자 확인 후 연결했습니다. 이후 별도 약관 동의가 나오면 해당 내용을 확인합니다.
+2. 모두의 육아 전용 **Free 프로젝트**와 PostgreSQL DB 생성 완료. PostgreSQL17, AWS 싱가포르, 고정 0.25 CU, 5분 절전, 복구 이력 6시간을 확인했습니다. 기존 앱 DB를 재사용하지 않습니다.
 3. `DATABASE_URL`은 psycopg 형식으로 설정하고 외부 연결에 TLS를 요구합니다. 비밀번호를 채팅·로그·Git·빌드 출력에 남기지 않습니다. 전용 비밀 저장소/서비스 환경변수로만 주입합니다.
 4. `render.yaml`에 따라 `codex/modu-yuga`의 검토된 커밋을 사용하는 Free 웹 서비스를 구성합니다. 자동 배포는 끄고 검증된 커밋을 수동 배포합니다. 실제 URL이 생기기 전에는 예상 URL을 전달하지 않습니다.
-5. 실제 `PUBLIC_ORIGIN`, `SUPPORT_EMAIL`, `HOSTING_LOCATION`, `DATABASE_LOCATION`, `DATABASE_URL`, 강한 `RATE_LIMIT_SECRET`을 주입합니다. `STATIC_DIR`은 빌드 산출물 경로입니다. 지원 메일은 공개 안내에 표시됨을 확인합니다.
+5. `PUBLIC_ORIGIN`을 지정하지 않으면 실제 Render의 `RENDER_EXTERNAL_URL`을 빌드/실행에 사용합니다. `SUPPORT_EMAIL`, `HOSTING_LOCATION`, `DATABASE_LOCATION`, `DATABASE_URL`, 강한 `RATE_LIMIT_SECRET`을 주입합니다. `STATIC_DIR`은 빌드 산출물 경로입니다. 지원 메일은 공개 안내에 표시됨을 확인합니다. 현재 DATABASE_URL의 Render 저장은 승인 전이며, MongoDB 대안을 [검토 중](DATABASE-CHOICE.md)입니다.
 6. HTTPS `/api/health`가 `closed-beta`, `payments_enabled:false`로 응답하는지 확인합니다. `/api/config`, 4개 `/legal/*` 페이지, 정적 자산을 확인합니다. 잘못된 Host와 API 문서 경로는 거절되어야 합니다.
-7. `python -m app.bootstrap_beta --output <접근을 제한한 비밀파일> --admin-email <운영계정> --invites 30`을 **완전히 빈 전용 DB에만** 실행합니다. 파일의 OS 접근권한은 현재 운영자만 읽도록 먼저 제한합니다. 생성된 원문 초대코드는 한 명에게 하나씩 배정하고 공개 이슈/저장소에 넣지 않습니다. 이 작업은 아직 실행하지 않았습니다.
+7. `python -m app.bootstrap_beta --output <접근을 제한한 비밀파일> --admin-email <운영계정> --invites 30`을 **완전히 빈 전용 DB에만** 실행합니다. 파일의 OS 접근권한은 현재 운영자와 SYSTEM만 읽도록 먼저 제한합니다. **실제 Neon 빈 DB에 초기화 완료**했으므로 다시 실행하지 않습니다. 가상 공구6·쿠폰1·핫딜1·초대30을 만들었습니다. 원문 코드·관리자 비밀번호는 비공개 파일에만 보관하며 초대는 아직 배정하지 않았습니다. 스키마 소유자 계정과 앱의 테이블 읽기/쓰기 전용 계정을 분리했습니다.
 8. 전용 시험 계정으로 가입·복구/재발급·참여/철회·쿠폰·판매자 신청·신고/차단·탈퇴를 실제 웹과 앱에서 검증합니다. 실데이터 없이 가상 콘텐츠만 사용합니다.
 9. 서버 재배포 후 데이터 유지, 절전 후 재접속, 앱 `https://localhost` CORS, 요청 제한의 프록시 경계를 검증합니다. 전달 헤더를 무조건 신뢰하지 않습니다. Render의 실제 프록시 규약에 맞춰 설정한 뒤 위조 헤더/서로 다른 테스트 접속을 검사합니다.
 10. `scripts/build-android-release.ps1 -ApiBaseUrl <실제 HTTPS /api 주소> -SdkRoot <SDK> -JavaHome <JDK21>`을 실행합니다. 스크립트는 실제 beta health 통과 전에는 서명키나 release를 생성하지 않습니다. 업로드 키와 DPAPI 암호 파일은 비공개 백업하고 Git에 넣지 않습니다.

@@ -9,7 +9,7 @@
 | ID | 의도/행위자 | 준비·실행 | 기대 신호 | 실제 결과/수정 | 증거 | 정리 |
 |---|---|---|---|---|---|---|
 | B01 | 비회원 탐색 | 새 브라우저/앱 저장소에서 홈·검색·상세·브랜드·핫딜 | 로그인 없이 읽기, 소유 행동에만 로그인 | 로컬/모의 API 통과, 외부 대기 | beta.browser-check.mjs, Android WebView 목록200 | 시험 브라우저 종료 |
-| B02 | 정상 계정 | 시험 가입·로그인·로그아웃·복구·재발급·탈퇴 | 인증 및 폐기 실제 동작 | SQLite/PG 통과, 외부 대기 | pytest35, PG26 | 임시 DB 종료·제거 |
+| B02 | 정상 계정 | 시험 가입·로그인·로그아웃·복구·재발급·탈퇴 | 인증 및 폐기 실제 동작 | SQLite/로컬PG 통과. 실제 Neon 대상 가입·재발급·탈퇴 통과, 공개 HTTPS 대기 | pytest35, PG26, neon-predeploy-results.json | 임시 로컬 DB 종료·제거, Neon QA 계정 탈퇴·QA 초대 삭제 |
 | B03 | 권한 우회 | 타인 자원·관리자 API·판매자 공개 시도 | 401/403/404, 상태 불변 | 서버 회귀시험 통과 | backend/tests | 격리 DB 제거 |
 | B04 | 동시/반복 요청 | 예약·초대·인증 질문 동시 요청 | 단회 사용·과예약 방지·풀 고갈 없음 | 발견한 풀 교착 수정, PG 통과 | PG26, 별도 검토 재현 | 격리 DB 제거 |
 | B05 | 잘못된 입력 | 손상 JSON·초과 요청·부적절한 Host·비밀값 입력 | 4xx, 비밀 입력 반사 없음 | 시험한 서버 입력 통과 | test_beta.py, PG26 | 격리 DB 제거 |
@@ -18,8 +18,8 @@
 | B08 | Android 배포본 | 설치·기동·HTTPS·핵심 흐름 | 올바른 이름/API/서명 | 로컬 debug 설치/기동/API200. release·외부HTTPS 대기 | android-local-smoke, package-verification | 소유 에뮬레이터만 종료 |
 | B09 | 개인정보 | 안내·탈퇴 후 세션/복구/소유 기록·판매자 종속 쿠폰 | 정책과 처리 일치, 타인 기능 유지 | 탈퇴/지갑 오류 수정·회귀 통과. 실제 공개정책/운영값 대기 | test_beta.py, 정책 TestClient200 | 격리 DB 제거 |
 | B10 | 오해 방지 | 화면과 서버 거래·혜택 모드 대조 | 시험 표시, 실제 결제 없음 | beta 안내/설정 계약 통과 | config endpoint, 320px beta browser | 없음 |
-| B11 | 작업 안전성 | Git diff·비밀 검사·실패 exit·시간 제한 | 기존 작업 보존 | 변경 diff 확인, 커밋 전 share-check 및 CI 확인 예정 | Git/검사 결과를 STATUS에 반영 | 이 QA run만 정리 |
-| B12 | 스토어 테스트 | Play 내부테스트·참여 URL | 활성 릴리스·설치 링크 | 미실행. 외부 무료 DB 연결 승인 대기 | Play 초안 기록만 존재 | 없음 |
+| B11 | 작업 안전성 | Git diff·비밀 검사·실패 exit·시간 제한 | 기존 작업 보존 | diff검사·stage22개 비밀검사 통과, 브랜치 push. CI별도 확인 | Git/검사 결과를 STATUS에 반영 | 이 QA run만 정리 |
+| B12 | 스토어 테스트 | Play 내부테스트·참여 URL | 활성 릴리스·설치 링크 | 미실행. Neon 준비 완료, Render 연결/DB 선택 미확정 | Play 초안 기록만 존재 | 없음 |
 
 ## 실행·원인·수정·잔여 위험
 
@@ -34,9 +34,10 @@
 | 별도 검토의 풀 고갈 재현 | 최초 7개500 → 수정 후 201/409 | 풀 timeout0, 완료 후 health200. 409를 성공 예약/작성으로 계산하지 않음 |
 | Android debug build / package check | 0 | 명칭·원본 브랜드·CSP 포함 확인. release 서명 검증 아님 |
 | Android local smoke | 0 | install Success, launch ok, health/catalog200, network failures0, 스크린샷 |
+| Neon runtime predeploy probe | 0 | 실제 클라우드 DB 대상 8검사 통과. 앱 전용 계정·TLS·가입/재발급/예약/탈퇴/재고 원복. 로컬 API 프로세스이므로 공개 HTTPS 검증은 아님 |
 
-처음 Android 포트 5562/5563에서는 부팅됐어도 ADB가 없었다. Windows 예약포트와 충돌했으며 5760/5761로 해결했다. 첫 앱 기동 때 WebView 초기화가 늦어 probe가 실패하여 bounded 대기를 추가했다. 실패 실행을 통과 횟수에 포함하지 않았다. 실제 외부 무료 서버의 냉시작·프록시·TLS·계정삭제 URL, 서명 release와 Play 테스트는 아직 검증하지 못했다.
+처음 Android 포트 5562/5563에서는 부팅됐어도 ADB가 없었다. Windows 예약포트와 충돌했으며 5760/5761로 해결했다. 첫 앱 기동 때 WebView 초기화가 늦어 probe가 실패하여 bounded 대기를 추가했다. 최신 debug 빌드도 여유 RAM 약284MB에서 첫 WebView 준비가 제한시간을 넘겼다. 이후 endpoint가 준비된 것을 확인한 뒤 재실행하여 설치·기동(4,635ms)·API200·network failures0을 확인했다. 실패 실행을 통과 횟수에 포함하지 않았다. 재실행 원본은 `artifacts/beta/android-latest-smoke-retry`다. 실제 외부 무료 서버의 냉시작·프록시·TLS·계정삭제 URL, 서명 release와 Play 테스트는 아직 검증하지 못했다.
 
 별도 서버/프런트 검토는 구현 담당자의 자기평가와 구분하여 수행했다. 서버 P1 두 건은 수정 후 재검토 승인, 복구 재발급 UI는 spec·quality 승인이다. 리뷰 원문은 로컬 작업 기록에 보존하며 비밀/로컬 계정 경로가 포함될 수 있는 원본은 공개하지 않는다.
 
-상태: **ULTRAQA BLOCKED — 외부 배포를 위한 Neon 신규 로그인 권한 확인 대기.** 로컬 시험 완료와 외부 베타 완료는 별개다. 무료 DB/서버 구성 이후 B01–B10의 외부 환경 검사 및 B12를 이어간다.
+상태: **ULTRAQA BLOCKED — Render 비밀 환경변수 연결 승인 및 DB 선택 미확정.** Neon 이메일 읽기 권한은 승인·연결됐고 전용 Free DB를 생성했습니다. 사용자의 MongoDB 질문을 전환/연결 승인으로 처리하지 않았습니다. [선택 검토서](DATABASE-CHOICE.md) 확인 후 연결 경로가 확정되면 B01–B10의 공개 HTTPS 환경 검사 및 B12를 이어갑니다. 로컬·실제 DB 검사 완료와 외부 베타 완료는 별개입니다.

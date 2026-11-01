@@ -1,6 +1,8 @@
 # 모두의 육아 — 외부 베타 준비 현황
 
-확인일: 2026-11-01. **앱·서버 베타 기능과 로컬 검증은 준비됐지만, 외부 테스터에게 배포할 상태는 아직 아닙니다.** 무료 DB 로그인 연결 승인을 기다리고 있습니다. 외부 HTTPS 주소, 서명 release, Play 내부 테스트 설치 링크는 아직 없습니다.
+확인일: 2026-11-01. **Neon 무료 DB 생성·초기화와 실제 DB 연결 검사는 완료됐지만, 외부 테스터에게 배포할 상태는 아직 아닙니다.** Render에 전용 DB 접속정보를 저장하기 전, 사용자의 MongoDB 대안 질문을 검토했습니다. 외부 HTTPS 주소, 서명 release, Play 내부 테스트 설치 링크는 아직 없습니다.
+
+최신 자료: [57개 화면과 현재 구현 대조](../../design/screen-spec-20261101-57.md), [PostgreSQL/MongoDB 선택과 전환 방법](DATABASE-CHOICE.md). 설계서 전체 구현과 외부 베타 배포는 별도의 완료 조건입니다.
 
 ## 한눈에 보기
 
@@ -12,7 +14,7 @@
 | 판매자 시험 | 실제 사업자정보 대신 가상 브랜드 신청 | 실제 입점·공급 계약은 별도 과제 |
 | 개인정보 | 입력 제한, 코드 해시, 세션 폐기, 탈퇴·연관 데이터 처리 | 실제 리전·연락처·보관/복구 절차 확정 |
 | 백엔드 | 35개 테스트 통과, 별도 검토의 주요 결함 2건 해결 | 실제 프록시의 IP 전달과 제한 검증 |
-| PostgreSQL | 전용 로컬 DB에서 26개 검사 통과 | 무료 외부 DB 생성·배포·재시작 검증 |
+| PostgreSQL | 로컬 26개 검사 + 실제 Neon DB 대상 API 8개 검사 통과 | Render 연결·공개 HTTPS·서버 재시작 검증 |
 | 프런트 | 58개 테스트, 일반/베타 빌드, 320px 브라우저 검사 통과 | 실제 API 통합 E2E |
 | Android | debug APK 설치·기동·WebView API 200 확인 | HTTPS를 사용하는 서명 AAB/APK와 기기 검증 |
 | 비용 | 무료 전용. 기존 Render 계정에 카드 없음 확인 | Free 플랜만 사용, 한도 초과 시 중단 |
@@ -31,7 +33,10 @@
 - `backend/tests/test_beta.py`: 초대·복구·탈퇴·신고·쿠폰 회귀시험.
 - `scripts/verify-beta-postgres.py`: 단회 초대 동시 사용, 마지막 재고, 복구·세션 폐기, 7개 동시 인증 요청, DB 재시작 유지 등 실제 PostgreSQL 검사.
 - `frontend/src/beta.browser-check.mjs`: 320px에서 가입/복구 확인, 자동 참여 없음, 중복 제출 차단. API는 fixture이며 외부 서버 검증으로 계산하지 않습니다.
-- 로컬 원본 증거: `artifacts/beta/postgres-results.json`, `artifacts/beta/android-latest-smoke/`, `artifacts/android/package-verification.json`.
+- 로컬 원본 증거: `artifacts/beta/postgres-results.json`, `artifacts/beta/android-latest-smoke-retry/`, `artifacts/android/package-verification.json`.
+- 실제 Neon Free PostgreSQL17·싱가포르 DB에서 런타임 계정 startup/health, 공구6개, 핫딜, 가입, 복구코드 재발급, 시험 예약, 탈퇴, 재고 원복 8개 검사를 통과했습니다. `artifacts/beta/neon-predeploy-results.json`. 로컬 API 프로세스에서 실제 클라우드 DB에 연결한 검사이며 공개 HTTPS 성공으로 계산하지 않습니다. 클라이언트 TLS 확인, 런타임 스키마 생성 권한 없음.
+- 최신 debug APK SHA-256: `8e8b36549ee5c0aff34eb8246b43194bb8fc60bd197678b04ccd3edd7e5d1435` (4,390,135 bytes). 설치·기동·WebView health/catalog200, network failures0. 시험 PC의 메모리 부족 중 첫 WebView 준비가 시간제한을 넘긴 기록도 보존했습니다. 초기화 완료 후 재실행이 통과했으며 release의 첫 실행 성능은 별도 검사해야 합니다.
+- 공유: 브랜치 `codex/modu-yuga`에 프런트 `6708dca`, 재발급 UI `bbfff53`, 서버/무료 배포 준비 `c741ee3`, 실제 Render URL 자동 설정 `8688f25`를 푸시했습니다. 최신 코드의 [push CI](https://github.com/yw8837/team_wifi/actions/runs/41306129827)·[PR CI](https://github.com/yw8837/team_wifi/actions/runs/41306133696)가 성공했습니다. [팀 검토 PR](https://github.com/yw8837/team_wifi/pull/1)은 Draft를 유지합니다.
 - 원본 로그·콘솔 화면·초대코드·서명키는 Git 공유 대상에서 제외합니다. 팀에는 코드와 비식별 결과를 공유합니다.
 
 ## 베타가 제공하지 않는 것
