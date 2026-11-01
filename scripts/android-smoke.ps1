@@ -6,7 +6,7 @@ Emulator stdout may contain ADB public keys: keep it outside the Git workspace.
 #>
 [CmdletBinding()]
 param(
-  [string]$SdkRoot = 'C:/Users/Public/CodexRuntime/android-sdk',
+  [string]$SdkRoot = $env:ANDROID_HOME,
   [string]$ApkPath = (Join-Path $PSScriptRoot '../artifacts/android/modu-yuga-debug.apk'),
   [string]$EvidenceDirectory = (Join-Path $PSScriptRoot '../artifacts/android/runtime'),
   [string]$Serial = 'emulator-5760',

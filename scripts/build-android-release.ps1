@@ -6,10 +6,13 @@ param(
   [string]$SdkRoot = $env:ANDROID_HOME,
   [string]$JavaHome = $env:JAVA_HOME,
   [ValidateRange(1,2100000000)][int]$VersionCode = 2,
-  [string]$VersionName = '0.2.0'
+  [string]$VersionName = '0.2.0',
+  [string]$OutputDirectory = ''
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
+$out = if ($OutputDirectory) { [IO.Path]::GetFullPath($OutputDirectory, $root) } else { Join-Path $root 'artifacts/android/release' }
+if (-not $out.StartsWith([IO.Path]::GetFullPath($root).TrimEnd('\','/')+[IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Build output must stay inside this project.' }
 if ($ApiBaseUrl.Scheme -ne 'https' -or $ApiBaseUrl.Host -in @('localhost','127.0.0.1','::1') -or $ApiBaseUrl.AbsolutePath.TrimEnd('/') -ne '/api' -or $ApiBaseUrl.Query -or $ApiBaseUrl.Fragment -or $ApiBaseUrl.UserInfo) { throw 'A public HTTPS /api URL is required.' }
 $health = Invoke-RestMethod -Uri ($ApiBaseUrl.AbsoluteUri.TrimEnd('/')+'/health') -TimeoutSec 90
 if ($health.status -ne 'ok' -or $health.mode -ne 'closed-beta' -or $health.payments_enabled) { throw 'Live beta health gate failed.' }
@@ -58,7 +61,6 @@ try {
       .\gradlew.bat bundleRelease assembleRelease --no-daemon --max-workers=2
       if ($LASTEXITCODE -ne 0) { throw 'Signed Android build failed.' }
     } finally { Pop-Location }
-    $out=Join-Path $root 'artifacts/android/release'
     New-Item -ItemType Directory -Force $out | Out-Null
     Copy-Item -LiteralPath 'android/app/build/outputs/bundle/release/app-release.aab' -Destination (Join-Path $out 'moduyuga-beta.aab') -Force
     Copy-Item -LiteralPath 'android/app/build/outputs/apk/release/app-release.apk' -Destination (Join-Path $out 'moduyuga-beta.apk') -Force

@@ -3,18 +3,23 @@ import argparse
 import hashlib
 from html import unescape
 import json
+import os
 from pathlib import Path
 import subprocess
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
-parser.add_argument('--sdk', default='C:/Users/Public/CodexRuntime/android-sdk')
-parser.add_argument('--java', default='C:/Program Files/Eclipse Adoptium/jdk-21.0.12.101-hotspot')
+parser.add_argument('--sdk', default=os.environ.get('ANDROID_HOME', str(ROOT / '.runtime/toolchains/android-sdk')))
+parser.add_argument('--java', default=os.environ.get('JAVA_HOME', str(ROOT / '.runtime/toolchains/jdk-21')))
+parser.add_argument('--release-dir', type=Path, default=ROOT / 'artifacts/android/release')
+parser.add_argument('--evidence-dir', type=Path, default=ROOT / 'artifacts/beta')
 args = parser.parse_args()
-release = ROOT / 'artifacts/android/release'
+release = args.release_dir.resolve()
+evidence = args.evidence_dir.resolve()
+if not release.is_relative_to(ROOT) or not evidence.is_relative_to(ROOT):
+    parser.error('Release and evidence paths must stay inside this project')
 build = json.loads((release / 'build.json').read_text(encoding='utf-8-sig'))
-evidence = ROOT / 'artifacts/beta'
 evidence.mkdir(parents=True, exist_ok=True)
 checks = []
 
@@ -56,11 +61,11 @@ check('APK v2 signature', 'Verified using v2 scheme (APK Signature Scheme v2): t
 check('APK signing identity', 'CN=Team_Wifi' in sign)
 jar = run('release-jarsigner.txt', [str(Path(args.java)/'bin/jarsigner.exe'), '-verify', str(release/'moduyuga-beta.aab')])
 check('AAB JAR signature', 'jar verified.' in jar)
-manifest = run('release-manifest.txt', [str(build_tools/'aapt.exe'), 'dump', 'xmltree', 'artifacts/android/release/moduyuga-beta.apk', 'AndroidManifest.xml'])
+manifest = run('release-manifest.txt', [str(build_tools/'aapt.exe'), 'dump', 'xmltree', str(release/'moduyuga-beta.apk'), 'AndroidManifest.xml'])
 check('no debuggable=true', not any('debuggable' in line and '0xffffffff' in line for line in manifest.splitlines()))
 for prop in ('allowBackup', 'usesCleartextTraffic'):
     check(prop+' false', any(prop in line and '=(type0x12)0x0' in line.replace(' ', '') for line in manifest.splitlines()))
-badging = run('release-badging.txt', [str(build_tools/'aapt.exe'), 'dump', 'badging', 'artifacts/android/release/moduyuga-beta.apk'])
+badging = run('release-badging.txt', [str(build_tools/'aapt.exe'), 'dump', 'badging', str(release/'moduyuga-beta.apk')])
 check('target API36', "targetSdkVersion:'36'" in badging)
 check('no dangerous permissions', all('android.permission.INTERNET' in line or 'DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION' in line for line in badging.splitlines() if line.startswith('uses-permission:')))
 report = {'scope': 'signed APK/AAB offline verification; Android execution and Play delivery are separate', 'checks': checks, 'build': build,
