@@ -84,3 +84,8 @@ ai-pipeline/artifacts/company_source_extract.json
 ai-pipeline/artifacts/materials_inventory.json
 ai-pipeline/artifacts/requirements_source.json
 ai-pipeline/artifacts/requirements_traceability.*
+
+# Local preserved materials, runtime caches, and agent review workspace
+/_archive/
+/.runtime/
+/.superpowers/

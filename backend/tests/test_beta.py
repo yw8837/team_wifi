@@ -14,6 +14,8 @@ def beta_mode(monkeypatch, setup):
     monkeypatch.setattr(config, 'BETA', True)
     # This SQLite test suite isolates domain behavior, not the PostgreSQL limiter.
     monkeypatch.setattr('app.main.throttle', lambda *args, **kwargs: None)
+    monkeypatch.setattr('app.main.beta_write_guard', lambda *args, **kwargs: None)
+    monkeypatch.setattr('app.main.charge_claimed_account', lambda *args, **kwargs: None)
     return setup
 
 

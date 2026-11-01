@@ -17,7 +17,7 @@ import threading
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run():
+def run(extra_checks=None, evidence_name='postgres-results.json'):
     parser = argparse.ArgumentParser()
     parser.add_argument('--pg-bin', type=Path, required=True)
     parser.add_argument('--runtime', type=Path, help='Owned ASCII temp parent for Windows PostgreSQL initdb')
@@ -25,7 +25,7 @@ def run():
     pg = args.pg_bin.resolve()
     runtime = args.runtime.resolve() if args.runtime else ROOT / 'artifacts/beta/runtime'
     runtime.mkdir(parents=True, exist_ok=True)
-    evidence = ROOT / 'artifacts/beta/postgres-results.json'
+    evidence = ROOT / 'artifacts/beta' / evidence_name
     results = []
     password = secrets.token_urlsafe(32)
     port = 55439
@@ -105,16 +105,14 @@ def run():
                 with SessionLocal() as db:
                     expect(not db.get(Token, token_digest(second['recovery_code'])), 'renewal revokes previous recovery hash')
                 # Reproduce the former nested-pool deadlock at the real pool capacity.
-                # Synchronize only a request's first label check; after the fix that
-                # check runs before authentication borrows an application connection.
+                # Synchronize the middleware guard before it borrows a connection.
                 import app.main as main
                 barrier = threading.Barrier(7)
-                real_throttle, timeout = main.throttle, engine.pool._timeout
-                def concurrent_throttle(request, label, limit=20):
-                    if label=='question' and label not in getattr(request.state, 'rate_checked', set()):
-                        barrier.wait(timeout=10)
-                    return real_throttle(request, label, limit)
-                main.throttle, engine.pool._timeout = concurrent_throttle, 0.75
+                real_guard, timeout = main.beta_write_guard, engine.pool._timeout
+                def concurrent_guard(request):
+                    barrier.wait(timeout=10)
+                    return real_guard(request)
+                main.beta_write_guard, engine.pool._timeout = concurrent_guard, 0.75
                 try:
                     with ThreadPoolExecutor(max_workers=7) as pool:
                         replies = list(pool.map(lambda i: c.post('/api/campaigns/'+campaign_id+'/questions',
@@ -122,13 +120,13 @@ def run():
                     expect(201 in replies and all(status in (201,409) for status in replies), 'seven authenticated writes have no pool exhaustion')
                     expect(c.get('/api/health').status_code==200, 'health remains available after concurrent writes')
                 finally:
-                    main.throttle, engine.pool._timeout = real_throttle, timeout
+                    main.beta_write_guard, engine.pool._timeout = real_guard, timeout
                 expect(c.request('DELETE','/api/me',headers=auth(second),json={'password':password}).status_code==200, 'beta deletion')
                 with SessionLocal() as db:
                     expect(not db.scalar(select(Token).where(Token.user_id==second['user']['id'])), 'deleted account tokens removed')
                     expect(not db.scalar(select(Record).where(Record.owner_id==second['user']['id'])), 'deleted account records removed')
                     expect(bool(db.scalar(select(RateBucket))), 'distributed rate buckets persisted')
-                for _ in range(12):
+                for _ in range(6):
                     response = c.post('/api/auth/recover', json={'email':'none@example.com','recovery_code':'invalid-code-long-enough','password':password})
                 expect(response.status_code==429, 'recovery rate limited')
                 # Persistent state survives a real PostgreSQL restart, not a mock.
@@ -138,10 +136,12 @@ def run():
                 expect(c.post('/api/auth/login',content='x'*65537).status_code==413, 'oversize body rejected')
                 for kind in ['privacy','terms','deletion','support']:
                     expect(c.get('/legal/'+kind).status_code==200, 'policy '+kind)
+                if extra_checks:
+                    extra_checks(c, expect)
             engine.dispose()
             evidence.write_text(json.dumps({'status':'pass','checks':results,'database':'PostgreSQL 17 local dedicated cluster',
                 'cloud_deployment_verified':False, 'cleanup':'cluster stopped; temporary directory removed on exit'},ensure_ascii=False,indent=2),encoding='utf-8')
-            print(f'POSTGRES_BETA_PASS: {len(results)} checks; evidence artifacts/beta/postgres-results.json')
+            print(f'POSTGRES_BETA_PASS: {len(results)} checks; evidence artifacts/beta/{evidence_name}')
         finally:
             if started:
                 command('pg_ctl','-D',data,'-m','immediate','-w','stop')

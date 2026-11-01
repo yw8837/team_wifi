@@ -19,7 +19,8 @@ from sqlalchemy.exc import IntegrityError, OperationalError, TimeoutError as Poo
 
 from .db import RUNTIME, Record, Token, User, get_db, init_db, now
 from .security import (DUMMY, admin_user, approved_seller, current_user, issue_token,
-                       optional_user, passwords, profile, throttle, token_digest)
+                       optional_user, passwords, profile, throttle, token_digest,
+                       beta_write_guard, charge_claimed_account)
 from . import schemas as S
 from . import config, beta
 from .http_safety import BodyLimitMiddleware
@@ -45,18 +46,7 @@ async def security_headers(request, call_next):
     if config.BETA and request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
         from starlette.concurrency import run_in_threadpool
         try:
-            await run_in_threadpool(throttle, request, 'write', 200)
-            # Do every label-specific check before Depends(current_user/get_db).
-            # Checking inside a handler could hold one pool slot while waiting for another.
-            labels = {'/api/auth/register': ('register', 20), '/api/auth/login': ('login', 20),
-                      '/api/auth/reset-request': ('reset-request', 10), '/api/auth/reset': ('reset', 10),
-                      '/api/auth/recover': ('recover', 10), '/api/auth/recovery-code': ('recovery-code', 10),
-                      '/api/reports': ('report', 20), '/api/me': ('delete-account', 10)}
-            limit = labels.get(request.url.path)
-            if request.method == 'POST' and re.fullmatch(r'/api/campaigns/[^/]+/questions', request.url.path):
-                limit = ('question', 30)
-            if limit:
-                await run_in_threadpool(throttle, request, *limit)
+            await run_in_threadpool(beta_write_guard, request)
         except HTTPException as error:
             return JSONResponse({'detail': error.detail}, status_code=error.status_code, headers=error.headers)
         except (OperationalError, PoolTimeout):
@@ -208,7 +198,8 @@ def public_config():
 
 @app.post('/api/auth/register', status_code=201)
 def register(body: S.Register, request: Request, db=Depends(get_db)):
-    throttle(request, 'register')
+    if not config.BETA:
+        throttle(request, 'register')
     if not body.terms_accepted or not body.privacy_accepted:
         fail('필수 약관과 개인정보 처리에 동의해 주세요.', 422)
     if config.BETA:
@@ -233,7 +224,7 @@ def register(body: S.Register, request: Request, db=Depends(get_db)):
 
 @app.post('/api/auth/login')
 def login(body: S.Login, request: Request, db=Depends(get_db)):
-    throttle(request, 'login')
+    charge_claimed_account(request, 'login', body.email)
     u = db.scalar(select(User).where(User.email == str(body.email).lower(), User.deleted.is_(False)))
     okay = passwords.verify(body.password, u.password_hash if u else DUMMY)
     if not u or not okay or db.scalar(select(Record.id).where(Record.kind == 'suspension', Record.owner_id == u.id)):
@@ -257,7 +248,8 @@ def logout(request: Request, user=Depends(current_user), db=Depends(get_db)):
 
 @app.post('/api/auth/reset-request')
 def reset_request(body: S.ResetRequest, request: Request, db=Depends(get_db)):
-    throttle(request, 'reset-request', 10)
+    if not config.BETA:
+        throttle(request, 'reset-request', 10)
     if config.BETA:
         return {'message': '베타에서는 가입 시 보관한 복구코드로 비밀번호를 변경할 수 있습니다. 이메일은 발송하지 않습니다.'}
     u = db.scalar(select(User).where(User.email == str(body.email).lower(), User.deleted.is_(False)))
@@ -274,7 +266,8 @@ def reset_request(body: S.ResetRequest, request: Request, db=Depends(get_db)):
 
 @app.post('/api/auth/reset')
 def reset_password(body: S.Reset, request: Request, db=Depends(get_db)):
-    throttle(request, 'reset', 10)
+    if not config.BETA:
+        throttle(request, 'reset', 10)
     if config.BETA:
         fail('베타 계정 복구 화면에서 복구코드를 입력해 주세요.', 400)
     t = db.get(Token, token_digest(body.token))
@@ -296,7 +289,7 @@ def reset_password(body: S.Reset, request: Request, db=Depends(get_db)):
 
 @app.post('/api/auth/recover')
 def recover_account(body: S.Recover, request: Request, db=Depends(get_db)):
-    throttle(request, 'recover', 10)
+    charge_claimed_account(request, 'recover', body.email)
     u = db.scalar(select(User).where(User.email == str(body.email).lower(), User.deleted.is_(False)))
     digest = token_digest(body.recovery_code)
     token = db.get(Token, digest)
@@ -316,7 +309,7 @@ def recover_account(body: S.Recover, request: Request, db=Depends(get_db)):
 def renew_recovery_code(body: S.Password, request: Request, user=Depends(current_user), db=Depends(get_db)):
     if not config.BETA:
         fail('비공개 베타 전용 기능입니다.', 404)
-    throttle(request, 'recovery-code', 10)
+    throttle(request, 'recovery-code', subject=user.id)
     if not passwords.verify(body.password, user.password_hash):
         fail('비밀번호를 확인해 주세요.', 403)
     raw = beta.recovery_code(db, user)
@@ -657,7 +650,7 @@ def questions(id: str, user=Depends(optional_user), db=Depends(get_db)):
 
 @app.post('/api/campaigns/{id}/questions', status_code=201)
 def post_question(id: str, body: S.BodyInput, request: Request, user=Depends(current_user), db=Depends(get_db)):
-    throttle(request, 'question', 30)
+    throttle(request, 'question', 30, subject=user.id)
     public_campaign(db, record(db, 'campaign', id))
     r = Record(kind='question', owner_id=user.id, parent_id=id, data={'body': body.body})
     db.add(r)
@@ -667,7 +660,7 @@ def post_question(id: str, body: S.BodyInput, request: Request, user=Depends(cur
 
 @app.post('/api/reports', status_code=201)
 def report(body: S.ReportInput, request: Request, user=Depends(current_user), db=Depends(get_db)):
-    throttle(request, 'report', 20)
+    throttle(request, 'report', 20, subject=user.id)
     if body.target_type == 'user':
         target = db.get(User, body.target_id)
         if not target or target.deleted or target.id == user.id:

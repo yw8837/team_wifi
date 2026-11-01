@@ -16,8 +16,8 @@ param(
   [int]$DevtoolsPort = 9222,
   [switch]$StartEmulator,
   [string]$AvdName = 'ModuYugaLocal',
-  [string]$AvdHome = 'D:/CodexRuntime/avd',
-  [string]$PrivateEmulatorLogDirectory = 'D:/CodexRuntime/android-smoke'
+  [string]$AvdHome = (Join-Path $PSScriptRoot '../.runtime/avd'),
+  [string]$PrivateEmulatorLogDirectory = (Join-Path $PSScriptRoot '../.runtime/android-smoke')
 )
 $ErrorActionPreference = 'Stop'
 if ($Serial -notmatch '^emulator-\d+$') { throw 'Only an explicitly named local test emulator is permitted.' }
@@ -30,10 +30,17 @@ $logPath = Join-Path $evidence 'android-smoke.log'
 Set-Content -LiteralPath $logPath -Value "Android smoke start $([DateTimeOffset]::Now.ToString('o'))`nSerial=$Serial Package=$PackageId`nAPK SHA256=$((Get-FileHash -LiteralPath $ApkPath -Algorithm SHA256).Hash)" -Encoding utf8
 if ($StartEmulator) {
   if ($AvdName -notmatch '^[A-Za-z0-9_-]+$') { throw 'Use the explicitly owned test AVD name.' }
+  # An emulator is optional. Do not exhaust the user's desktop to run smoke QA.
+  $availableGiB = (Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB
+  if ($availableGiB -lt 4) { throw 'At least 4 GiB free RAM is required before starting an optional emulator. Use a physical test device instead.' }
+  $avdDrive = [IO.DriveInfo]::new([IO.Path]::GetPathRoot([IO.Path]::GetFullPath($AvdHome)))
+  if ($avdDrive.AvailableFreeSpace -lt 30GB) { throw 'At least 30 GiB free on the AVD drive is required. Do not create or start an emulator; use a physical test device instead.' }
   $existing = Get-CimInstance Win32_Process | Where-Object { $_.Name -like '*qemu*' -and $_.CommandLine -match "-avd\s+$([regex]::Escape($AvdName))\b" }
   if ($existing) { throw 'The named test emulator is already running. Omit -StartEmulator; no existing process was terminated.' }
   $privateLogs = [IO.Path]::GetFullPath($PrivateEmulatorLogDirectory)
-  if ($privateLogs.StartsWith([IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')), [StringComparison]::OrdinalIgnoreCase)) { throw 'Emulator raw logs must remain outside the Git workspace.' }
+  $runtimeRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../.runtime')).TrimEnd('\','/') + [IO.Path]::DirectorySeparatorChar
+  if (-not $privateLogs.StartsWith($runtimeRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'Emulator raw logs must remain inside the ignored project .runtime directory.' }
+  if (-not [IO.Path]::GetFullPath($AvdHome).StartsWith($runtimeRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'An optional AVD must remain inside the project .runtime directory.' }
   New-Item -ItemType Directory -Path $privateLogs -Force | Out-Null
   $env:ANDROID_AVD_HOME=$AvdHome; $env:ANDROID_HOME=$SdkRoot; $env:ANDROID_SDK_ROOT=$SdkRoot
   $emulatorPort = $Serial.Split('-')[1]

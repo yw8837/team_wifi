@@ -1,6 +1,6 @@
 # 무료 베타 DB 선택 — PostgreSQL과 MongoDB
 
-확인일: 2026-11-01. 사용자 질문: ‘몽고DB를 사용하는 방법은?’ **질문은 DB 전환이나 Neon 접속정보의 Render 저장 승인으로 간주하지 않는다.** 아직 Render에 DATABASE_URL을 전송하거나 서비스를 배포하지 않았다.
+확인일: 2026-11-01. MongoDB 대안을 검토한 뒤 사용자가 **Neon 유지·전용 DB 접속정보의 Render 저장·무료 배포**를 명시적으로 승인했습니다. Neon PostgreSQL과 Render Free로 배포했고 공개 HTTPS 검사 75건을 통과했습니다. 아래 비교는 선택 근거이며 전환 대기 상태가 아닙니다. 최신 검증·배포 상태는 [STATUS](STATUS.md)를 기준으로 봅니다.
 
 ## 추천과 이유
 

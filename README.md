@@ -6,9 +6,14 @@
 
 ## 먼저 볼 문서
 
+**현재 무료 시험 서버:** https://moduyuga-beta.onrender.com — 로그인 없이 둘러볼 수 있습니다. 가입은 초대코드가 필요하고 실제 결제·배송은 없습니다. Play 내부 테스트와 실제 Android release 설치 검증의 완료 여부는 아래 베타 현황에서 확인하세요.
+
+이 PC의 작업 경로는 **`E:/Team_Wifi`**로 통일했습니다. 이전 기획·회의·데이터는 `_archive/legacy-project`에 보존했습니다. 새 터미널에서는 `. ./scripts/use-workspace.ps1`로 프로젝트 캐시·임시 경로를 설정합니다. 기존 SDK/JDK를 재사용하며 에뮬레이터를 자동 기동하지 않습니다.
+
 - [외부 베타 준비 현황·검증 결과·남은 배포 조건](docs/build/beta-20261101/STATUS.md)
 - [최신 디자인 기준·원본 자산](docs/design/brand/README.md)
 - [v0.6 화면설계서 50개 화면과 현재 구현 대조](docs/design/screen-spec-v0.6.md)
+- [추가 제공한 57개 화면과 현재 구현 대조](docs/design/screen-spec-20261101-57.md)
 - [브랜드 적용 검증 기록](docs/build/brand-20261101/VERIFICATION.md)
 - [실행·검증 결과](docs/build/DELIVERY.md)
 - [팀 실행과 공유 방법](docs/build/TEAM.md)
@@ -83,4 +88,4 @@ $env:ANDROID_HOME = '<Android SDK 경로>'
 | `scripts` | 공유 전 검사·실제 E2E·Android 재현 명령 |
 | `artifacts` | 로컬 실행 증거·APK, Git 제외 |
 
-초기 계획의 Next.js는 이 Android 클라이언트에서 React/Vite/Capacitor로 구체화했습니다. 공개 상세 HTML은 FastAPI가 생성하며 개발 데이터는 noindex입니다. SQLite 회귀시험과 전용 로컬 PostgreSQL의 동시성·복구·삭제·재시작 유지 검사를 통과했습니다. 클라우드 배포와 공개 HTTPS 검증은 아직 완료되지 않았습니다. 기존 기획서와 회의 원문은 수정하지 않습니다.
+초기 계획의 Next.js는 이 Android 클라이언트에서 React/Vite/Capacitor로 구체화했습니다. 공개 상세 HTML은 FastAPI가 생성하며 시험 데이터는 noindex입니다. Neon PostgreSQL + Render Free의 공개 HTTPS 배포와 API 검증을 진행했습니다. 서명 APK/AAB는 `artifacts/android/release`에 보관하며 Play 배포·실제 기기 설치 검증과 구분합니다. 기존 기획서와 회의 원문은 수정하지 않습니다.

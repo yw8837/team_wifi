@@ -1,7 +1,10 @@
 import hashlib
 import hmac
+import json
+import math
 import secrets
 import threading
+import time
 from collections import defaultdict, deque
 from fastapi import Depends, HTTPException, Request
 from pwdlib import PasswordHash
@@ -28,6 +31,113 @@ passwords = BoundedPasswordHash()
 DUMMY = passwords.hash('dummy-password-never-an-account')
 _attempts = defaultdict(deque)
 _lock = threading.Lock()
+# Only these server-owned labels exist in memory. Rejected requests never grow a deque.
+GLOBAL_LIMITS = {'write': 120, 'expensive-auth': 30, 'register': 10}
+_global_attempts = {label: deque() for label in GLOBAL_LIMITS}
+_global_lock = threading.Lock()
+ACCOUNT_LIMITS = {'write': 60, 'question': 30, 'report': 20,
+                  'recovery-code': 5, 'delete-account': 5}
+CLAIMED_LIMITS = {'login': 10, 'recover': 5}
+
+
+def rate_error(retry_after):
+    return HTTPException(429, '요청이 많습니다. 잠시 후 다시 시도해 주세요.',
+                         headers={'Retry-After': str(max(1, math.ceil(retry_after)))})
+
+
+def global_write_guard(request):
+    """Cheap rolling-minute guard before any DB access; single worker only.
+
+    Restart/sleep resets this process-local budget. An attacker may consume the
+    shared budget and delay all testers; account quotas do not prevent that DoS.
+    """
+    labels = ['write']
+    if (request.method == 'POST' and request.url.path in (
+            '/api/auth/register', '/api/auth/login', '/api/auth/recover', '/api/auth/recovery-code')) or (
+            request.method == 'DELETE' and request.url.path == '/api/me'):
+        labels.append('expensive-auth')
+    if request.method == 'POST' and request.url.path == '/api/auth/register':
+        labels.append('register')
+    with _global_lock:
+        stamp = time.monotonic()
+        for bucket in _global_attempts.values():
+            while bucket and bucket[0] <= stamp-60:
+                bucket.popleft()
+        waits = [_global_attempts[label][0]+60-stamp for label in labels
+                 if len(_global_attempts[label]) >= GLOBAL_LIMITS[label]]
+        if waits:
+            raise rate_error(max(waits))
+        for label in labels:
+            _global_attempts[label].append(stamp)
+
+
+def rate_key(scope, subject, label, stamp):
+    # Namespace and subject are unambiguous; email/token/IP never become DB keys.
+    value = json.dumps(['v2', scope, label, stamp//600, str(subject)], separators=(',', ':'))
+    return hmac.new(config.RATE_LIMIT_SECRET.encode(), value.encode(), hashlib.sha256).hexdigest()
+
+
+def charge_buckets(session, request, scope, subject, limits):
+    """Commit only a dedicated, short limiter transaction before the action starts."""
+    from sqlalchemy.dialects.postgresql import insert
+    stamp = now()
+    expires = (stamp//600+1)*600
+    exceeded = False
+    checked = set(getattr(request.state, 'rate_checked', set()))
+    for label, limit in limits.items():
+        marker = (scope, str(subject), label)
+        if marker in checked:
+            continue
+        statement = insert(RateBucket).values(key=rate_key(scope, subject, label, stamp), count=1, expires=expires)
+        total = session.scalar(statement.on_conflict_do_update(index_elements=[RateBucket.key],
+                               set_={'count': RateBucket.count+1}).returning(RateBucket.count))
+        exceeded |= total > limit
+        checked.add(marker)
+    session.execute(delete(RateBucket).where(RateBucket.expires <= stamp))
+    # Commit even quota rejection and subsequent failed auth/domain actions.
+    session.commit()
+    if exceeded:
+        raise rate_error(expires-now())
+    request.state.rate_checked = checked
+
+
+def beta_write_guard(request):
+    global_write_guard(request)
+    auth = request.headers.get('Authorization', '')
+    if not auth.startswith('Bearer ') or len(auth) > 250:
+        return
+    # This is quota identity, not authorization. Endpoints authenticate again in
+    # their own transaction after this session has CLOSED, so revocation is fresh.
+    with SessionLocal() as session:
+        session.connection(execution_options={'isolation_level': 'READ COMMITTED'})
+        try:
+            user = optional_user(request, session)
+        except HTTPException:
+            return
+        if not user:
+            return
+        limits = {'write': ACCOUNT_LIMITS['write']}
+        path = request.url.path
+        label = None
+        if request.method == 'POST':
+            if path.startswith('/api/campaigns/') and path.endswith('/questions') and path.count('/') == 4:
+                label = 'question'
+            else:
+                label = {'/api/reports': 'report', '/api/auth/recovery-code': 'recovery-code'}.get(path)
+        elif request.method == 'DELETE' and path == '/api/me':
+            label = 'delete-account'
+        if label:
+            limits[label] = ACCOUNT_LIMITS[label]
+        charge_buckets(session, request, 'account', user.id, limits)
+
+
+def charge_claimed_account(request, label, email):
+    """Call after body validation, before first action query/hash (get_db is lazy on PG)."""
+    if not config.BETA:
+        return throttle(request, label, 10 if label == 'recover' else 20)
+    with SessionLocal() as session:
+        session.connection(execution_options={'isolation_level': 'READ COMMITTED'})
+        charge_buckets(session, request, 'claimed-account', str(email).lower(), {label: CLAIMED_LIMITS[label]})
 
 def token_digest(raw):
     return hashlib.sha256(raw.encode()).hexdigest()
@@ -37,29 +147,10 @@ def issue_token(db, user, kind='session', lifetime=8*3600):
     db.add(Token(digest=token_digest(raw), user_id=user.id, kind=kind, expires=now()+lifetime))
     return raw
 
-def throttle(request: Request, label, limit=20):
+def throttle(request: Request, label, limit=20, *, subject=None):
     if config.BETA:
-        # Middleware performs beta checks before authentication opens a transaction.
-        # Endpoints may retain local-mode checks without acquiring a second connection.
-        checked = getattr(request.state, 'rate_checked', set())
-        if label in checked:
-            return
-        # One atomic upsert shared by every process. Raw IP addresses are not persisted.
-        from sqlalchemy.dialects.postgresql import insert
-        stamp = now()
-        source = request.client.host if request.client else 'unknown'
-        key = hmac.new(config.RATE_LIMIT_SECRET.encode(), f'{source}:{label}:{stamp//600}'.encode(), hashlib.sha256).hexdigest()
-        with SessionLocal() as session:
-            # Rate-limit transactions do not need application SERIALIZABLE snapshots.
-            session.connection(execution_options={'isolation_level': 'READ COMMITTED'})
-            statement = insert(RateBucket).values(key=key, count=1, expires=(stamp//600+1)*600)
-            total = session.scalar(statement.on_conflict_do_update(index_elements=[RateBucket.key],
-                                   set_={'count': RateBucket.count+1}).returning(RateBucket.count))
-            session.execute(delete(RateBucket).where(RateBucket.expires < stamp-600))
-            session.commit()
-        if total > limit:
-            raise HTTPException(429, '요청이 많습니다. 잠시 후 다시 시도해 주세요.', headers={'Retry-After': '600'})
-        request.state.rate_checked = checked | {label}
+        if ('account', str(subject), label) not in getattr(request.state, 'rate_checked', set()):
+            raise RuntimeError('Account quota must be checked before the action transaction.')
         return
     key = (request.client.host if request.client else 'local', label)
     with _lock:
