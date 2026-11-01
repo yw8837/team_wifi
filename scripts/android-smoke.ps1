@@ -9,7 +9,7 @@ param(
   [string]$SdkRoot = 'C:/Users/Public/CodexRuntime/android-sdk',
   [string]$ApkPath = (Join-Path $PSScriptRoot '../artifacts/android/modu-yuga-debug.apk'),
   [string]$EvidenceDirectory = (Join-Path $PSScriptRoot '../artifacts/android/runtime'),
-  [string]$Serial = 'emulator-5554',
+  [string]$Serial = 'emulator-5760',
   [string]$PackageId = 'kr.moduyuga.app',
   [string]$ApiBaseUrl = 'http://10.0.2.2:8000/api',
   [ValidateRange(15,300)][int]$BootTimeoutSeconds = 90,
@@ -37,8 +37,11 @@ if ($StartEmulator) {
   New-Item -ItemType Directory -Path $privateLogs -Force | Out-Null
   $env:ANDROID_AVD_HOME=$AvdHome; $env:ANDROID_HOME=$SdkRoot; $env:ANDROID_SDK_ROOT=$SdkRoot
   $emulatorPort = $Serial.Split('-')[1]
-  $launched = Start-Process -FilePath (Join-Path $SdkRoot 'emulator/emulator.exe') -ArgumentList @('-avd',$AvdName,'-no-window','-no-audio','-no-boot-anim','-gpu','swiftshader_indirect','-feature','-Vulkan,-QuickbootFileBacked','-no-snapshot','-port',$emulatorPort,'-cores','2','-memory','1536','-show-kernel') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $privateLogs 'lowmem.stdout.log') -RedirectStandardError (Join-Path $privateLogs 'lowmem.stderr.log') -PassThru
-  Add-Content -LiteralPath $logPath -Value "Owned test emulator launcher PID=$($launched.Id); requested RAM1536/cores2/QuickbootFileBacked disabled (system image may enforce a higher RAM minimum); private raw logs outside Git." -Encoding utf8
+  # Windows may reserve the default 5554..5585 range for Hyper-V. Explicit ports
+  # can be selected outside it without changing OS exclusions or firewall settings.
+  $adbPort = [int]$emulatorPort+1
+  $launched = Start-Process -FilePath (Join-Path $SdkRoot 'emulator/emulator.exe') -ArgumentList @('-avd',$AvdName,'-no-window','-no-audio','-no-boot-anim','-gpu','swiftshader','-feature','-Vulkan,-QuickbootFileBacked','-no-snapshot','-ports',"$emulatorPort,$adbPort",'-cores','2','-memory','2048','-show-kernel') -WindowStyle Hidden -RedirectStandardOutput (Join-Path $privateLogs 'lowmem.stdout.log') -RedirectStandardError (Join-Path $privateLogs 'lowmem.stderr.log') -PassThru
+  Add-Content -LiteralPath $logPath -Value "Owned test emulator launcher PID=$($launched.Id); requested RAM2048/cores2; explicit console/ADB ports $emulatorPort/$adbPort; private raw logs outside Git." -Encoding utf8
 }
 function Invoke-TestAdb([string[]]$AdbArguments, [int]$TimeoutSeconds=20, [switch]$AllowFailure) {
   $info = [Diagnostics.ProcessStartInfo]::new()
@@ -75,8 +78,15 @@ $appPid = (Invoke-TestAdb @('-s',$Serial,'shell','pidof',$PackageId)).Split(' ')
 if ($appPid -notmatch '^\d+$') { throw 'App process is absent after launch.' }
 Invoke-TestAdb @('-s',$Serial,'shell','dumpsys','activity','activities') | Set-Content -LiteralPath (Join-Path $evidence 'activities.txt') -Encoding utf8
 Invoke-TestAdb @('-s',$Serial,'forward',"tcp:$DevtoolsPort","localabstract:webview_devtools_remote_$appPid") | Out-Null
-$targets = Invoke-RestMethod -Uri "http://127.0.0.1:$DevtoolsPort/json" -TimeoutSec 10
-$target = @($targets | Where-Object { $_.type -eq 'page' -and $_.webSocketDebuggerUrl })[0]
+$target = $null
+$webviewDeadline = [DateTime]::UtcNow.AddSeconds(30)
+do {
+  try {
+    $targets = Invoke-RestMethod -Uri "http://127.0.0.1:$DevtoolsPort/json" -TimeoutSec 5
+    $target = @($targets | Where-Object { $_.type -eq 'page' -and $_.webSocketDebuggerUrl }) | Select-Object -First 1
+  } catch { Add-Content -LiteralPath $logPath -Value 'WebView still initializing; waiting for its developer endpoint.' }
+  if (-not $target) { Start-Sleep -Seconds 2 }
+} while (-not $target -and [DateTime]::UtcNow -lt $webviewDeadline)
 if (-not $target) { throw 'No debuggable app WebView found. App/API validation remains incomplete.' }
 $cdpCode = @'
 const [wsUrl,apiBase] = process.argv.slice(2);

@@ -1,0 +1,38 @@
+# Free web service only. Use a Neon FREE project; do not create Render's 30-day DB.
+# No payment method, paid disk, paid instance, cron, or autoscaling is required.
+services:
+  - type: web
+    name: moduyuga-beta
+    runtime: python
+    plan: free
+    region: singapore
+    branch: codex/modu-yuga
+    buildCommand: bash scripts/render-build.sh
+    startCommand: cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port "$PORT" --no-access-log --limit-concurrency 12 --timeout-keep-alive 5
+    healthCheckPath: /api/health
+    autoDeployTrigger: off
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.14
+      - key: NODE_VERSION
+        value: 24.11.0
+      - key: MODU_ENV
+        value: beta
+      - key: PUBLIC_ORIGIN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: RATE_LIMIT_SECRET
+        generateValue: true
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: HOSTING_LOCATION
+        value: Render · 싱가포르
+      - key: DATABASE_LOCATION
+        sync: false
+      - key: STATIC_DIR
+        value: /opt/render/project/src/frontend/dist
+      - key: RUNTIME_DIR
+        value: /tmp/moduyuga
+      - key: OMP_NUM_THREADS
+        value: '1'

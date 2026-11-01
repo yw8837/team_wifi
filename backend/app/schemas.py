@@ -13,6 +13,8 @@ class Register(Strict):
     terms_accepted: bool
     privacy_accepted: bool
     marketing_opt_in: bool = False
+    invite_code: str = Field(default='', max_length=200)
+    adult_confirmed: bool = False
 
 class Login(Strict):
     email: EmailStr
@@ -27,6 +29,16 @@ class ResetRequest(Strict):
 class Reset(Strict):
     token: str = Field(min_length=20, max_length=200)
     password: str = Field(min_length=10, max_length=128)
+
+class Recover(Strict):
+    email: EmailStr
+    recovery_code: str = Field(min_length=20, max_length=200)
+    password: str = Field(min_length=10, max_length=128)
+
+class BetaApplication(Strict):
+    brand_name: str = Field(min_length=2, max_length=80)
+    brand_description: str = Field(min_length=5, max_length=1000)
+    seller_terms_accepted: bool
 
 class Application(Strict):
     business_name: str = Field(default='', max_length=100)
@@ -78,7 +90,7 @@ class BodyInput(Strict):
     body: str = Field(min_length=1, max_length=1000)
 
 class ReportInput(Strict):
-    target_type: Literal['question', 'campaign']
+    target_type: Literal['question', 'campaign', 'user']
     target_id: str = Field(max_length=36)
     reason: str = Field(min_length=3, max_length=500)
 

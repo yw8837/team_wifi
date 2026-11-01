@@ -6,12 +6,13 @@ from pathlib import Path
 from fastapi import Request
 from sqlalchemy import Boolean, ForeignKey, Index, Integer, JSON, String, UniqueConstraint, create_engine, event, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from . import config
 
 RUNTIME = Path(os.getenv('RUNTIME_DIR', Path(__file__).resolve().parents[1] / 'runtime'))
 RUNTIME.mkdir(parents=True, exist_ok=True)
 URL = os.getenv('DATABASE_URL', f'sqlite:///{(RUNTIME / "modu.db").as_posix()}')
-engine = create_engine(URL, connect_args={'check_same_thread': False, 'timeout': 30} if URL.startswith('sqlite') else {}, pool_pre_ping=True,
-                       **({} if URL.startswith('sqlite') else {'isolation_level': 'SERIALIZABLE'}))
+engine = create_engine(URL, connect_args={'check_same_thread': False, 'timeout': 30} if URL.startswith('sqlite') else {'connect_timeout': 10}, pool_pre_ping=True, hide_parameters=True,
+                       **({} if URL.startswith('sqlite') else {'isolation_level': 'SERIALIZABLE', 'pool_size': 5, 'max_overflow': 2}))
 if URL.startswith('sqlite'):
     @event.listens_for(engine, 'connect')
     def sqlite_config(conn, _):
@@ -49,6 +50,12 @@ class Token(Base):
     kind: Mapped[str] = mapped_column(String(20))
     expires: Mapped[int] = mapped_column(Integer)
 
+class RateBucket(Base):
+    __tablename__ = 'rate_buckets'
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    count: Mapped[int] = mapped_column(Integer, default=1)
+    expires: Mapped[int] = mapped_column(Integer, index=True)
+
 class Record(Base):
     """Versioned aggregates; private data never serialized without a resource serializer."""
     __tablename__ = 'records'
@@ -67,7 +74,11 @@ class Record(Base):
     created: Mapped[int] = mapped_column(Integer, default=now)
 
 def init_db():
-    Base.metadata.create_all(engine)
+    # PostgreSQL advisory lock serializes first boot across revisions/instances.
+    with engine.begin() as connection:
+        if URL.startswith('postgresql'):
+            connection.execute(text('SELECT pg_advisory_xact_lock(72411301)'))
+        Base.metadata.create_all(connection)
 
 def get_db(request: Request):
     with SessionLocal() as session:

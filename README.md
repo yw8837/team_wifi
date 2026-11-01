@@ -6,6 +6,7 @@
 
 ## 먼저 볼 문서
 
+- [외부 베타 준비 현황·검증 결과·남은 배포 조건](docs/build/beta-20261101/STATUS.md)
 - [최신 디자인 기준·원본 자산](docs/design/brand/README.md)
 - [v0.6 화면설계서 50개 화면과 현재 구현 대조](docs/design/screen-spec-v0.6.md)
 - [브랜드 적용 검증 기록](docs/build/brand-20261101/VERIFICATION.md)
@@ -82,4 +83,4 @@ $env:ANDROID_HOME = '<Android SDK 경로>'
 | `scripts` | 공유 전 검사·실제 E2E·Android 재현 명령 |
 | `artifacts` | 로컬 실행 증거·APK, Git 제외 |
 
-초기 계획의 Next.js는 이 Android 클라이언트에서 React/Vite/Capacitor로 구체화했습니다. 공개 상세 HTML은 FastAPI가 생성하며 개발 데이터는 noindex입니다. PostgreSQL 연결 설정은 지원하지만 현재 테스트 증거는 SQLite 기준입니다. 운영 웹의 SSR·PostgreSQL 마이그레이션/부하·백업·배포는 별도 검증이 필요합니다. 기존 기획서와 회의 원문은 수정하지 않습니다.
+초기 계획의 Next.js는 이 Android 클라이언트에서 React/Vite/Capacitor로 구체화했습니다. 공개 상세 HTML은 FastAPI가 생성하며 개발 데이터는 noindex입니다. SQLite 회귀시험과 전용 로컬 PostgreSQL의 동시성·복구·삭제·재시작 유지 검사를 통과했습니다. 클라우드 배포와 공개 HTTPS 검증은 아직 완료되지 않았습니다. 기존 기획서와 회의 원문은 수정하지 않습니다.

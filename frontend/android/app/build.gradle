@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+def releaseRequested = gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') }
+def signingEnv = ['MODU_KEYSTORE', 'MODU_STORE_PASSWORD', 'MODU_KEY_ALIAS', 'MODU_KEY_PASSWORD'].collectEntries { [(it): System.getenv(it)] }
+if (releaseRequested && signingEnv.values().any { !it }) {
+    throw new GradleException('Release requires the private upload keystore environment. Use scripts/build-android-release.ps1.')
+}
+
 android {
     namespace = "kr.moduyuga.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +13,8 @@ android {
         applicationId "kr.moduyuga.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode Integer.parseInt(System.getenv('MODU_VERSION_CODE') ?: '2')
+        versionName System.getenv('MODU_VERSION_NAME') ?: '0.2.0'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -16,8 +22,20 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (signingEnv.MODU_KEYSTORE) {
+                storeFile file(signingEnv.MODU_KEYSTORE)
+                storePassword signingEnv.MODU_STORE_PASSWORD
+                keyAlias signingEnv.MODU_KEY_ALIAS
+                keyPassword signingEnv.MODU_KEY_PASSWORD
+            }
+        }
+    }
     buildTypes {
         release {
+            signingConfig signingConfigs.release
+            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
