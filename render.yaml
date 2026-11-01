@@ -19,7 +19,10 @@ services:
       - key: MODU_ENV
         value: beta
       - key: PUBLIC_ORIGIN
-        sync: false
+        fromService:
+          name: moduyuga-beta
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
       - key: DATABASE_URL
         sync: false
       - key: RATE_LIMIT_SECRET

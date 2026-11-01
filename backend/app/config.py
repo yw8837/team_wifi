@@ -5,7 +5,7 @@ from urllib.parse import urlsplit
 
 MODE = os.getenv('MODU_ENV', 'local')
 BETA = MODE == 'beta'
-PUBLIC_ORIGIN = os.getenv('PUBLIC_ORIGIN', '').rstrip('/')
+PUBLIC_ORIGIN = (os.getenv('PUBLIC_ORIGIN') or os.getenv('RENDER_EXTERNAL_URL', '')).rstrip('/')
 SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', '')
 RATE_LIMIT_SECRET = os.getenv('RATE_LIMIT_SECRET', '')
 HOSTING_LOCATION = os.getenv('HOSTING_LOCATION', '')
