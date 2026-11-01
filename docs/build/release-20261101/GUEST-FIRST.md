@@ -2,6 +2,8 @@
 
 2026-11-01. 요청: 앱을 처음 열면 공구·핫딜을 바로 볼 수 있어야 한다. 브랜드와 기존 화면설계는 유지한다.
 
+![배포 웹을 390px 화면에서 직접 확인한 비회원 홈. 실제 Android 기기 캡처는 아님.](guest-first-home.png)
+
 ## 결함과 수정
 
 기존 `/`는 `moduyuga.intro` 저장값이 없으면 `/welcome`으로 이동했다. 소개 화면에 가입·로그인이 배치되어 새 설치에서 탐색이 뒤로 밀렸다. 기존 상세 URL 중심 검사는 이 분기를 놓쳤다.
@@ -31,5 +33,22 @@
 - 390px 화면에서 검색어 `기저귀`로 시험 상품 1개 표시. 상세의 수량 3 → 참여 → 로그인 → 둘러보기 → 수량 3 유지.
 - `/login?returnTo=/my/saved`의 둘러보기 링크가 `/`로 연결되고 검색 가능한 홈으로 실제 복귀하는 것을 확인.
 - 로컬 브라우저 검사는 개발 서버의 동일 출처 프록시로 무료 공개 API를 읽었다. 운영 CORS 설정은 변경하지 않았다. 로컬 프록시는 배포물이 아니다.
+- 최종 수정 커밋 `b0e3a8a`의 GitHub CI에서 프런트 95개·백엔드 40개 통과, TypeScript/Vite 빌드 성공. 백엔드 테스트 도구 호환성 경고 1개는 기존 상태다.
+- Render Free에 같은 커밋 배포 완료: `dep-dbjks5ec6qcc73bqvkmg`, `Deploy succeeded | Live` 확인. 실제 HTTPS origin에서도 intro 없음/세션 없음으로 새 진입을 재현하여 목록 6개·비밀번호 입력 0개·390px 가로 넘침 없음과 로그인에서 홈 복귀를 확인했다. 검사 후 기존 소개 저장값과 화면 크기 설정을 복원했다.
 
 증거는 `artifacts/beta/guest-first-*`에 보관한다. Android 패키지 서명·번들 검증과 실제 휴대폰 실행은 서로 다른 검증 단계로 기록한다.
+
+## Android 수정 패키지
+
+0.2.1/versionCode3 APK·AAB를 기존 업로드 키로 빌드했다. Gradle 133개 작업이 성공했고 서명·정식명·HTTPS API·CSP·권한 등 오프라인30검사를 통과했다. APK와 AAB에 들어간 웹 파일 전체가 이번 `frontend/dist`와 SHA-256 기준으로 일치한다. package `kr.moduyuga.app`, minSDK24, targetSDK36이다.
+
+| 파일 | SHA-256 |
+|---|---|
+| `moduyuga-beta.aab` | `35f731f15c20961e8451a4112d10f4fe0c71b2af8a451b6a25e471375461be5b` |
+| `moduyuga-beta.apk` | `8e51cf6fa0a1f757bfce08bd68e68ef228f1013c922994b90b8fe3d049285d79` |
+
+기존0.2.0 패키지와 검증 JSON은 `artifacts/android/releases/2-0.2.0`에 보존했다. 최신 파일은 `artifacts/android/release`에 있다. 에뮬레이터를 시작하거나 Android Studio를 설치하지 않았다. 이 PC의 새 Gradle 캐시는 E:에만 작성했다.
+
+빌드 로그에는 기존 도구 체인의 flatDir·SDK XML 버전·Gradle deprecation 및 생성 manifest 중복 replace 관련 경고가 있다. 빌드/필수 release lint 성공과 경고가 없는 상태는 구분한다. Gradle9 전환이나 SDK/플러그인 갱신은 이번 UX 수정 범위에 포함하지 않았다.
+
+Play에 versionCode3 업로드 후 2026-11-01 23:58 KST, **0.2.1 · 비회원 첫 화면 개선 / 활성 / 내부 테스터에게 제공됨**을 확인했다. 기존 승인 계정만 대상이며 팀원을 추가하지 않았다. 유일한 콘솔 경고는 난독화 가독화 파일 없음으로, 현재 minifyEnabled=false인 빌드다. 차단 오류는 없었다. `artifacts/beta/play-internal-0.2.1-active.jpg`에 증거를 보관한다. 이 내부 배포는 프로덕션 공개 출시나 새 버전의 실기기 실행 관찰을 뜻하지 않는다.
