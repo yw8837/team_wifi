@@ -22,8 +22,14 @@ await page.route("https://api.example.test/api/**", async (route) => {
     await route.fulfill({ status: 401, json: { detail: "세션 만료" }, headers: { "Access-Control-Allow-Origin": "*" } });
     return;
   }
+  if (path === "/auth/recovery-code" && req.postDataJSON()?.password !== "Fixture-only-password") {
+    await route.fulfill({ status: 403, json: { detail: "현재 비밀번호를 확인해 주세요." }, headers: { "Access-Control-Allow-Origin": "*" } });
+    return;
+  }
+  if (path === "/auth/recovery-code") await new Promise((resolve) => setTimeout(resolve, 750));
   let body;
-  if (path === "/config") body = { legal: {} };
+  if (path === "/auth/recovery-code") body = { message: "복구코드 재발급 완료", recovery_code: "TEST-ONLY-RENEWED-RECOVERY" };
+  else if (path === "/config") body = { legal: {} };
   else if (path === "/auth/register") body = { access_token: "fixture-session", user, recovery_code: "TEST-ONLY-" + "RECOVERY".repeat(8) };
   else if (path === "/auth/recover") body = { message: "재설정 완료", recovery_code: "TEST-ONLY-ROTATED-RECOVERY" };
   else if (path === "/auth/login") body = { access_token: "fixture-session", user };
@@ -76,6 +82,37 @@ try {
   await page.getByText("신고를 접수했습니다. 운영 검토 후 처리됩니다.", { exact: true }).waitFor();
   assert.deepEqual(requests.find((r) => r.path === "/reports").body, { target_type: "user", target_id: "other-user", reason: "작성자 신고 시험" });
 
+  await page.goto(base + "/settings");
+  await page.getByRole("heading", { name: "복구코드 다시 발급", exact: true }).waitFor();
+  const renewalPassword = page.locator('input[name="recovery-code-password"]');
+  assert.equal(await renewalPassword.getAttribute("minlength"), "10");
+  assert.equal(await renewalPassword.getAttribute("maxlength"), "128");
+  assert.equal(await page.getByRole("navigation", { name: "이용 안내" }).getByRole("link").count(), 4);
+  await renewalPassword.fill("Fixture-wrong-password");
+  await page.getByRole("button", { name: "이전 코드를 폐기하고 새 코드 발급", exact: true }).click();
+  await page.getByText("현재 비밀번호를 확인해 주세요.", { exact: true }).waitFor();
+  assert.equal(await page.locator(".recovery-code").count(), 0);
+  assert.equal(page.url(), base + "/settings");
+  await renewalPassword.fill("Fixture-only-password");
+  await page.getByRole("button", { name: "이전 코드를 폐기하고 새 코드 발급", exact: true }).click();
+  await page.getByRole("button", { name: "새 코드 발급 중…", exact: true }).waitFor();
+  assert.equal(await renewalPassword.isDisabled(), true);
+  await renewalPassword.evaluate((input) => input.closest("form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
+  await page.getByText("TEST-ONLY-RENEWED-RECOVERY", { exact: true }).waitFor();
+  assert.equal(requests.filter((r) => r.path === "/auth/recovery-code").length, 2, "one rejected attempt and one successful request only");
+  assert.deepEqual(requests.filter((r) => r.path === "/auth/recovery-code")[1].body, { password: "Fixture-only-password" });
+  assert.equal(page.url(), base + "/settings");
+  assert.equal(await page.getByRole("button", { name: "새 코드 확인 완료", exact: true }).isDisabled(), true);
+  assert.equal(await page.evaluate(() => sessionStorage.getItem("moduyuga.session")), "fixture-session");
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  assert.doesNotMatch(await page.evaluate(() => JSON.stringify({ local: { ...localStorage }, session: { ...sessionStorage } })), /RECOVERY|password/i);
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "새 코드 확인 완료", exact: true }).click();
+  assert.equal(page.url(), base + "/settings");
+  assert.equal(await page.locator(".recovery-code").count(), 0);
+  assert.equal(await renewalPassword.inputValue(), "");
+  assert.equal(requests.filter((r) => r.path === "/auth/recovery-code").length, 2);
+
   await page.goto(base + "/seller");
   await page.locator('input[name="brand_name"]').fill("시험 브랜드");
   assert.equal(await page.locator('input[name="business_number"], input[name="contact_phone"], input[name*="address"]').count(), 0);
@@ -107,7 +144,7 @@ try {
   assert.equal(page.url(), base + "/campaigns/fixture");
   assert.equal(await page.getByLabel("참여 수량").inputValue(), "3");
   assert.equal(await page.evaluate(() => sessionStorage.getItem("moduyuga.session")), null);
-  console.log("PASS: 320px guest browse, signup acknowledgment, original quantity, no auto participation, user report, fake seller form, rotated recovery acknowledgment, no secret storage and guest browsing after session expiry (mocked API).");
+  console.log("PASS: 320px guest browse, signup acknowledgment, original quantity, no auto participation, user report, fake seller form, rotated recovery acknowledgment, password-confirmed Settings renewal with duplicate-submit guard, no secret storage and guest browsing after session expiry (mocked API).");
 } finally {
   await browser.close();
 }

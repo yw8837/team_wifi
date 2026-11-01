@@ -70,3 +70,34 @@ export function BetaRecover() {
     <Feedback {...action} /><button disabled={action.busy}>{action.busy ? "재설정 중…" : "비밀번호 재설정"}</button>
   </form><LegalLinks /></div>;
 }
+
+export function BetaRecoveryCodeSettings() {
+  const action = useAction();
+  const [password, setPassword] = useState(""), [newCode, setNewCode] = useState("");
+  if (newCode) return <RecoveryCodeNotice code={newCode} continueLabel="새 코드 확인 완료" onContinue={() => {
+    setNewCode("");
+    action.setMessage("새 복구코드를 확인했습니다. 이전 코드는 더 이상 사용할 수 없습니다.");
+  }} />;
+  return <section className="panel" aria-labelledby="renew-recovery-title">
+    <h2 id="renew-recovery-title">복구코드 다시 발급</h2>
+    <p>가입할 때 복구코드를 보관하지 못했거나 잃어버렸다면 현재 비밀번호를 확인하고 새 코드를 발급받으세요.</p>
+    <p className="notice">새 코드를 발급하면 이전 복구코드는 즉시 사용할 수 없게 됩니다. 새 코드는 90일 동안 유효하며 한 번만 표시됩니다. 현재 로그인은 유지됩니다.</p>
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      void action.run(async () => {
+        const result = await api<{ message: string; recovery_code: string }>("/auth/recovery-code", "POST", { password });
+        setPassword("");
+        if (!result.recovery_code) throw new Error("새 복구코드를 받지 못했습니다. 지원·문의에서 안내를 확인해 주세요.");
+        setNewCode(result.recovery_code);
+      });
+    }}>
+      <fieldset disabled={action.busy}><legend className="sr-only">복구코드 재발급 비밀번호 확인</legend>
+        <PasswordField label="복구코드 재발급을 위한 현재 비밀번호" name="recovery-code-password"
+          autoComplete="current-password" required minLength={10} maxLength={128} value={password}
+          onChange={(e) => setPassword(e.target.value)} />
+        <button disabled={action.busy}>{action.busy ? "새 코드 발급 중…" : "이전 코드를 폐기하고 새 코드 발급"}</button>
+      </fieldset>
+    </form>
+    <Feedback {...action} />
+  </section>;
+}

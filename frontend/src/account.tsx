@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LegalLinks } from "./beta";
+import { BETA_MODE, BetaRecoveryCodeSettings, LegalLinks } from "./beta";
 import { Link, useNavigate } from "react-router-dom";
 import { api, date, money, statusName } from "./api";
 import type { Campaign, Coupon, Reservation, Wallet } from "./types";
@@ -296,6 +296,7 @@ export function Settings() {
           로그아웃
         </button>
       </section>
+      {BETA_MODE && <BetaRecoveryCodeSettings />}
       <section className="panel">
         <h2>신고·차단 안내</h2>
         <p>
@@ -308,8 +309,9 @@ export function Settings() {
       <section className="panel">
         <h2>계정 탈퇴</h2>
         <p>
-          프로필을 익명화하고 모든 로그인 세션을 폐기합니다. 미완료 모집 참여는
-          철회됩니다. 진행 중인 판매 공구는 먼저 종료해야 합니다.
+          {BETA_MODE
+            ? "계정 정보와 직접 작성한 시험 기록을 삭제하고 모든 로그인과 복구코드를 폐기합니다. 판매 중인 시험 공구도 종료되며 해당 공구의 참여는 모두 철회됩니다."
+            : "프로필을 익명화하고 모든 로그인 세션을 폐기합니다. 미완료 모집 참여는 철회됩니다. 진행 중인 판매 공구는 먼저 종료해야 합니다."}
         </p>
         {!deleting ? (
           <button
@@ -365,6 +367,7 @@ export function Settings() {
         )}
       </section>
       <Feedback {...action} />
+      <LegalLinks />
       <Link to="/welcome">서비스 소개</Link>
     </div>
   );
