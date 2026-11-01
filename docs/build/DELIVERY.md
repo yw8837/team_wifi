@@ -5,6 +5,7 @@
 ## 직접 확인할 곳
 
 - [로컬 실행 안내](../../README.md), [팀 공유 방법](TEAM.md)
+- [Google Play 앱 초안 등록·정책 대조·출시 조건](PLAY-CONSOLE.md)
 - [보안 검토](security-review.md), [개인정보 처리·운영 조건](SECURITY.md)
 - [101개 요구사항의 코드·시험 대조](requirements-status.md)
 - [자료·출처 확인](SOURCES.md), [데이터 분석·실험](../../ai-pipeline/IMPLEMENTATION.md)

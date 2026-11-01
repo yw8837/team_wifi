@@ -8,6 +8,7 @@
 
 - [실행·검증 결과](docs/build/DELIVERY.md)
 - [팀 실행과 공유 방법](docs/build/TEAM.md)
+- [Google Play 앱 등록 결과·출시 조건](docs/build/PLAY-CONSOLE.md)
 - [기능과 API 계약](docs/build/CONTRACT.md)
 - [보안 검토](docs/build/security-review.md) / [개인정보·운영 전 조건](docs/build/SECURITY.md)
 - [기존 101개 요구와 구현 대조](docs/build/requirements-status.md)
