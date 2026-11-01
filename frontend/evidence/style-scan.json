@@ -1,0 +1,133 @@
+{
+  "root": "frontend/src",
+  "filesScanned": 13,
+  "groups": 5,
+  "hits": 17,
+  "findings": [
+    {
+      "id": "09",
+      "group": "type",
+      "name": "decorative strikes & highlights",
+      "fix": "strike for edits, underline for links",
+      "hits": [
+        {
+          "file": "styles.css",
+          "line": 206,
+          "text": "text-decoration: underline;"
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "group": "type",
+      "name": "kicker above every heading",
+      "fix": "delete kickers that restate the heading",
+      "hits": [
+        {
+          "file": "admin.tsx",
+          "line": 31,
+          "text": "eyebrow=\"서버에서 권한을 다시 확인합니다\""
+        },
+        {
+          "file": "auth-pages.tsx",
+          "line": 25,
+          "text": "<p className=\"eyebrow\">함께 고르는 육아생활</p>"
+        },
+        {
+          "file": "catalog.tsx",
+          "line": 126,
+          "text": "eyebrow=\"함께 준비하는 육아생활\""
+        },
+        {
+          "file": "catalog.tsx",
+          "line": 158,
+          "text": "<PageTitle eyebrow=\"육아만 골라 모은\" title=\"핫딜 모음\">"
+        },
+        {
+          "file": "catalog.tsx",
+          "line": 311,
+          "text": "<PageTitle eyebrow={c.brand_name} title={c.title}>"
+        },
+        {
+          "file": "seller.tsx",
+          "line": 72,
+          "text": "<PageTitle eyebrow=\"판매자센터\" title=\"판매를 시작하기 전에\">"
+        },
+        {
+          "file": "shared.tsx",
+          "line": 280,
+          "text": "eyebrow,"
+        },
+        {
+          "file": "shared.tsx",
+          "line": 284,
+          "text": "eyebrow?: string;"
+        },
+        {
+          "file": "shared.tsx",
+          "line": 290,
+          "text": "{eyebrow && <p className=\"eyebrow\">{eyebrow}</p>}"
+        },
+        {
+          "file": "styles.css",
+          "line": 307,
+          "text": ".eyebrow {"
+        }
+      ]
+    },
+    {
+      "id": "15",
+      "group": "copy",
+      "name": "emoji everywhere",
+      "fix": "cut emoji from product copy",
+      "hits": [
+        {
+          "file": "catalog.tsx",
+          "line": 199,
+          "text": "판매처에서 확인 ↗"
+        },
+        {
+          "file": "research-summary.tsx",
+          "line": 257,
+          "text": "label=\"D2 ↔ D3 일치 행\""
+        },
+        {
+          "file": "research-summary.tsx",
+          "line": 451,
+          "text": "데이터 원문 ↗"
+        },
+        {
+          "file": "research-summary.tsx",
+          "line": 527,
+          "text": "원자료 확인 ↗"
+        }
+      ]
+    },
+    {
+      "id": "19",
+      "group": "component",
+      "name": "max-radius / glassmorphism",
+      "fix": "one small radius, solid surfaces",
+      "hits": [
+        {
+          "file": "styles.css",
+          "line": 386,
+          "text": "border-radius: 24px;"
+        }
+      ]
+    },
+    {
+      "id": "21",
+      "group": "component",
+      "name": "corners that don't nest",
+      "fix": "inner = outer − padding",
+      "hits": [
+        {
+          "file": "styles.css",
+          "line": 386,
+          "text": "border-radius: 24px;"
+        }
+      ]
+    }
+  ]
+}
