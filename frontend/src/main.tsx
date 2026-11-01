@@ -22,6 +22,8 @@ import { Admin } from "./admin";
 import { BrandLockup, APP_NAME } from "./brand";
 import { IconHome, IconFlame, IconBuildingStore, IconGift, IconUser } from "@tabler/icons-react";
 import { BETA_MODE, BETA_NOTICE } from "./beta";
+import { PUBLIC_RELEASE } from "./release-policy";
+import { PublicApp, PublicGate } from "./public-app";
 import "./styles.css";
 import "./brand-theme.css";
 import "./beta.css";
@@ -201,9 +203,9 @@ function Layout() {
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <Layout />
-      </AuthProvider>
+      <PublicGate enabled={PUBLIC_RELEASE}><AuthProvider>
+        {PUBLIC_RELEASE ? <PublicApp /> : <Layout />}
+      </AuthProvider></PublicGate>
     </BrowserRouter>
   </React.StrictMode>,
 );

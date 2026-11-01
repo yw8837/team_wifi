@@ -1,3 +1,4 @@
+import { DEPLOYED_MODE } from "./release-policy";
 import { useState } from "react";
 import { api, API_BASE } from "./api";
 import { Field, Feedback, PageTitle, PasswordField, useAction, useAuth, useResource } from "./shared";
@@ -19,8 +20,8 @@ export function legalUrl(page: string, configured?: string): string {
 }
 
 export function LegalLinks() {
-  const config = useResource<Config>(BETA_MODE ? "/config" : null);
-  if (!BETA_MODE) return null;
+  const config = useResource<Config>(DEPLOYED_MODE ? "/config" : null);
+  if (!DEPLOYED_MODE) return null;
   return <nav className="legal-links" aria-label="이용 안내">
     {legalPages.map(([key, label]) => <a key={key} href={legalUrl(key, config.data?.legal?.[key])}
       target="_blank" rel="noopener noreferrer">{label} ↗</a>)}

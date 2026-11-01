@@ -2,7 +2,11 @@ apply plugin: 'com.android.application'
 
 def releaseRequested = gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') }
 def signingEnv = ['MODU_KEYSTORE', 'MODU_STORE_PASSWORD', 'MODU_KEY_ALIAS', 'MODU_KEY_PASSWORD'].collectEntries { [(it): System.getenv(it)] }
-if (releaseRequested && signingEnv.values().any { !it }) {
+def unsignedCi = System.getenv('MODU_UNSIGNED_CI') == '1' && System.getenv('GITHUB_ACTIONS') == 'true'
+if (unsignedCi && signingEnv.values().any { it }) {
+    throw new GradleException('Unsigned CI must not receive signing credentials.')
+}
+if (releaseRequested && !unsignedCi && signingEnv.values().any { !it }) {
     throw new GradleException('Release requires the private upload keystore environment. Use scripts/build-android-release.ps1.')
 }
 
@@ -34,7 +38,7 @@ android {
     }
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            if (!unsignedCi) { signingConfig signingConfigs.release }
             debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

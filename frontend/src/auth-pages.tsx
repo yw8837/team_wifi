@@ -1,3 +1,4 @@
+import { PUBLIC_RELEASE, DEPLOYED_MODE, publicBrowsePath, publicReturnPath } from "./release-policy";
 import { useState } from "react";
 import { BrandLockup } from "./brand";
 import { IconArrowRight, IconBuildingStore } from "@tabler/icons-react";
@@ -58,14 +59,14 @@ export function Login() {
     action = useAction();
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState("");
-  const to = safeReturnPath(params.get("returnTo"));
+  const to = PUBLIC_RELEASE ? publicReturnPath(safeReturnPath(params.get("returnTo"))) : safeReturnPath(params.get("returnTo"));
   return (
     <div className="narrow">
       <div className="auth-brand"><BrandLockup stacked /></div>
       <PageTitle title="다시 만나 반가워요">
         <p>로그인 후 보던 화면으로 돌아갑니다.</p>
       </PageTitle>
-      <Link className="button secondary" to={matchRoutes(guestBrowseRoutes, to) ? to : "/"}>로그인 없이 둘러보기</Link>
+      <Link className="button secondary" to={PUBLIC_RELEASE ? publicBrowsePath(to) : matchRoutes(guestBrowseRoutes, to) ? to : "/"}>로그인 없이 둘러보기</Link>
       {location.state?.expired && (
         <p role="status" className="notice">
           로그인 세션이 만료되었습니다. 다시 로그인하면 보던 화면으로
@@ -111,7 +112,7 @@ export function Login() {
         <Link to="/reset">비밀번호 재설정</Link>
       </div>
       <p className="muted">
-        {BETA_MODE ? "이 베타는 이메일 인증·소셜 로그인을 제공하지 않습니다. 비밀번호 분실 시 보관한 복구코드가 필요합니다." : "이 개발 빌드는 이메일 인증·소셜 로그인을 제공하지 않습니다."} 세션은 현재 탭 또는 앱 실행 동안 유지됩니다.
+        {DEPLOYED_MODE ? "이메일 인증·소셜 로그인을 제공하지 않습니다. 비밀번호 분실 시 보관한 복구코드가 필요합니다." : "이 개발 빌드는 이메일 인증·소셜 로그인을 제공하지 않습니다."} 세션은 현재 탭 또는 앱 실행 동안 유지됩니다.
       </p>
     </div>
   );
@@ -121,7 +122,7 @@ export function Signup() {
     nav = useNavigate(),
     { setSession } = useAuth(),
     action = useAction();
-  const track = params.get("track") === "seller" ? "seller" : "buyer";
+  const track = !PUBLIC_RELEASE && params.get("track") === "seller" ? "seller" : "buyer";
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -133,7 +134,7 @@ export function Signup() {
     adult_confirmed: false,
   });
   const [pending, setPending] = useState<AuthResponse | null>(null);
-  const to = safeReturnPath(params.get("returnTo"));
+  const to = PUBLIC_RELEASE ? publicReturnPath(safeReturnPath(params.get("returnTo"))) : safeReturnPath(params.get("returnTo"));
   if (pending?.recovery_code) return <div className="narrow"><RecoveryCodeNotice code={pending.recovery_code} onContinue={() => {
     setSession(pending.access_token, pending.user);
     setPending(null);
@@ -144,9 +145,9 @@ export function Signup() {
       <PageTitle
         title={track === "seller" ? "판매자로 시작하기" : "구매자로 시작하기"}
       >
-        <p>판매자도 같은 계정으로 구매 기능을 이용할 수 있어요.</p>
+        <p>{PUBLIC_RELEASE ? "정보 저장과 공구 수요·질문에 참여할 수 있어요. 로그인 후 직접 원하는 행동을 선택해 주세요." : "판매자도 같은 계정으로 구매 기능을 이용할 수 있어요."}</p>
       </PageTitle>
-      <div className="segmented">
+      {!PUBLIC_RELEASE && <div className="segmented">
         <button
           type="button"
           className={track === "buyer" ? "selected" : "secondary"}
@@ -165,7 +166,7 @@ export function Signup() {
         >
           판매자
         </button>
-      </div>
+      </div>}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -175,7 +176,7 @@ export function Signup() {
               track,
             });
             setForm({ ...form, password: "", invite_code: "" });
-            if (BETA_MODE) {
+            if (DEPLOYED_MODE) {
               if (!result.recovery_code) throw new Error("복구코드를 받지 못했습니다. 지원·문의에서 안내를 확인해 주세요.");
               setPending(result);
             } else {
@@ -214,12 +215,12 @@ export function Signup() {
           value={form.nickname}
           onChange={(e) => setForm({ ...form, nickname: e.target.value })}
         />
-        {BETA_MODE ? <>
-          <Field label="초대코드" name="invite_code" autoComplete="off" autoCapitalize="none" spellCheck={false} required
-            value={form.invite_code} onChange={(e) => setForm({ ...form, invite_code: e.target.value })} />
+        {DEPLOYED_MODE ? <>
+          {BETA_MODE && <Field label="초대코드" name="invite_code" autoComplete="off" autoCapitalize="none" spellCheck={false} required
+            value={form.invite_code} onChange={(e) => setForm({ ...form, invite_code: e.target.value })} />}
           <label className="check"><input type="checkbox" required checked={form.adult_confirmed}
             onChange={(e) => setForm({ ...form, adult_confirmed: e.target.checked })} /><span>[필수] 만 18세 이상입니다.</span></label>
-          <p className="notice">{BETA_NOTICE}. 실제 사업자 정보와 민감정보는 입력하지 마세요.</p>
+          <p className="notice">{PUBLIC_RELEASE ? "실제 주문·결제·배송은 제공하지 않습니다. 아이와 가족의 개인정보는 입력하지 마세요." : BETA_NOTICE + ". 실제 사업자 정보와 민감정보는 입력하지 마세요."}</p>
           <LegalLinks />
         </> : <details>
           <summary>개발용 이용약관 및 개인정보 안내</summary>
@@ -232,7 +233,7 @@ export function Signup() {
           </p>
         </details>}
         {(
-          (BETA_MODE ? ["terms_accepted", "privacy_accepted"] : ["terms_accepted", "privacy_accepted", "marketing_opt_in"]) as ("terms_accepted" | "privacy_accepted" | "marketing_opt_in")[]
+          (DEPLOYED_MODE ? ["terms_accepted", "privacy_accepted"] : ["terms_accepted", "privacy_accepted", "marketing_opt_in"]) as ("terms_accepted" | "privacy_accepted" | "marketing_opt_in")[]
         ).map((key, i) => (
           <label className="check" key={key}>
             <input
@@ -273,7 +274,7 @@ export function Reset() {
   const [email, setEmail] = useState(""),
     [token, setToken] = useState(""),
     [password, setPassword] = useState("");
-  if (BETA_MODE) return <BetaRecover />;
+  if (DEPLOYED_MODE) return <BetaRecover />;
   return (
     <div className="narrow">
       <PageTitle title="비밀번호 재설정">

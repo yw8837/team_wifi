@@ -17,7 +17,7 @@ services:
       - key: NODE_VERSION
         value: 24.11.0
       - key: MODU_ENV
-        value: beta
+        value: public_release
       - key: PUBLIC_ORIGIN
         fromService:
           name: moduyuga-beta

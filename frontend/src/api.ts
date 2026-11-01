@@ -1,4 +1,4 @@
-import { isPublicRead } from "./beta-policy";
+import { betaApiOrigin, isPublicRead } from "./beta-policy";
 export const TOKEN_KEY = "moduyuga.session";
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(
   /\/$/,
@@ -62,6 +62,9 @@ export async function api<T>(
   method = "GET",
   body?: unknown,
 ): Promise<T> {
+  if (import.meta.env.VITE_PUBLIC_RELEASE === "1" || import.meta.env.VITE_BETA_MODE === "1") {
+    betaApiOrigin(true, API_BASE);
+  }
   const token = sessionStorage.getItem(TOKEN_KEY);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15_000);

@@ -120,10 +120,14 @@ def beta_write_guard(request):
         path = request.url.path
         label = None
         if request.method == 'POST':
-            if path.startswith('/api/campaigns/') and path.endswith('/questions') and path.count('/') == 4:
+            if path.startswith('/api/release/demands/') and path.endswith('/comments'):
+                label = 'question'
+            elif path == '/api/release/demands':
+                label = 'question'
+            elif path.startswith('/api/campaigns/') and path.endswith('/questions') and path.count('/') == 4:
                 label = 'question'
             else:
-                label = {'/api/reports': 'report', '/api/auth/recovery-code': 'recovery-code'}.get(path)
+                label = {'/api/reports': 'report', '/api/release/reports': 'report', '/api/auth/recovery-code': 'recovery-code'}.get(path)
         elif request.method == 'DELETE' and path == '/api/me':
             label = 'delete-account'
         if label:
@@ -133,7 +137,7 @@ def beta_write_guard(request):
 
 def charge_claimed_account(request, label, email):
     """Call after body validation, before first action query/hash (get_db is lazy on PG)."""
-    if not config.BETA:
+    if not config.deployed():
         return throttle(request, label, 10 if label == 'recover' else 20)
     with SessionLocal() as session:
         session.connection(execution_options={'isolation_level': 'READ COMMITTED'})
@@ -148,7 +152,7 @@ def issue_token(db, user, kind='session', lifetime=8*3600):
     return raw
 
 def throttle(request: Request, label, limit=20, *, subject=None):
-    if config.BETA:
+    if config.deployed():
         if ('account', str(subject), label) not in getattr(request.state, 'rate_checked', set()):
             raise RuntimeError('Account quota must be checked before the action transaction.')
         return
@@ -198,4 +202,4 @@ def admin_user(user=Depends(current_user)):
 
 def profile(user):
     return dict(id=user.id, email=user.email, nickname=user.nickname, is_admin=user.is_admin,
-                seller_status=user.seller_status, points_balance=user.points, email_verified=False)
+                seller_status=None if config.PUBLIC_RELEASE else user.seller_status, points_balance=0 if config.PUBLIC_RELEASE else user.points, email_verified=False)

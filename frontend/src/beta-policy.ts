@@ -24,6 +24,7 @@ export function buildCsp(beta: boolean, base: string | undefined): string {
 
 export function isPublicRead(path: string, method = "GET"): boolean {
   if (method !== "GET") return false;
+  if (/^\/release\/(?:offers(?:\/[^/?]+)?|demands(?:\/[^/?]+(?:\/comments)?)?)(?:\?.*)?$/.test(path)) return true;
   return /^\/(?:config|health|hotdeals|coupons|brands(?:\/[^/?]+)?|campaigns(?:\/[^/?]+(?:\/questions)?)?)(?:\?.*)?$/.test(path);
 }
 

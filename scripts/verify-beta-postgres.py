@@ -23,6 +23,8 @@ def run(extra_checks=None, evidence_name='postgres-results.json'):
     parser.add_argument('--runtime', type=Path, help='Owned ASCII temp parent for Windows PostgreSQL initdb')
     args = parser.parse_args()
     pg = args.pg_bin.resolve()
+    pg_version = subprocess.check_output([str(pg / ('pg_ctl.exe' if os.name == 'nt' else 'pg_ctl')), '--version'],
+                                         text=True, timeout=15).strip()
     runtime = args.runtime.resolve() if args.runtime else ROOT / 'artifacts/beta/runtime'
     runtime.mkdir(parents=True, exist_ok=True)
     evidence = ROOT / 'artifacts/beta' / evidence_name
@@ -139,7 +141,7 @@ def run(extra_checks=None, evidence_name='postgres-results.json'):
                 if extra_checks:
                     extra_checks(c, expect)
             engine.dispose()
-            evidence.write_text(json.dumps({'status':'pass','checks':results,'database':'PostgreSQL 17 local dedicated cluster',
+            evidence.write_text(json.dumps({'status':'pass','checks':results,'database':pg_version+' local dedicated cluster',
                 'cloud_deployment_verified':False, 'cleanup':'cluster stopped; temporary directory removed on exit'},ensure_ascii=False,indent=2),encoding='utf-8')
             print(f'POSTGRES_BETA_PASS: {len(results)} checks; evidence artifacts/beta/{evidence_name}')
         finally:

@@ -4,6 +4,7 @@ import hashlib
 from html import unescape
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import zipfile
@@ -14,10 +15,12 @@ parser.add_argument('--sdk', default=os.environ.get('ANDROID_HOME', str(ROOT / '
 parser.add_argument('--java', default=os.environ.get('JAVA_HOME', str(ROOT / '.runtime/toolchains/jdk-21')))
 parser.add_argument('--release-dir', type=Path, default=ROOT / 'artifacts/android/release')
 parser.add_argument('--evidence-dir', type=Path, default=ROOT / 'artifacts/beta')
+parser.add_argument('--web-dir', type=Path, default=ROOT / 'frontend/dist')
 args = parser.parse_args()
 release = args.release_dir.resolve()
 evidence = args.evidence_dir.resolve()
-if not release.is_relative_to(ROOT) or not evidence.is_relative_to(ROOT):
+web_dir = args.web_dir.resolve()
+if not release.is_relative_to(ROOT) or not evidence.is_relative_to(ROOT) or not web_dir.is_relative_to(ROOT):
     parser.error('Release and evidence paths must stay inside this project')
 build = json.loads((release / 'build.json').read_text(encoding='utf-8-sig'))
 evidence.mkdir(parents=True, exist_ok=True)
@@ -44,6 +47,15 @@ for item in build['artifacts']:
     prefix = 'assets/' if artifact.suffix == '.apk' else 'base/assets/'
     with zipfile.ZipFile(artifact) as archive:
         html = unescape(archive.read(prefix + 'public/index.html').decode())
+        if 'mode' in build:
+            marker = re.search(r'<meta\s+name="moduyuga-mode"\s+content="([^"]+)"', html)
+            check(item['name'] + ': explicit build mode', marker is not None and marker.group(1) == build['mode'])
+        local_dist = web_dir
+        check(item['name'] + ': current HTML matches', archive.read(prefix+'public/index.html') == (local_dist/'index.html').read_bytes())
+        for asset_path in sorted((local_dist/'assets').glob('*')):
+            if asset_path.is_file():
+                check(item['name'] + ': current asset '+asset_path.name,
+                      archive.read(prefix+'public/assets/'+asset_path.name) == asset_path.read_bytes())
         check(item['name'] + ': CSP before script', 0 <= html.index('http-equiv="Content-Security-Policy"') < html.index('<script'))
         check(item['name'] + ': CSP HTTPS origin', 'https://moduyuga-beta.onrender.com' in html and 'unsafe-eval' not in html and '10.0.2.2' not in html)
         config = json.loads(archive.read(prefix + 'capacitor.config.json'))
@@ -59,14 +71,19 @@ build_tools = Path(args.sdk) / 'build-tools/35.0.0'
 sign = run('release-apksigner.txt', [str(build_tools/'apksigner.bat'), 'verify', '--verbose', '--print-certs', str(release/'moduyuga-beta.apk')])
 check('APK v2 signature', 'Verified using v2 scheme (APK Signature Scheme v2): true' in sign)
 check('APK signing identity', 'CN=Team_Wifi' in sign)
+check('APK original upload certificate', 'Signer #1 certificate SHA-256 digest: 92c9567f774691f39c75e62cf6208ef126cebd75ad52bd3fda2b2e4f2592f9d3' in sign)
 jar = run('release-jarsigner.txt', [str(Path(args.java)/'bin/jarsigner.exe'), '-verify', str(release/'moduyuga-beta.aab')])
 check('AAB JAR signature', 'jar verified.' in jar)
+certificate = run('release-aab-certificate.txt', [str(Path(args.java)/'bin/keytool.exe'), '-J-Duser.language=en', '-printcert', '-jarfile', str(release/'moduyuga-beta.aab')])
+check('AAB original upload certificate', '92c9567f774691f39c75e62cf6208ef126cebd75ad52bd3fda2b2e4f2592f9d3' in certificate.replace(':','').replace(' ','').lower())
 manifest = run('release-manifest.txt', [str(build_tools/'aapt.exe'), 'dump', 'xmltree', str(release/'moduyuga-beta.apk'), 'AndroidManifest.xml'])
 check('no debuggable=true', not any('debuggable' in line and '0xffffffff' in line for line in manifest.splitlines()))
 for prop in ('allowBackup', 'usesCleartextTraffic'):
     check(prop+' false', any(prop in line and '=(type0x12)0x0' in line.replace(' ', '') for line in manifest.splitlines()))
 badging = run('release-badging.txt', [str(build_tools/'aapt.exe'), 'dump', 'badging', str(release/'moduyuga-beta.apk')])
 check('target API36', "targetSdkVersion:'36'" in badging)
+check('manifest versionCode matches', "versionCode='"+str(build['versionCode'])+"'" in badging)
+check('manifest versionName matches', "versionName='"+build['versionName']+"'" in badging)
 check('no dangerous permissions', all('android.permission.INTERNET' in line or 'DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION' in line for line in badging.splitlines() if line.startswith('uses-permission:')))
 report = {'scope': 'signed APK/AAB offline verification; Android execution and Play delivery are separate', 'checks': checks, 'build': build,
           'aab_signature_note': 'Android upload signing uses a self-signed certificate; jarsigner reports no public CA/timestamp and ZIP ordering warnings. Play bundle processing remains an independent validation.'}

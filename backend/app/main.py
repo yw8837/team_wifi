@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import secrets
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -33,17 +33,24 @@ async def lifespan(app):
 
 
 app = FastAPI(title='모두의 육아 - 육아템 공동구매,핫딜 API', version='0.2.0', lifespan=lifespan,
-              docs_url=None if config.BETA else '/docs', redoc_url=None if config.BETA else '/redoc',
-              openapi_url=None if config.BETA else '/openapi.json')
+              docs_url=None if config.deployed() else '/docs', redoc_url=None if config.deployed() else '/redoc',
+              openapi_url=None if config.deployed() else '/openapi.json')
 app.add_middleware(BodyLimitMiddleware)
-if config.BETA:
+if config.deployed():
     from urllib.parse import urlsplit
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=[urlsplit(config.PUBLIC_ORIGIN).hostname, 'localhost', '127.0.0.1'])
 
 
 @app.middleware('http')
 async def security_headers(request, call_next):
-    if config.BETA and request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
+    # Close the legacy surface before authentication or domain processing.
+    if config.PUBLIC_RELEASE:
+        path = request.url.path
+        allowed = (path in ('/api/health', '/api/config', '/api/me', '/api/blocks') or
+                   path.startswith(('/api/release/', '/api/auth/', '/api/blocks/')))
+        if (path.startswith('/api') and not allowed) or path.startswith('/public/'):
+            return JSONResponse({'detail': '공개 서비스에서 제공하지 않는 기능입니다.'}, status_code=404)
+    if config.deployed() and request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
         from starlette.concurrency import run_in_threadpool
         try:
             await run_in_threadpool(beta_write_guard, request)
@@ -186,35 +193,38 @@ def withdraw_record(db, r):
 def health(db=Depends(get_db)):
     from sqlalchemy import text
     db.execute(text('SELECT 1'))
-    return {'status': 'ok', 'mode': 'closed-beta' if config.BETA else 'local-demo', 'payments_enabled': False}
+    return {'status': 'ok', 'mode': 'public-release' if config.PUBLIC_RELEASE else 'closed-beta' if config.BETA else 'local-demo', 'payments_enabled': False}
 
 
 @app.get('/api/config')
 def public_config():
-    return {'mode': 'closed-beta' if config.BETA else 'local-demo', 'invite_required': config.BETA,
-            'payments_enabled': False, 'seller_real_data_enabled': not config.BETA,
+    return {'mode': 'public-release' if config.PUBLIC_RELEASE else 'closed-beta' if config.BETA else 'local-demo', 'invite_required': config.BETA, 'public_release': config.PUBLIC_RELEASE, 'beta_mode': config.BETA,
+            'payments_enabled': False, 'seller_real_data_enabled': not config.deployed(),
             'legal': {k: '/legal/'+k for k in ('privacy', 'terms', 'deletion', 'support')}}
 
 
 @app.post('/api/auth/register', status_code=201)
 def register(body: S.Register, request: Request, db=Depends(get_db)):
-    if not config.BETA:
+    if not config.deployed():
         throttle(request, 'register')
     if not body.terms_accepted or not body.privacy_accepted:
         fail('필수 약관과 개인정보 처리에 동의해 주세요.', 422)
-    if config.BETA:
+    if config.deployed():
         if not body.adult_confirmed:
-            fail('비공개 베타는 만 18세 이상만 참여할 수 있습니다.', 422)
+            fail('만 18세 이상만 가입할 수 있습니다.', 422)
         if body.marketing_opt_in:
-            fail('베타 기간에는 마케팅 수신을 신청할 수 없습니다.', 422)
-        beta.redeem_invite(db, body.invite_code)
+            fail('마케팅 수신을 신청할 수 없습니다.', 422)
+        if config.PUBLIC_RELEASE and body.track != 'buyer':
+            fail('공개 서비스는 일반 회원 가입만 제공합니다.', 422)
+        if config.BETA:
+            beta.redeem_invite(db, body.invite_code)
     u = User(email=str(body.email).lower(), password_hash=passwords.hash(body.password), nickname=body.nickname,
              seller_status='draft' if body.track == 'seller' else None, marketing=body.marketing_opt_in)
     db.add(u)
     db.flush()
-    audit(db, u, 'beta-terms-20261101-privacy-20261101-adult-accepted' if config.BETA else 'terms-v1-and-privacy-v1-accepted', u.id)
+    audit(db, u, 'public-terms-20261102-privacy-20261102-adult-accepted' if config.PUBLIC_RELEASE else 'beta-terms-20261101-privacy-20261101-adult-accepted' if config.BETA else 'terms-v1-and-privacy-v1-accepted', u.id)
     raw = issue_token(db, u)
-    recovery = beta.recovery_code(db, u) if config.BETA else None
+    recovery = beta.recovery_code(db, u) if config.deployed() else None
     db.commit()
     result = dict(access_token=raw, token_type='bearer', user=profile(u))
     if recovery:
@@ -248,10 +258,10 @@ def logout(request: Request, user=Depends(current_user), db=Depends(get_db)):
 
 @app.post('/api/auth/reset-request')
 def reset_request(body: S.ResetRequest, request: Request, db=Depends(get_db)):
-    if not config.BETA:
+    if not config.deployed():
         throttle(request, 'reset-request', 10)
-    if config.BETA:
-        return {'message': '베타에서는 가입 시 보관한 복구코드로 비밀번호를 변경할 수 있습니다. 이메일은 발송하지 않습니다.'}
+    if config.deployed():
+        return {'message': '이 서비스에서는 가입 시 보관한 복구코드로 비밀번호를 변경할 수 있습니다. 이메일은 발송하지 않습니다.'}
     u = db.scalar(select(User).where(User.email == str(body.email).lower(), User.deleted.is_(False)))
     if u:
         db.execute(delete(Token).where(Token.user_id == u.id, Token.kind == 'reset'))
@@ -266,10 +276,10 @@ def reset_request(body: S.ResetRequest, request: Request, db=Depends(get_db)):
 
 @app.post('/api/auth/reset')
 def reset_password(body: S.Reset, request: Request, db=Depends(get_db)):
-    if not config.BETA:
+    if not config.deployed():
         throttle(request, 'reset', 10)
-    if config.BETA:
-        fail('베타 계정 복구 화면에서 복구코드를 입력해 주세요.', 400)
+    if config.deployed():
+        fail('계정 복구 화면에서 복구코드를 입력해 주세요.', 400)
     t = db.get(Token, token_digest(body.token))
     if not t or t.kind != 'reset' or t.expires <= now():
         fail('복구 토큰이 만료되었거나 유효하지 않습니다.', 400)
@@ -293,7 +303,7 @@ def recover_account(body: S.Recover, request: Request, db=Depends(get_db)):
     u = db.scalar(select(User).where(User.email == str(body.email).lower(), User.deleted.is_(False)))
     digest = token_digest(body.recovery_code)
     token = db.get(Token, digest)
-    if not u or not token or token.kind != 'recovery' or token.user_id != u.id or token.expires <= now():
+    if not u or db.scalar(select(Record.id).where(Record.kind == 'suspension', Record.owner_id == u.id)) or not token or token.kind != 'recovery' or token.user_id != u.id or token.expires <= now():
         fail('이메일과 복구코드를 확인해 주세요.', 400)
     removed = db.execute(delete(Token).where(Token.digest == digest, Token.kind == 'recovery', Token.expires > now())).rowcount
     if removed != 1:
@@ -307,8 +317,8 @@ def recover_account(body: S.Recover, request: Request, db=Depends(get_db)):
 
 @app.post('/api/auth/recovery-code')
 def renew_recovery_code(body: S.Password, request: Request, user=Depends(current_user), db=Depends(get_db)):
-    if not config.BETA:
-        fail('비공개 베타 전용 기능입니다.', 404)
+    if not config.deployed():
+        fail('배포 서비스 전용 기능입니다.', 404)
     throttle(request, 'recovery-code', subject=user.id)
     if not passwords.verify(body.password, user.password_hash):
         fail('비밀번호를 확인해 주세요.', 403)
@@ -322,9 +332,9 @@ def delete_account(body: S.Password, user=Depends(current_user), db=Depends(get_
     if not passwords.verify(body.password, user.password_hash):
         fail('비밀번호를 확인해 주세요.', 403)
     live = rows(db, 'campaign', Record.owner_id == user.id, Record.status.in_(['active', 'pending']))
-    if live and not config.BETA:
+    if live and not config.deployed():
         fail('진행 중이거나 검토 중인 공구를 먼저 종료해 주세요.')
-    if config.BETA:
+    if config.deployed():
         # Seller departure cannot leave other testers' unpaid reservations active.
         for campaign in rows(db, 'campaign', Record.owner_id == user.id):
             for reservation in rows(db, 'reservation', Record.parent_id == campaign.id, Record.status == 'active'):
@@ -338,7 +348,7 @@ def delete_account(body: S.Password, user=Depends(current_user), db=Depends(get_
     for q in rows(db, 'question', Record.owner_id == user.id):
         q.status = 'hidden'
         q.data = {'body': '탈퇴한 사용자의 글입니다.'}
-    if config.BETA:
+    if config.deployed():
         # No financial retention duty is invented for unpaid test records.
         # Remove authored free text and all per-user beta records after withdrawing.
         owned = list(db.scalars(select(Record.id).where(Record.owner_id == user.id)))
@@ -351,11 +361,13 @@ def delete_account(body: S.Password, user=Depends(current_user), db=Depends(get_
         db.execute(delete(Record).where(Record.kind.in_(['report', 'saved']), Record.parent_id.in_(owned)))
         db.execute(delete(Record).where(Record.owner_id == user.id))
         db.execute(delete(Record).where(Record.kind == 'report', Record.parent_id == user.id))
+        from .release import delete_user_content
+        delete_user_content(db, user.id, owned)
         user.points, user.created = 0, 0
     user.email, user.nickname = f'deleted-{user.id}@invalid.local', '탈퇴한 회원'
     user.password_hash, user.deleted, user.marketing = passwords.hash(secrets.token_urlsafe(32)), True, False
     user.seller_status = 'suspended' if user.seller_status else None
-    if not config.BETA:
+    if not config.deployed():
         audit(db, user, 'account-deleted', user.id)
     db.commit()
     (RUNTIME / 'outbox' / f'{user.id}.json').unlink(missing_ok=True)
@@ -676,13 +688,27 @@ def report(body: S.ReportInput, request: Request, user=Depends(current_user), db
 
 @app.post('/api/blocks/{id}')
 def block(id: str, user=Depends(current_user), db=Depends(get_db)):
-    if id == user.id or not db.get(User, id):
+    target = db.get(User, id)
+    if id == user.id or not target or target.deleted:
         fail('차단할 수 없는 사용자입니다.', 422)
     key = f'{user.id}:{id}'
     if not db.scalar(select(Record.id).where(Record.kind == 'block', Record.unique_key == key)):
         db.add(Record(kind='block', owner_id=user.id, parent_id=id, unique_key=key))
         db.commit()
     return {'message': '이 사용자의 글을 숨겼습니다.'}
+
+
+@app.get('/api/blocks')
+def blocked_users(limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=10000), user=Depends(current_user), db=Depends(get_db)):
+    ids = select(Record.parent_id).where(Record.kind == 'block', Record.owner_id == user.id)
+    return [{'id': u.id, 'nickname': u.nickname} for u in db.scalars(select(User).where(User.id.in_(ids), User.deleted.is_(False)).order_by(User.id).limit(limit).offset(offset))]
+
+
+@app.delete('/api/blocks/{id}')
+def unblock(id: str, user=Depends(current_user), db=Depends(get_db)):
+    db.execute(delete(Record).where(Record.kind == 'block', Record.owner_id == user.id, Record.parent_id == id))
+    db.commit()
+    return {'message': '차단을 해제했습니다.'}
 
 
 @app.get('/api/admin/applications')
@@ -851,6 +877,9 @@ def robots():
 def sitemap():
     return Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>', media_type='application/xml')
 
+
+from .release import router as release_router
+app.include_router(release_router)
 
 from .legal import router as legal_router
 app.include_router(legal_router)

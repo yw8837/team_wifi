@@ -1,0 +1,42 @@
+.public-main { max-width: 980px; }
+.public-gate { padding: 48px 24px; text-align: center; }
+.public-gate .brand-lockup { margin: 20px auto 32px; }
+.public-categories { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 8px; margin: 20px 0; }
+.public-categories button { display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; padding: 12px 4px; font-size: 12px; }
+.public-categories button.selected { background: var(--blush); color: var(--cocoa); border-color: var(--coral); }
+.public-intro { background: var(--cream); padding: 24px; border-radius: 16px; margin: 24px 0; }
+.public-intro strong { color: var(--cocoa); font-size: 18px; }
+.public-intro p { margin: 10px 0; color: var(--muted); }
+.reference-card { display: flex; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+.reference-card h2 { font-size: 20px; margin: 4px 0 10px; }
+.reference-card h2 a { color: var(--cocoa); text-decoration: none; }
+.reference-card p { margin: 8px 0; }
+.reference-card .muted { font-size: 12px; }
+.reference-symbol { width: 64px; height: 64px; flex: 0 0 64px; display: grid; place-items: center; color: var(--cocoa); background: var(--cream); border-radius: 16px; }
+.public-detail { max-width: 740px; margin: 24px auto; }
+.public-detail .panel { margin: 24px 0; }
+.public-filter,.comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.comparison-result { display: block; padding: 20px 0; line-height: 1.9; }
+.comparison-result strong { color: var(--cocoa); font-size: 22px; }
+.demand-card { padding: 24px 0; border-bottom: 1px solid var(--line); }
+.demand-card h2 { font-size: 22px; }
+.demand-card h2 a { color: var(--cocoa); text-decoration: none; }
+.ugc-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.9; }
+.ugc-text.preview { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.moderation { margin: 20px 0; }
+.moderation summary { color: var(--muted); min-height: 44px; cursor: pointer; display: list-item; padding: 10px 0; }
+.moderation form { padding: 16px 0; }
+.moderation button { margin: 4px 8px 4px 0; }
+.comments { border-top: 1px solid var(--line); margin-top: 36px; padding-top: 24px; }
+.comment { border-bottom: 1px solid var(--line); padding: 18px 0; }
+.public-main fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+@media (max-width: 600px) {
+ .public-categories { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; }
+ .public-categories button { font-size: 11px; }
+ .public-filter,.comparison-grid { grid-template-columns: 1fr; gap: 8px; }
+ .reference-card { gap: 12px; }
+ .reference-symbol { width: 48px; height: 48px; flex-basis: 48px; }
+ .reference-card h2 { font-size: 18px; }
+ .public-intro { padding: 20px; }
+ .bottom-nav a { font-size: 11px; }
+}
