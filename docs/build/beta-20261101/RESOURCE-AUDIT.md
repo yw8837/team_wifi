@@ -33,7 +33,7 @@
 ## 배포와 증거
 
 - 무료 공개 웹: https://moduyuga-beta.onrender.com
-- 실제 HTTPS API 75개 검사 통과. 배포 코드는 dd36488이며 후속 limiter 보완은 아직 검토/배포 전이다.
-- 서명 APK/AAB 생성, APK v2와 AAB JAR 서명 검증 완료. Google Play가 AAB 2(0.2.0), minSDK24/targetSDK36을 처리한 화면 확인. 내부 테스트 출시 노트 초안 저장까지 진행했다.
-- **release Android 설치·실행과 Play 테스터 설치 링크는 아직 완료하지 않았다.** APK 생성·AAB 처리와 설치 검증을 구분한다.
+- 실제 HTTPS API 75개 검사 통과. 검토된 limiter 보완43be76c를 배포한 뒤75개 검사를 다시 통과했다.
+- 서명 APK/AAB 생성, APK v2와 AAB JAR 서명 검증 완료. Google Play가 AAB 2(0.2.0), minSDK24/targetSDK36을 처리한 화면 확인. 11/1 23:02 내부 테스트 활성화와 승인 계정의 초대 페이지 접근까지 확인했다.
+- **release Android의 실제 휴대폰 설치·실행·비회원 목록 표시는 사용자 보고로 확인했다. Play 참여 링크는 발급·접근 확인했다.** APK 생성·AAB 처리와 설치 검증을 구분한다.
 - 비공개 로컬 증거: `artifacts/beta/resource-audit-before.json`, `android-release-verification.json`, `public-api-results.json`. 서명키 파일은 비공개 경로에 그대로 있으며 공유하지 않는다.

@@ -2,42 +2,46 @@
 
 ## 목표와 경계
 
-외부 테스터의 설치→비회원 탐색→계정 사용→예약/철회→신고→탈퇴를 검증한다. 실결제·배송·실제 공급 확보를 시험 성공으로 주장하지 않는다. 전용 시험 계정/환경만 변경한다. 최대 5회 수정 검증, 동일 실패 3회 시 원인과 외부 조건을 명시한다. 기존 기획·다른 서비스·개인 계정은 변경하지 않는다.
+외부 테스터의 설치→비회원 탐색→계정→시험 참여/철회→신고→탈퇴를 검증한다. 초대형 가상 상품 시험이며 실제 결제·배송은 없다. 최대5회 수정 검증, 동일 실패3회 종료. 다른 서비스·기획·사용자 계정 보존, E 드라이브만 작업, 에뮬레이터 재생성·실행 금지, 무료 서비스만 사용한다.
 
-## 사전 시나리오
+현재 결과: **배포·첫 설치 확인 완료 / Android 인증 후 동선의 전체 실기기 QA는 미완료.** 서버와 Play 내부 배포는 완료했다. 이전 Render 연결 승인/DB 선택 대기는 해소됐다.
 
-| ID | 의도/행위자 | 준비·실행 | 기대 신호 | 실제 결과/수정 | 증거 | 정리 |
+## 시나리오와 증거
+
+| ID | 의도·행위자 | 준비·실행 | 기대 | 실제 결과·수정 | 증거 | 정리 |
 |---|---|---|---|---|---|---|
-| B01 | 비회원 탐색 | 새 브라우저/앱 저장소에서 홈·검색·상세·브랜드·핫딜 | 로그인 없이 읽기, 소유 행동에만 로그인 | 로컬/모의 API 통과, 외부 대기 | beta.browser-check.mjs, Android WebView 목록200 | 시험 브라우저 종료 |
-| B02 | 정상 계정 | 시험 가입·로그인·로그아웃·복구·재발급·탈퇴 | 인증 및 폐기 실제 동작 | SQLite/로컬PG 통과. 실제 Neon 대상 가입·재발급·탈퇴 통과, 공개 HTTPS 대기 | pytest35, PG26, neon-predeploy-results.json | 임시 로컬 DB 종료·제거, Neon QA 계정 탈퇴·QA 초대 삭제 |
-| B03 | 권한 우회 | 타인 자원·관리자 API·판매자 공개 시도 | 401/403/404, 상태 불변 | 서버 회귀시험 통과 | backend/tests | 격리 DB 제거 |
-| B04 | 동시/반복 요청 | 예약·초대·인증 질문 동시 요청 | 단회 사용·과예약 방지·풀 고갈 없음 | 발견한 풀 교착 수정, PG 통과 | PG26, 별도 검토 재현 | 격리 DB 제거 |
-| B05 | 잘못된 입력 | 손상 JSON·초과 요청·부적절한 Host·비밀값 입력 | 4xx, 비밀 입력 반사 없음 | 시험한 서버 입력 통과 | test_beta.py, PG26 | 격리 DB 제거 |
-| B06 | 오프라인·만료 | 요청 중단/만료 토큰/중복 제출 | 명확한 오류·자동 참여/재전송 없음 | timeout unit, 만료 guest, 중복 제출 통과. 실제 절전 대기 | unit58, 320px mock browser | 시험 컨텍스트 종료 |
-| B07 | 영속성 | DB 재시작 후 조회 | 저장 유지 | 실제 로컬 PG restart 통과. 클라우드 미실행 | postgres-results.json | PG 종료·제거 |
-| B08 | Android 배포본 | 설치·기동·HTTPS·핵심 흐름 | 올바른 이름/API/서명 | 로컬 debug 설치/기동/API200. release·외부HTTPS 대기 | android-local-smoke, package-verification | 소유 에뮬레이터만 종료 |
-| B09 | 개인정보 | 안내·탈퇴 후 세션/복구/소유 기록·판매자 종속 쿠폰 | 정책과 처리 일치, 타인 기능 유지 | 탈퇴/지갑 오류 수정·회귀 통과. 실제 공개정책/운영값 대기 | test_beta.py, 정책 TestClient200 | 격리 DB 제거 |
-| B10 | 오해 방지 | 화면과 서버 거래·혜택 모드 대조 | 시험 표시, 실제 결제 없음 | beta 안내/설정 계약 통과 | config endpoint, 320px beta browser | 없음 |
-| B11 | 작업 안전성 | Git diff·비밀 검사·실패 exit·시간 제한 | 기존 작업 보존 | diff검사·stage22개 비밀검사 통과, 브랜치 push. CI별도 확인 | Git/검사 결과를 STATUS에 반영 | 이 QA run만 정리 |
-| B12 | 스토어 테스트 | Play 내부테스트·참여 URL | 활성 릴리스·설치 링크 | 미실행. Neon 준비 완료, Render 연결/DB 선택 미확정 | Play 초안 기록만 존재 | 없음 |
+| B01 | 비회원 탐색 | 공개 웹·API 홈/목록/상세 | 로그인 없이 읽기 | 공개 API·브라우저 공구6개 표시, 참여 전 로그인 이동·뒤로가기 수량3 복원 | public-api-results.json, 실제 브라우저 | 임시 탭 종료 |
+| B02 | 정상 계정 | 한 번만 쓰는 QA 초대3개 | 가입·복구·회전·탈퇴 | 실제 HTTPS 통과 | public-api-probe.py/result | 계정3개 탈퇴·초대3개 삭제 |
+| B03 | 타인 권한 침해 | 다른 계정의 예약/관리자 API | 401/403/404 | 실제 HTTPS 거절 확인 | 75checks | 소유 시험 데이터 삭제 |
+| B04 | 중복·동시성 | stale revision/중복 예약, 초대 동시 사용, 7개 인증 쓰기 | 과예약·중복사용·pool 고갈 없음 | 공개 duplicate/stale 통과, 실제 로컬PG46 및 기존26 통과 | rate-subject-results.json, postgres-results.json | 임시 PG 종료·제거 |
+| B05 | 비정상 입력 | 손상 JSON·65KiB body·잘못된 이메일 | 4xx, 비밀 입력 반사 없음 | 422/413, 반사 없음 | 75checks, pytest40 | fixture 정리 |
+| B06 | 만료·중단 | 폐기 token, mock timeout·중복 클릭 | guest 유지, 자동 재전송·참여 없음 | 실제 폐기 token401/공개GET200. UI 모의 시험 통과 | unit58, beta.browser-check.mjs, 75checks | 모의 컨텍스트 정리 |
+| B07 | 재배포 영속성 | 실제 배포 전 계정·저장1개 생성 → 43be76c배포 → 조회 | 계정·저장 유지 | 통과 | redeploy-persistence-results.json | 계정 탈퇴·임시 초대1개 삭제 |
+| B08 | Android release | signed APK/AAB 오프라인 검사·Play 처리 | 이름/API/서명/권한 및 기기 실행 | 오프라인30검사·Play 처리 통과. 휴대폰 설치·실행·guest 목록은 사용자 보고 확인 | android-release-verification.json | 에뮬레이터 종료·테스트 AVD 휴지통 정리 |
+| B09 | 개인정보 | 실제 legal4페이지 및 탈퇴 이후 기록/재고 | 정책 일치·토큰 폐기·재고 원복 | 실제 HTTPS 통과, 국외 호스팅/limiter 설명 수정 | legal.py, 75checks | QA 계정 정리 |
+| B10 | 오해 방지 | config·앱 안내 비교 | closed-beta, payments false | 공개 API 및 UI 확인 | public-api-results.json | 없음 |
+| B11 | 파일·공유 안전 | 이전→E SHA256, staged 비밀검사, 실제 exit/CI 확인 | 유실·비밀 push 없음 | 보존 파일5480개 일치, staged16개 검사, CI 성공 | migration verification, share-check, GitHub CI | 옛 primary checkout은 앱 보호로 보존 |
+| B12 | Play 배포 | 전용 테스터 목록1명·release2 출시 | active·실제 참여 가능 | 활성·내부 테스터 제공, 지정 계정에 초대 표시. 다운로드/기기 첫 실행은 사용자 보고 확인 | play-internal-active.png, play-tester-invite-visible.png | 타 앱 목록 변경 없음 |
+| B13 | quota 우회 | 같은 peer의 두 계정, 위조XFF·대체token·실패auth·logout 경합 | 계정 분리·실패횟수commit·endpoint 재인증 | 실제 로컬PG46검사와 별도 검토 수용 | test_rate_subject.py, verify-rate-subject-postgres.py | 운영 서버 한도 소진 공격 미실행 |
 
-## 실행·원인·수정·잔여 위험
+## 실행과 종료 상태
 
-2026-11-01 실행. 기존 검증을 외부 배포 결과로 대신하지 않는다.
+- 새 E 경로 `python -m pytest tests -q`: exit0, **40 passed**, Starlette/httpx 테스트 도구 deprecation warning1.
+- `verify-rate-subject-postgres.py`: 이전 실행 증거 **46 local PostgreSQL checks pass**, 검토자가 본문/결과 대조. 이동 이후 무거운 PG 재시험은 반복하지 않음.
+- 43be76c 공개 HTTPS probe: exit0, **75 checks pass**, 실패0. 기존 dd36488의75개 결과는 별도 파일로 보존.
+- redeploy probe before/after: exit0, 배포 전 계정·저장 목록 조회 유지, 계정/초대 정리 확인.
+- Android signed package: **30 offline checks pass**. 파일명과 Unicode aapt 호출 등 시험 도구 문제를 수정한 뒤 통과했다. 런타임 실행 성공으로 확대하지 않음.
+- PowerShell smoke/workspace 스크립트 구문검사: pass. emulator를 실행하지 않음.
+- GitHub [push CI](https://github.com/yw8837/team_wifi/actions/runs/41313688780)·[PR CI](https://github.com/yw8837/team_wifi/actions/runs/41313693249): success. API/UI·빌드·npm audit 포함.
 
-| 실행 | 종료 | 실제 결과 |
-|---|---|---|
-| backend pytest | 0 | 35 passed, Starlette/httpx 테스트 도구 deprecation 경고1 |
-| frontend unit / 일반·베타 build | 0 | 58 tests, TypeScript/Vite 성공 |
-| 320px 베타 browser contract | 0 | 명시적 복구 ACK, 수량 복원, 자동 예약0, 잘못된 비밀번호/중복 요청/비밀 저장 검사 통과; mock API |
-| verify-beta-postgres.py | 0 | 26 checks. 실제 localhost PostgreSQL17·단회 동시성·재시작 유지·7개 인증 쓰기 |
-| 별도 검토의 풀 고갈 재현 | 최초 7개500 → 수정 후 201/409 | 풀 timeout0, 완료 후 health200. 409를 성공 예약/작성으로 계산하지 않음 |
-| Android debug build / package check | 0 | 명칭·원본 브랜드·CSP 포함 확인. release 서명 검증 아님 |
-| Android local smoke | 0 | install Success, launch ok, health/catalog200, network failures0, 스크린샷 |
-| Neon runtime predeploy probe | 0 | 실제 클라우드 DB 대상 8검사 통과. 앱 전용 계정·TLS·가입/재발급/예약/탈퇴/재고 원복. 로컬 API 프로세스이므로 공개 HTTPS 검증은 아님 |
+## 발견한 문제와 수정
 
-처음 Android 포트 5562/5563에서는 부팅됐어도 ADB가 없었다. Windows 예약포트와 충돌했으며 5760/5761로 해결했다. 첫 앱 기동 때 WebView 초기화가 늦어 probe가 실패하여 bounded 대기를 추가했다. 최신 debug 빌드도 여유 RAM 약284MB에서 첫 WebView 준비가 제한시간을 넘겼다. 이후 endpoint가 준비된 것을 확인한 뒤 재실행하여 설치·기동(4,635ms)·API200·network failures0을 확인했다. 실패 실행을 통과 횟수에 포함하지 않았다. 재실행 원본은 `artifacts/beta/android-latest-smoke-retry`다. 실제 외부 무료 서버의 냉시작·프록시·TLS·계정삭제 URL, 서명 release와 Play 테스트는 아직 검증하지 못했다.
+기존 중첩 DB connection 고갈, 판매자 탈퇴 후 쿠폰함500, 복구코드 재발급 공백은 수정·회귀검증했다. 이번에는 Render의 확인되지 않은 proxy peer로 다른 사용자가 한도에 묶이는 문제를 서버 검증 계정 기준으로 변경했다. quota를 action 전에 별도 짧은 transaction으로 commit/close하고 endpoint가 다시 인증한다. 실패한 action의 rollback이 실패 횟수를 지우지 않는다.
 
-별도 서버/프런트 검토는 구현 담당자의 자기평가와 구분하여 수행했다. 서버 P1 두 건은 수정 후 재검토 승인, 복구 재발급 UI는 spec·quality 승인이다. 리뷰 원문은 로컬 작업 기록에 보존하며 비밀/로컬 계정 경로가 포함될 수 있는 원본은 공개하지 않는다.
+release 에뮬레이터는 PC의 가용 RAM이 약356MiB까지 감소한 상황에서 설치·기동 검증을 마치지 못했다. OS 재시작 원인은 확정하지 않는다. 실패를 재현하려고 다시 기동하지 않고 실제 기기 경로로 전환했다. 사용자 승인 범위의 AVD/캐시 약14.35GiB를 휴지통으로 이동했고 사용자 본인이 휴지통을 비웠다고 확인했다.
 
-상태: **ULTRAQA BLOCKED — Render 비밀 환경변수 연결 승인 및 DB 선택 미확정.** Neon 이메일 읽기 권한은 승인·연결됐고 전용 Free DB를 생성했습니다. 사용자의 MongoDB 질문을 전환/연결 승인으로 처리하지 않았습니다. [선택 검토서](DATABASE-CHOICE.md) 확인 후 연결 경로가 확정되면 B01–B10의 공개 HTTPS 환경 검사 및 B12를 이어갑니다. 로컬·실제 DB 검사 완료와 외부 베타 완료는 별개입니다.
+## 잔여 위험과 다음 확인
+
+실제 휴대폰의 Play 설치·첫 실행·guest 공구 표시는 사용자가 확인했다. Android 기기에서 인증 후 참여·복구·탈퇴의 전체 UI 경로는 아직 독립 검증하지 않았으므로 이 전체 QA 목표에 대해서는 `ULTRAQA BLOCKED: Android 인증 후 실기기 동선 미확인`으로 남긴다. 무료 절전 지연과 전역 예산 소진 시 다른 사용자429 가능성, 메모리 한도의 재시작 초기화는 수용한 베타 한계다. 실결제/배송·이메일 소유 확인·운영 자동 파기·스토어 정식 심사는 완료하지 않았다.
+
+원본 증거는 `artifacts/beta`에 보존한다. 이 실행에 한정한 `.omx` QA 상태를 inactive/cleanup 후 CLI clear하고 absent를 확인했다(`qa-release-cleanup.json`). 이후 들어온 사용자 첫 설치 확인은 `android-user-confirmation.json`에 별도 기록했다. CLI 검증 도구의 outcome enum·read 응답 형식 두 오류는 고친 후 정리 결과를 확인했으며 앱 결함으로 계산하지 않았다. 비공개 서명키·초대/복구코드·DB URL과 기존 자료는 보존한다. 전체 목표가 미확인인 동안 `ULTRAQA COMPLETE`를 출력하지 않는다.

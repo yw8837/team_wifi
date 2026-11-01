@@ -1,46 +1,40 @@
-# 모두의 육아 — 외부 베타 준비 현황
+# 모두의 육아 — 내부 테스트 배포 현황
 
-확인일: 2026-11-01. **Neon 무료 DB 생성·초기화와 실제 DB 연결 검사는 완료됐지만, 외부 테스터에게 배포할 상태는 아직 아닙니다.** Render에 전용 DB 접속정보를 저장하기 전, 사용자의 MongoDB 대안 질문을 검토했습니다. 외부 HTTPS 주소, 서명 release, Play 내부 테스트 설치 링크는 아직 없습니다.
+2026-11-01 23:02 KST 기준, **무료 HTTPS 서버와 Google Play 내부 테스트 배포를 완료했습니다. 이후 사용자가 실제 Android 설치·실행·비회원 공구 목록 표시까지 확인했습니다. 이 기기 결과는 사용자 보고이며 제가 기기를 직접 관찰한 결과와 구분합니다.**
 
-최신 자료: [57개 화면과 현재 구현 대조](../../design/screen-spec-20261101-57.md), [PostgreSQL/MongoDB 선택과 전환 방법](DATABASE-CHOICE.md). 설계서 전체 구현과 외부 베타 배포는 별도의 완료 조건입니다.
+- 웹: https://moduyuga-beta.onrender.com
+- Play 참여: https://play.google.com/apps/internaltest/4700489771428159755
+- 정식 앱명: **모두의 육아 - 육아템 공동구매,핫딜**, 개발자 Team_Wifi, 패키지 `kr.moduyuga.app`.
+- 최초 승인 테스터 1명을 전용 목록에 등록했습니다. 가입용 1회 초대코드와 본인 시험 안내는 로컬 `artifacts/beta/private/SELF-TEST.txt`에 보관합니다. 코드·비밀번호는 공유 문서에 넣지 않습니다.
 
-## 한눈에 보기
+## 지금 확인된 것
 
-| 항목 | 확인한 상태 | 다음 조건 |
+| 항목 | 실제 확인 결과 | 증거/남은 조건 |
 |---|---|---|
-| 앱 이름 | 모두의 육아 - 육아템 공동구매,핫딜 / Team_Wifi | 스토어 초안 이후 실제 게시 확인 |
-| 비회원 탐색 | 홈·검색·공구·브랜드·핫딜 열람 가능 | 실제 외부 서버에서도 확인 |
-| 베타 가입·복구 | 단회 초대코드, 18세 이상 확인, 복구코드 확인·재발급 | 운영 DB에 제한된 초대코드 발급 |
-| 판매자 시험 | 실제 사업자정보 대신 가상 브랜드 신청 | 실제 입점·공급 계약은 별도 과제 |
-| 개인정보 | 입력 제한, 코드 해시, 세션 폐기, 탈퇴·연관 데이터 처리 | 실제 리전·연락처·보관/복구 절차 확정 |
-| 백엔드 | 35개 테스트 통과, 별도 검토의 주요 결함 2건 해결 | 실제 프록시의 IP 전달과 제한 검증 |
-| PostgreSQL | 로컬 26개 검사 + 실제 Neon DB 대상 API 8개 검사 통과 | Render 연결·공개 HTTPS·서버 재시작 검증 |
-| 프런트 | 58개 테스트, 일반/베타 빌드, 320px 브라우저 검사 통과 | 실제 API 통합 E2E |
-| Android | debug APK 설치·기동·WebView API 200 확인 | HTTPS를 사용하는 서명 AAB/APK와 기기 검증 |
-| 비용 | 무료 전용. 기존 Render 계정에 카드 없음 확인 | Free 플랜만 사용, 한도 초과 시 중단 |
-| Google Play | 조직 계정의 앱 초안·한국어 정식명 저장 | 내부 테스트 릴리스·테스터 접근·참여 링크 |
+| 작업 위치 | `E:/Team_Wifi` 독립 저장소·Codex 프로젝트 설정. 앱 보존 파일 4,267개와 과거 자료 1,213개 SHA-256 일치 | [이전 검증 기록](WORKSPACE-MIGRATION.md). 옛 primary checkout은 Codex 보호로 보존 |
+| 무료 운영 | Render Free + Neon Free PostgreSQL17, 싱가포르. 기존 카드 없는 Render 계정, 유료 전환 없음 | [운영 절차](RUNBOOK.md) |
+| 실제 서버 | 검토 커밋 `43be76c` 수동 배포 성공 | Render deploy `dep-dbjkb7ijnfac7388ntkg`, `render-43be76c-live.png` |
+| 공개 HTTPS | 탐색·초대 가입·권한·참여/철회·저장·질문/신고/차단·복구/탈퇴·CORS 등 75개 검사 통과 | `public-api-results.json`. 임시 계정 3개 탈퇴·초대 3개 삭제 |
+| 재배포 영속성 | 배포 전 만든 별도 계정과 저장 목록을 새 배포에서도 조회. 이후 계정·임시 초대 정리 | `redeploy-persistence-results.json` |
+| 요청 제한 | 확인되지 않은 프록시 IP 대신 서버가 검증한 계정으로 분리. 전역 예산은 DB 접근 전 적용 | E에서 pytest40 통과, 로컬 PostgreSQL46 검사, 별도 spec/quality 검토 수용 |
+| 프런트 | 기존58개 단위시험·320px 모의 브라우저 검증. 새 커밋 GitHub CI의 API/UI 검사 성공 | 실제 Android 실행은 별도 |
+| 서명 Android | 0.2.0/versionCode2 APK·AAB 생성. 서명·이름·HTTPS API·권한 등 오프라인30검사 통과 | `artifacts/android/release`. release 설치·첫 실행·비회원 목록은 사용자 확인. Android 인증 후 동선은 추가 시험 범위 |
+| Play 내부 테스트 | **활성 / 내부 테스터에게 제공됨**, 11/1 23:02 게시. 실제 참여 페이지 접근 확인 | `play-internal-active.png`, `play-tester-invite-visible.png`. 휴대폰 설치·첫 실행은 사용자 확인 완료 |
+| 공개 안내 | 개인정보·약관·삭제·지원 URL이 실제 HTTPS로 열림. Render/Neon 위치와 요청 제한 문구 반영 | `/legal/privacy`, `/legal/terms`, `/legal/deletion`, `/legal/support` |
+| 팀 공유 | `codex/modu-yuga` push, [Draft PR #1](https://github.com/yw8837/team_wifi/pull/1) 유지 | [push CI](https://github.com/yw8837/team_wifi/actions/runs/41313688780), [PR CI](https://github.com/yw8837/team_wifi/actions/runs/41313693249) 성공 |
 
-## 이번에 고친 문제
+Play의 정식 심사 전 내부 테스트 페이지에는 `kr.moduyuga.app (unreviewed)`라는 임시 이름이 표시됩니다. 스토어 한국어 정식명은 초안으로 저장했으며, 콘솔 앱 헤더도 아직 이전 이름을 표시할 수 있습니다. 패키지 내부 정식 명칭 검증과 스토어 공개 심사를 구분합니다. 제출 경고 1건은 난독화 가독화 파일 없음이며 현재 `minifyEnabled false`인 빌드로, 제출 차단 오류는 없습니다.
 
-1. **판매자가 탈퇴하면 구매자의 쿠폰함이 500 오류로 열리지 않음.** 발급자 기록과 연결된 시험 쿠폰을 만료 처리하고, 이미 삭제된 발급자가 있어도 쿠폰함을 열 수 있게 수정했습니다. 다른 사용자 예약에 복사된 공구명도 일반 종료 문구로 바꿉니다.
-2. **동시 인증 요청이 DB 연결을 서로 기다리며 멈춤.** 요청 제한 검사를 인증 트랜잭션 전에 수행하도록 옮겼습니다. 같은 요청에서 검사를 반복해 연결을 추가로 잡지 않습니다. 기존 재현은 7개 요청 모두 500이었고, 수정 후에는 201/409로 처리되며 풀 대기 시간초과가 0건입니다. 409는 동시 변경 감지 결과이며 성공으로 계산하지 않습니다.
-3. **가입 응답을 놓치면 복구코드를 다시 보관할 수 없음.** 로그인 후 현재 비밀번호를 확인하여 새 코드를 발급받는 기능을 추가했습니다. 기존 코드는 즉시 폐기되고 현재 세션은 유지됩니다.
-4. **Android 부팅 후 ADB 연결 실패.** Windows의 TCP 5547–5746 예약 범위와 충돌했습니다. 시스템 보호 설정을 바꾸지 않고 시험 에뮬레이터를 5760/5761로 실행해 설치·기동·API 통신을 확인했습니다.
+## 기기 확인 결과와 후속 베타 시험
 
-## 증거와 재현
+1. 승인 테스터의 Play 설치·실행·비회원 공구 목록 표시는 사용자 응답으로 확인했습니다. 기기 모델·Android 버전·native 로그는 아직 수집하지 않았습니다.
+2. 초대코드 가입·로그인 후 복귀·시험 참여/철회·탈퇴의 실제 Android UI 동선은 후속 베타 시험으로 남깁니다. 서버는 실제 HTTPS75검사, 프런트는 단위·모의 브라우저 검사와 공개 웹 guest 로그인 이동·수량 복원으로 검증했습니다.
+3. 본인 설치 확인 기록은 `artifacts/beta/android-user-confirmation.json`입니다. 검증 방법과 범위를 구분하여 기록합니다.
 
-- [QA 시나리오와 실제 결과](QA.md), [완료 조건](GATES.md), [무료 배포 절차](RUNBOOK.md)
-- `backend/tests/test_beta.py`: 초대·복구·탈퇴·신고·쿠폰 회귀시험.
-- `scripts/verify-beta-postgres.py`: 단회 초대 동시 사용, 마지막 재고, 복구·세션 폐기, 7개 동시 인증 요청, DB 재시작 유지 등 실제 PostgreSQL 검사.
-- `frontend/src/beta.browser-check.mjs`: 320px에서 가입/복구 확인, 자동 참여 없음, 중복 제출 차단. API는 fixture이며 외부 서버 검증으로 계산하지 않습니다.
-- 로컬 원본 증거: `artifacts/beta/postgres-results.json`, `artifacts/beta/android-latest-smoke-retry/`, `artifacts/android/package-verification.json`.
-- 실제 Neon Free PostgreSQL17·싱가포르 DB에서 런타임 계정 startup/health, 공구6개, 핫딜, 가입, 복구코드 재발급, 시험 예약, 탈퇴, 재고 원복 8개 검사를 통과했습니다. `artifacts/beta/neon-predeploy-results.json`. 로컬 API 프로세스에서 실제 클라우드 DB에 연결한 검사이며 공개 HTTPS 성공으로 계산하지 않습니다. 클라이언트 TLS 확인, 런타임 스키마 생성 권한 없음.
-- 최신 debug APK SHA-256: `8e8b36549ee5c0aff34eb8246b43194bb8fc60bd197678b04ccd3edd7e5d1435` (4,390,135 bytes). 설치·기동·WebView health/catalog200, network failures0. 시험 PC의 메모리 부족 중 첫 WebView 준비가 시간제한을 넘긴 기록도 보존했습니다. 초기화 완료 후 재실행이 통과했으며 release의 첫 실행 성능은 별도 검사해야 합니다.
-- 공유: 브랜치 `codex/modu-yuga`에 프런트 `6708dca`, 재발급 UI `bbfff53`, 서버/무료 배포 준비 `c741ee3`, 실제 Render URL 자동 설정 `8688f25`를 푸시했습니다. 최신 코드의 [push CI](https://github.com/yw8837/team_wifi/actions/runs/41306129827)·[PR CI](https://github.com/yw8837/team_wifi/actions/runs/41306133696)가 성공했습니다. [팀 검토 PR](https://github.com/yw8837/team_wifi/pull/1)은 Draft를 유지합니다.
-- 원본 로그·콘솔 화면·초대코드·서명키는 Git 공유 대상에서 제외합니다. 팀에는 코드와 비식별 결과를 공유합니다.
+## 베타 범위와 한계
 
-## 베타가 제공하지 않는 것
+실제 결제·주문·배송·정산·환불, 판매자 사업자 인증, 실제 공급 계약은 제공하지 않습니다. 상품·가격·쿠폰·포인트는 시험용입니다. 독립 커뮤니티 게시판, 이메일 소유 확인, 최신 57개 설계 화면 전체 구현도 완료된 것으로 표시하지 않습니다. [화면 대조표](../../design/screen-spec-20261101-57.md)를 별도로 관리합니다.
 
-실제 결제·주문·배송·정산·환불, 판매자 사업자 인증, 실제 공급 계약은 제공하지 않습니다. 쿠폰·포인트·공구 가격은 시험용입니다. 독립 커뮤니티 게시판과 운영용 이메일 소유 확인도 아직 없습니다. 이번 베타는 공구 탐색·시험 참여·질문/신고·브랜드/혜택 흐름의 사용성 검증을 위한 단계입니다.
+무료 서비스가 절전되면 첫 요청이 약 1분 지연될 수 있습니다. 쓰기 요청을 자동 재전송하지 않습니다. 전역 요청 한도는 공격 시 다른 참여자에게도 영향을 줄 수 있고 재시작하면 초기화됩니다. HMAC 계정/이메일 제한은 DB에 남습니다. 한도를 초과하면 초대·가입을 중단하고 유료 전환하지 않습니다.
 
-무료 서비스의 절전으로 첫 요청이 약 1분 지연될 수 있습니다. 앱은 요청 시간제한과 수동 재시도 안내를 제공하며, 참여·가입 요청을 자동 재전송하지 않습니다. 무료 한도를 넘으면 서비스를 중단하고 유료 전환하지 않습니다.
+[QA 보고서](QA.md) · [운영 절차](RUNBOOK.md) · [자원 정리](RESOURCE-AUDIT.md) · [DB 선택 근거](DATABASE-CHOICE.md). 원본 증거는 `artifacts/beta`에 보관하고 비밀·콘솔 원문은 Git에 올리지 않습니다.
