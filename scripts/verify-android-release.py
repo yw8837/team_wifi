@@ -25,6 +25,8 @@ if not release.is_relative_to(ROOT) or not evidence.is_relative_to(ROOT) or not 
 build = json.loads((release / 'build.json').read_text(encoding='utf-8-sig'))
 evidence.mkdir(parents=True, exist_ok=True)
 checks = []
+apk_name = next(item['name'] for item in build['artifacts'] if item['name'].endswith('.apk'))
+aab_name = next(item['name'] for item in build['artifacts'] if item['name'].endswith('.aab'))
 
 
 def check(name, condition):
@@ -68,19 +70,19 @@ for item in build['artifacts']:
             check(item['name'] + ': original ' + asset, archive.read(prefix+'public/brand/'+asset) == (ROOT/'frontend/public/brand'/asset).read_bytes())
 
 build_tools = Path(args.sdk) / 'build-tools/35.0.0'
-sign = run('release-apksigner.txt', [str(build_tools/'apksigner.bat'), 'verify', '--verbose', '--print-certs', str(release/'moduyuga-beta.apk')])
+sign = run('release-apksigner.txt', [str(build_tools/'apksigner.bat'), 'verify', '--verbose', '--print-certs', str(release/apk_name)])
 check('APK v2 signature', 'Verified using v2 scheme (APK Signature Scheme v2): true' in sign)
 check('APK signing identity', 'CN=Team_Wifi' in sign)
 check('APK original upload certificate', 'Signer #1 certificate SHA-256 digest: 92c9567f774691f39c75e62cf6208ef126cebd75ad52bd3fda2b2e4f2592f9d3' in sign)
-jar = run('release-jarsigner.txt', [str(Path(args.java)/'bin/jarsigner.exe'), '-verify', str(release/'moduyuga-beta.aab')])
+jar = run('release-jarsigner.txt', [str(Path(args.java)/'bin/jarsigner.exe'), '-verify', str(release/aab_name)])
 check('AAB JAR signature', 'jar verified.' in jar)
-certificate = run('release-aab-certificate.txt', [str(Path(args.java)/'bin/keytool.exe'), '-J-Duser.language=en', '-printcert', '-jarfile', str(release/'moduyuga-beta.aab')])
+certificate = run('release-aab-certificate.txt', [str(Path(args.java)/'bin/keytool.exe'), '-J-Duser.language=en', '-printcert', '-jarfile', str(release/aab_name)])
 check('AAB original upload certificate', '92c9567f774691f39c75e62cf6208ef126cebd75ad52bd3fda2b2e4f2592f9d3' in certificate.replace(':','').replace(' ','').lower())
-manifest = run('release-manifest.txt', [str(build_tools/'aapt.exe'), 'dump', 'xmltree', str(release/'moduyuga-beta.apk'), 'AndroidManifest.xml'])
+manifest = run('release-manifest.txt', [str(build_tools/'aapt.exe'), 'dump', 'xmltree', str(release/apk_name), 'AndroidManifest.xml'])
 check('no debuggable=true', not any('debuggable' in line and '0xffffffff' in line for line in manifest.splitlines()))
 for prop in ('allowBackup', 'usesCleartextTraffic'):
     check(prop+' false', any(prop in line and '=(type0x12)0x0' in line.replace(' ', '') for line in manifest.splitlines()))
-badging = run('release-badging.txt', [str(build_tools/'aapt.exe'), 'dump', 'badging', str(release/'moduyuga-beta.apk')])
+badging = run('release-badging.txt', [str(build_tools/'aapt.exe'), 'dump', 'badging', str(release/apk_name)])
 check('target API36', "targetSdkVersion:'36'" in badging)
 check('manifest versionCode matches', "versionCode='"+str(build['versionCode'])+"'" in badging)
 check('manifest versionName matches', "versionName='"+build['versionName']+"'" in badging)

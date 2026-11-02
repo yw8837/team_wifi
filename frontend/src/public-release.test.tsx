@@ -24,6 +24,22 @@ beforeEach(()=>{
 });
 afterEach(()=>vi.unstubAllGlobals());
 describe("public release navigation and safe content",()=>{
+ it("keeps account help and every legal document available to guests",()=>{
+   const html=render("/my");
+   expect(html).toContain("마이페이지");
+   expect(html).toContain('aria-label="내 활동과 계정"');
+   expect(html).toContain('aria-label="서비스와 이용 안내"');
+   expect(html).toContain('href="/my/policies"');
+   expect(html).toContain('/legal/support');
+   expect(html).not.toContain('/legal/privacy');
+   const policies=render('/my/policies');
+   for(const kind of ["terms","privacy","deletion"]) expect(policies).toContain(`/legal/${kind}`);
+   expect(policies).not.toContain('로그인이 필요해요');
+   expect(html).toContain("새 탭에서 열림");
+   expect(html).not.toContain("로그인이 필요해요");
+   expect(html).not.toContain("콘텐츠 신고 관리");
+   expect(fetch).not.toHaveBeenCalled();
+ });
  it("opens useful browse first and omits legacy transactional navigation",()=>{const html=render("/");expect(html).toContain("육아템, 꼼꼼히 알아보고 준비해요");expect(html).toContain('type="search"');expect(html).toContain("공식 참고 정보");expect(html).toContain('href="/calculator"');expect(html).not.toMatch(/href="\/(?:seller|benefits|campaigns|brands|hotdeals)/);expect(html).not.toContain("포인트");expect(fetch).not.toHaveBeenCalled();});
  it.each(["/my/saved","/settings","/demands/new","/admin"])("protects owned route %s without hiding guest exploration",path=>{const html=render(path);expect(html).toContain("로그인이 필요해요");expect(html).toContain("/login?returnTo="+encodeURIComponent(path));expect(fetch).not.toHaveBeenCalled();});
  it("does not expose legacy beta routes",()=>{expect(render("/benefits")).toContain("화면을 찾을 수 없어요");expect(render("/seller")).not.toContain("입점 신청");});

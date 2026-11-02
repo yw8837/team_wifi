@@ -1,6 +1,6 @@
 # 모두의 육아 — 첫 공개 버전 제출 기록
 
-확인일: 2026-11-02 (KST). **프로덕션 0.3.0(code 4)과 변경사항 10개의 최종 검토 전송을 실행했고, Console에서 ‘검토 중인 변경사항’을 확인했다. Google 자동 사전 검사는 진행 중이며, 화면은 검사 성공 시 심사로 전달된다고 안내한다. 승인·공개는 아직 확인되지 않았다.**
+확인일: 2026-11-02 (KST). **프로덕션 0.3.0(code 4)과 변경사항 10개의 최종 검토 전송을 실행했고, Console에서 ‘검토 중인 변경사항’을 확인했다. 후속 Console 확인에서 자동 사전 검사가 끝나고 ‘변경사항을 검토 중입니다’가 표시된 것을 확인했다. 승인·공개는 아직 확인되지 않았다.**
 
 - 앱: 모두의 육아 - 육아템 공동구매,핫딜 / 개발자 Team_Wifi
 - 패키지: `kr.moduyuga.app`
@@ -8,6 +8,7 @@
 - [Play 게시 개요](https://play.google.com/console/u/1/developers/6223742597925226118/app/4975294246879669605/publishing)
 - [운영 앱](https://moduyuga-beta.onrender.com/)
 - 관리형 게시: 사용 중지 상태. 승인 후 자동 게시되는 설정이며 승인 시점은 Google이 결정한다.
+- 실제 검토 상태 화면: `artifacts/store/release-4/play-in-review-confirmed.jpg` (로컬 보관)
 - 최초 제출 화면: `artifacts/store/release-4/play-review-submission-queued.jpg` (로컬 보관)
 
 ## 제출한 앱과 실제 기능

@@ -1,4 +1,5 @@
 import { DEPLOYED_MODE } from "./release-policy";
+import { betaApiOrigin } from "./beta-policy";
 import { useState } from "react";
 import { api, API_BASE } from "./api";
 import { Field, Feedback, PageTitle, PasswordField, useAction, useAuth, useResource } from "./shared";
@@ -13,7 +14,9 @@ const legalPages = [
 type Config = { legal: Partial<Record<typeof legalPages[number][0], string>> };
 
 export function legalUrl(page: string, configured?: string): string {
-  const base = new URL(API_BASE, window.location.origin);
+  const webOrigin = import.meta.env.VITE_PUBLIC_WEB_ORIGIN;
+  if (webOrigin) betaApiOrigin(true, webOrigin);
+  const base = new URL(webOrigin || API_BASE, window.location.origin);
   // Legal documents are served by the configured API origin, never an arbitrary remote URL.
   const path = configured === `/legal/${page}` ? configured : `/legal/${page}`;
   return new URL(path, base.origin).href;

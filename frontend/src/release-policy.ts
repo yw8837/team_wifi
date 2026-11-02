@@ -7,7 +7,7 @@ export function publicConfigMatches(config: unknown): boolean {
   return value.public_release === true && value.beta_mode === false;
 }
 export function publicBrowsePath(path: string): string {
-  const match=matchRoutes([ {path:"/demands/new",handle:{owned:true}}, ...["/", "/offers/:id", "/demands", "/demands/:id", "/calculator", "/welcome", "/my"].map(path => ({ path, handle: {owned:false} }))], path);
+  const match=matchRoutes([ {path:"/demands/new",handle:{owned:true}}, ...["/", "/offers/:id", "/demands", "/demands/:id", "/calculator", "/welcome", "/my", "/my/policies"].map(path => ({ path, handle: {owned:false} }))], path);
   return match && !match.some(route=>route.route.handle?.owned) ? path : "/";
 }
 export type ComparisonInput = { price: string; shipping: string; quantity: string };
@@ -20,5 +20,5 @@ export function compareUnit(input: ComparisonInput): {total:number; unit:number}
 }
 
 export function publicReturnPath(path:string):string {
- return matchRoutes(["/", "/offers/:id", "/demands", "/demands/new", "/demands/:id", "/calculator", "/welcome", "/my", "/my/saved", "/settings", "/admin"].map(path=>({path})),path)?path:"/";
+ return matchRoutes(["/", "/offers/:id", "/demands", "/demands/new", "/demands/:id", "/calculator", "/welcome", "/my", "/my/policies", "/my/saved", "/settings", "/admin"].map(path=>({path})),path)?path:"/";
 }

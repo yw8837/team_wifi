@@ -68,8 +68,8 @@ jobs:
       VITE_BETA_MODE: '0'
       VITE_API_BASE_URL: https://moduyuga-beta.onrender.com/api
       MODU_LOCAL_ANDROID: '0'
-      MODU_VERSION_CODE: '4'
-      MODU_VERSION_NAME: '0.3.0'
+      MODU_VERSION_CODE: '5'
+      MODU_VERSION_NAME: '0.3.1'
       MODU_UNSIGNED_CI: '1'
     steps:
       - uses: actions/checkout@v4
@@ -89,6 +89,6 @@ jobs:
       - run: python scripts/prepare-unsigned-android.py
       - uses: actions/upload-artifact@v4
         with:
-          name: unsigned-android-4
+          name: unsigned-android-5
           path: artifacts/android/unsigned-ci
           if-no-files-found: error

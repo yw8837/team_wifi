@@ -5,7 +5,7 @@ import { IconHome, IconMessages, IconCalculator, IconBookmark, IconUser } from "
 import { api, categories, date, money, safeExternalUrl } from "./api";
 import { APP_NAME, BrandLockup, CategoryIcon } from "./brand";
 import { Login, Reset, Signup } from "./auth-pages";
-import { BetaRecoveryCodeSettings, LegalLinks } from "./beta";
+import { BetaRecoveryCodeSettings, LegalLinks, legalUrl } from "./beta";
 import { Feedback, Field, PageTitle, PasswordField, Protected, ResourceState, useAction, useAuth } from "./shared";
 import { compareUnit, publicConfigMatches } from "./release-policy";
 import type { ComparisonInput } from "./release-policy";
@@ -29,14 +29,15 @@ export function PublicApp(){
   const location=useLocation(),{user}=useAuth();
   const [offline,setOffline]=useState(!navigator.onLine);
   useEffect(()=>{const online=()=>setOffline(false),off=()=>setOffline(true);window.addEventListener("online",online);window.addEventListener("offline",off);return()=>{window.removeEventListener("online",online);window.removeEventListener("offline",off);};},[]);
-  useEffect(()=>{window.scrollTo(0,0);document.title=APP_NAME;},[location.pathname]);
+  useEffect(()=>{window.scrollTo(0,0);document.title=APP_NAME;document.getElementById("main")?.focus({preventScroll:true});},[location.pathname]);
   const auth=["/login","/signup","/reset"].includes(location.pathname);
   return <><a className="skip-link" href="#main">본문으로 이동</a><header className="app-header"><Link className="wordmark" to="/"><BrandLockup/></Link><Link className="header-account" to={user?"/my":"/login"}>{user?user.nickname:"로그인"}</Link></header>
     {offline&&<p className="offline" role="alert">오프라인입니다. 계산기는 계속 이용할 수 있어요. 연결 후 정보를 다시 불러와 주세요.</p>}
-    <main id="main" className={auth?"auth-main":"public-main"}><Routes>
+    <main id="main" tabIndex={-1} className={auth?"auth-main":"public-main"}><Routes>
       <Route path="/" element={<Offers/>}/><Route path="/offers/:id" element={<OfferDetail/>}/>
       <Route path="/demands" element={<Demands/>}/><Route path="/demands/new" element={<Protected><NewDemand/></Protected>}/><Route path="/demands/:id" element={<DemandDetail/>}/>
       <Route path="/calculator" element={<Calculator/>}/><Route path="/my/saved" element={<Protected><Offers saved/></Protected>}/><Route path="/my" element={<PublicMy/>}/><Route path="/settings" element={<Protected><PublicSettings/></Protected>}/>
+      <Route path="/my/policies" element={<PublicPolicies/>}/>
       <Route path="/admin" element={<Protected admin><PublicAdmin/></Protected>}/><Route path="/login" element={<Login/>}/><Route path="/signup" element={<Signup/>}/><Route path="/reset" element={<Reset/>}/><Route path="/welcome" element={<PublicWelcome/>}/>
       <Route path="*" element={<section className="panel"><h1>화면을 찾을 수 없어요</h1><Link to="/">육아 정보 둘러보기</Link></section>}/>
     </Routes></main>
@@ -89,12 +90,69 @@ function DemandDetail(){
  <section className="comments"><h2>질문과 이야기</h2><ResourceState {...comments} retry={comments.reload}/>{!comments.loading&&!comments.error&&(comments.data?.length?comments.data.map(c=><article className="comment" key={c.id}><p className="ugc-text">{c.body}</p><p className="muted">{c.author.nickname} · {date(c.created_at)}</p><Moderation kind="comment" id={c.id} author={c.author} own={c.own} onChange={reload} onDelete={async()=>{await api(releasePath("comments",c.id),"DELETE");reload();}}/></article>):<p>이 페이지에는 댓글이 없어요. 제품을 고를 때 궁금한 점을 나눠 보세요.</p>)}{!comments.loading&&!comments.error&&<Pagination page={commentPage} count={comments.data?.length||0} change={setCommentPage}/>}<p className="notice" id="comment-privacy">{privacyNotice}</p><form aria-describedby="comment-privacy" onSubmit={e=>{e.preventDefault();if(requireLogin())void action.run(async()=>{await api(releasePath("demands",id)+"/comments","POST",{body});setBody("");setCommentPage(0);reload();},"댓글을 등록했습니다.");}}><label className="field"><span>댓글 작성</span><textarea required minLength={2} maxLength={1000} rows={3} value={body} onChange={e=>setBody(e.target.value)}/></label><button disabled={action.busy}>{user?"댓글 등록":"로그인하고 댓글 등록"}</button></form></section></article>}</>;
 }
 function PublicWelcome(){return <section className="welcome"><div className="welcome-emblem"><img src="/brand/symbol.svg" alt="" width="128"/></div><p className="eyebrow">함께 고르는 육아생활</p><h1>우리에게 맞는 육아템,<br/>차근차근 골라요.</h1><p className="lead">공식 정보의 출처를 살펴보고,<br/>단가를 비교하고, 공구 수요를 나누세요.</p><Link className="button" to="/">로그인 없이 육아 정보 둘러보기</Link><p>실제 주문·결제·배송은 제공하지 않습니다.</p><LegalLinks/></section>;}
-function PublicMy(){const {user}=useAuth();return <><PageTitle title={user?user.nickname+"님의 육아생활":"마이"}><p>{user?"필요한 정보를 저장하고 안전하게 함께 이야기해요.":"먼저 둘러보고 필요한 순간에 가입하세요."}</p></PageTitle>{user?<nav className="menu-list"><Link to="/my/saved">저장한 육아 정보 <span>→</span></Link><Link to="/settings">계정·복구·차단 설정 <span>→</span></Link>{user.is_admin&&<Link to="/admin">콘텐츠 신고 관리 <span>→</span></Link>}</nav>:<section className="panel"><Link className="button" to="/login?returnTo=%2Fmy">로그인</Link><p><Link to="/signup?returnTo=%2Fmy">구매자 회원가입</Link></p><Link to="/">로그인 없이 둘러보기</Link></section>}<LegalLinks/><Link to="/welcome">서비스 소개</Link></>;}
+function PublicMy() {
+  const {user}=useAuth();
+  return <div className="my-page">
+    <PageTitle title="마이페이지"><p>내가 모은 정보부터 계정 관리까지.</p></PageTitle>
+    <section className="my-profile" aria-labelledby="my-profile-title">
+      <div className="my-avatar"><IconUser size={28} stroke={1.6} aria-hidden="true"/></div>
+      <div className="my-profile-copy">
+        <h2 id="my-profile-title">{user ? user.nickname+"님, 반가워요" : "함께 고르는 육아생활"}</h2>
+        <p>{user ? "필요한 육아 정보를 모아 두고, 궁금한 점을 나눠요." : "둘러보기는 자유롭게, 저장과 글쓰기는 로그인 후에."}</p>
+        {!user&&<div className="my-auth-actions"><Link className="button" to="/login?returnTo=%2Fmy">로그인</Link><Link to="/signup?returnTo=%2Fmy">회원가입</Link></div>}
+      </div>
+    </section>
+    <section className="my-section" aria-labelledby="my-activity-title">
+      <h2 id="my-activity-title">내 활동과 계정</h2>
+      <nav className="my-menu" aria-label="내 활동과 계정">
+        <Link to="/my/saved"><IconBookmark size={23} aria-hidden="true"/><span><strong>저장한 육아 정보</strong><small>다시 보고 싶은 정보를 한곳에</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
+        <Link to="/settings"><IconUser size={23} aria-hidden="true"/><span><strong>계정 관리</strong><small>로그아웃 · 복구코드 · 차단 · 계정 삭제</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
+        {user?.is_admin&&<Link to="/admin"><span><strong>콘텐츠 신고 관리</strong><small>접수된 신고 확인과 처리</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}
+      </nav>
+    </section>
+    <PublicHelp/>
+    <p className="my-footer">모두의 육아 · Team_Wifi</p>
+  </div>;
+}
+
+function PublicHelp() {
+  return <>
+    <section className="my-section" aria-labelledby="my-help-title">
+      <h2 id="my-help-title">도움말</h2>
+      <nav className="my-menu" aria-label="서비스와 이용 안내">
+        <a href={legalUrl("support")} target="_blank" rel="noopener noreferrer"><span><strong>도움말과 문의</strong><small>자주 묻는 질문 · 오류 신고 · 운영 문의</small></span><span className="my-chevron" aria-hidden="true">↗</span><span className="visually-hidden"> (새 탭에서 열림)</span></a>
+        <Link to="/welcome"><span><strong>모두의 육아 소개</strong><small>지금 이용할 수 있는 기능을 알아보세요</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
+      </nav>
+    </section>
+    <nav className="my-policy-footer" aria-label="정책 안내"><Link to="/my/policies">약관 및 정책 <span aria-hidden="true">›</span></Link><p>이용약관 · 개인정보 · 데이터 삭제 안내</p></nav>
+  </>;
+}
+
+function PublicPolicies() {
+  return <div className="my-page policy-index">
+    <Link className="back-link" to="/my">← 마이페이지</Link>
+    <PageTitle title="약관 및 정책"><p>서비스 이용 기준과 내 정보 관리 방법을 확인하세요.</p></PageTitle>
+    <nav className="my-menu" aria-label="약관 및 정책 문서">
+      {[
+        ["terms","이용약관","서비스 이용 기준과 커뮤니티 규칙"],
+        ["privacy","개인정보 처리방침","수집하는 정보와 보관·삭제 기준"],
+        ["deletion","계정·데이터 삭제 안내","탈퇴 방법과 기록별 삭제 방법"],
+      ].map(([key,title,description])=><a key={key} href={legalUrl(key)} target="_blank" rel="noopener noreferrer">
+        <span><strong>{title}</strong><small>{description}</small></span><span className="my-chevron" aria-hidden="true">↗</span><span className="visually-hidden"> (새 탭에서 열림)</span>
+      </a>)}
+    </nav>
+    <p className="my-help-note">각 문서는 로그인 없이 새 탭에서 열립니다.</p>
+    <div className="policy-contact"><p>내용이 궁금하거나 내 정보에 관한 요청이 있나요?</p><a href={legalUrl("support")} target="_blank" rel="noopener noreferrer">도움말과 문의 <span className="visually-hidden">(새 탭에서 열림)</span><span aria-hidden="true">↗</span></a></div>
+    <p className="my-footer">모두의 육아 · Team_Wifi</p>
+  </div>;
+}
 function PublicSettings(){
  const {user,clear}=useAuth(),nav=useNavigate(),action=useAction();const [deleting,setDeleting]=useState(false),[password,setPassword]=useState(""),[confirmed,setConfirmed]=useState(false),[blockPage,setBlockPage]=useState(0);const blocks=usePublicResource<Author[]>("/blocks?limit=20&offset="+blockPage*20,user?.id);
- return <div className="narrow"><PageTitle title="계정·설정"/><section className="panel"><h2>현재 계정</h2><p>{user?.nickname} · {user?.email}</p><p className="muted">로그인은 현재 탭·앱 세션에 유지됩니다. 이메일 인증과 외부 본인 인증은 제공하지 않습니다.</p><button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{await api("/auth/logout","POST");clear();nav("/",{replace:true});})}>로그아웃</button></section><BetaRecoveryCodeSettings/>
+ return <div className="narrow account-settings"><Link className="back-link" to="/my">← 마이페이지</Link><PageTitle title="계정 관리"/>
+ <section className="panel"><h2>현재 계정</h2><p>{user?.nickname} · {user?.email}</p><p className="muted">로그인은 현재 탭·앱 세션에 유지됩니다. 이메일 인증과 외부 본인 인증은 제공하지 않습니다.</p><button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{await api("/auth/logout","POST");clear();nav("/",{replace:true});})}>로그아웃</button></section><BetaRecoveryCodeSettings/>
  <section className="panel"><h2>차단한 작성자</h2><p>차단은 내 로그인 화면에 적용됩니다. 차단을 해제하면 작성자의 글과 댓글이 다시 표시됩니다.</p><ResourceState {...blocks} retry={blocks.reload}/>{!blocks.loading&&!blocks.error&&(blocks.data?.length?<ul className="plain-list">{blocks.data.map(b=><li key={b.id}><span>{b.nickname}</span><button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{await api("/blocks/"+routeId(b.id),"DELETE");blocks.reload();},"차단을 해제했습니다.")}>차단 해제</button></li>)}</ul>:<p>이 페이지에 차단한 작성자가 없습니다.</p>)}{!blocks.loading&&!blocks.error&&<Pagination page={blockPage} count={blocks.data?.length||0} change={setBlockPage}/>}</section>
- <section className="panel"><h2>계정과 데이터 삭제</h2><p>계정 정보와 직접 작성한 수요·댓글, 저장·관심 기록을 삭제하고 모든 로그인과 복구코드를 폐기합니다. 법적 의무와 보안 목적의 최소 기록은 개인정보 처리방침에 따라 보관될 수 있습니다. 삭제 후에는 복구할 수 없습니다.</p>{!deleting?<button className="danger secondary" onClick={()=>setDeleting(true)}>계정 삭제 진행</button>:<form onSubmit={e=>{e.preventDefault();if(confirmed)void action.run(async()=>{await api("/me","DELETE",{password});clear();nav("/",{replace:true});});}}><PasswordField label="현재 비밀번호" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)}/><label className="check"><input type="checkbox" required checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/><span>삭제 결과와 복구 불가를 확인했으며 계정을 삭제합니다.</span></label><div className="actions"><button className="danger" disabled={action.busy}>계정 영구 삭제</button><button type="button" className="secondary" disabled={action.busy} onClick={()=>{setDeleting(false);setPassword("");setConfirmed(false);}}>취소</button></div></form>}</section><Feedback {...action}/><LegalLinks/></div>;
+ <section className="panel"><h2>계정과 데이터 삭제</h2><p>직접 작성한 수요·댓글과 저장·관심·신고·차단 기록을 삭제합니다. 내 수요 글에 달린 다른 회원의 댓글과 관심 기록도 함께 삭제되며, 모든 로그인과 복구코드를 사용할 수 없게 됩니다. 삭제 후에는 복구할 수 없습니다.</p><p>이메일·닉네임·비밀번호는 사용할 수 없게 바뀌고, 데이터 연결 관계를 위한 임의 계정 ID와 탈퇴 상태가 남습니다. <a href={legalUrl("deletion")} target="_blank" rel="noopener noreferrer">삭제 범위와 남는 기록 확인 (새 탭)</a></p>
+ {!deleting?<button className="danger secondary" onClick={()=>setDeleting(true)}>계정 삭제 진행</button>:<form onSubmit={e=>{e.preventDefault();if(confirmed)void action.run(async()=>{await api("/me","DELETE",{password});clear();nav("/",{replace:true});});}}><PasswordField label="현재 비밀번호" autoComplete="current-password" required value={password} onChange={e=>setPassword(e.target.value)}/><label className="check"><input type="checkbox" required checked={confirmed} onChange={e=>setConfirmed(e.target.checked)}/><span>삭제 결과와 복구 불가를 확인했으며 계정을 삭제합니다.</span></label><div className="actions"><button className="danger" disabled={action.busy}>계정 영구 삭제</button><button type="button" className="secondary" disabled={action.busy} onClick={()=>{setDeleting(false);setPassword("");setConfirmed(false);}}>취소</button></div></form>}</section><Feedback {...action}/><PublicHelp/></div>;
 }
 type ReleaseReport={id:string;target_type:string;target_id:string;reason:string;status:string;created_at?:string;note?:string;target_preview?:string;demand_id?:string|null;author_nickname?:string};
 export function PublicAdmin(){const [page,setPage]=useState(0);const reports=usePublicResource<ReleaseReport[]>("/release/admin/reports?limit=20&offset="+page*20);return <><PageTitle title="콘텐츠 신고 관리"><p>신고 대상과 사유를 확인한 뒤 처리하세요. 숨김·정지는 즉시 실제 콘텐츠와 계정에 적용됩니다.</p></PageTitle><ResourceState {...reports} retry={reports.reload}/>{!reports.loading&&!reports.error&&(reports.data?.length?reports.data.map(report=><AdminReport key={report.id} report={report} reload={reports.reload}/>):<p className="state">이 페이지에 접수된 공개 콘텐츠 신고가 없습니다.</p>)}{!reports.loading&&!reports.error&&<Pagination page={page} count={reports.data?.length||0} change={setPage}/>}</>;}

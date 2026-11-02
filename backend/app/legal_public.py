@@ -1,0 +1,101 @@
+"""Public-release policies and readable, script-free help pages.
+
+Only describe implemented features. Keep legal routes stable for installed apps
+and Play listings; these pages must remain usable without authentication.
+"""
+from html import escape
+import re
+from . import config
+
+NAME = '모두의 육아 - 육아템 공동구매,핫딜'
+PAGES = (
+    ('terms', '이용약관'), ('privacy', '개인정보 처리방침'),
+    ('deletion', '계정과 데이터 삭제'), ('support', '도움말과 문의'),
+)
+INTRO = {
+    '이용약관': '함께 이용하기 위해 알아두어야 할 서비스 범위와 이용 기준입니다.',
+    '개인정보 처리방침': '어떤 정보를 왜 보관하는지, 어떻게 확인하고 삭제할 수 있는지 안내합니다.',
+    '계정과 데이터 삭제': '계정을 탈퇴하거나, 계정은 유지하면서 개별 기록을 지우는 방법을 안내합니다.',
+    '도움말과 문의': '이용 중 궁금한 점을 먼저 확인하고, 해결되지 않으면 운영팀에 알려 주세요.',
+}
+
+
+def public_page(title, content):
+    headings = re.findall(r'<h2>(.*?)</h2>', content)
+    for index, heading in enumerate(headings, 1):
+        content = content.replace(f'<h2>{heading}</h2>', f'<h2 id="section-{index}" tabindex="-1">{heading}</h2>', 1)
+    toc = ''.join(f'<li><a href="#section-{i}">{heading}</a></li>' for i, heading in enumerate(headings, 1))
+    links = ''.join(f'<a href="/legal/{kind}"' + (' aria-current="page"' if label == title else '') + f'>{label}</a>' for kind, label in PAGES)
+    summary, content = content.split('</div>', 1)
+    summary += '</div>'
+    return f'''<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex"><meta name="theme-color" content="#fffaf3">
+<title>{escape(title)} | {NAME}</title>
+<style>
+:root{{color-scheme:light;--ink:#4f382e;--muted:#73635b;--line:#e6dcd4;--accent:#a4362d;--cream:#fff5e7}}
+*{{box-sizing:border-box}}html{{scroll-padding-top:24px}}body{{margin:0;padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom);background:#fffcf8;color:var(--ink);font:16px/1.8 system-ui,-apple-system,sans-serif;word-break:keep-all;overflow-wrap:anywhere}}
+a{{color:var(--accent);text-underline-offset:4px}}a:focus-visible,summary:focus-visible{{outline:3px solid var(--accent);outline-offset:4px;border-radius:3px}}
+.skip{{position:absolute;top:-100px;left:16px;background:white;padding:12px;z-index:2}}.skip:focus{{top:12px}}
+.brand-bar{{border-bottom:1px solid var(--line)}}.brand-inner{{max-width:1040px;margin:auto;padding:16px 24px;display:flex;justify-content:space-between;align-items:center;gap:16px}}
+.brand{{font-size:19px;font-weight:800;color:var(--ink);text-decoration:none}}.brand::before{{content:'';display:inline-block;width:12px;height:12px;border-radius:50%;background:#dc8e85;margin-right:10px}}
+.back{{display:inline-flex;align-items:center;min-height:44px;font-size:14px}}
+.legal-shell{{max-width:1040px;margin:auto;padding:40px 24px 56px}}.eyebrow{{color:var(--muted);font-size:14px;letter-spacing:.06em;margin:0 0 10px}}
+h1{{font-size:clamp(28px,4vw,36px);letter-spacing:-.04em;line-height:1.3;margin:0 0 16px}}.intro{{font-size:18px;max-width:680px;margin:0 0 16px}}.meta{{font-size:14px;color:var(--muted);margin:0 0 30px}}
+.mobile-toc{{display:none}}.legal-summary{{grid-column:2;grid-row:1}}.legal-summary .summary{{margin:0}}.legal-layout{{display:grid;grid-template-columns:220px minmax(0,1fr);column-gap:44px;row-gap:0;align-items:start}}.toc{{grid-column:1;grid-row:1 / span 2;border-top:2px solid #dc8e85;padding-top:16px}}.toc h2{{font-size:15px;margin:0 0 10px;border:0;padding:0}}.toc ol{{list-style:none;padding:0;margin:0}}.toc li{{margin:0}}.toc a{{display:flex;align-items:center;min-height:44px;padding:6px 0;text-decoration:none;color:var(--muted);font-size:14px}}.toc a:hover{{color:var(--accent);text-decoration:underline}}
+article{{min-width:0;grid-column:2;grid-row:2}}article h2{{font-size:22px;line-height:1.5;letter-spacing:-.025em;margin:36px 0 14px;padding-top:24px;border-top:1px solid var(--line);scroll-margin-top:24px}}article h3{{font-size:17px;margin:22px 0 8px}}p{{margin:0 0 16px}}li{{margin:8px 0}}ul,ol{{padding-left:24px}}.summary{{background:var(--cream);border-radius:16px;padding:22px 24px;margin-bottom:24px}}.summary>p:first-child{{font-weight:700}}.summary ul{{margin-bottom:0}}.summary p:last-child{{margin-bottom:0}}
+.data-list{{margin:0}}.data-list dt{{font-weight:700;margin-top:20px}}.data-list dd{{margin:6px 0 0}}.steps{{list-style:none;padding:0;counter-reset:step}}.steps li{{position:relative;padding:0 0 22px 44px;margin:0;counter-increment:step}}.steps li::before{{content:counter(step);position:absolute;left:0;top:1px;width:28px;height:28px;border-radius:50%;background:var(--cream);text-align:center;font-size:14px;font-weight:700}}.steps strong{{display:block}}.steps p{{margin:4px 0 0}}
+.action{{display:inline-flex;align-items:center;min-height:48px;padding:10px 18px;background:var(--accent);color:white;border-radius:10px;text-decoration:none;font-weight:600;margin:4px 0 12px}}
+details{{border-bottom:1px solid var(--line);padding:4px 0}}summary{{cursor:pointer;min-height:48px;padding:12px 0;font-weight:600}}details p{{margin:4px 0 16px}}.contact{{border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:20px}}.contact a{{overflow-wrap:anywhere}}.muted{{color:var(--muted);font-size:14px}}
+footer{{border-top:1px solid var(--line);margin-top:48px;padding-top:24px}}footer nav{{display:flex;flex-wrap:wrap;gap:4px 24px}}footer nav a{{display:inline-flex;min-height:44px;align-items:center;font-size:14px}}footer a[aria-current]{{font-weight:700;color:var(--ink)}}footer p{{font-size:14px;color:var(--muted);margin-top:16px}}
+@media(max-width:720px){{.brand-inner{{padding:10px 20px}}.legal-shell{{padding:28px 20px 40px}}.legal-layout{{display:flex;flex-direction:column;gap:0}}.legal-summary{{width:100%}}.desktop-toc{{display:none}}.mobile-toc{{display:block;margin:16px 0 0;width:100%}}.mobile-toc summary{{padding:10px 0}}.toc{{padding:16px;background:#fff;border:1px solid var(--line);border-radius:12px}}.toc ol{{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}}.toc a{{font-size:14px}}.summary{{padding:20px}}.intro{{font-size:16px}}article h2{{font-size:21px;margin-top:28px}}}}
+@media(max-width:360px){{.toc ol{{grid-template-columns:1fr}}.brand{{font-size:17px}}}}
+@media print{{.brand-bar,.toc,footer,.skip,.action{{display:none}}.legal-layout{{display:block}}.legal-shell{{padding:0}}body{{background:white;color:black}}details::details-content{{display:block}}}}
+</style></head><body><a class="skip" href="#document">본문으로 이동</a>
+<header class="brand-bar"><div class="brand-inner"><a class="brand" href="/">모두의 육아</a><a class="back" href="/my">← 마이페이지</a></div></header>
+<main class="legal-shell"><p class="eyebrow">모두의 육아 이용 안내</p><h1>{escape(title)}</h1><p class="intro">{INTRO[title]}</p><p class="meta">운영 Team_Wifi · 적용일 2026년 11월 2일</p>
+<div class="legal-layout"><div class="legal-summary">{summary}</div><nav class="toc desktop-toc" aria-label="이 문서의 목차"><h2>이 페이지에서</h2><ol>{toc}</ol></nav><details class="mobile-toc"><summary>목차 펼쳐보기</summary><nav class="toc" aria-label="모바일 문서 목차"><ol>{toc}</ol></nav></details><article id="document" tabindex="-1">{content}</article></div>
+<footer><nav aria-label="다른 이용 안내">{links}</nav><p>{NAME}<br>이용 안내는 로그인 없이 확인할 수 있습니다.</p></footer></main></body></html>'''
+
+
+def public_pages(contact):
+    hosting = escape(config.HOSTING_LOCATION or '운영 환경에 저장 위치 미설정')
+    database = escape(config.DATABASE_LOCATION or '운영 환경에 저장 위치 미설정')
+    return {
+        'privacy': ('개인정보 처리방침', f'''
+<div class="summary"><p>먼저 확인해 주세요</p><ul><li>육아 정보와 공구 수요 글은 로그인 없이 볼 수 있습니다.</li><li>회원의 이메일은 공개하지 않습니다. 작성한 글·댓글과 닉네임은 공개됩니다.</li><li>계정을 유지하면서 글이나 저장 기록을 지울 수 있습니다. <a href="/legal/deletion">삭제 방법 보기</a></li></ul></div>
+<h2>1. 운영자와 적용 범위</h2><p>Team_Wifi가 운영하는 성인 보호자 대상 육아용품 정보·공구 수요 서비스에 적용됩니다. 실제 주문·결제·배송·정산과 판매자 입점 기능은 제공하지 않습니다. 개인정보 관련 문의는 {contact}로 접수합니다.</p>
+<h2>2. 수집 항목과 이용 목적</h2>
+<dl class="data-list"><dt>가입과 계정 관리</dt><dd>이메일, 닉네임, 비밀번호의 Argon2 해시, 계정 ID, 가입 시각, 만 18세 이상 확인 및 필수 약관·개인정보 동의 기록을 처리합니다. 가입·로그인·계정 관리에 사용하며 마케팅 수신은 받지 않습니다. 이메일 인증과 이메일 발송은 제공하지 않습니다.</dd>
+<dt>글쓰기와 커뮤니티 활동</dt><dd>공구 수요 글·댓글의 내용, 작성 시각, 작성자 ID와 닉네임을 처리합니다. 저장·관심·신고 사유와 대상·차단 기록은 각 기능 제공과 신고 처리에 사용합니다.</dd>
+<dt>인증과 계정 보호</dt><dd>세션 토큰과 복구코드는 해시로 저장합니다. 세션은 8시간, 복구코드는 90일 동안 유효합니다. 원문 복구코드는 가입·재발급 화면에서 한 번 표시하며 서버에는 원문을 저장하지 않습니다. 복구·로그아웃·계정 삭제 시 관련 세션을 폐기합니다.</dd></dl>
+<details><summary>과다 요청 제한과 운영 기록의 세부 항목</summary><p>계정 ID 또는 로그인·복구에 입력한 이메일을 비밀키(HMAC)로 변환한 값과 요청 횟수를 과다 요청 제한에 사용합니다. 제한 카운터에는 원문 이메일이나 IP를 저장하지 않습니다. 10분 창이 만료된 카운터는 다음 계정 제한 처리 시 삭제하며, 요청이 없으면 정리가 지연됩니다. 전체 요청 제한은 메모리에 있으며 재시작 시 초기화됩니다.</p><p>동의 및 운영자의 신고 처리 감사 기록에는 계정 ID·대상 ID·조치 종류를 보관합니다. 정기 자동 삭제 기한은 설정하지 않았으며 해당 기록 소유 계정 삭제 시 삭제합니다. 호스팅 제공자는 통신·보안 로그를 자체 정책에 따라 처리할 수 있습니다.</p></details>
+<h2>3. 다른 이용자에게 보이는 정보</h2><p>수요 글·댓글의 내용과 작성 시각, 작성자 ID·닉네임은 공개됩니다. 개인별 저장·관심 목록, 신고 사유, 차단 목록과 이메일은 공개하지 않습니다. 글에 표시되는 관심 수는 실제 계정의 관심 기록을 합산한 값이며 구매 실적이 아닙니다.</p>
+<h2>4. 보관 기간과 삭제 범위</h2><p>계정과 작성·활동 기록은 <strong>회원탈퇴 또는 본인 삭제까지</strong> 보관합니다. 회원탈퇴 시 세션·복구코드, 본인 수요 글·댓글·관심·저장·신고·차단 기록을 삭제합니다. 본인 수요 글에 달린 다른 회원의 댓글과 관련 관심·신고도 함께 삭제합니다.</p><p>이메일·닉네임·비밀번호는 사용할 수 없게 바뀝니다. 데이터 연결 관계를 위한 임의 계정 ID와 탈퇴 상태는 남습니다. 실제 금전 거래가 없어 거래 법정 보관기간을 적용하지 않습니다. 제한 카운터는 2항의 별도 정리 기준을 따릅니다.</p><p>호스팅·DB 제공자의 복구 이력에는 이전 데이터가 일시적으로 남을 수 있습니다. 제공자의 보관·삭제 정책을 따르며, 별도의 자동 복구·삭제 이력 대조 기능은 없습니다. <a href="/legal/deletion">기록별 삭제 방법과 계정 삭제 절차</a>를 확인하세요.</p>
+<h2>5. 위탁과 국외 처리</h2><dl class="data-list"><dt>Render · 서버 운영</dt><dd>운영 환경상 저장 위치: {hosting}. <a href="https://render.com/privacy">Render 개인정보 정책</a></dd><dt>Neon · 데이터베이스 운영</dt><dd>운영 환경상 저장 위치: {database}. <a href="https://neon.com/privacy-policy">Neon 개인정보 정책</a></dd></dl><p>계정·작성·활동 데이터는 서비스 제공을 위해 네트워크로 해당 서버와 DB에 전송되어 처리됩니다. 광고 목적으로 판매하지 않습니다. 제공자의 로그와 복구 이력은 각 제공자 정책에 따라 처리됩니다.</p>
+<h2>6. 수집하지 않는 정보</h2><p>아이의 이름·생년월일·건강정보, 배송지, 결제정보, 사업자 서류를 요구하지 않습니다. 위치·사진·마이크 권한, 광고 식별자, 광고·분석 추적 SDK를 사용하지 않습니다. 글이나 댓글에도 아이와 가족의 개인정보, 민감한 정보, 타인의 정보를 작성하지 마세요.</p><p>외부 출처 링크를 열면 해당 사이트의 정책이 적용됩니다. 단가 비교 계산기에 입력한 값은 서버에 전송하거나 저장하지 않습니다.</p>
+<h2>7. 보호 조치와 이용자의 권리</h2><p>로그인 토큰은 브라우저/WebView 세션 저장소에 보관됩니다. 통신은 HTTPS, 비밀번호는 Argon2 해시, 데이터 접근은 권한 검사로 보호합니다.</p><p>본인 글·댓글과 저장·관심 기록은 해당 화면에서 삭제할 수 있으며, 앱과 웹의 계정 관리에서 탈퇴할 수 있습니다. 열람·정정·처리정지·삭제·이의 제기는 아래 창구로 요청하세요.</p><div class="contact"><strong>개인정보 문의 · Team_Wifi</strong><p>{contact}</p><p class="muted">계정 이메일과 요청 내용을 알려 주세요. 비밀번호·복구코드·주민등록번호는 보내지 마세요. 운영자가 계정 주체를 확인한 뒤 처리합니다.</p></div>'''),
+        'terms': ('이용약관', f'''
+<div class="summary"><p>현재 서비스의 이용 범위</p><ul><li>공식 출처를 살펴보고 육아용품의 조건을 비교합니다.</li><li>회원은 정보를 저장하고 공구 수요와 질문을 나눌 수 있습니다.</li><li>관심 표시는 수요 조사입니다. 예약·주문·구매계약이 성립하지 않습니다.</li></ul></div>
+<h2>제1조. 서비스 범위</h2><p>Team_Wifi는 육아용품 외부 정보와 출처, 조건 비교, 저장, 공구 수요 제안·관심·질문 기능을 제공합니다. 실제 주문·결제·배송·공급 계약·정산은 제공하지 않습니다.</p>
+<h2>제2조. 가입과 계정 관리</h2><p>만 18세 이상 이용자가 필수 약관과 개인정보 처리에 동의하여 일반 회원으로 가입합니다. 본인의 이메일을 입력하고 비밀번호와 복구코드를 안전하게 보관하세요. 이메일 소유 확인이나 이메일 복구 발송은 제공하지 않습니다.</p><p>계정·복구코드의 양도·공개 또는 타인 정보 사용을 금지합니다. 비밀번호를 잊었다면 <a href="/reset">복구코드로 비밀번호 재설정</a>을 이용할 수 있습니다.</p>
+<h2>제3조. 외부 정보 이용</h2><p>외부 정보에는 출처와 확인 시점을 표시합니다. 쇼핑 참고 링크는 구매 가능한 공구나 특가를 뜻하지 않습니다. 확인하지 못한 가격·배송비·종료 시점은 표시하지 않으며 가격·재고·상품 안전·판매처 이행을 보장하지 않습니다.</p><p>외부 판매처에서 현재 조건과 상품·배송·환불 정책을 직접 확인하세요. 단가 비교 결과는 이용자가 입력한 가격·배송비·수량을 계산한 값입니다.</p>
+<h2>제4조. 게시물과 커뮤니티 이용</h2><p>권리가 있는 내용만 게시하세요. 욕설·괴롭힘·차별·성적 또는 불법 콘텐츠·사기·스팸·권리침해·개인정보 노출을 금지합니다. 작성자는 본인 수요 글과 댓글을 삭제할 수 있습니다.</p><p>부적절한 글·댓글은 해당 화면에서 신고할 수 있으며 작성자를 차단할 수 있습니다. 운영자는 신고 검토 후 콘텐츠 숨김·이용정지·기각 조치를 할 수 있습니다. 이의 제기는 {contact}로 접수합니다.</p>
+<h2>제5조. 탈퇴와 기록 삭제</h2><p>마이페이지의 계정 관리에서 현재 비밀번호로 탈퇴할 수 있습니다. 작성·활동 기록의 삭제 범위와 남는 기록은 <a href="/legal/privacy">개인정보 처리방침</a>을 따릅니다. <a href="/legal/deletion">계정·데이터 삭제 안내</a>에서 절차를 확인하세요.</p>
+<h2>제6조. 접속 지연과 이용자 권리</h2><p>무료 서버의 절전·용량 제한으로 접속이 지연되거나 중단될 수 있습니다. 문제가 지속되면 <a href="/legal/support">도움말과 문의</a>를 이용하세요. 법률상 인정되는 이용자의 권리를 이 안내로 제한하지 않습니다.</p>'''),
+        'deletion': ('계정과 데이터 삭제', f'''
+<div class="summary"><p>앱 삭제와 계정 삭제는 다릅니다</p><p>휴대폰에서 앱을 지워도 서버의 계정과 작성 기록은 남습니다. 아래 웹 경로는 앱을 삭제한 뒤에도 이용할 수 있습니다.</p></div>
+<h2>1. 계정은 유지하고 기록만 삭제</h2><dl class="data-list"><dt>저장한 육아 정보</dt><dd>마이페이지 → 저장한 육아 정보 → 해당 정보의 상세 화면에서 <strong>저장 해제</strong>를 누릅니다.</dd><dt>수요 글과 댓글</dt><dd>공구 수요 → 본인이 작성한 글의 상세 화면 → <strong>신고·차단·삭제</strong> 메뉴 → <strong>내 글 삭제</strong>를 누릅니다. 댓글은 해당 댓글의 신고·차단·삭제 메뉴에서 <strong>내 댓글 삭제</strong>를 누릅니다. 수요 글을 지우면 그 글에 달린 댓글·관심·신고도 함께 삭제됩니다.</dd><dt>관심 표시</dt><dd>관심을 표시한 수요 글에서 <strong>관심 취소</strong>를 누릅니다.</dd><dt>작성자 차단</dt><dd>마이페이지 → 계정 관리 → 차단한 작성자에서 <strong>차단 해제</strong>를 누릅니다.</dd></dl><p>신고·동의·운영 기록처럼 개별 삭제 버튼이 없는 항목은 {contact}로 문의해 주세요. 본인 확인 후 요청의 대상과 처리 범위를 안내합니다.</p>
+<h2>2. 계정 전체 삭제</h2><ol class="steps"><li><strong>계정 관리 열기</strong><p>로그인 후 마이페이지 → 계정 관리로 이동합니다. 기존 앱에서는 ‘계정·복구·차단 설정’ 또는 ‘계정·설정’으로 표시될 수 있습니다.</p></li><li><strong>삭제 범위 확인</strong><p>‘계정과 데이터 삭제’ 영역의 <b>계정 삭제 진행</b>을 누릅니다.</p></li><li><strong>현재 비밀번호와 확인 항목 입력</strong><p>현재 비밀번호를 입력하고 삭제 결과와 복구 불가 확인 항목을 선택합니다.</p></li><li><strong>계정 영구 삭제 실행</strong><p><b>계정 영구 삭제</b>를 누르면 처리 후 로그아웃되어 첫 화면으로 이동합니다. 취소하려면 제출 전에 ‘취소’를 누르세요.</p></li></ol><a class="action" href="/login?returnTo=%2Fsettings">로그인하고 계정 관리 열기</a>
+<h2>3. 삭제되는 정보와 남는 기록</h2><p>본인 수요 글·댓글·관심·저장·신고·차단 기록과 세션·복구코드를 삭제합니다. 본인 수요 글에 달린 다른 회원의 댓글·관심·신고도 함께 삭제됩니다. 이메일·닉네임·비밀번호는 사용할 수 없게 바뀌며 계정과 삭제한 콘텐츠는 복구할 수 없습니다.</p><p>데이터 연결 관계를 위한 임의 계정 ID와 탈퇴 상태가 남습니다. 요청 제한 카운터와 제공자의 로그·복구 이력에는 별도 처리 기준이 적용됩니다. <a href="/legal/privacy#section-4">개인정보 처리방침의 보관·삭제 기준</a>을 확인하세요.</p>
+<h2>4. 로그인할 수 없거나 삭제가 안 될 때</h2><p><a href="/reset">보관한 복구코드로 비밀번호 재설정</a> 후 직접 삭제할 수 있습니다. 복구코드를 잃었거나 삭제 오류가 발생하면 아래 창구로 계정 이메일과 요청 내용을 보내 주세요. 운영자가 계정 주체 확인 후 처리합니다.</p><div class="contact"><strong>계정·개인정보 삭제 요청 · Team_Wifi</strong><p>{contact}</p><p class="muted">제목에 ‘계정 삭제 요청’ 또는 ‘개별 기록 삭제 요청’을 적고, 대상 기록과 발생 화면을 알려 주세요. 비밀번호·복구코드·주민등록번호는 보내지 마세요.</p></div>'''),
+        'support': ('도움말과 문의', f'''
+<div class="summary"><p>궁금한 기능부터 확인하세요</p><p>로그인 없이 육아 정보와 공구 수요 글을 둘러볼 수 있어요. 정보 저장과 글쓰기·댓글·관심 표시는 로그인 후 이용할 수 있습니다.</p></div>
+<h2>1. 자주 묻는 질문</h2><details open><summary>여기서 상품을 주문할 수 있나요?</summary><p>현재는 공식 출처의 정보를 살펴보고 조건을 비교하거나 공구 수요를 나누는 서비스입니다. 실제 주문·결제·배송·판매자 입점은 제공하지 않습니다. 관심 표시는 구매 계약이나 예약이 아닙니다.</p></details>
+<details><summary>가격이나 배송비가 없는 이유는 무엇인가요?</summary><p>확인하지 못한 가격·배송비·종료 시점은 표시하지 않습니다. ‘공식 참고 정보’는 특가나 공동구매 판매를 뜻하지 않습니다. 상세 화면의 출처 링크에서 현재 가격과 재고를 확인해 주세요.</p></details>
+<details><summary>비밀번호를 잊었어요</summary><p>가입 또는 재발급 때 보관한 복구코드로 <a href="/reset">비밀번호를 재설정</a>할 수 있습니다. 복구코드는 90일 동안 유효하며 이메일로 발송하지 않습니다. 코드를 잃었다면 아래 운영 문의 창구로 연락해 주세요. 비밀번호와 복구코드를 보내지는 마세요.</p></details>
+<details><summary>불편한 글이나 작성자를 신고하고 싶어요</summary><p>수요 글·댓글의 신고 메뉴에서 사유를 입력할 수 있습니다. 작성자를 차단하면 로그인한 내 화면에서 해당 작성자의 글·댓글이 숨겨집니다. 계정 관리의 ‘차단한 작성자’에서 해제할 수 있습니다. 신고 처리에 이의가 있으면 운영팀에 문의해 주세요.</p></details>
+<details><summary>탈퇴하지 않고 글이나 저장 기록만 지울 수 있나요?</summary><p>네. 본인 글·댓글, 저장과 관심 기록은 해당 화면에서 삭제할 수 있습니다. <a href="/legal/deletion">기록별 삭제 방법</a>에서 정확한 경로와 삭제 범위를 확인하세요.</p></details>
+<h2>2. 접속이 늦거나 오류가 발생할 때</h2><p>무료 서버가 절전에서 깨어날 때 첫 요청이 지연될 수 있습니다. 연결 상태를 확인하고 잠시 뒤 다시 불러오세요. 글쓰기·관심·저장 버튼을 반복해서 누르기 전에 처리 내역을 확인해 주세요.</p><p>화면을 다시 열어도 문제가 계속되면 발생 시각, 화면 이름, 기기·운영체제, 오류 메시지를 함께 알려 주세요. 로그인이나 계정 삭제에 문제가 있다면 그 상황도 적어 주세요.</p>
+<h2>3. 운영팀에 문의</h2><div class="contact"><strong>Team_Wifi 운영 문의</strong><p>{contact}</p><p>이용 문의 · 오류 신고 · 개인정보 요청 · 신고 처리 이의 제기</p><p class="muted">실시간 응답은 보장하지 않습니다. 화면을 첨부할 때 이메일·토큰·복구코드 등 개인정보와 인증정보를 가려 주세요. 비밀번호나 복구코드는 요청하지 않습니다.</p></div>'''),
+    }

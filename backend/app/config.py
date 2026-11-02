@@ -14,6 +14,7 @@ def deployed():
 
 
 PUBLIC_ORIGIN = (os.getenv('PUBLIC_ORIGIN') or os.getenv('RENDER_EXTERNAL_URL', '')).rstrip('/')
+PUBLIC_WEB_ORIGIN = os.getenv('PUBLIC_WEB_ORIGIN', '').rstrip('/')
 SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', '')
 RATE_LIMIT_SECRET = os.getenv('RATE_LIMIT_SECRET', '')
 HOSTING_LOCATION = os.getenv('HOSTING_LOCATION', '')
@@ -23,6 +24,11 @@ ORIGINS = ['https://localhost'] if DEPLOYED else [
     'http://127.0.0.1:5173', 'http://localhost:5173', 'https://localhost', 'http://localhost']
 if PUBLIC_ORIGIN:
     ORIGINS.append(PUBLIC_ORIGIN)
+if PUBLIC_WEB_ORIGIN:
+    web_url = urlsplit(PUBLIC_WEB_ORIGIN)
+    if web_url.scheme != 'https' or not web_url.hostname or web_url.path or web_url.query or web_url.fragment or web_url.username or web_url.password:
+        raise RuntimeError('PUBLIC_WEB_ORIGIN must be one explicit HTTPS origin.')
+    ORIGINS.append(PUBLIC_WEB_ORIGIN)
 
 
 def validate():

@@ -17,12 +17,12 @@ export default defineConfig(({ mode }) => {
       }, injectTo: "head-prepend" }];
     },
   }],
-  preview: { host: "127.0.0.1", port: 4173, strictPort: true, proxy: { "/api": { target: "http://127.0.0.1:8000", changeOrigin: true } } },
+  preview: { host: "127.0.0.1", port: 4173, strictPort: true, proxy: { "/api": { target: "http://127.0.0.1:8000", changeOrigin: true }, "/legal": { target: "http://127.0.0.1:8000", changeOrigin: true } } },
   server: {
     host: "127.0.0.1",
     port: 5173,
     strictPort: true,
-    proxy: { "/api": { target: "http://127.0.0.1:8000", changeOrigin: true } },
+    proxy: { "/api": { target: "http://127.0.0.1:8000", changeOrigin: true }, "/legal": { target: "http://127.0.0.1:8000", changeOrigin: true } },
   },
 });
 });

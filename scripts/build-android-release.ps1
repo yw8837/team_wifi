@@ -5,16 +5,17 @@ param(
   [Parameter(Mandatory)][uri]$ApiBaseUrl,
   [string]$SdkRoot = $env:ANDROID_HOME,
   [string]$JavaHome = $env:JAVA_HOME,
-  [ValidateRange(1,2100000000)][int]$VersionCode = 2,
-  [string]$VersionName = '0.2.0',
-  [ValidateSet('beta','public_release')][string]$Mode = 'beta',
-  [string]$OutputDirectory = ''
+  [Parameter(Mandatory)][ValidateRange(1,2100000000)][int]$VersionCode,
+  [Parameter(Mandatory)][string]$VersionName,
+  [ValidateSet('beta','public_release')][string]$Mode = 'public_release',
+  [string]$OutputDirectory = '',
+  [string]$WebOrigin = ''
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
 $out = if ($OutputDirectory) { [IO.Path]::GetFullPath($OutputDirectory, $root) } else { Join-Path $root 'artifacts/android/release' }
 if (-not $out.StartsWith([IO.Path]::GetFullPath($root).TrimEnd('\','/')+[IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) { throw 'Build output must stay inside this project.' }
-if ($Mode -eq 'public_release' -and ((Test-Path -LiteralPath (Join-Path $out 'moduyuga-beta.aab')) -or (Test-Path -LiteralPath (Join-Path $out 'moduyuga-beta.apk')))) { throw 'Preserve existing release artifacts; choose a new output directory.' }
+if ((Test-Path -LiteralPath (Join-Path $out 'build.json')) -or (Test-Path -LiteralPath (Join-Path $out 'moduyuga.aab')) -or (Test-Path -LiteralPath (Join-Path $out 'moduyuga.apk'))) { throw 'Preserve existing release artifacts; choose a new output directory.' }
 if ($ApiBaseUrl.Scheme -ne 'https' -or $ApiBaseUrl.Host -in @('localhost','127.0.0.1','::1') -or $ApiBaseUrl.AbsolutePath.TrimEnd('/') -ne '/api' -or $ApiBaseUrl.Query -or $ApiBaseUrl.Fragment -or $ApiBaseUrl.UserInfo) { throw 'A public HTTPS /api URL is required.' }
 $health = Invoke-RestMethod -Uri ($ApiBaseUrl.AbsoluteUri.TrimEnd('/')+'/health') -TimeoutSec 90
 $expectedHealthMode = if ($Mode -eq 'public_release') { 'public-release' } else { 'closed-beta' }
@@ -32,7 +33,7 @@ $identity = [Security.Principal.WindowsIdentity]::GetCurrent().Name
 if ($LASTEXITCODE -ne 0) { throw 'Could not restrict the signing directory ACL.' }
 $vault = Join-Path $private 'upload-password.clixml'
 $keystore = Join-Path $private 'upload.jks'
-$keys = @('JAVA_HOME','ANDROID_HOME','ANDROID_SDK_ROOT','VITE_API_BASE_URL','VITE_BETA_MODE','VITE_PUBLIC_RELEASE','MODU_LOCAL_ANDROID','MODU_KEYSTORE','MODU_STORE_PASSWORD','MODU_KEY_PASSWORD','MODU_KEY_ALIAS','MODU_VERSION_CODE','MODU_VERSION_NAME')
+$keys = @('JAVA_HOME','ANDROID_HOME','ANDROID_SDK_ROOT','VITE_API_BASE_URL','VITE_BETA_MODE','VITE_PUBLIC_RELEASE','VITE_PUBLIC_WEB_ORIGIN','MODU_LOCAL_ANDROID','MODU_KEYSTORE','MODU_STORE_PASSWORD','MODU_KEY_PASSWORD','MODU_KEY_ALIAS','MODU_VERSION_CODE','MODU_VERSION_NAME')
 $saved = @{}
 foreach ($key in $keys) { $saved[$key]=[Environment]::GetEnvironmentVariable($key,'Process') }
 try {
@@ -40,6 +41,7 @@ try {
   $env:VITE_API_BASE_URL=$ApiBaseUrl.AbsoluteUri.TrimEnd('/'); $env:MODU_LOCAL_ANDROID='0'
   $env:VITE_BETA_MODE = if ($Mode -eq 'beta') { '1' } else { '0' }
   $env:VITE_PUBLIC_RELEASE = if ($Mode -eq 'public_release') { '1' } else { '0' }
+  $env:VITE_PUBLIC_WEB_ORIGIN=$WebOrigin
   $env:MODU_KEYSTORE=$keystore; $env:MODU_KEY_ALIAS='moduyuga-upload'
   if ((Test-Path -LiteralPath $keystore) -ne (Test-Path -LiteralPath $vault)) { throw 'Incomplete signing key pair. Recover the existing backup; never silently replace it.' }
   if (-not (Test-Path -LiteralPath $vault)) {
@@ -70,10 +72,10 @@ try {
       if ($LASTEXITCODE -ne 0) { throw 'Signed Android build failed.' }
     } finally { Pop-Location }
     New-Item -ItemType Directory -Force $out | Out-Null
-    Copy-Item -LiteralPath 'android/app/build/outputs/bundle/release/app-release.aab' -Destination (Join-Path $out 'moduyuga-beta.aab') -Force
-    Copy-Item -LiteralPath 'android/app/build/outputs/apk/release/app-release.apk' -Destination (Join-Path $out 'moduyuga-beta.apk') -Force
-    $metadata=@{versionCode=$VersionCode;versionName=$VersionName;mode=$Mode;api=$env:VITE_API_BASE_URL;artifacts=@()}
-    foreach ($name in @('moduyuga-beta.aab','moduyuga-beta.apk')) {
+    Copy-Item -LiteralPath 'android/app/build/outputs/bundle/release/app-release.aab' -Destination (Join-Path $out 'moduyuga.aab') -Force
+    Copy-Item -LiteralPath 'android/app/build/outputs/apk/release/app-release.apk' -Destination (Join-Path $out 'moduyuga.apk') -Force
+    $metadata=@{versionCode=$VersionCode;versionName=$VersionName;mode=$Mode;api=$env:VITE_API_BASE_URL;webOrigin=$WebOrigin;artifacts=@()}
+    foreach ($name in @('moduyuga.aab','moduyuga.apk')) {
       $file=Get-Item -LiteralPath (Join-Path $out $name)
       $metadata.artifacts+=@{name=$name;bytes=$file.Length;sha256=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLower()}
     }
