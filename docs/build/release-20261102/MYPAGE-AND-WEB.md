@@ -18,7 +18,7 @@
 - Render 서비스 이름 변경만으로 기존 `onrender.com` 주소는 바뀌지 않았다. API 서비스 표시 이름은 `moduyuga-api`로 정리했다.
 - 무료 정적 웹을 별도 배포하는 설정을 추가했다. 계정 DB를 새로 만들거나 복제하지 않는다. 정적 웹에는 DB 비밀번호·서명키·API 비밀키를 넣지 않는다.
 - `PUBLIC_WEB_ORIGIN`은 명시적인 HTTPS 웹 원점 한 개를 API CORS에 추가한다. 와일드카드·자격증명 포함 URL·경로·쿼리를 허용하지 않는다. 웹에서 토큰이 생겼다고 Android에 자동 로그인되는 것은 아니며, 각 클라이언트에서 같은 계정으로 로그인한다.
-- 정적 웹의 정책 네 개는 서버와 같은 Python 템플릿에서 생성한다. `scripts/export-public-policies.py`는 DB를 사용하지 않는다. 새 웹의 공개 여부·최종 URL·운영 검증은 배포 후 이 문서에 기록한다.
+- 정적 웹의 정책 네 개는 서버와 같은 Python 템플릿에서 생성한다. `scripts/export-public-policies.py`는 DB를 사용하지 않는다. 정식 웹 주소는 **https://moduyuga.onrender.com**이며 실제 배포·접속을 확인했다.
 - `VITE_PUBLIC_WEB_ORIGIN`을 지정한 웹/앱은 정책을 정식 웹에서 연다. HTTPS API 검사는 유지한다.
 - Android App Links(공유 링크 → 설치 앱의 해당 화면)는 현재 구현되지 않았다. 계정·데이터 공유와 링크 기반 앱 실행을 혼동하지 않는다.
 
@@ -32,3 +32,24 @@
 - 원본 화면과 수정 화면 증거: `artifacts/mypage-20261102/` (로컬). 로컬 UI 확인에는 별도 SQLite 시험 DB만 사용했다.
 
 Google Play에는 현재 code 4가 심사 중이다. 이 수정의 신규 APK/AAB 빌드, 웹 운영 반영, Play 제출은 각각 구분해서 기록한다. C: 원본 보존, 이번 삭제량 0 bytes, 이전 coordinator hold 유지.
+
+## 운영 반영 완료 — 2026-11-02 13:52 KST
+
+- 무료 정적 웹 `moduyuga`, 서비스 ID `srv-dbk1ajnb9u1s73fb09qg`: `01f7ea9a658ba826623b1a842387f05c021aa618`, 배포 `dep-dbk1bd5g1s2s738gh660` Live. 도메인 구매·카드 등록·새 DB 생성 없이 Render 기본 주소를 사용했다.
+- 기존 API `moduyuga-api`: `eb21fce7188670625661fa4ecedd9adcaf48ed69`, 배포 `dep-dbk1b0vlk1mc73aiae20` Live. 이후 `01f7ea9`는 CI/검증 스크립트 변경뿐이다. 기존 주소와 DB는 code 4 호환성을 위해 유지한다.
+- API의 `PUBLIC_WEB_ORIGIN`, 기존 웹 빌드의 `VITE_PUBLIC_WEB_ORIGIN`을 정식 웹 주소로 지정했다. 정적 사이트에는 공개 설정만 저장했다. 서비스 자동 배포는 Off이며 검증한 커밋을 수동 배포한다.
+- Render는 SPA 포괄 rewrite가 정책의 디렉터리 URL도 처리하므로 `/legal/:kind → /legal/:kind/index.html`을 `/* → /index.html`보다 앞에 두었다. 보안 헤더 nosniff, DENY, strict-origin-when-cross-origin을 설정했다. 이 실제 설정을 `render.yaml`에도 기록했다.
+- 운영 브라우저에서 비회원 육아 정보 목록 → 마이페이지 → 약관 및 정책 → 개인정보 처리방침을 확인했다. 네 문서 모두 HTTP 200과 각 문서 제목/본문을 확인했다. 정책 모음과 마이페이지 직접 접근도 정상이다.
+- CORS preflight: 정식 웹 원점은 200 및 정확한 Allow-Origin, 허용하지 않은 원점은 400이고 Allow-Origin 없음. 운영 로그인을 새로 수행하거나 사용자 데이터를 수정하지 않았다. 동일 계정/데이터를 사용하도록 같은 API를 연결했고, 로그인 후 계정 화면은 앞서 분리된 로컬 DB로 확인했다.
+- 375×812, 가로 약 844×390, 1280×800에서 가로 넘침을 확인하지 못했다. 화면 이동 후 main 포커스, Tab으로 돌아가기 링크 선택, Enter 복귀를 확인했다. Android 실기기 검증은 별도다.
+- 최종 화면 증거: `artifacts/mypage-20261102/after-my-mobile-final.png`, `after-privacy-mobile-final.png`, `policy-hub-desktop-final.png`. 운영 응답 기록: `live-web-verification.json`. 이전 after-my-mobile.jpg는 중간 화면이므로 최종 결과로 사용하지 않는다.
+- GitHub Actions [41390331304](https://github.com/yw8837/team_wifi/actions/runs/41390331304): `01f7ea9`의 api, ui, unsigned-android 모두 성공. 서버 81개·프런트 142개 검사와 PostgreSQL 검증, npm audit 및 Android 빌드 포함.
+
+## 최종 서명 Android 산출물
+
+- 버전 **0.3.1 / code 5**, 소스 `01f7ea9`의 앱 코드, 기존 업로드 인증서 유지. E의 Node/JDK/SDK와 E Gradle 캐시에서 명령행 빌드 성공. 최종 디렉터리 `artifacts/android/releases/5-0.3.1-final/`.
+- `moduyuga.aab`: 3,258,096 bytes, SHA256 `e6f60be6c8a3c26eff595da50946f27ba4cb836009615f95f2fa01dece0305da`.
+- `moduyuga.apk`: 3,414,821 bytes, SHA256 `dafde7267c6ce1f28a96caca20e66a328c4c1b2e6d6f1d00282a1f40e2c8e602`.
+- 오프라인 검증 **45개 통과**: APK/AAB 서명, 기존 인증서, 패키지/앱 이름/버전, API 36, 위험 권한 없음, HTTPS API, 정식 정책 원점, 실제 번들 HTML/JS/CSS 일치. 증거 `artifacts/mypage-20261102/android-final/android-release-verification.json`.
+- 이 code 5는 이번 작업에서 Play에 올리지 않았다. 현재 code 4 심사와 신규 빌드 완료를 구분한다. 설치된 앱의 화면 변경에는 앱 업데이트가 필요하며, 서버에서 제공하는 기존 정책 URL에는 새 내용이 반영됐다.
+- 무료 API는 유휴 후 첫 연결 지연이 있을 수 있다. Android App Links, 실기기 0.3.1 실행, Play의 계정 유지형 데이터 삭제 선택 답변 갱신은 이 완료 범위에 포함하지 않는다.

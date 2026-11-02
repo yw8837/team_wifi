@@ -59,6 +59,9 @@ services:
         value: Neon · AWS 싱가포르
     routes:
       - type: rewrite
+        source: /legal/:kind
+        destination: /legal/:kind/index.html
+      - type: rewrite
         source: /*
         destination: /index.html
     headers:
