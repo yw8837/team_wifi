@@ -66,27 +66,58 @@ export async function api<T>(
     betaApiOrigin(true, API_BASE);
   }
   const token = sessionStorage.getItem(TOKEN_KEY);
+  const bootstrap = method === "GET" && path === "/config";
+  const readOnly = method === "GET";
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15_000);
+  // The free host can take 50+ seconds to wake. Keep one bounded deadline
+  // for bootstrap retries; never replay writes after an ambiguous failure.
+  const timeout = setTimeout(() => controller.abort(), bootstrap ? 90_000 : 15_000);
+  const timeoutMessage = readOnly
+    ? "서버 연결에 시간이 오래 걸리고 있어요. 잠시 후 다시 연결해 주세요."
+    : "응답 시간이 초과되었습니다. 처리 여부를 먼저 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다.";
+  const connectionMessage = readOnly
+    ? "서버에 연결할 수 없습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요."
+    : "서버에 연결할 수 없습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다.";
+  const retryDelay = (ms: number) => new Promise<void>((resolve, reject) => {
+    if (controller.signal.aborted) { reject(new ApiError(0, timeoutMessage)); return; }
+    const abort = () => { clearTimeout(timer); reject(new ApiError(0, timeoutMessage)); };
+    const timer = setTimeout(() => {
+      controller.signal.removeEventListener("abort", abort);
+      resolve();
+    }, ms);
+    controller.signal.addEventListener("abort", abort, { once: true });
+  });
   try {
-    let response: Response;
-    try {
-      response = await fetch(API_BASE + path, {
-        method,
-        headers: {
-          ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-        signal: controller.signal,
-      });
-    } catch {
-      throw new ApiError(0, controller.signal.aborted
-        ? "응답 시간이 초과되었습니다. 처리 여부를 먼저 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다."
-        : "서버에 연결할 수 없습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다.");
+    let response: Response | undefined;
+    const attempts = bootstrap ? 3 : 1;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      try {
+        response = await fetch(API_BASE + path, {
+          method,
+          headers: {
+            ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: body !== undefined ? JSON.stringify(body) : undefined,
+          signal: controller.signal,
+        });
+      } catch {
+        if (!controller.signal.aborted && attempt + 1 < attempts) {
+          await retryDelay(1_500 * (attempt + 1));
+          continue;
+        }
+        throw new ApiError(0, controller.signal.aborted ? timeoutMessage : connectionMessage);
+      }
+      if ([502, 503, 504].includes(response.status) && attempt + 1 < attempts) {
+        await response.body?.cancel();
+        await retryDelay(1_500 * (attempt + 1));
+        continue;
+      }
+      break;
     }
+    if (!response) throw new ApiError(0, connectionMessage);
     const data = await response.json().catch(() => {
-      if (controller.signal.aborted) throw new ApiError(0, "응답 시간이 초과되었습니다. 처리 여부를 확인한 뒤 다시 시도해 주세요.");
+      if (controller.signal.aborted) throw new ApiError(0, timeoutMessage);
       return {};
     });
     if (!response.ok) {

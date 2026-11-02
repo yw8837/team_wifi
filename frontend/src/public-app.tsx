@@ -19,10 +19,17 @@ const routeId=(id?:string)=>encodeURIComponent(id || "");
 export function PublicGate({enabled,children}:{enabled:boolean;children:ReactNode}) {
   const config=usePublicResource<unknown>(enabled?"/config":null);
   const location=useLocation();
+  const [slow,setSlow]=useState(false);
+  useEffect(()=>{
+    setSlow(false);
+    if(!config.loading)return;
+    const timer=window.setTimeout(()=>setSlow(true),10_000);
+    return()=>window.clearTimeout(timer);
+  },[config.loading]);
   if(!enabled)return children;
-  if((config.loading||config.error||!publicConfigMatches(config.data))&&location.pathname==="/calculator")return <main className="public-main"><Link className="wordmark" to="/"><BrandLockup/></Link><Calculator/><p><Link to="/">육아 정보로 돌아가기 · 서버 연결 확인</Link></p></main>;
-  if(config.loading)return <main className="narrow public-gate"><BrandLockup stacked/><h1>육아 정보를 준비하고 있어요</h1><p role="status">첫 연결은 시간이 걸릴 수 있어요. 잠시 기다려 주세요.</p><Link to="/calculator">기다리는 동안 단가 비교하기</Link></main>;
-  if(config.error || !publicConfigMatches(config.data))return <main className="narrow public-gate"><BrandLockup stacked/><h1>서비스 연결을 확인해 주세요</h1><p role="alert">{config.error || "현재 서버와 앱 버전이 맞지 않아 정보를 안전하게 표시할 수 없습니다."}</p><button onClick={config.reload}>연결 다시 확인</button><p>입력이나 가입 없이 다시 연결할 수 있어요.</p><Link to="/calculator">연결 없이 단가 비교 계산기 이용</Link></main>;
+  if((config.loading||config.error||!publicConfigMatches(config.data))&&location.pathname==="/calculator")return <main className="public-main"><Link className="wordmark" to="/"><BrandLockup/></Link><Calculator/><p><Link to="/">육아템으로 돌아가기 · 서버 연결 확인</Link></p></main>;
+  if(config.loading)return <main className="narrow public-gate"><BrandLockup stacked/><h1>육아템을 불러오고 있어요</h1><p role="status">{slow?"연결이 평소보다 늦어지고 있어요. 연결되면 자동으로 열립니다.":"잠시만 기다려 주세요."}</p>{slow&&<p>처음 접속할 때는 1분 이상 걸릴 수 있어요.</p>}<Link to="/calculator">기다리는 동안 단가 비교하기</Link><p><a href={legalUrl("support")}>도움말과 문의</a></p></main>;
+  if(config.error || !publicConfigMatches(config.data))return <main className="narrow public-gate"><BrandLockup stacked/><h1>서비스 연결을 확인해 주세요</h1><p role="alert">{config.error || "현재 서버와 앱 버전이 맞지 않아 정보를 안전하게 표시할 수 없습니다."}</p><button onClick={config.reload}>연결 다시 확인</button><p>입력이나 가입 없이 다시 연결할 수 있어요.</p><Link to="/calculator">연결 없이 단가 비교 계산기 이용</Link><p><a href={legalUrl("support")}>도움말과 문의</a></p></main>;
   return children;
 }
 export function PublicApp(){
@@ -39,9 +46,9 @@ export function PublicApp(){
       <Route path="/calculator" element={<Calculator/>}/><Route path="/my/saved" element={<Protected><Offers saved/></Protected>}/><Route path="/my" element={<PublicMy/>}/><Route path="/settings" element={<Protected><PublicSettings/></Protected>}/>
       <Route path="/my/policies" element={<PublicPolicies/>}/>
       <Route path="/admin" element={<Protected admin><PublicAdmin/></Protected>}/><Route path="/login" element={<Login/>}/><Route path="/signup" element={<Signup/>}/><Route path="/reset" element={<Reset/>}/><Route path="/welcome" element={<PublicWelcome/>}/>
-      <Route path="*" element={<section className="panel"><h1>화면을 찾을 수 없어요</h1><Link to="/">육아 정보 둘러보기</Link></section>}/>
+      <Route path="*" element={<section className="panel"><h1>화면을 찾을 수 없어요</h1><Link to="/">육아템 둘러보기</Link></section>}/>
     </Routes></main>
-    {!auth&&<nav className="bottom-nav" aria-label="주요 메뉴">{[["/","육아 정보",IconHome],["/demands","공구 수요",IconMessages],["/calculator","단가 비교",IconCalculator],["/my/saved","저장",IconBookmark],["/my","마이",IconUser]].map(([to,label,Icon])=>{const Glyph=Icon as typeof IconHome;return <NavLink key={String(to)} end={to==="/"} to={String(to)}><span className="nav-icon"><Glyph size={23} stroke={1.7} aria-hidden="true"/></span><span>{String(label)}</span></NavLink>;})}</nav>}
+    {!auth&&<nav className="bottom-nav" aria-label="주요 메뉴">{[["/","육아템",IconHome],["/demands","공구 수요",IconMessages],["/calculator","단가 비교",IconCalculator],["/my/saved","저장",IconBookmark],["/my","마이",IconUser]].map(([to,label,Icon])=>{const Glyph=Icon as typeof IconHome;return <NavLink key={String(to)} end={to==="/"} to={String(to)}><span className="nav-icon"><Glyph size={23} stroke={1.7} aria-hidden="true"/></span><span>{String(label)}</span></NavLink>;})}</nav>}
   </>;
 }
 function OfferCard({offer}:{offer:Offer}){
@@ -53,15 +60,15 @@ function Offers({saved=false}:{saved?:boolean}){
  const page=Math.max(0,Math.min(500,Math.floor(Number(params.get("page"))||0)));
  const result=usePublicResource<Offer[]>((saved?"/release/saved":"/release/offers")+"?"+new URLSearchParams({limit:"20",offset:String(page*20),...(saved?{}:{q,category})}),user?.id);
  const filtered=result.data;
- return <section className="home-catalog"><PageTitle eyebrow="함께 고르는 육아생활" title={saved?"저장한 육아 정보":"육아템, 꼼꼼히 알아보고 준비해요"}><p>{saved?"다시 확인하고 싶은 공식 정보를 모아뒀어요.":"공식 출처와 비교 기준을 살펴보고, 필요한 공구 수요를 나눠요."}</p></PageTitle>
- {!saved&&<><label className="field"><span className="sr-only">육아 정보 검색</span><input type="search" placeholder="육아용품 검색" maxLength={100} value={q} onChange={e=>setParams({...Object.fromEntries(params),q:e.target.value,page:"0"},{replace:true})}/></label><div className="public-categories" aria-label="카테고리">{["",...categories].map(c=><button key={c} className={category===c?"selected":"secondary"} aria-pressed={category===c} onClick={()=>setParams({...Object.fromEntries(params),category:c,page:"0"})}>{c&&<CategoryIcon category={c} size={24}/>}<span>{c||"전체"}</span></button>)}</div><aside className="public-intro"><strong>가격보다 먼저, 우리에게 맞는 기준부터</strong><p>참고 링크는 특가·제휴 판매가 아닙니다. 가격과 재고는 판매처에서 확인해 주세요.</p><Link to="/calculator">배송비까지 단가 비교하기 →</Link></aside></>}
- <ResourceState {...result} retry={result.reload}/>{!result.loading&&!result.error&&(filtered?.length?<div className="reference-list">{filtered.map(o=><OfferCard key={o.id} offer={o}/>)}</div>:<section className="panel"><h2>{saved?"아직 저장한 정보가 없어요":"검색 결과가 없어요"}</h2><p>{saved?"정보 상세의 저장 버튼으로 필요한 자료를 모아 보세요.":"다른 검색어 또는 전체 카테고리를 선택해 보세요."}</p><Link to="/">육아 정보 전체 보기</Link></section>)}
+ return <section className="home-catalog"><PageTitle eyebrow="함께 고르는 육아생활" title={saved?"저장한 육아템":"육아템, 꼼꼼히 알아보고 준비해요"}><p>{saved?"다시 보고 싶은 육아템을 모아뒀어요.":"공식 출처와 비교 기준을 살펴보고, 필요한 공구 수요를 나눠요."}</p></PageTitle>
+ {!saved&&<><label className="field"><span className="sr-only">육아템 검색</span><input type="search" placeholder="육아템 검색" maxLength={100} value={q} onChange={e=>setParams({...Object.fromEntries(params),q:e.target.value,page:"0"},{replace:true})}/></label><div className="public-categories" aria-label="카테고리">{["",...categories].map(c=><button key={c} className={category===c?"selected":"secondary"} aria-pressed={category===c} onClick={()=>setParams({...Object.fromEntries(params),category:c,page:"0"})}>{c&&<CategoryIcon category={c} size={24}/>}<span>{c||"전체"}</span></button>)}</div><aside className="public-intro"><strong>가격보다 먼저, 우리에게 맞는 기준부터</strong><p>참고 링크는 특가·제휴 판매가 아닙니다. 가격과 재고는 판매처에서 확인해 주세요.</p><Link to="/calculator">배송비까지 단가 비교하기 →</Link></aside></>}
+ <ResourceState {...result} retry={result.reload}/>{!result.loading&&!result.error&&(filtered?.length?<div className="reference-list">{filtered.map(o=><OfferCard key={o.id} offer={o}/>)}</div>:<section className="panel"><h2>{saved?"아직 저장한 육아템이 없어요":"검색 결과가 없어요"}</h2><p>{saved?"육아템 상세의 저장 버튼으로 관심 있는 제품을 모아 보세요.":"다른 검색어 또는 전체 카테고리를 선택해 보세요."}</p><Link to="/">육아템 전체 보기</Link></section>)}
  {!result.loading&&!result.error&&<Pagination page={page} count={result.data?.length||0} change={next=>setParams({...Object.fromEntries(params),page:String(next)})}/>}
  </section>;
 }
 function OfferDetail(){
  const {id}=useParams(),{user,requireLogin}=useAuth(),action=useAction();const result=usePublicResource<Offer>(releasePath("offers",id),user?.id),o=result.data;
- return <><Link to="/">← 육아 정보</Link><ResourceState {...result} retry={result.reload}/>{o&&!result.loading&&!result.error&&<article className="public-detail"><PageTitle eyebrow={o.category} title={o.title}><p>{o.summary}</p></PageTitle><span className="badge">{o.entry_type==="verified_offer"?"확인한 판매 정보":"공식 참고 정보 · 특가 아님"}</span><section className="panel"><h2>출처와 확인 정보</h2><p>{o.source_name}</p><p>확인 시각 {date(o.source_checked_at)}</p><p>{o.price===null?"가격 정보 없음 · 판매처에서 확인":money(o.price)+(o.unit?" / "+o.unit:"")}</p><p>{o.shipping_fee===null?"배송비 정보 없음": "배송비 "+money(o.shipping_fee)}</p><p>{o.expires_at?"안내 기한 "+date(o.expires_at):"별도 판매 기한 정보 없음"}</p>{safeExternalUrl(o.source_url)&&<a className="button secondary" href={safeExternalUrl(o.source_url)!} target="_blank" rel="noopener noreferrer">{o.source_name} 공식 출처 보기 ↗</a>}<p className="hint">외부 사이트로 이동합니다. 가격·재고·제품 사양과 구매 조건은 원문에서 다시 확인하세요.{o.is_affiliate?" 제휴 링크가 포함되어 있습니다.":" 제휴 수수료를 받지 않습니다."}</p></section><section className="panel"><h2>비교할 때 살펴보세요</h2><ul>{o.comparison_notes.map((n,i)=><li key={i}>{n}</li>)}</ul><Link to="/calculator">단가·배송비 계산하기 →</Link></section><Feedback {...action}/><button aria-pressed={o.saved} disabled={action.busy} onClick={()=>{if(requireLogin())void action.run(async()=>{await api(releasePath("offers",id)+"/saved",o.saved?"DELETE":"PUT");result.reload();},o.saved?"저장을 해제했습니다.":"정보를 저장했습니다.");}}>{o.saved?"저장 해제":"정보 저장"}</button></article>}</>;
+ return <><Link to="/">← 육아템</Link><ResourceState {...result} retry={result.reload}/>{o&&!result.loading&&!result.error&&<article className="public-detail"><PageTitle eyebrow={o.category} title={o.title}><p>{o.summary}</p></PageTitle><span className="badge">{o.entry_type==="verified_offer"?"확인한 판매 정보":"공식 참고 정보 · 특가 아님"}</span><section className="panel"><h2>출처와 확인 정보</h2><p>{o.source_name}</p><p>확인 시각 {date(o.source_checked_at)}</p><p>{o.price===null?"가격 정보 없음 · 판매처에서 확인":money(o.price)+(o.unit?" / "+o.unit:"")}</p><p>{o.shipping_fee===null?"배송비 정보 없음": "배송비 "+money(o.shipping_fee)}</p><p>{o.expires_at?"안내 기한 "+date(o.expires_at):"별도 판매 기한 정보 없음"}</p>{safeExternalUrl(o.source_url)&&<a className="button secondary" href={safeExternalUrl(o.source_url)!} target="_blank" rel="noopener noreferrer">{o.source_name} 공식 출처 보기 ↗</a>}<p className="hint">외부 사이트로 이동합니다. 가격·재고·제품 사양과 구매 조건은 원문에서 다시 확인하세요.{o.is_affiliate?" 제휴 링크가 포함되어 있습니다.":" 제휴 수수료를 받지 않습니다."}</p></section><section className="panel"><h2>비교할 때 살펴보세요</h2><ul>{o.comparison_notes.map((n,i)=><li key={i}>{n}</li>)}</ul><Link to="/calculator">단가·배송비 계산하기 →</Link></section><Feedback {...action}/><button aria-pressed={o.saved} disabled={action.busy} onClick={()=>{if(requireLogin())void action.run(async()=>{await api(releasePath("offers",id)+"/saved",o.saved?"DELETE":"PUT");result.reload();},o.saved?"저장을 해제했습니다.":"육아템을 저장했습니다.");}}>{o.saved?"저장 해제":"육아템 저장"}</button></article>}</>;
 }
 function Calculator(){
  const blank={price:"",shipping:"0",quantity:""};const [inputs,setInputs]=useState<ComparisonInput[]>([{...blank},{...blank}]);
@@ -89,7 +96,7 @@ function DemandDetail(){
  return <><Link to="/demands">← 공구 수요</Link><ResourceState {...result} retry={result.reload}/>{d&&!result.loading&&!result.error&&<article className="public-detail"><PageTitle eyebrow={d.category} title={d.title}><p>{d.author.nickname} · {date(d.created_at)}</p></PageTitle><p className="ugc-text">{d.body}</p><p className="notice">관심은 수요 조사입니다. 실제 주문·예약·결제·배송은 발생하지 않습니다. 운영자나 판매자의 공구 개설을 보장하지 않습니다.</p><p>현재 관심 {d.interest_count}명</p><button aria-pressed={d.interested} disabled={action.busy} onClick={()=>{if(requireLogin())void action.run(async()=>{await api(releasePath("demands",id)+"/interest",d.interested?"DELETE":"PUT");result.reload();},d.interested?"관심을 취소했습니다.":"관심을 표시했습니다. 주문이나 예약은 발생하지 않습니다.");}}>{d.interested?"관심 취소":"나도 관심 있어요"}</button><Feedback {...action}/><Moderation kind="demand" id={d.id} author={d.author} own={d.own} onChange={()=>nav("/demands",{replace:true})} onDelete={async()=>{await api(releasePath("demands",id),"DELETE");nav("/demands",{replace:true});}}/>
  <section className="comments"><h2>질문과 이야기</h2><ResourceState {...comments} retry={comments.reload}/>{!comments.loading&&!comments.error&&(comments.data?.length?comments.data.map(c=><article className="comment" key={c.id}><p className="ugc-text">{c.body}</p><p className="muted">{c.author.nickname} · {date(c.created_at)}</p><Moderation kind="comment" id={c.id} author={c.author} own={c.own} onChange={reload} onDelete={async()=>{await api(releasePath("comments",c.id),"DELETE");reload();}}/></article>):<p>이 페이지에는 댓글이 없어요. 제품을 고를 때 궁금한 점을 나눠 보세요.</p>)}{!comments.loading&&!comments.error&&<Pagination page={commentPage} count={comments.data?.length||0} change={setCommentPage}/>}<p className="notice" id="comment-privacy">{privacyNotice}</p><form aria-describedby="comment-privacy" onSubmit={e=>{e.preventDefault();if(requireLogin())void action.run(async()=>{await api(releasePath("demands",id)+"/comments","POST",{body});setBody("");setCommentPage(0);reload();},"댓글을 등록했습니다.");}}><label className="field"><span>댓글 작성</span><textarea required minLength={2} maxLength={1000} rows={3} value={body} onChange={e=>setBody(e.target.value)}/></label><button disabled={action.busy}>{user?"댓글 등록":"로그인하고 댓글 등록"}</button></form></section></article>}</>;
 }
-function PublicWelcome(){return <section className="welcome"><div className="welcome-emblem"><img src="/brand/symbol.svg" alt="" width="128"/></div><p className="eyebrow">함께 고르는 육아생활</p><h1>우리에게 맞는 육아템,<br/>차근차근 골라요.</h1><p className="lead">공식 정보의 출처를 살펴보고,<br/>단가를 비교하고, 공구 수요를 나누세요.</p><Link className="button" to="/">로그인 없이 육아 정보 둘러보기</Link><p>실제 주문·결제·배송은 제공하지 않습니다.</p><LegalLinks/></section>;}
+function PublicWelcome(){return <section className="welcome"><div className="welcome-emblem"><img src="/brand/symbol.svg" alt="" width="128"/></div><p className="eyebrow">함께 고르는 육아생활</p><h1>우리에게 맞는 육아템,<br/>차근차근 골라요.</h1><p className="lead">공식 정보의 출처를 살펴보고,<br/>단가를 비교하고, 공구 수요를 나누세요.</p><Link className="button" to="/">로그인 없이 육아템 둘러보기</Link><p>실제 주문·결제·배송은 제공하지 않습니다.</p><LegalLinks/></section>;}
 function PublicMy() {
   const {user}=useAuth();
   return <div className="my-page">
@@ -98,14 +105,14 @@ function PublicMy() {
       <div className="my-avatar"><IconUser size={28} stroke={1.6} aria-hidden="true"/></div>
       <div className="my-profile-copy">
         <h2 id="my-profile-title">{user ? user.nickname+"님, 반가워요" : "함께 고르는 육아생활"}</h2>
-        <p>{user ? "필요한 육아 정보를 모아 두고, 궁금한 점을 나눠요." : "둘러보기는 자유롭게, 저장과 글쓰기는 로그인 후에."}</p>
+        <p>{user ? "필요한 육아템를 모아 두고, 궁금한 점을 나눠요." : "둘러보기는 자유롭게, 저장과 글쓰기는 로그인 후에."}</p>
         {!user&&<div className="my-auth-actions"><Link className="button" to="/login?returnTo=%2Fmy">로그인</Link><Link to="/signup?returnTo=%2Fmy">회원가입</Link></div>}
       </div>
     </section>
     <section className="my-section" aria-labelledby="my-activity-title">
       <h2 id="my-activity-title">내 활동과 계정</h2>
       <nav className="my-menu" aria-label="내 활동과 계정">
-        <Link to="/my/saved"><IconBookmark size={23} aria-hidden="true"/><span><strong>저장한 육아 정보</strong><small>다시 보고 싶은 정보를 한곳에</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
+        <Link to="/my/saved"><IconBookmark size={23} aria-hidden="true"/><span><strong>저장한 육아템</strong><small>다시 보고 싶은 육아템을 한곳에</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
         <Link to="/settings"><IconUser size={23} aria-hidden="true"/><span><strong>계정 관리</strong><small>로그아웃 · 복구코드 · 차단 · 계정 삭제</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
         {user?.is_admin&&<Link to="/admin"><span><strong>콘텐츠 신고 관리</strong><small>접수된 신고 확인과 처리</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}
       </nav>

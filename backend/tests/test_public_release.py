@@ -156,6 +156,26 @@ def signup(c, **kw):
     return c.post('/api/auth/register',json={**payload,**kw})
 
 
+def test_same_account_shares_saves_and_posts_across_independent_sessions(public_mode):
+    c, people, _ = public_mode
+    registered = signup(c)
+    assert registered.status_code == 201
+    web = {'Authorization': 'Bearer ' + registered.json()['access_token']}
+    logged_in = c.post('/api/auth/login', json={'email': 'public@example.com', 'password': PASSWORD})
+    assert logged_in.status_code == 200
+    app_session = {'Authorization': 'Bearer ' + logged_in.json()['access_token']}
+    assert web != app_session
+    assert c.get('/api/me', headers=web).json()['id'] == c.get('/api/me', headers=app_session).json()['id']
+    save_url = '/api/release/offers/official-source-1/saved'
+    assert c.put(save_url, headers=web).status_code == 200
+    assert [item['id'] for item in c.get('/api/release/saved', headers=app_session).json()] == ['official-source-1']
+    assert c.delete(save_url, headers=app_session).status_code == 200
+    assert c.get('/api/release/saved', headers=web).json() == []
+    demand = post_demand(c, app_session)
+    assert c.get('/api/release/demands/' + demand['id'], headers=web).json()['own'] is True
+    assert c.get('/api/release/demands/' + demand['id'], headers=people['buyer']['headers']).json()['own'] is False
+
+
 def test_public_signup_recovery_and_no_local_outbox(public_mode):
     c,p,_=public_mode
     assert signup(c, adult_confirmed=False).status_code == 422

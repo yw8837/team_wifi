@@ -64,6 +64,48 @@ describe("external source links", () => {
   );
 });
 describe("API failures and session", () => {
+  it("allows the first config read to finish after a 55-second server wake", async () => {
+    vi.useFakeTimers();
+    const fetch = vi.fn((_url: string, init: RequestInit) => new Promise<Response>((resolve, reject) => {
+      const timer = setTimeout(() => resolve(new Response(JSON.stringify({ public_release: true }))), 55_000);
+      init.signal?.addEventListener("abort", () => { clearTimeout(timer); reject(new Error("aborted")); });
+    }));
+    vi.stubGlobal("fetch", fetch);
+    const result = api("/config");
+    await vi.advanceTimersByTimeAsync(55_000);
+    await expect(result).resolves.toEqual({ public_release: true });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch.mock.calls[0][1].signal?.aborted).toBe(false);
+  });
+  it("recovers config from a transient gateway and network failure without manual reload", async () => {
+    vi.useFakeTimers();
+    const fetch = vi.fn().mockResolvedValueOnce(new Response("waking", { status: 503 }))
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ public_release: true })));
+    vi.stubGlobal("fetch", fetch);
+    const result = api("/config");
+    await vi.advanceTimersByTimeAsync(4_500);
+    await expect(result).resolves.toEqual({ public_release: true });
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+  it("bounds an unavailable config server at 90 seconds with a read-only message", async () => {
+    vi.useFakeTimers();
+    const fetch = vi.fn((_url: string, init: RequestInit) => new Promise<Response>((_resolve, reject) => {
+      init.signal?.addEventListener("abort", () => reject(new Error("aborted")));
+    }));
+    vi.stubGlobal("fetch", fetch);
+    const result = api("/config");
+    const rejection = expect(result).rejects.toMatchObject({ status: 0, message: expect.not.stringContaining("처리 여부") });
+    await vi.advanceTimersByTimeAsync(90_000);
+    await rejection;
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+  it("never automatically retries a mutation rejected by a gateway", async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response("unavailable", { status: 503 }));
+    vi.stubGlobal("fetch", fetch);
+    await expect(api("/release/demands", "POST", { title: "example" })).rejects.toMatchObject({ status: 503 });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
   it("aborts a slow mutation after 15 seconds without replaying it", async () => {
     vi.useFakeTimers();
     const fetch = vi.fn((_url: string, init: RequestInit) => new Promise((_resolve, reject) => {
