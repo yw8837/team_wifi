@@ -42,6 +42,7 @@ def version(command):
 
 manifest = dict(schema_version=1, signed=False, commit=commit, run_id=os.environ['GITHUB_RUN_ID'],
                 run_attempt=os.environ['GITHUB_RUN_ATTEMPT'], mode='public_release', api=api,
+                webOrigin=os.environ['VITE_PUBLIC_WEB_ORIGIN'],
                 versionCode=int(os.environ['MODU_VERSION_CODE']), versionName=os.environ['MODU_VERSION_NAME'],
                 tools={'java': version(['java', '-version']), 'node': version(['node', '--version'])}, files={})
 for file in sorted(out.rglob('*')):

@@ -66,6 +66,8 @@ for item in build['artifacts']:
         check(item['name'] + ': no remote app bundle', not config.get('server', {}).get('url'))
         scripts = '\n'.join(archive.read(n).decode() for n in archive.namelist() if n.startswith(prefix+'public/assets/') and n.endswith('.js'))
         check(item['name'] + ': release HTTPS API', build['api'] in scripts)
+        if build.get('webOrigin'):
+            check(item['name'] + ': permanent policy origin', build['webOrigin'] in scripts)
         for asset in ('symbol.svg', 'wordmark.png'):
             check(item['name'] + ': original ' + asset, archive.read(prefix+'public/brand/'+asset) == (ROOT/'frontend/public/brand'/asset).read_bytes())
 

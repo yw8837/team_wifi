@@ -23,6 +23,7 @@ if(Test-Path -LiteralPath $out){throw 'Choose a new release directory; existing 
 $manifest=Get-Content -LiteralPath (Join-Path $incoming 'provenance.json') -Raw | ConvertFrom-Json
 if($manifest.schema_version -ne 1 -or $manifest.signed -ne $false -or $manifest.commit -ne $ExpectedCommit -or $manifest.run_id -ne $ExpectedRunId -or $manifest.mode -ne 'public_release' -or $manifest.versionCode -ne $ExpectedVersionCode -or $manifest.versionName -ne $ExpectedVersionName -or $manifest.api -ne 'https://moduyuga-beta.onrender.com/api'){throw 'CI provenance does not match the reviewed release.'}
 $incomingPrefix=$incoming.TrimEnd('\','/')+[IO.Path]::DirectorySeparatorChar
+if($manifest.webOrigin -ne 'https://moduyuga.onrender.com'){throw 'CI web origin does not match the permanent web address.'}
 foreach($entry in $manifest.files.PSObject.Properties){
  $file=[IO.Path]::GetFullPath($entry.Name,$incoming)
  if(-not $file.StartsWith($incomingPrefix,[StringComparison]::OrdinalIgnoreCase)){throw 'Unsafe manifest path.'}
@@ -60,7 +61,7 @@ try{
  if($LASTEXITCODE -ne 0){throw 'AAB signing failed.'}
  Copy-Item -LiteralPath (Join-Path $incoming 'web') -Destination (Join-Path $out 'web') -Recurse
  Copy-Item -LiteralPath (Join-Path $incoming 'provenance.json') -Destination (Join-Path $out 'unsigned-provenance.json')
- $metadata=@{versionCode=$manifest.versionCode;versionName=$manifest.versionName;mode=$manifest.mode;api=$manifest.api;commit=$manifest.commit;run_id=$manifest.run_id;artifacts=@()}
+ $metadata=@{versionCode=$manifest.versionCode;versionName=$manifest.versionName;mode=$manifest.mode;api=$manifest.api;webOrigin=$manifest.webOrigin;commit=$manifest.commit;run_id=$manifest.run_id;artifacts=@()}
  foreach($name in @('moduyuga.apk','moduyuga.aab')){
   $file=Get-Item -LiteralPath (Join-Path $out $name)
   $metadata.artifacts+=@{name=$name;bytes=$file.Length;sha256=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLower()}

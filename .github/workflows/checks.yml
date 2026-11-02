@@ -51,6 +51,7 @@ jobs:
           VITE_PUBLIC_RELEASE: '1'
           VITE_BETA_MODE: '0'
           VITE_API_BASE_URL: https://moduyuga-beta.onrender.com/api
+          VITE_PUBLIC_WEB_ORIGIN: https://moduyuga.onrender.com
       - uses: actions/upload-artifact@v4
         with:
           name: public-web-candidate
@@ -67,6 +68,7 @@ jobs:
       VITE_PUBLIC_RELEASE: '1'
       VITE_BETA_MODE: '0'
       VITE_API_BASE_URL: https://moduyuga-beta.onrender.com/api
+      VITE_PUBLIC_WEB_ORIGIN: https://moduyuga.onrender.com
       MODU_LOCAL_ANDROID: '0'
       MODU_VERSION_CODE: '5'
       MODU_VERSION_NAME: '0.3.1'
