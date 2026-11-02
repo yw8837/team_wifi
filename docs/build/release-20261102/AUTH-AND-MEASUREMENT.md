@@ -24,7 +24,7 @@
 - 서버 비밀 환경 변수: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`. 프런트·Android·Git에 넣지 않는다.
 - Google 웹 클라이언트 redirect: `https://moduyuga-beta.onrender.com/api/auth/social/google/callback`
 - Kakao REST 앱 redirect: `https://moduyuga-beta.onrender.com/api/auth/social/kakao/callback`; 카카오 로그인·OpenID Connect 활성화 필요.
-- 실제 제공자 승인, 서버 환경 설정, 실제 계정 인증, Android 실기기 반환은 설정 후 별도로 검증해야 한다. 단위 시험의 가짜 제공자 응답을 운영 로그인 성공으로 취급하지 않는다.
+- 카카오 제공자 승인·서버 환경 설정·기존 계정 연결과 실제 재로그인은 아래 최종 운영 기록에서 확인했다. Google 활성화와 Android 실기기 반환은 아직 미완료다. 단위 시험의 가짜 제공자 응답을 운영 로그인 성공으로 취급하지 않는다.
 
 ## 실제 서비스 통계
 
@@ -62,10 +62,32 @@
 - 추가 후 서버 전체 **123개**, 프런트 **155개** 통과. 최초 로컬 웹 빌드는 명령에 `VITE_API_BASE_URL` 대신 다른 변수명을 준 실행 오류로 보호 장치에서 거부됐다. 올바른 공개 환경 변수로 다시 실행해 빌드 성공했다. 구 성공 결과로 새 코드를 대체 검증하지 않았다.
 - 콘솔에는 User Unlinked만 받는 설정을 준비했다. 실제 웹훅 활성화·공식 송신 검증·후속 배포 ID는 아래 최종 운영 기록을 따른다.
 
-### 서명 Android 0.5.0 / code 7
+### 최초 서명 Android 0.5.0 / code 7 — 보존 산출물
 
 - 경로: `artifacts/android/releases/7-0.5.0-auth-data/`. 동일 SHA·CI run의 unsigned provenance와 모든 파일 SHA를 확인한 뒤 E의 기존 업로드 키로 서명했다. 서명키를 CI로 전송하지 않았다.
 - APK: 3,547,407 bytes, SHA256 `2ae51b69631e6b5f861ea40e6f5ec2cbfff2a26f095478d9e393bce399f7b7b0`.
 - AAB: 3,373,212 bytes, SHA256 `67494f9fc93f5b1aea9aa6043ad4d7ea6990e71693f12794cce3d23b0d47019e`.
 - 오프라인 검증 **49개 통과**: `android/android-release-verification.json`. 패키지·버전·기존 인증서·실제 번들·원점·권한·서명 등을 확인했다.
 - Play 미업로드, Android 실기기 소셜 반환 미검증이다. 기존 설치본에는 새 프런트가 자동 배포되지 않는다. 신규 수집/인증 방식의 Play 데이터 보안 변경은 [DATA-SAFETY.md](DATA-SAFETY.md)의 후속 매핑에 기록하며 콘솔 저장 완료로 주장하지 않는다.
+
+## 최종 운영 기록 — 2026-11-02 23:30 KST
+
+- 최종 기능 소스는 `8fde8abbc266078db09c8dd240b86bca1ba491fa`다. [push CI 41460847054](https://github.com/yw8837/team_wifi/actions/runs/41460847054)의 API·UI·Android 작업이 모두 성공했다. 서버 123개, 프런트 155개, 실제 PostgreSQL 67개 검사와 npm audit을 통과했다. 증거 `ci-events.json`, `ci-postgres-events/public-release-postgres-results.json`.
+- API 배포 `dep-dbk9qk6gekts73f5v7jg`, 정식 웹 배포 `dep-dbk9qk0473hc7382hg6g` 모두 해당 소스로 **Live**다. 기존 무료 서비스와 서버 비밀 환경변수를 유지했다. 기록 화면 `render-api-events-live.png`, `render-web-events-live.png`.
+- 운영 API·가이드·검색 안내 파일·개인정보 고지·잘못된 웹훅 거부를 포함한 **15개 점검 통과**. 운영 JS/CSS가 동일 CI 산출물과 바이트 단위로 일치했다. `live-final.json` pass=true. 이 시점의 건강 확인은 0.61초였으며 무료 인스턴스의 유휴 기동 지연을 없애거나 상시 가용성을 보장한 것은 아니다.
+- 사용자 승인으로 기존 이메일 운영자 계정에 카카오를 연결했다. 해당 브라우저 세션을 로그아웃한 뒤 비밀번호 입력 없이 **카카오로 계속하기**로 재로그인해 기존 운영자 메뉴를 확인했다. 최종 배포 뒤에도 같은 계정과 `연결됨: 카카오`를 확인했다. 별도 회원 생성·비밀번호 변경·기록 초기화 없이 기존 계정을 사용했다. 증거 `kakao-owner-relogin.png`, `kakao-owner-linked-final.png`, `kakao-final.json`.
+- 카카오 앱의 계정 상태 변경 웹훅을 사용함으로 저장하고 **User Unlinked만 자동 수신**하도록 설정했다. URL은 `https://moduyuga-beta.onrender.com/api/auth/social/kakao/events`다. `kakao-unlink-webhook-enabled.png`.
+- 카카오 공식 도구에서 계정을 변경하지 않는 **User Linked** 서명 이벤트를 수동 전송했다. 실제 서명·issuer·audience 검사를 거쳐 **202 Accepted, 빈 본문, 913ms** 응답을 확인했다(`kakao-signed-event-202.png`). 이는 통신·서명 검증 증거이며 실제 운영 회원의 연결 해제/삭제를 수행한 시험이 아니다. 연결 해제의 보존·삭제·중복·오래된 이벤트 동작은 격리 시험으로 검증했다. Render 유휴 기동은 제공자 응답 제한을 초과할 수 있으므로 모든 알림의 즉시 처리를 보장하지 않는다.
+
+### 최종 서명 Android 산출물
+
+- **0.5.0(code 7)**, 경로 `artifacts/android/releases/7-0.5.0-auth-data-final/`. CI run `41460847054`의 source/provenance와 파일 해시를 확인해 E의 기존 키로 서명했다. 앞의 `7-0.5.0-auth-data/`는 이전 소스 증거로 보존한다.
+- APK: 3,547,407 bytes, SHA256 `66384beccdd9b810882f4fcc1404b4c8b2f3d06aabfe583016b02b9da5a4ee25`.
+- AAB: 3,373,338 bytes, SHA256 `318bb60c26ae81ae73ae004258d3237ffc4b77439d968ea2868328cb6fc97ece`.
+- 서명·버전·원점·실제 번들 일치 등 **49개 통과**: `android-final/android-release-verification.json`. Play 업로드·Play 데이터 보안 답변 갱신·Android 실기기 소셜 반환 확인은 하지 않았다.
+
+### 남은 범위
+
+- **Google 로그인 미활성화**: 지정 관리 계정의 프로젝트 한도 문제. 무료 로그인 전용 프로젝트 1개 추가 요청은 사용자 제출 확인을 기다리는 초안 상태이며 Google에 아직 보내지 않았다. 다른 계정·타 서비스 프로젝트·결제 연결을 대신 사용하지 않았다.
+- 실제 일반 신규 회원의 제공자 동의부터 가입까지의 운영 종단 확인과 Android 실기기 반환은 미확인이다. 기존 운영자 카카오 재로그인 성공과 격리된 신규 가입 시험 결과를 구분한다.
+- 검색/AI 노출 및 CTR 향상은 아직 관측 결과가 아니다. 수집 동의와 실제 이용 데이터가 쌓여야 분석할 수 있다.

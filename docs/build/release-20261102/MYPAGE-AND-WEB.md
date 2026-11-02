@@ -79,4 +79,4 @@ Google Play에는 현재 code 4가 심사 중이다. 이 수정의 신규 APK/AA
 
 ## 후속 인증·활동 분석 배포 — 2026-11-02
 
-code 6 이후 **0.5.0(code 7)**의 서명 APK/AAB와 오프라인 49개 검증을 완료했다. 최신 파일은 `artifacts/android/releases/7-0.5.0-auth-data/`이며 Play 업로드·실기기 실행은 수행하지 않았다. 같은 소스 `0e5ec28`을 정식 웹과 API에 배포하고 선택 동의 기반 노출·CTA·저장/관심 분석 및 정적 공개 가이드를 연결했다. 계정 로그인 진단, 카카오 실제 설정, Google 활성화 미완료 범위는 [AUTH-AND-MEASUREMENT.md](AUTH-AND-MEASUREMENT.md)를 따른다.
+code 6 이후 **0.5.0(code 7)**의 서명 APK/AAB와 오프라인 49개 검증을 완료했다. 최신 파일은 `artifacts/android/releases/7-0.5.0-auth-data-final/`이며 Play 업로드·실기기 실행은 수행하지 않았다. 같은 소스 `8fde8ab`을 정식 웹과 API에 배포하고 선택 동의 기반 노출·CTA·저장/관심 분석, 정적 공개 가이드, 카카오 서명 연결 해제 알림을 연결했다. 기존 운영자 계정의 실제 카카오 연결과 비밀번호 없는 재로그인을 확인했다. 이전 소스 `0e5ec28` 산출물은 보존한다. 계정 로그인 진단, 최종 CI·배포·서명 증거, Google 활성화 미완료 범위는 [AUTH-AND-MEASUREMENT.md](AUTH-AND-MEASUREMENT.md)를 따른다.
