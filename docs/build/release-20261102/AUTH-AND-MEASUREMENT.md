@@ -6,7 +6,8 @@
 
 ## 이메일 가입·로그인
 
-- 운영 API의 합성 비회원 로그인은 정상 401이었다. 사용자에게 표시된 원래 오류 문구는 아직 확보하지 못했다. 전체 원인을 해결했다고 단정하지 않는다.
+- 사용자가 보고한 증상은 가입 시 이메일 중복, 로그인 시 자격증명 불일치였다. 대상 계정은 초기 배포 때 생성한 운영자 계정이었다. 운영 DB 읽기 전용 검사에서 계정 존재·관리자·비정지·비탈퇴와 초기 생성 비밀번호의 해시 일치를 확인했다. 사용자 입력 비밀번호는 받지 않았다.
+- 보관된 기존 자격증명으로 운영 브라우저 로그인과 계정 관리 진입에 성공했다. 별도 API 검증 세션도 로그인·관리자 분석 조회 200 후 해당 세션만 로그아웃했다. 기존 계정·저장 기록·비밀번호를 임의 변경하지 않았다. 사용자 직접 새 비밀번호 설정을 위한 복구코드 발급 화면을 준비했다. 이 계정의 설정 문제와 모든 이용자의 인증 장애를 구분한다.
 - Render 무료 서버는 비활성 후 50초 이상 기동 지연이 가능하다. 기존 클라이언트의 가입·로그인 제한 15초를 90초로 바꾸고, 쓰기 요청은 자동 재전송하지 않는다. 55초 지연 응답 회귀 검증을 추가했다. 이 변경은 무료 호스트의 가용성 보장이 아니다.
 - 중복 이메일 가입은 로그인·계정 복구를 안내한다. 사용할 수 없는 비밀번호 해시는 인증 실패로 처리한다.
 - 격리 DB에서 가입→복구코드 발급→동일 계정 로그인과 잘못된 비밀번호 거부를 검증한다. PostgreSQL 검증에도 실제 가입→로그인을 포함한다.
@@ -18,7 +19,8 @@
 - 기존 이메일 회원은 계정 관리에서 연결한다. 같은 `(provider, sub)`는 앱과 웹에서 같은 회원 ID로 연결된다. 다른 회원에 연결된 소셜 ID는 거부한다.
 - 새 회원은 서비스 약관·개인정보·성인 확인을 거친다. 소셜 전용 회원은 연결된 제공자의 새 인증 결과로 계정 삭제가 가능하다. 삭제 재인증은 5분, 로그인 요청은 10분 유효하다.
 - 웹·Android 반환 URL에 세션/제공자 토큰을 싣지 않는다. 임의 flow ID와 시작 기기에만 있는 256비트 검증 값으로 최종 세션을 교환한다. Android는 Capacitor Browser의 시스템 브라우저와 App deep-link 콜백을 사용한다. WebView 안에서 제공자 비밀번호를 받지 않는다.
-- 운영 준비 상태: Kakao Developers 앱 등록 폼을 준비했지만 운영정책 확인·저장은 사용자 실행 시 확인 대기다. Google 로그인 계정은 프로젝트 생성 한도에 도달했으며 전용 프로젝트 선택이 필요하다. 기존 타 서비스 프로젝트를 재사용하거나 삭제하지 않았다.
+- 운영 준비 상태: 사용자 승인 후 Kakao Developers에 전용 앱 `1634514`를 생성하고 로그인·OpenID Connect·REST 콜백을 활성화했다. 기본 발급된 client secret의 보호를 유지하고, 인증 키 2개를 기존 Render API의 비밀 환경변수로 연결했다. 제공자 실인증 결과는 아래 후속 증거와 구분한다.
+- Google은 사용자가 지정한 관리 계정의 프로젝트 생성 한도가 소진됐다. 다른 로그인 계정에는 여유가 있었지만 사용자가 그 계정을 선택하지 않아 생성하지 않았다. 지정 계정으로 무료 로그인 전용 프로젝트 1개 추가 요청 초안을 준비했으며, Google 지원 제출은 사용자 확인 대기다. 기존 타 서비스 프로젝트를 재사용·삭제하거나 과금·무료 체험판을 활성화하지 않았다.
 - 서버 비밀 환경 변수: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`. 프런트·Android·Git에 넣지 않는다.
 - Google 웹 클라이언트 redirect: `https://moduyuga-beta.onrender.com/api/auth/social/google/callback`
 - Kakao REST 앱 redirect: `https://moduyuga-beta.onrender.com/api/auth/social/kakao/callback`; 카카오 로그인·OpenID Connect 활성화 필요.
@@ -42,4 +44,21 @@
 
 ## 검증과 배포 증거
 
-작업 중 증거는 `artifacts/auth-growth-20261102/`에 보관한다. 비밀·원본 로그·합성 계정 토큰은 커밋하지 않는다. 최종 CI, 배포 ID, 서명 빌드 SHA와 실제 검증 범위는 검증 완료 후 아래에 추가한다.
+증거는 `artifacts/auth-growth-20261102/`에 보관한다. 비밀·원본 로그·계정 정보·토큰은 커밋하지 않는다.
+
+- 배포 소스: `0e5ec288cae32d040c9d0ed00ff4c7f048f0d0df`. 기능 커밋 `492cdec` 이후, Android 초기 URL의 화면 이동 중 재처리와 StrictMode의 중복 claim을 막는 후속 수정을 포함한다.
+- [GitHub Actions 41454251614](https://github.com/yw8837/team_wifi/actions/runs/41454251614): API·UI·Android 모두 success. 서버 110개, 프런트 155개, 실제 PostgreSQL 67개 검사 통과. npm audit 통과. PostgreSQL 결과는 `ci-postgres/public-release-postgres-results.json`.
+- 격리된 실제 브라우저에서 일반 회원의 선택 동의, 목록 노출, 상세 CTA, 서버 저장 성공 및 순서에 맞는 전환 연결을 확인했다. 측정과 저장 요청의 경합을 수정한 뒤 `local-ui-measurement-ordered.json` pass. 운영 회원에게 가짜 노출·저장 기록을 만들지 않았다.
+- 정식 웹 배포 `dep-dbk97pgn74is73bq19ag` Live. API 코드 배포 `dep-dbk94he7bikc739htfg0` Live 후, 같은 소스의 기존 빌드를 재사용한 카카오 환경 설정 배포 `dep-dbk9dcfb9u1s73815sv0` Live.
+- 운영 API 건강·설정, 비인증 분석 접근 거부, 4개 정적 가이드, robots·sitemap·llms·개인정보 문서 등 13개 검사 통과. 첫 개인정보 검사에 실제 문서에 없는 영문 `OpenID`를 요구한 검증 오류가 있었고, 문서의 소셜 고유 식별자·선택 동의·노출·30일 보관 고지로 검사 조건을 바로잡았다. 원래 결과를 보존했다.
+- 운영 웹 JS·CSS와 같은 CI 산출물의 바이트가 일치했다: `live-ci-assets.json`. 공개 가이드 브라우저 화면은 `live-answer-guide.png`, 기존 운영자 로그인 증거는 비공개 `owner-login-restored.png`.
+- 카카오 환경 배포 후 `/auth/social/providers`는 `kakao`만 반환하고, 건강 확인 200 및 잘못된 콜백 400을 확인했다(`live-kakao-config.json`). 로그인 화면의 실제 카카오 버튼과 공식 인증 화면까지 연결됐다. 공식 화면의 제공 항목은 회원번호뿐이다. 기존 운영자 계정에 연결하는 최종 동의는 별도 사용자 확인 대기이며, 이 시점에는 실제 토큰 교환·연결 완료를 주장하지 않는다.
+- 카카오 서비스 외부 연결 해제 알림 웹훅은 아직 설정하지 않았다. 현재 서비스의 계정 삭제는 로컬 연결을 제거하며, 외부 연결 해제 이벤트의 자동 반영까지 완료한 것으로 간주하지 않는다.
+
+### 서명 Android 0.5.0 / code 7
+
+- 경로: `artifacts/android/releases/7-0.5.0-auth-data/`. 동일 SHA·CI run의 unsigned provenance와 모든 파일 SHA를 확인한 뒤 E의 기존 업로드 키로 서명했다. 서명키를 CI로 전송하지 않았다.
+- APK: 3,547,407 bytes, SHA256 `2ae51b69631e6b5f861ea40e6f5ec2cbfff2a26f095478d9e393bce399f7b7b0`.
+- AAB: 3,373,212 bytes, SHA256 `67494f9fc93f5b1aea9aa6043ad4d7ea6990e71693f12794cce3d23b0d47019e`.
+- 오프라인 검증 **49개 통과**: `android/android-release-verification.json`. 패키지·버전·기존 인증서·실제 번들·원점·권한·서명 등을 확인했다.
+- Play 미업로드, Android 실기기 소셜 반환 미검증이다. 기존 설치본에는 새 프런트가 자동 배포되지 않는다. 신규 수집/인증 방식의 Play 데이터 보안 변경은 [DATA-SAFETY.md](DATA-SAFETY.md)의 후속 매핑에 기록하며 콘솔 저장 완료로 주장하지 않는다.

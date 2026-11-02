@@ -76,3 +76,7 @@ Google Play에는 현재 code 4가 심사 중이다. 이 수정의 신규 APK/AA
 ## 후속 데이터 활용 배포 — 2026-11-02 18:12 KST
 
 위 code 5는 연결 개선 시점의 보존 산출물이다. 이후 관심 육아템 설정·개인별 목록·운영자 관심 집계를 추가한 **0.4.0(code 6)**을 서명 빌드했으며 웹과 API에 소스 `df94436`을 배포했다. 최신 파일은 `artifacts/android/releases/6-0.4.0-interest/`, Play 미업로드·실기기 실행 미확인이다. 분석·검증·배포 증거는 [SERVICE-DATA.md](SERVICE-DATA.md)를 따른다. E 전체 보존 복사도 별도로 완료됐으며 [이전 완료 기록](../beta-20261101/C-TO-E-20261102.md)을 따른다.
+
+## 후속 인증·활동 분석 배포 — 2026-11-02
+
+code 6 이후 **0.5.0(code 7)**의 서명 APK/AAB와 오프라인 49개 검증을 완료했다. 최신 파일은 `artifacts/android/releases/7-0.5.0-auth-data/`이며 Play 업로드·실기기 실행은 수행하지 않았다. 같은 소스 `0e5ec28`을 정식 웹과 API에 배포하고 선택 동의 기반 노출·CTA·저장/관심 분석 및 정적 공개 가이드를 연결했다. 계정 로그인 진단, 카카오 실제 설정, Google 활성화 미완료 범위는 [AUTH-AND-MEASUREMENT.md](AUTH-AND-MEASUREMENT.md)를 따른다.
