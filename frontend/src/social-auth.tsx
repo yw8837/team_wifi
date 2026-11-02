@@ -94,7 +94,7 @@ export function SocialReturn() {
       <label className="check"><input type="checkbox" required checked={adult} onChange={e => setAdult(e.target.checked)}/>만 18세 이상입니다.</label>
       <label className="check"><input type="checkbox" required checked={terms} onChange={e => setTerms(e.target.checked)}/>이용약관에 동의합니다.</label>
       <label className="check"><input type="checkbox" required checked={privacy} onChange={e => setPrivacy(e.target.checked)}/>개인정보 처리에 동의합니다.</label>
-      <p className="hint">소셜 계정의 고유 식별자와 직접 입력한 닉네임을 보관합니다. 구글·카카오 비밀번호는 받지 않습니다.</p><button disabled={action.busy}>가입 완료</button></form>}
+      <p className="hint">소셜 계정의 고유 식별자와 직접 입력한 닉네임을 보관합니다. 구글·카카오 비밀번호는 받지 않습니다. 카카오에서 이 서비스 연결을 해제하면 카카오 로그인 연결이 삭제됩니다. 다른 로그인 수단이 없는 카카오 전용 회원은 계정과 작성·활동 기록도 함께 삭제됩니다.</p><button disabled={action.busy}>가입 완료</button></form>}
     {waiting && <button disabled={action.busy} onClick={() => void action.run(claim)}>로그인 완료 확인</button>}<Feedback {...action}/><Link to="/login">로그인부터 다시 시작</Link></div>;
 }
 export function SocialAccountSettings() {
@@ -102,6 +102,7 @@ export function SocialAccountSettings() {
   return <section className="panel"><h2>소셜 계정 연결</h2><p>연결한 소셜 계정으로 앱과 웹의 같은 기록을 이용합니다. 다른 회원의 기록을 자동으로 합치지 않습니다.</p>
     {result.error && <p role="alert">{result.error}</p>}<p>{result.data?.providers.length ? '연결됨: ' + result.data.providers.map(p => names[p]).join(', ') : '연결된 소셜 계정 없음'}</p>
     <SocialButtons purpose="link" to="/settings" only={(['google', 'kakao'] as Provider[]).filter(p => !result.data?.providers.includes(p))}/>
+    {result.data?.providers.includes('kakao') && <p className="hint">카카오에서 서비스 연결을 해제하면 카카오 연결과 현재 로그인 세션을 폐기합니다. 이메일 비밀번호나 다른 소셜 연결이 있으면 계정은 유지됩니다. 다른 로그인 수단이 없는 카카오 전용 회원은 계정과 작성·활동 기록도 삭제됩니다.</p>}
     {result.data?.has_password === false && <><p>계정을 삭제하려면 연결된 소셜 계정으로 다시 인증해 주세요. 확인은 5분 동안 유효합니다.</p><SocialButtons purpose="reauth" only={result.data.providers} to="/settings"/></>}
   </section>;
 }

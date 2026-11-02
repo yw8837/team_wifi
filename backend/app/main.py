@@ -335,6 +335,11 @@ def delete_account(body: S.Password, user=Depends(current_user), db=Depends(get_
     social_verified = bool(social_proof and social_proof.kind == 'social_reauth' and social_proof.user_id == user.id and social_proof.expires > now())
     if not social_verified and not passwords.verify(body.password, user.password_hash):
         fail('비밀번호를 확인해 주세요.', 403)
+    return erase_account(user, db)
+
+
+def erase_account(user, db):
+    """Apply the same erasure after password/reauth or a verified sole-provider unlink."""
     live = rows(db, 'campaign', Record.owner_id == user.id, Record.status.in_(['active', 'pending']))
     if live and not config.deployed():
         fail('진행 중이거나 검토 중인 공구를 먼저 종료해 주세요.')
@@ -887,6 +892,9 @@ app.include_router(release_router)
 
 from .social_auth import router as social_router
 app.include_router(social_router)
+
+from .social_events import router as social_events_router
+app.include_router(social_events_router)
 
 from .growth import router as growth_router
 app.include_router(growth_router)

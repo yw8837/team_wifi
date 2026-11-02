@@ -187,6 +187,9 @@ def claim(body: Claim, user=Depends(optional_user), db=Depends(get_db)):
     if purpose != 'login' and (not user or user.id != flow.owner_id):
         raise HTTPException(403, '계정 연결을 시작한 회원으로 로그인해 주세요.')
     key = identity_key(flow.data['provider'], flow.data['subject'])
+    revoked = db.scalar(select(Record).where(Record.kind == 'oauth_revocation', Record.unique_key == key))
+    if revoked and flow.created <= revoked.data.get('occurred_at', 0):
+        raise HTTPException(400, '연결 해제 전에 시작한 인증입니다. 다시 로그인해 주세요.')
     identity = db.scalar(select(Record).where(Record.kind == IDENTITY, Record.unique_key == key))
     if purpose == 'reauth':
         if not identity or identity.owner_id != user.id:
