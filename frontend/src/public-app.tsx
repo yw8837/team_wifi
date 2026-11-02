@@ -11,6 +11,7 @@ import { compareUnit, publicConfigMatches } from "./release-policy";
 import type { ComparisonInput } from "./release-policy";
 import { releasePath, usePublicResource } from "./release-data";
 import type { Author, Comment, Demand, Offer } from "./release-data";
+import { PersonalDiscovery, PreferencePage, ServiceInsights } from "./discovery";
 import "./public.css";
 
 const privacyNotice="아이의 이름·생일·사진, 연락처·주소, 건강정보 등 아이와 가족의 개인정보는 적지 마세요. 광고·거래 유도·불법 정보는 신고 대상입니다.";
@@ -45,6 +46,7 @@ export function PublicApp(){
       <Route path="/demands" element={<Demands/>}/><Route path="/demands/new" element={<Protected><NewDemand/></Protected>}/><Route path="/demands/:id" element={<DemandDetail/>}/>
       <Route path="/calculator" element={<Calculator/>}/><Route path="/my/saved" element={<Protected><Offers saved/></Protected>}/><Route path="/my" element={<PublicMy/>}/><Route path="/settings" element={<Protected><PublicSettings/></Protected>}/>
       <Route path="/my/policies" element={<PublicPolicies/>}/>
+      <Route path="/my/preferences" element={<Protected><PreferencePage/></Protected>}/><Route path="/admin/insights" element={<Protected admin><ServiceInsights/></Protected>}/>
       <Route path="/admin" element={<Protected admin><PublicAdmin/></Protected>}/><Route path="/login" element={<Login/>}/><Route path="/signup" element={<Signup/>}/><Route path="/reset" element={<Reset/>}/><Route path="/welcome" element={<PublicWelcome/>}/>
       <Route path="*" element={<section className="panel"><h1>화면을 찾을 수 없어요</h1><Link to="/">육아템 둘러보기</Link></section>}/>
     </Routes></main>
@@ -62,6 +64,7 @@ function Offers({saved=false}:{saved?:boolean}){
  const filtered=result.data;
  return <section className="home-catalog"><PageTitle eyebrow="함께 고르는 육아생활" title={saved?"저장한 육아템":"육아템, 꼼꼼히 알아보고 준비해요"}><p>{saved?"다시 보고 싶은 육아템을 모아뒀어요.":"공식 출처와 비교 기준을 살펴보고, 필요한 공구 수요를 나눠요."}</p></PageTitle>
  {!saved&&<><label className="field"><span className="sr-only">육아템 검색</span><input type="search" placeholder="육아템 검색" maxLength={100} value={q} onChange={e=>setParams({...Object.fromEntries(params),q:e.target.value,page:"0"},{replace:true})}/></label><div className="public-categories" aria-label="카테고리">{["",...categories].map(c=><button key={c} className={category===c?"selected":"secondary"} aria-pressed={category===c} onClick={()=>setParams({...Object.fromEntries(params),category:c,page:"0"})}>{c&&<CategoryIcon category={c} size={24}/>}<span>{c||"전체"}</span></button>)}</div><aside className="public-intro"><strong>가격보다 먼저, 우리에게 맞는 기준부터</strong><p>참고 링크는 특가·제휴 판매가 아닙니다. 가격과 재고는 판매처에서 확인해 주세요.</p><Link to="/calculator">배송비까지 단가 비교하기 →</Link></aside></>}
+ {!saved&&!q&&!category&&page===0&&<PersonalDiscovery/>}
  <ResourceState {...result} retry={result.reload}/>{!result.loading&&!result.error&&(filtered?.length?<div className="reference-list">{filtered.map(o=><OfferCard key={o.id} offer={o}/>)}</div>:<section className="panel"><h2>{saved?"아직 저장한 육아템이 없어요":"검색 결과가 없어요"}</h2><p>{saved?"육아템 상세의 저장 버튼으로 관심 있는 제품을 모아 보세요.":"다른 검색어 또는 전체 카테고리를 선택해 보세요."}</p><Link to="/">육아템 전체 보기</Link></section>)}
  {!result.loading&&!result.error&&<Pagination page={page} count={result.data?.length||0} change={next=>setParams({...Object.fromEntries(params),page:String(next)})}/>}
  </section>;
@@ -105,16 +108,18 @@ function PublicMy() {
       <div className="my-avatar"><IconUser size={28} stroke={1.6} aria-hidden="true"/></div>
       <div className="my-profile-copy">
         <h2 id="my-profile-title">{user ? user.nickname+"님, 반가워요" : "함께 고르는 육아생활"}</h2>
-        <p>{user ? "필요한 육아템를 모아 두고, 궁금한 점을 나눠요." : "둘러보기는 자유롭게, 저장과 글쓰기는 로그인 후에."}</p>
+        <p>{user ? "필요한 육아템을 모아 두고, 궁금한 점을 나눠요." : "둘러보기는 자유롭게, 저장과 글쓰기는 로그인 후에."}</p>
         {!user&&<div className="my-auth-actions"><Link className="button" to="/login?returnTo=%2Fmy">로그인</Link><Link to="/signup?returnTo=%2Fmy">회원가입</Link></div>}
       </div>
     </section>
     <section className="my-section" aria-labelledby="my-activity-title">
       <h2 id="my-activity-title">내 활동과 계정</h2>
       <nav className="my-menu" aria-label="내 활동과 계정">
+        <Link to="/my/preferences"><IconHome size={23} aria-hidden="true"/><span><strong>관심 육아템 설정</strong><small>관심 분야와 비교 기준 · 앱·웹 함께 적용</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
         <Link to="/my/saved"><IconBookmark size={23} aria-hidden="true"/><span><strong>저장한 육아템</strong><small>다시 보고 싶은 육아템을 한곳에</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
         <Link to="/settings"><IconUser size={23} aria-hidden="true"/><span><strong>계정 관리</strong><small>로그아웃 · 복구코드 · 차단 · 계정 삭제</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
         {user?.is_admin&&<Link to="/admin"><span><strong>콘텐츠 신고 관리</strong><small>접수된 신고 확인과 처리</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}
+        {user?.is_admin&&<Link to="/admin/insights"><span><strong>육아템 관심 분석</strong><small>저장·수요 현황과 제공 데이터 분석</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}
       </nav>
     </section>
     <PublicHelp/>

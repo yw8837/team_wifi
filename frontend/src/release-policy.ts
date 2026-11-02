@@ -20,5 +20,5 @@ export function compareUnit(input: ComparisonInput): {total:number; unit:number}
 }
 
 export function publicReturnPath(path:string):string {
- return matchRoutes(["/", "/offers/:id", "/demands", "/demands/new", "/demands/:id", "/calculator", "/welcome", "/my", "/my/policies", "/my/saved", "/settings", "/admin"].map(path=>({path})),path)?path:"/";
+ return matchRoutes(["/", "/offers/:id", "/demands", "/demands/new", "/demands/:id", "/calculator", "/welcome", "/my", "/my/policies", "/my/saved", "/my/preferences", "/settings", "/admin", "/admin/insights"].map(path=>({path})),path)?path:"/";
 }

@@ -9,6 +9,7 @@ from pydantic import Field, field_validator
 from sqlalchemy import delete, exists, func, select
 
 from . import config
+from . import discovery
 from .db import Record, Token, User, get_db, now, uid
 from .schemas import Strict
 from .security import admin_user, current_user, optional_user, throttle
@@ -101,6 +102,76 @@ def timestamp(value):
 
 def saved_ids(db, user):
     return set(db.scalars(select(Record.parent_id).where(Record.kind == SAVE, Record.owner_id == user.id))) if user else set()
+
+
+def preferences_for(db, user):
+    item = db.scalar(select(Record).where(Record.kind == discovery.PREFERENCE, Record.owner_id == user.id))
+    return discovery.Preferences.model_validate(item.data) if item else discovery.Preferences()
+
+
+@router.get('/preferences')
+def get_preferences(user=Depends(current_user), db=Depends(get_db)):
+    return preferences_for(db, user)
+
+
+@router.put('/preferences')
+def set_preferences(body: discovery.Preferences, user=Depends(current_user), db=Depends(get_db)):
+    from sqlalchemy.dialects.postgresql import insert as pg_insert
+    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+    insert = pg_insert if db.bind.dialect.name == 'postgresql' else sqlite_insert
+    db.execute(insert(Record).values(id=uid(), kind=discovery.PREFERENCE, owner_id=user.id,
+        unique_key=user.id, data=body.model_dump(), status='active', created=now())
+        .on_conflict_do_update(index_elements=['kind', 'unique_key'], set_={'data': body.model_dump()}))
+    db.commit()
+    return body
+
+
+@router.delete('/preferences')
+def clear_preferences(user=Depends(current_user), db=Depends(get_db)):
+    db.execute(delete(Record).where(Record.kind == discovery.PREFERENCE, Record.owner_id == user.id))
+    db.commit()
+    return discovery.Preferences()
+
+
+@router.get('/recommendations')
+def recommended_offers(user=Depends(current_user), db=Depends(get_db)):
+    return discovery.recommendations(catalog(), preferences_for(db, user), saved_ids(db, user))
+
+
+@router.get('/admin/insights')
+def service_insights(user=Depends(admin_user), db=Depends(get_db)):
+    import json
+    entries = catalog()
+    current_ids = [e['id'] for e in entries]
+    # Active accounts only; no raw customer/person rows leave this endpoint.
+    saves = visible_query(SAVE, None, Record.parent_id.in_(current_ids)).order_by(None).subquery()
+    total = db.scalar(select(func.count(func.distinct(saves.c.owner_id)))) or 0
+    counts = dict(db.execute(select(saves.c.parent_id, func.count(func.distinct(saves.c.owner_id))).group_by(saves.c.parent_id)).all())
+    a, b = saves.alias('a'), saves.alias('b')
+    pairs_query = (select(a.c.parent_id, b.c.parent_id, func.count(func.distinct(a.c.owner_id)).label('n'))
+        .join(b, (a.c.owner_id == b.c.owner_id) & (a.c.parent_id < b.c.parent_id))
+        .group_by(a.c.parent_id, b.c.parent_id).having(func.count(func.distinct(a.c.owner_id)) >= discovery.MIN_COHORT))
+    titles = {e['id']: e['title'] for e in entries}
+    pairs = [{'first': titles[left], 'second': titles[right], 'accounts': n,
+              'support': n / total, 'first_to_second': n / counts[left],
+              'second_to_first': n / counts[right]} for left, right, n in db.execute(pairs_query)]
+    pairs.sort(key=lambda row: (-row['accounts'], row['first'], row['second']))
+    demand_rows = visible_query(DEMAND, None).order_by(None).subquery()
+    interests = visible_query(INTEREST, None).order_by(None).subquery()
+    categories = []
+    for category in discovery.CATEGORIES:
+        ids = [e['id'] for e in entries if e['category'] == category]
+        saved_count = db.scalar(select(func.count(func.distinct(saves.c.owner_id))).where(saves.c.parent_id.in_(ids))) or 0
+        demand_condition = demand_rows.c.data['category'].as_string() == category
+        writers = db.scalar(select(func.count(func.distinct(demand_rows.c.owner_id))).where(demand_condition)) or 0
+        interest_count = db.scalar(select(func.count(func.distinct(interests.c.owner_id)))
+            .join(demand_rows, interests.c.parent_id == demand_rows.c.id).where(demand_condition)) or 0
+        categories.append({'category': category, 'saved_accounts': discovery.masked_count(saved_count),
+            'demand_authors': discovery.masked_count(writers), 'interested_accounts': discovery.masked_count(interest_count)})
+    evidence = json.loads(Path(__file__).with_name('discovery_evidence.json').read_text('utf-8'))
+    return {'minimum_cohort': discovery.MIN_COHORT, 'saved_accounts': discovery.masked_count(total),
+            'categories': categories, 'pairs': pairs[:20], 'evidence': evidence,
+            'note': '현재 계정의 저장·수요·관심 신호입니다. 구매·매출·주문 예측이 아닙니다. 1~4계정의 집계는 숨깁니다.'}
 
 
 @router.get('/offers')

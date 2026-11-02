@@ -28,6 +28,14 @@ def checks(c, expect):
         return response.json()
     first, second = signup(1), signup(2)
     h1, h2 = [{'Authorization':'Bearer '+account['access_token']} for account in (first, second)]
+    preferences = {'categories': ['기저귀·물티슈'], 'priority': 'unit_price'}
+    expect(c.put('/api/release/preferences', headers=h1, json=preferences).status_code == 200, 'public preferences PostgreSQL upsert insert')
+    preferences['priority'] = 'care'
+    expect(c.put('/api/release/preferences', headers=h1, json=preferences).status_code == 200, 'public preferences PostgreSQL upsert update')
+    expect(c.get('/api/release/preferences', headers=h1).json() == preferences, 'public preferences persisted')
+    expect(c.get('/api/release/preferences', headers=h2).json()['categories'] == [], 'public preferences account isolation')
+    expect(c.get('/api/release/recommendations', headers=h1).json()['basis'] == 'preferences', 'public recommendations use declared interests')
+    expect(c.delete('/api/release/preferences', headers=h1).status_code == 200, 'public preferences reset')
     expect(c.get('/api/config').json()['public_release'] is True, 'public deployment config')
     expect(c.get('/api/health').json()['mode']=='public-release', 'public deployment health mode')
     expect(not first['user']['email_verified'], 'public does not claim email ownership')
@@ -64,6 +72,9 @@ def checks(c, expect):
         user=db.get(User,first['user']['id'])
         user.is_admin=True
         db.commit()
+    insights = c.get('/api/release/admin/insights', headers=h1)
+    expect(insights.status_code == 200 and insights.json()['saved_accounts'] is None,
+           'public insights PostgreSQL aggregate and small-cohort suppression')
     expect(c.post('/api/release/admin/reports/'+report.json()['id']+'/resolve',headers=h1,json={'action':'hide','note':'로컬 검증'}).status_code==200,
            'public moderation hides real target')
     expect(c.get(url).status_code==404,'public hidden demand excluded')
