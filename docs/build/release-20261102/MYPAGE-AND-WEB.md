@@ -72,3 +72,7 @@ Google Play에는 현재 code 4가 심사 중이다. 이 수정의 신규 APK/AA
 - E Node/JDK/SDK·Gradle 캐시로 서명 빌드 성공. 오프라인 검증 45개 통과: `artifacts/mypage-20261102/android-connection/android-release-verification.json`. 기존 서명키와 제출된 code 4 산출물은 해시 불변 확인.
 - 이 code 5는 Play 미업로드이며 실기기 실행은 미확인이다. code 4 심사 상태와 혼동하지 않는다. 현재 설치된 code 4에는 프런트 연결·표현 개선이 자동 반영되지 않는다.
 - E 실행·시험·빌드 증거를 이전 검증에 연결해 G1/G2/G3를 통과시켰고 hold를 보존 후 해제했다. 기존 C 자료의 전체 보존 복사는 백그라운드에서 재개했다. C 삭제량은 0이며 전체 이전 완료가 아니다.
+
+## 후속 데이터 활용 배포 — 2026-11-02 18:12 KST
+
+위 code 5는 연결 개선 시점의 보존 산출물이다. 이후 관심 육아템 설정·개인별 목록·운영자 관심 집계를 추가한 **0.4.0(code 6)**을 서명 빌드했으며 웹과 API에 소스 `df94436`을 배포했다. 최신 파일은 `artifacts/android/releases/6-0.4.0-interest/`, Play 미업로드·실기기 실행 미확인이다. 분석·검증·배포 증거는 [SERVICE-DATA.md](SERVICE-DATA.md)를 따른다. E 전체 보존 복사도 별도로 완료됐으며 [이전 완료 기록](../beta-20261101/C-TO-E-20261102.md)을 따른다.

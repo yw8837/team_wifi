@@ -29,8 +29,23 @@
 
 - E 프런트 자동 검사 **151개**, 서버 **93개** 통과. 계정 간 정보 분리, 별도 세션의 동일 계정 공유, 입력 제한, 만료·저장 우선순위, 관리자 권한, 소수 집계 숨김, 탈퇴 삭제 검증 포함.
 - 공개 모드 TypeScript/웹 빌드 성공. 증거는 `artifacts/service-data-20261102/`에 보존하며 원본 로그·원본 고객 자료는 Git에 넣지 않는다.
-- 별도 PostgreSQL CI, 브라우저 검증, 운영 배포, Android 0.4.0(code 6) 서명 빌드의 최종 결과는 아래 완료 기록에 덧붙인다.
+- 별도 PostgreSQL CI **59개** 통과: 관심 설정 upsert·계정 분리·초기화·집계 SQL과 기존 공개/과거 호환 기능 포함. `artifacts/service-data-20261102/ci-postgres/public-release-postgres-results.json`.
+- 격리된 SQLite와 합성 계정으로 브라우저 로그인 후 관심 설정 복귀, 저장 후 새로고침 유지, 홈 카테고리/이유/단가 비교 링크, 운영자 5계정 동시 저장 조합, 분석 출처를 확인했다. 390×844·1280×900에서 가로 넘침 없음, 화면 이동 main 포커스와 키보드 출처 링크 접근 확인. 운영 사용자에게 가짜 활동을 추가하지 않았다.
 
 ## 배포 상태
 
-검증 중이며 이 문단 자체를 운영 배포 또는 Play 제출 완료로 해석하지 않는다. 기존 code 4 심사와 이전 code 5 산출물을 보존한다. 새 앱은 실기기 실행·Play 업로드 없이 서명 파일 검증까지 수행한다.
+2026-11-02 18:12 KST 기준 웹·API 운영 반영 완료. 소스 `df94436fc6e7d16599534efb27f21b891bf783df`, 작업 브랜치 `codex/modu-yuga`에 커밋·푸시했다. main 병합 없음.
+
+- [GitHub Actions 41417778000](https://github.com/yw8837/team_wifi/actions/runs/41417778000): api/ui/unsigned-android 모두 성공. 서버 93개·프런트 151개, PostgreSQL 59개, 공개 HTTPS 빌드, npm audit, Android 빌드 포함.
+- 기존 무료 API `srv-dbjj7hc9v7es73a8uvk0` 배포 `dep-dbk557ff3r2c738nkv80` **Live**, 같은 소스 확인. 기존 API 주소·DB를 유지한다. health/config 200, 새 인증 경로 3종의 비로그인 요청 401, 개인정보 안내의 새 항목 반영 확인.
+- 정식 웹 `https://moduyuga.onrender.com` 배포 `dep-dbk56eutlv9c73esf890` **Live**, 같은 소스 확인. 실제 브라우저에서 관심 선택 진입·로그인 복귀 경로 확인. 배포 직후 한 번은 이전 HTML이 보였고 새로고침으로 새 JS `index-DbvBG9kM.js`·CSS `index-yZr8dtc8.css` 반영 확인. 공개 정책에도 관심 설정 항목이 반영됐다.
+- 운영 브라우저에서 새 계정을 만들거나 사용자 설정을 바꾸지 않았다. 인증 후 저장·집계 동작은 격리된 브라우저와 PostgreSQL CI 검증이며 실제 Android 기기 검증으로 주장하지 않는다.
+
+## Android 0.4.0(code 6)
+
+- E Node/JDK/SDK·Gradle 캐시와 기존 업로드 서명키로 빌드 성공. 새 산출물 `artifacts/android/releases/6-0.4.0-interest/`; 이전 code 4·5 파일 보존.
+- AAB: 3,261,538 bytes, SHA256 `e7f4d1b25e2002fa6c4d140994e792759f7fe752aaed8bbe715c9fff5b0739c4`.
+- APK: 3,418,273 bytes, SHA256 `66d271d1a58f2a8451720be420df37428253f2c10c3727631aa33534a0cc6db9`.
+- 오프라인 검증 **45개** 통과: 서명·기존 인증서, 패키지·정식 앱 이름·버전·API 36·권한·HTTPS/API/정책 원점·실제 HTML/JS/CSS 일치. `artifacts/service-data-20261102/android/android-release-verification.json`.
+- 이 code 6는 **Play 미업로드·실기기 실행 미확인**이다. 기존 설치 앱의 새 화면에는 업데이트가 필요하다. 서버 정책은 기존 앱에서도 갱신된다. 기존 code 4의 Play 심사 상태는 이 작업에서 변경하거나 다시 확인하지 않았다.
+- 무료 Render API의 유휴 기동 지연은 유지된다. 이번 데이터 활용 추가가 호스팅의 상시 가동 보장을 뜻하지 않는다. C 원본 변경·삭제 없음.
