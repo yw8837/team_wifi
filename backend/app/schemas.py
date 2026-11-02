@@ -21,7 +21,8 @@ class Login(Strict):
     password: str = Field(min_length=1, max_length=128)
 
 class Password(Strict):
-    password: str = Field(min_length=1, max_length=128)
+    password: str = Field(default='', max_length=128)
+    reauth_token: str = Field(default='', max_length=200)
 
 class ResetRequest(Strict):
     email: EmailStr

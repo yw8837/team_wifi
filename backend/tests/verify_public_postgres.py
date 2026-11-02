@@ -45,9 +45,23 @@ def checks(c, expect):
     expect(catalog.status_code==200 and all(entry['entry_type']=='shopping_reference' and entry['price'] is None for entry in catalog.json()),
            'checked-in public manifest only with no invented prices')
     offer_id = catalog.json()[0]['id']
+    expect(c.post('/api/auth/login', json={'email':'public1@example.com','password':password}).status_code == 200,
+           'public PostgreSQL registration and password login roundtrip')
+    expect(c.put('/api/release/measurement/consent', headers=h1, json={'enabled':True}).status_code == 200,
+           'measurement explicit opt in PostgreSQL')
+    event = {'offer_id':offer_id, 'placement':'catalog', 'channel':'web', 'action':'view', 'visible_ms':1000}
+    for _ in range(2):
+        expect(c.post('/api/release/measurement/events',headers=h1,json=event).json()['recorded'], 'measurement PostgreSQL idempotent impression')
+    expect(c.post('/api/release/measurement/events',headers=h1,json={**event,'action':'detail'}).json()['recorded'], 'measurement click after impression')
     for _ in range(2):
         expect(c.put('/api/release/offers/'+offer_id+'/saved',headers=h1).status_code==200, 'public saved idempotent PUT')
     expect(len(c.get('/api/release/saved',headers=h1).json())==1, 'one public saved record')
+    with SessionLocal() as db:
+        measured = list(db.scalars(select(Record).where(Record.kind == 'growth_exposure', Record.owner_id == first['user']['id'])))
+        expect(len(measured) == 1 and measured[0].data['saved'], 'server-confirmed save attribution PostgreSQL')
+    expect(c.put('/api/release/measurement/consent',headers=h1,json={'enabled':False}).status_code == 200, 'measurement opt out')
+    with SessionLocal() as db:
+        expect(not db.scalar(select(Record.id).where(Record.kind == 'growth_exposure',Record.owner_id == first['user']['id'])), 'opt out removes analysis records')
     response=c.post('/api/release/demands',headers=h1,json={'title':'기저귀 함께 비교하기','body':'기저귀 단위당 가격과 배송 조건을 비교합니다.','category':'기저귀·물티슈'})
     expect(response.status_code==201,'public demand write with durable quota')
     demand_id=response.json()['id']

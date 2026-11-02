@@ -6,6 +6,7 @@ export type User = {
   seller_status: string | null;
   points_balance: number;
   email_verified: boolean;
+  has_password?: boolean;
 };
 export type Campaign = {
   id: string;

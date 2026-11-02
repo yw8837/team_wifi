@@ -10,6 +10,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { api, safeReturnPath } from "./api";
+import { SocialButtons } from "./social-auth";
 import { BETA_MODE, BETA_NOTICE, BetaRecover, LegalLinks, RecoveryCodeNotice } from "./beta";
 import { signupDestination } from "./beta-policy";
 import type { User } from "./types";
@@ -111,8 +112,9 @@ export function Login() {
         <Link to={"/signup?returnTo=" + encodeURIComponent(to)}>회원가입</Link>
         <Link to="/reset">비밀번호 재설정</Link>
       </div>
+      {PUBLIC_RELEASE && <SocialButtons to={to}/>}
       <p className="muted">
-        {DEPLOYED_MODE ? "이메일 인증·소셜 로그인을 제공하지 않습니다. 비밀번호 분실 시 보관한 복구코드가 필요합니다." : "이 개발 빌드는 이메일 인증·소셜 로그인을 제공하지 않습니다."} 세션은 현재 탭 또는 앱 실행 동안 유지됩니다.
+        {DEPLOYED_MODE ? "이메일 가입 계정은 비밀번호 분실 시 보관한 복구코드가 필요합니다. 이메일 소유 확인은 제공하지 않습니다." : "이 개발 빌드는 이메일 인증을 제공하지 않습니다."} 세션은 현재 탭 또는 앱 실행 동안 유지됩니다.
       </p>
     </div>
   );
@@ -143,10 +145,11 @@ export function Signup() {
   return (
     <div className="narrow">
       <PageTitle
-        title={track === "seller" ? "판매자로 시작하기" : "구매자로 시작하기"}
+        title={track === "seller" ? "판매자로 시작하기" : "모두의 육아 시작하기"}
       >
         <p>{PUBLIC_RELEASE ? "정보 저장과 공구 수요·질문에 참여할 수 있어요. 로그인 후 직접 원하는 행동을 선택해 주세요." : "판매자도 같은 계정으로 구매 기능을 이용할 수 있어요."}</p>
       </PageTitle>
+      {PUBLIC_RELEASE && <SocialButtons to={to}/>}
       {!PUBLIC_RELEASE && <div className="segmented">
         <button
           type="button"

@@ -1,3 +1,4 @@
+import { MeasurementReport, useExposure } from "./measurement";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { api, categories, safeExternalUrl } from "./api";
@@ -24,9 +25,7 @@ export function PersonalDiscovery() {
     <ResourceState {...result} retry={result.reload}/>
     {result.data && !result.error && !result.loading && <>
       <p>{result.data.basis === "preferences" ? "직접 고른 관심 분야에서 아직 저장하지 않은 육아템을 먼저 보여드려요." : result.data.basis === "saved" ? "내가 저장한 육아템과 같은 분야를 모았어요." : "관심 분야를 최대 3개 골라 보세요. 설정은 같은 계정의 앱과 웹에서 함께 사용해요."}</p>
-      {result.data.items.length ? <div className="discovery-grid">{result.data.items.map(item => <Link className="discovery-card" to={"/offers/" + encodeURIComponent(item.id)} key={item.id}>
-        <CategoryIcon category={item.category} size={26}/><small>{item.category}</small><strong>{item.title}</strong><span>{item.reasons.join(" · ")}{item.saved ? " · 저장함" : ""}</span>
-      </Link>)}</div> : <Link className="button secondary" to="/my/preferences">관심 분야 설정하기</Link>}
+      {result.data.items.length ? <div className="discovery-grid">{result.data.items.map(item => <MeasuredRecommendation key={item.id} item={item}/>)}</div> : <Link className="button secondary" to="/my/preferences">관심 분야 설정하기</Link>}
       {result.data.priority !== "none" && <p className="comparison-focus"><strong>{comparisonChoices[result.data.priority].label}</strong> · {result.data.focus} {result.data.priority === "unit_price" && <Link to="/calculator">단가 비교하기 →</Link>}</p>}
       <small className="muted">내 관심 설정과 저장 기록을 기준으로 보여드려요. 판매 순위나 최저가 추천은 아니에요.</small>
     </>}
@@ -96,5 +95,10 @@ export function InsightsView({ data }: { data: Insights }) {
 export function ServiceInsights() {
   const { user } = useAuth();
   const result = usePublicResource<Insights>("/release/admin/insights", user?.id);
-  return <section><Link to="/my">← 마이페이지</Link><PageTitle eyebrow="운영자 전용" title="육아템 관심 분석"><p>실제 서비스 활동으로 다음 조사·공구 준비의 우선순위를 정하세요.</p></PageTitle><ResourceState {...result} retry={result.reload}/>{result.data && !result.loading && !result.error && <InsightsView data={result.data}/>}<button className="secondary" disabled={result.loading} onClick={result.reload}>최신 활동으로 새로고침</button></section>;
+  return <section><Link to="/my">← 마이페이지</Link><PageTitle eyebrow="운영자 전용" title="육아템 관심 분석"><p>실제 서비스 활동으로 다음 조사·공구 준비의 우선순위를 정하세요.</p></PageTitle><ResourceState {...result} retry={result.reload}/>{result.data && !result.loading && !result.error && <InsightsView data={result.data}/>}<button className="secondary" disabled={result.loading} onClick={result.reload}>최신 활동으로 새로고침</button><MeasurementReport/></section>;
+}
+
+function MeasuredRecommendation({item}:{item:Recommendations["items"][number]}) {
+ const exposure=useExposure(item.id,"personal");
+ return <div ref={exposure.ref as React.RefObject<HTMLDivElement>}><Link className="discovery-card" onClick={()=>void exposure.click("detail")} to={"/offers/"+encodeURIComponent(item.id)}><CategoryIcon category={item.category} size={26}/><small>{item.category}</small><strong>{item.title}</strong><span>{item.reasons.join(" · ")}{item.saved?" · 저장함":""}</span></Link></div>;
 }

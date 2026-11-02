@@ -7,3 +7,4 @@ export VITE_PUBLIC_WEB_ORIGIN="$RENDER_EXTERNAL_URL"
 npm --prefix frontend ci
 npm --prefix frontend run build
 python3 scripts/export-public-policies.py
+python3 scripts/export-public-guides.py

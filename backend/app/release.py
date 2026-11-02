@@ -190,21 +190,27 @@ def offer(id: str, user=Depends(optional_user), db=Depends(get_db)):
     return {**entry, 'saved': id in saved_ids(db, user)}
 
 
-def put_unique(db, kind, user_id, target_id):
+def put_unique(db, kind, user_id, target_id, commit=True):
     # Database uniqueness handles duplicate and concurrent PUTs without fake counters.
     from sqlalchemy.dialects.postgresql import insert as pg_insert
     from sqlalchemy.dialects.sqlite import insert as sqlite_insert
     insert = pg_insert if db.bind.dialect.name == 'postgresql' else sqlite_insert
-    db.execute(insert(Record).values(id=uid(), kind=kind, owner_id=user_id, parent_id=target_id,
+    result = db.execute(insert(Record).values(id=uid(), kind=kind, owner_id=user_id, parent_id=target_id,
                unique_key=f'{user_id}:{target_id}', data={}, status='active', created=now())
                .on_conflict_do_nothing(index_elements=['kind', 'unique_key']))
-    db.commit()
+    if commit:
+        db.commit()
+    return result.rowcount
 
 
 @router.put('/offers/{id}/saved')
 def save_offer(id: str, user=Depends(current_user), db=Depends(get_db)):
     entry = offer_by_id(id)
-    put_unique(db, SAVE, user.id, id)
+    created = put_unique(db, SAVE, user.id, id, commit=False)
+    if created:
+        from .growth import confirm_save
+        confirm_save(db, user, id)
+    db.commit()
     return {**entry, 'saved': True}
 
 
@@ -321,7 +327,7 @@ def delete_demand(id: str, user=Depends(current_user), db=Depends(get_db)):
     # Author deletion also removes replies, interest and associated report text.
     children = select(Record.id).where(Record.kind == COMMENT, Record.parent_id == id)
     db.execute(delete(Record).where(Record.kind == REPORT, Record.parent_id.in_(children)))
-    db.execute(delete(Record).where(Record.kind.in_([COMMENT, INTEREST, REPORT]), Record.parent_id == id))
+    db.execute(delete(Record).where(Record.kind.in_([COMMENT, INTEREST, REPORT, 'growth_exposure']), Record.parent_id == id))
     db.delete(item)
     db.commit()
     return {'message': '수요 제안을 삭제했습니다.'}
@@ -330,7 +336,11 @@ def delete_demand(id: str, user=Depends(current_user), db=Depends(get_db)):
 @router.put('/demands/{id}/interest')
 def add_interest(id: str, user=Depends(current_user), db=Depends(get_db)):
     item = content(db, DEMAND, id, user)
-    put_unique(db, INTEREST, user.id, id)
+    created = put_unique(db, INTEREST, user.id, id, commit=False)
+    if created:
+        from .growth import confirm_save
+        confirm_save(db, user, id, conversion='interested')
+    db.commit()
     return demand_dto(db, item, user)
 
 
@@ -448,4 +458,4 @@ def delete_user_content(db, user_id, owned):
     # owned IDs were collected before owner rows were removed by account deletion.
     related_comments = list(db.scalars(select(Record.id).where(Record.kind == COMMENT, Record.parent_id.in_(owned))))
     targets = [user_id, *owned, *related_comments]
-    db.execute(delete(Record).where(Record.kind.in_([COMMENT, INTEREST, SAVE, REPORT, 'block']), Record.parent_id.in_(targets)))
+    db.execute(delete(Record).where(Record.kind.in_([COMMENT, INTEREST, SAVE, REPORT, 'block', 'growth_exposure']), Record.parent_id.in_(targets)))

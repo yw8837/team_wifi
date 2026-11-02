@@ -8,6 +8,7 @@ import time
 from collections import defaultdict, deque
 from fastapi import Depends, HTTPException, Request
 from pwdlib import PasswordHash
+from pwdlib.exceptions import UnknownHashError
 from sqlalchemy import delete, select
 from .db import Token, User, Record, RateBucket, SessionLocal, get_db, now
 from . import config
@@ -24,7 +25,10 @@ class BoundedPasswordHash:
 
     def verify(self, password, hashed):
         with self.limit:
-            return self.engine.verify(password, hashed)
+            try:
+                return self.engine.verify(password, hashed)
+            except (UnknownHashError, ValueError):
+                return False
 
 
 passwords = BoundedPasswordHash()
@@ -201,5 +205,7 @@ def admin_user(user=Depends(current_user)):
     return user
 
 def profile(user):
-    return dict(id=user.id, email=user.email, nickname=user.nickname, is_admin=user.is_admin,
-                seller_status=None if config.PUBLIC_RELEASE else user.seller_status, points_balance=0 if config.PUBLIC_RELEASE else user.points, email_verified=False)
+    social_only = user.password_hash == '!social-only'
+    return dict(id=user.id, email='' if social_only else user.email, nickname=user.nickname, is_admin=user.is_admin,
+                seller_status=None if config.PUBLIC_RELEASE else user.seller_status, points_balance=0 if config.PUBLIC_RELEASE else user.points,
+                email_verified=False, has_password=not social_only)

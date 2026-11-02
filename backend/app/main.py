@@ -70,6 +70,8 @@ async def security_headers(request, call_next):
 
 @app.exception_handler(IntegrityError)
 async def conflict(request, exc):
+    if request.url.path == '/api/auth/register':
+        return JSONResponse(status_code=409, content={'detail': '이 이메일로 가입된 계정이 있습니다. 로그인하거나 계정 복구를 이용해 주세요.'})
     return JSONResponse(status_code=409, content={'detail': '이미 처리된 요청입니다. 새로고침 후 확인해 주세요.'})
 
 
@@ -329,7 +331,9 @@ def renew_recovery_code(body: S.Password, request: Request, user=Depends(current
 
 @app.delete('/api/me')
 def delete_account(body: S.Password, user=Depends(current_user), db=Depends(get_db)):
-    if not passwords.verify(body.password, user.password_hash):
+    social_proof = db.get(Token, token_digest(body.reauth_token)) if body.reauth_token else None
+    social_verified = bool(social_proof and social_proof.kind == 'social_reauth' and social_proof.user_id == user.id and social_proof.expires > now())
+    if not social_verified and not passwords.verify(body.password, user.password_hash):
         fail('비밀번호를 확인해 주세요.', 403)
     live = rows(db, 'campaign', Record.owner_id == user.id, Record.status.in_(['active', 'pending']))
     if live and not config.deployed():
@@ -880,6 +884,12 @@ def sitemap():
 
 from .release import router as release_router
 app.include_router(release_router)
+
+from .social_auth import router as social_router
+app.include_router(social_router)
+
+from .growth import router as growth_router
+app.include_router(growth_router)
 
 from .legal import router as legal_router
 app.include_router(legal_router)

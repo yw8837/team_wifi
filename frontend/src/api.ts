@@ -67,11 +67,13 @@ export async function api<T>(
   }
   const token = sessionStorage.getItem(TOKEN_KEY);
   const bootstrap = method === "GET" && path === "/config";
+  const authentication = method === "POST" && ['/auth/register', '/auth/login'].includes(path);
+  const measurement = method === 'POST' && path === '/release/measurement/events';
   const readOnly = method === "GET";
   const controller = new AbortController();
   // The free host can take 50+ seconds to wake. Keep one bounded deadline
   // for bootstrap retries; never replay writes after an ambiguous failure.
-  const timeout = setTimeout(() => controller.abort(), bootstrap ? 90_000 : 15_000);
+  const timeout = setTimeout(() => controller.abort(), measurement ? 2_000 : bootstrap || authentication ? 90_000 : 15_000);
   const timeoutMessage = readOnly
     ? "서버 연결에 시간이 오래 걸리고 있어요. 잠시 후 다시 연결해 주세요."
     : "응답 시간이 초과되었습니다. 처리 여부를 먼저 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다.";

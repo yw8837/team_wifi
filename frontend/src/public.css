@@ -95,6 +95,14 @@
 .moderation button { margin: 4px 8px 4px 0; }
 .comments { border-top: 1px solid var(--line); margin-top: 36px; padding-top: 24px; }
 .comment { border-bottom: 1px solid var(--line); padding: 18px 0; }
+.social-login { margin: 24px 0; padding-top: 20px; border-top: 1px solid var(--line); }
+.social-buttons { display: grid; gap: 12px; }
+.social-button { min-height: 48px; width: 100%; border: 1px solid #c4b7af; }
+.social-google { color: #292929; background: #fff; }
+.social-kakao { color: #191919; background: #fee500; border-color: #e4cd00; }
+.measurement-row { border-top: 1px solid var(--line); padding: 16px 0; }
+.measurement-row dl { display: flex; gap: 24px; flex-wrap: wrap; }
+.measurement-row dd { margin: 4px 0; font-weight: 700; }
 .public-main fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 @media (max-width: 600px) {
  .public-categories { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; }

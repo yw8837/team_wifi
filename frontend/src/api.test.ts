@@ -64,6 +64,18 @@ describe("external source links", () => {
   );
 });
 describe("API failures and session", () => {
+  it.each(['/auth/login', '/auth/register'])("waits through a 55-second server wake for %s without replaying credentials", async (path) => {
+    vi.useFakeTimers();
+    const fetch = vi.fn((_url: string, init: RequestInit) => new Promise<Response>((resolve, reject) => {
+      const timer = setTimeout(() => resolve(new Response(JSON.stringify({ access_token: 'fixture-session' }))), 55_000);
+      init.signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new Error('aborted')); });
+    }));
+    vi.stubGlobal('fetch', fetch);
+    const result = api(path, 'POST', { email: 'fixture@example.com', password: 'local-only-fixture' });
+    await vi.advanceTimersByTimeAsync(55_000);
+    await expect(result).resolves.toEqual({ access_token: 'fixture-session' });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
   it("allows the first config read to finish after a 55-second server wake", async () => {
     vi.useFakeTimers();
     const fetch = vi.fn((_url: string, init: RequestInit) => new Promise<Response>((resolve, reject) => {
