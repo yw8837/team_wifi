@@ -24,22 +24,24 @@ export async function proofPair() {
 export function nativeReturn(url: string): string | null {
   try {
     const parsed = new URL(url), flow = parsed.searchParams.get('flow');
-    return parsed.protocol === 'kr.moduyuga.app:' && parsed.hostname === 'auth' && parsed.pathname === '/complete' && flow && /^[a-f0-9-]{36}$/.test(flow)
+    return parsed.protocol === 'kr.moduyuga.app:' && parsed.hostname === 'auth' && !parsed.username && !parsed.password && !parsed.port && parsed.pathname === '/complete' && flow && /^[a-f0-9-]{36}$/.test(flow)
       ? '/auth/complete?flow=' + encodeURIComponent(flow) : null;
   } catch { return null; }
 }
 export function NativeAuthReturn() {
   const nav = useNavigate();
+  const navigate = useRef(nav);
+  navigate.current = nav;
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
     const receive = ({ url }: { url: string }) => {
       const path = nativeReturn(url);
-      if (path) { void Browser.close().catch(() => {}); nav(path, { replace: true }); }
+      if (path) { void Browser.close().catch(() => {}); navigate.current(path, { replace: true }); }
     };
     const listener = App.addListener('appUrlOpen', receive);
     void App.getLaunchUrl().then(result => { if (result) receive(result); });
     return () => { void listener.then(handle => handle.remove()); };
-  }, [nav]);
+  }, []); // Read the launch URL once; route changes must not replay an old callback.
   return null;
 }
 export function SocialButtons({ to = '/', purpose = 'login', only }: { to?: string; purpose?: Purpose; only?: Provider[] }) {
@@ -67,7 +69,7 @@ type Result = { status: 'pending' | 'onboarding' | 'authenticated' | 'linked' | 
 export function SocialReturn() {
   const [params] = useSearchParams(), nav = useNavigate(), { setSession, refresh } = useAuth(), action = useAction();
   const flow = params.get('flow') || '';
-  const started = useRef(false);
+  const started = useRef('');
   const [onboarding, setOnboarding] = useState(false), [waiting, setWaiting] = useState(false);
   const [nickname, setNickname] = useState(''), [adult, setAdult] = useState(false), [terms, setTerms] = useState(false), [privacy, setPrivacy] = useState(false);
   async function claim() {
@@ -86,7 +88,7 @@ export function SocialReturn() {
     } else if (result.status === 'linked') { await refresh(); nav('/settings', { replace: true }); }
     else throw new Error('로그인 응답을 확인하지 못했습니다. 다시 시작해 주세요.');
   }
-  useEffect(() => { if (!started.current) { started.current = true; void action.run(claim); } }, []); // one-use claim must not be replayed by StrictMode
+  useEffect(() => { if (started.current !== flow) { started.current = flow; void action.run(claim); } }, [flow]); // one-use claim must not be replayed by StrictMode
   return <div className="narrow"><PageTitle title={onboarding ? '처음 오셨네요' : '로그인 확인'}><p>{onboarding ? '닉네임과 서비스 이용 동의를 확인하면 가입이 완료됩니다.' : '로그인을 시작한 기기와 소셜 계정을 확인합니다.'}</p></PageTitle>
     {onboarding && <form onSubmit={e => { e.preventDefault(); void action.run(claim); }}><Field label="닉네임" required minLength={2} maxLength={30} value={nickname} onChange={e => setNickname(e.target.value)}/><LegalLinks/>
       <label className="check"><input type="checkbox" required checked={adult} onChange={e => setAdult(e.target.checked)}/>만 18세 이상입니다.</label>
