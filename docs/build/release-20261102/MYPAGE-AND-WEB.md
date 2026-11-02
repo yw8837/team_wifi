@@ -31,7 +31,7 @@
 - 초기 0.3.1(code 5) 서명 APK/AAB 및 오프라인 검사 43개 통과: `artifacts/android/releases/5-0.3.1/`. 이후 정식 명칭/웹 원점 변경 전의 중간 산출물이며 최종 제출물로 쓰지 않는다. 기존 code 4 산출물은 보존했다.
 - 원본 화면과 수정 화면 증거: `artifacts/mypage-20261102/` (로컬). 로컬 UI 확인에는 별도 SQLite 시험 DB만 사용했다.
 
-Google Play에는 현재 code 4가 심사 중이다. 이 수정의 신규 APK/AAB 빌드, 웹 운영 반영, Play 제출은 각각 구분해서 기록한다. C: 원본 보존, 이번 삭제량 0 bytes, 이전 coordinator hold 유지.
+Google Play에는 현재 code 4가 심사 중이다. 이 수정의 신규 APK/AAB 빌드, 웹 운영 반영, Play 제출은 각각 구분해서 기록한다. C: 원본 보존, 이번 삭제량 0 bytes. 당시 설정한 이전 coordinator hold는 아래 후속 검증 완료 후 해제했다.
 
 ## 운영 반영 완료 — 2026-11-02 13:52 KST
 
@@ -45,7 +45,7 @@ Google Play에는 현재 code 4가 심사 중이다. 이 수정의 신규 APK/AA
 - 최종 화면 증거: `artifacts/mypage-20261102/after-my-mobile-final.png`, `after-privacy-mobile-final.png`, `policy-hub-desktop-final.png`. 운영 응답 기록: `live-web-verification.json`. 이전 after-my-mobile.jpg는 중간 화면이므로 최종 결과로 사용하지 않는다.
 - GitHub Actions [41390331304](https://github.com/yw8837/team_wifi/actions/runs/41390331304): `01f7ea9`의 api, ui, unsigned-android 모두 성공. 서버 81개·프런트 142개 검사와 PostgreSQL 검증, npm audit 및 Android 빌드 포함.
 
-## 최종 서명 Android 산출물
+## 정식 주소 반영 시점의 서명 Android 산출물
 
 - 버전 **0.3.1 / code 5**, 소스 `01f7ea9`의 앱 코드, 기존 업로드 인증서 유지. E의 Node/JDK/SDK와 E Gradle 캐시에서 명령행 빌드 성공. 최종 디렉터리 `artifacts/android/releases/5-0.3.1-final/`.
 - `moduyuga.aab`: 3,258,096 bytes, SHA256 `e6f60be6c8a3c26eff595da50946f27ba4cb836009615f95f2fa01dece0305da`.
@@ -53,3 +53,22 @@ Google Play에는 현재 code 4가 심사 중이다. 이 수정의 신규 APK/AA
 - 오프라인 검증 **45개 통과**: APK/AAB 서명, 기존 인증서, 패키지/앱 이름/버전, API 36, 위험 권한 없음, HTTPS API, 정식 정책 원점, 실제 번들 HTML/JS/CSS 일치. 증거 `artifacts/mypage-20261102/android-final/android-release-verification.json`.
 - 이 code 5는 이번 작업에서 Play에 올리지 않았다. 현재 code 4 심사와 신규 빌드 완료를 구분한다. 설치된 앱의 화면 변경에는 앱 업데이트가 필요하며, 서버에서 제공하는 기존 정책 URL에는 새 내용이 반영됐다.
 - 무료 API는 유휴 후 첫 연결 지연이 있을 수 있다. Android App Links, 실기기 0.3.1 실행, Play의 계정 유지형 데이터 삭제 선택 답변 갱신은 이 완료 범위에 포함하지 않는다.
+
+## 초기 연결 개선·육아템 표기와 데이터 공유 검증 — 2026-11-02 14:43 KST
+
+- 사용자가 운영 웹에서 연결 오류를 확인했다. 프런트의 기존 모든 요청 제한은 15초였고, Render Free UI는 유휴 후 기동에 50초 이상 걸릴 수 있다고 안내한다. 조사 시 API 응답은 200(0.617초)이었고 브라우저 재시도로 목록이 복구됐다. 원래 실패 요청의 서버 기동 추적은 확보하지 못했으므로 그 한 번의 실패 원인을 절전으로 확정하지 않는다.
+- 초기 `GET /config`만 전체 90초 한도 안에서 최대 3회 시도한다. 네트워크 오류와 502/503/504에만 1.5초·3초 간격으로 재시도한다. 쓰기 요청은 자동 재전송하지 않으며 기존 15초 제한을 유지한다.
+- 10초 이상 대기하면 연결 지연과 자동 진행 안내, 도움말을 제공한다. 55초 지연 응답 성공, 일시 503/네트워크 오류 복구, 전체 90초 제한, 쓰기 요청 재시도 금지를 자동 검사했다. 실제 유휴 15분 후 재기동 시험은 수행하지 않았다. Render 절전 정책을 없앤 변경이 아니므로 상시 즉시 응답이나 무중단을 보장하지 않는다.
+- 홈·검색·탐색·저장 메뉴의 사용자 노출 명칭을 ‘육아템’으로 정리했다. 정책의 기능 설명도 같은 표현을 사용하며 기존 앱의 계정 삭제 안내 호환성은 유지한다.
+- 웹과 앱은 기존 API/DB를 공유한다. 별개 로그인 토큰의 동일 계정이 저장/저장 해제와 게시글 소유권을 공유하고 다른 계정은 소유자로 취급되지 않는 서버 검사를 추가했다. 로그인 상태는 클라이언트별이며 다른 화면의 변경은 데이터를 다시 읽을 때 반영된다. 푸시 동기화나 Android App Links 구현을 뜻하지 않는다.
+- 소스 `49cfbcbf463b003cd130e3c42c5c350cf1d8f0b3` 커밋·푸시 완료. [CI 41395192059](https://github.com/yw8837/team_wifi/actions/runs/41395192059)의 api/ui/unsigned-android 모두 성공: 서버 82개, 프런트 146개 통과. E 로컬 데이터 파이프라인 검증도 통과했다.
+- 정적 웹 배포 `dep-dbk23s3bc2fs73e6kukg`와 API 배포 `dep-dbk23q0u01pc738r4v70` 모두 같은 소스 `49cfbcb`로 Live. 운영 브라우저에서 초기 연결 안내가 목록으로 전환되고 육아템 검색·하단 메뉴가 표시되는 것을 확인했다. 화면 증거: `artifacts/mypage-20261102/connection-fixed-home.png`.
+
+### 현재 최신 서명 Android 산출물
+
+- 0.3.1(code 5), `artifacts/android/releases/5-0.3.1-connection/`. 앞의 `5-0.3.1-final`은 당시 검증 산출물로 보존하며 새 제출에는 이 최신 연결 개선본을 사용한다.
+- `moduyuga.aab`: 3,258,411 bytes, SHA256 `cacff993eeccd5bb45e51bb94f5d294e8d4bb28a48ad029109ad062728e4caab`.
+- `moduyuga.apk`: 3,415,149 bytes, SHA256 `73fe514a0ebadf520ffe3f897a34b01939949f5e0915036488e2d58db383f6ff`.
+- E Node/JDK/SDK·Gradle 캐시로 서명 빌드 성공. 오프라인 검증 45개 통과: `artifacts/mypage-20261102/android-connection/android-release-verification.json`. 기존 서명키와 제출된 code 4 산출물은 해시 불변 확인.
+- 이 code 5는 Play 미업로드이며 실기기 실행은 미확인이다. code 4 심사 상태와 혼동하지 않는다. 현재 설치된 code 4에는 프런트 연결·표현 개선이 자동 반영되지 않는다.
+- E 실행·시험·빌드 증거를 이전 검증에 연결해 G1/G2/G3를 통과시켰고 hold를 보존 후 해제했다. 기존 C 자료의 전체 보존 복사는 백그라운드에서 재개했다. C 삭제량은 0이며 전체 이전 완료가 아니다.
