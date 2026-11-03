@@ -11,7 +11,7 @@
 | 이름 | GitHub | 역할 | 주요 담당 |
 | :--- | :--- | :--- | :--- |
 | **최용우** | [@yw8837](https://github.com/yw8837) | Full-Stack / Architecture | 서비스 아키텍처 설계, 백엔드 API & GEO 엔진 구현 |
-| **최유정** | [@cheezcyj](https://github.com/cheezcyj) | Frontend / UI·UX | 모바일 반응형 웹 인터페이스, 동적 인터랙션 및 CTA |
+| **최유정** | [@cheezcyj](https://github.com/cheezcyj) | Frontend / UI·UX / Design | 요구사항 정의, 화면 설계, UI·UX 디자인, 화면흐름 프로토타입 설계, 동적 인터랙션 구현 및 CTA 담당 |
 | **이승현** | [@LEES999](https://github.com/LEES999) | AI & Data Engineering | 이커머스 트랜잭션 분석, 군집화 및 수요·이탈 예측 모델 |
 
 ---
