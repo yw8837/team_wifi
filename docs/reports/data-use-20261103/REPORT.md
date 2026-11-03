@@ -10,6 +10,8 @@ Team_Wifi · 작성 기준 2026년 11월 3일
 
 이 보고서는 전체 프로젝트 최종 보고서 중 **데이터 분석과 활용 부분**에 해당한다. 제출 양식이 정해지면 문제 정의, 팀 역할, 전체 시스템 구성, 일정과 함께 편집할 수 있다.
 
+2026년 11월 3일 추가 제공된 요구사항정의서 128개 항목과 화면 설계 자료를 확인했다. [요구사항·화면 설계 대조 기록](DESIGN-REFERENCE.md)에 관심 설정·추천·저장·공개 웹 요구사항을 현재 구현과 연결했다. 설계의 대화형 추천과 주문·결제 등 전체 목표 범위는 이 보고서의 구현 완료 범위와 다르다. [S9]
+
 ## 제공 데이터와 분석 단위
 
 | 구분 | 자료 | 규모와 단위 | 이번 프로젝트의 사용 |
@@ -129,6 +131,7 @@ PageValues·BounceRates·ExitRates 등을 입력에서 제외하고 방문 횟�
 - S6 분류 평가: `ai-pipeline/artifacts/evaluation.json`.
 - S7 활동 측정: `backend/app/growth.py`, `frontend/src/measurement.tsx`, `scripts/export-public-guides.py`.
 - S8 배포와 검증: `docs/build/release-20261102/SERVICE-DATA.md`, `docs/build/release-20261102/AUTH-AND-MEASUREMENT.md`, [CI 41460847054](https://github.com/yw8837/team_wifi/actions/runs/41460847054).
+- S9 추가 제공 요구사항·화면 설계: [원본 Drive 폴더](https://drive.google.com/drive/folders/1RD9U3j9ycCwECVkDyUszQmQLu3L1gzTk), [자료 구성과 현재 적용 대조](DESIGN-REFERENCE.md).
 - D1 원출처: https://www.kaggle.com/datasets/salahuddinahmedshuvo/ecommerce-consumer-behavior-analysis-data
 - D2 원출처: https://www.kaggle.com/datasets/thedevastator/online-retail-transaction-data
 - D3 원출처: https://archive.ics.uci.edu/dataset/502/online+retail+ii
