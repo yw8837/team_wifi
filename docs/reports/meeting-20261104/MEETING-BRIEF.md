@@ -215,7 +215,7 @@ DB는 API 서버와 별도로 Neon에 있어 서버 재시작만으로 회원 �
 
 구현·배포 기록: 공개 웹, 비교 가이드·계산기, 회원 관심 설정·저장, 수요 글·댓글, 운영자 공동 저장 분석, 동의 기반 측정, 기존 계정 카카오 재로그인.
 
-검증 기록: 서버 123개·프런트 155개·PostgreSQL 67개 검사. 이는 전체 기능 검사 수이며 데이터 모델 정확도나 운영 효과를 뜻하지 않습니다.
+검증 기록: 서버 132개·프런트 159개·PostgreSQL 71개 검사. 이는 전체 기능 검사 수이며 데이터 모델 정확도나 운영 효과를 뜻하지 않습니다.
 
 남음: Google 활성화, Android 0.5.0의 Play 업로드·실기기 확인, 대화형 추천과 대화 보관·삭제, 실제 주문·결제·배송·환불·정산, 새 설계 수용조건별 검증.
 
@@ -246,3 +246,12 @@ Google 관리 계정의 한도 해결, Android 실기기 확인, 서버 응답 �
 3. Google 인증·Android 실기기·서버 응답·DB 복원 확인의 담당자.
 
 공유 링크: [정식 웹](https://moduyuga.onrender.com/) · [관심 설정](https://moduyuga.onrender.com/my/preferences) · [운영자 분석](https://moduyuga.onrender.com/admin/insights) · [공개 가이드](https://moduyuga.onrender.com/guides.html)
+
+
+## 팀 협업 시트
+
+[Team_Wifi_FP — 담당 체크와 업무 수정](https://docs.google.com/spreadsheets/d/15TfV_XCtgJCjMyW-cLnYF8oTbvf9ebcfqCzm69SxIrY/edit#gid=612340017)
+
+팀원별 할 일에서 이승현·최유정·최용우 체크박스로 담당을 정합니다. 여러 명을 체크하면 공동 담당입니다. 업무·상태·기한·다음 행동은 같은 표에서 직접 수정하고, 상단의 팀원별 요약과 대시보드·업무 현황은 자동 계산됩니다. 기존 10월 30일 업무와 회의 원문은 보존했습니다.
+
+132/159/71 검증 수치는 [로그인·프로필 배포 기록](../../build/release-20261104/LOGIN-AND-PROFILE.md) 기준입니다.
