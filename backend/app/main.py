@@ -906,6 +906,9 @@ app.include_router(social_events_router)
 from .growth import router as growth_router
 app.include_router(growth_router)
 
+from .advisor import router as advisor_router
+app.include_router(advisor_router)
+
 from .legal import router as legal_router
 app.include_router(legal_router)
 

@@ -20,7 +20,7 @@ export function MeasurementProvider({ children }: { children: ReactNode }) {
   }, [user?.id, version]);
   return <Measurement.Provider value={{ enabled: !!user && choice.userId === user.id && choice.enabled, eligible: choice.eligible, reload }}>{children}</Measurement.Provider>;
 }
-type Placement = 'catalog' | 'personal' | 'detail' | 'demand_list' | 'demand_detail';
+type Placement = 'catalog' | 'personal' | 'detail' | 'demand_list' | 'demand_detail' | 'companion' | 'advisor' | 'compare_cta';
 type Action = 'detail' | 'source' | 'calculator' | 'save' | 'interest';
 export function useExposure(offerId: string | undefined, placement: Placement) {
   const { enabled } = useContext(Measurement), ref = useRef<HTMLElement | null>(null);
@@ -63,7 +63,7 @@ export function MeasurementSettings() {
 type Row = {placement: Placement; channel: string; accounts: number | null; clicked_accounts: number | null; saved_accounts: number | null; interested_accounts: number | null; interest_rate: number | null; ctr: number | null; ctr_95_interval: number[] | null; save_rate: number | null; decision: string};
 type Report = {rows: Row[]; definition: string; limitations: string; search: string};
 const percent = (n: number | null) => n === null ? '집계 보류' : (n * 100).toFixed(1) + '%';
-const places = {catalog: '육아템 목록', personal: '내 관심 육아템', detail: '육아템 상세', demand_list: '공구 수요 목록', demand_detail: '공구 수요 관심 버튼'};
+const places = {companion: '함께 살펴볼 육아템', advisor: '조건 찾기 결과', compare_cta: '비교 기준 안내', catalog: '육아템 목록', personal: '내 관심 육아템', detail: '육아템 상세', demand_list: '공구 수요 목록', demand_detail: '공구 수요 관심 버튼'};
 export function MeasurementReport() {
   const data = usePublicResource<Report>('/release/measurement/report');
   return <section className="panel"><h2>노출 → 클릭 → 저장·관심</h2><ResourceState {...data} retry={data.reload}/>{data.data && <><p>{data.data.definition}</p>

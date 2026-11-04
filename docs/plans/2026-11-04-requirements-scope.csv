@@ -1,0 +1,129 @@
+﻿요구사항 ID,기능명,원문 중요도,이번 우선순위,리드 담당,현재 상태,완료 조건 / 제한,목표일,원문 근거
+signup_01,회원가입,필수,P0,최용우,부분 반영·외부 막힘,이메일·카카오 구현; Google·네이버 미활성. 신규 소셜 실계정 확인 별도,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+signup_02,관심사 온보딩,필수,P1,최용우,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mypage_05,관심사 수정,중요,P0,최유정,기존 구현,관심 최대 3개·비교 기준 계정 저장. 신규 조건 찾기는 별도 설정,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+login_01,로그인,필수,P0,최용우,부분 반영·외부 막힘,카카오 활성; Google 프로젝트 한도 미해결. 전체 제공자 완료 아님,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+login_02,로그아웃,필수,P0,최용우,부분 반영,세션 종료·다른 계정 비노출. 조건 찾기 재로그인 유지 확인; 자유대화 이력 없음,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+login_03,비밀번호 재설정,중요,P1,최용우,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mypage_01,마이페이지 조회,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mypage_02,회원정보 관리,중요,P0,최유정,기존 구현,카카오 연결 계정 닉네임 수정·권한 격리. 최신 CI 근거 연결,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mypage_03,배송지 관리,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mypage_04,회원 탈퇴,필수,P0,최용우,기존 구현·정책 확인,계정 및 새 조건 기록 삭제 확인. 원문 7년 일괄 보관 메모를 정책으로 채택하지 않음,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mileage_01,마일리지 조회,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mileage_02,마일리지 적립,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mileage_03,마일리지 사용,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mileage_04,취소·환불 시 마일리지 처리,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+main_01,비로그인 메인 화면,필수,P0,최유정,공개 탐색 구현,비로그인 홈 → 목록 → 상세를 시연. API 첫 기동 지연은 별도 확인,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+main_02,홈 상단 내비게이션,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+main_03,메인 배너,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+browse_01,신상품 조회,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+browse_02,마감임박 공동구매 조회,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+brand_01,브랜드 목록 조회,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+brand_02,브랜드별 상품 조회,중요,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+timesale_01,타임세일 조회,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+promotion_01,기획전 조회,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+browse_03,육아용품 세부 카테고리,필수,P0,최유정,부분 반영,현재 6개 분야. 설계의 대·중·소분류 전체와 구분,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+browse_04,상품 검색,필수,P0,최유정,부분 반영,제목·요약·출처 검색. 가격·연령 정보 없는 항목을 임의 필터하지 않음,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+browse_05,상품 필터·정렬,중요,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_01,공개 상품 상세,필수,P0,최유정,부분 반영,공식 참고 목록 상세. 실제 SKU·재고·거래 페이지와 구분,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_02,상품정보 고지 항목,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_03,상품정보 확인 상태,필수,P0,최유정,부분 반영,가격·배송비·인증 미확인은 미확인으로 표시. 판매 고지 완성으로 설명하지 않음,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_04,개별구매·공동구매 선택,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_05,상품 옵션·수량 선택,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+groupbuy_01,공동구매 조건 조회,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_06,배송·취소·반품 안내,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_07,상품 후기 조회,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+inquiry_01,상품 문의 작성,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+inquiry_02,상품 문의 3건 미리보기,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+inquiry_03,상품 문의 전체 목록 이동,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+inquiry_04,답변 접기·펼치기,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+inquiry_05,비공개 문의 보호,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+browse_06,관심 상품·담기,유용,P0,최유정,부분 반영,계정별 저장·해제 동작 확인. 구매방식별 장바구니는 P2,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+individual_01,개별구매 주문·결제,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+groupbuy_02,공동구매 참여 선결제,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+payment_01,결제 결과 확인,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mypage_06,주문·참여 내역,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+delivery_01,배송 상태 조회,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+refund_01,취소·반품 신청,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+refund_02,환불 상태 조회,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+groupbuy_03,참여 인원·모집 상태,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+groupbuy_04,최소 인원 미달 자동 취소·환불,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+groupbuy_05,공동구매 결과 확인,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+recommend_01,우하단 추천 버튼,필수,P0,이승현,부분 반영·검증 중,분야·용도·비교 기준·예산의 선택형 안내 /advisor. 조건 저장·변경·삭제 제공. 자유 대화·아이 연령 추정·LLM 추천은 미구현,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+recommend_02,대화 기반 상품 추천,필수,P0,이승현,부분 반영·검증 중,분야·용도·비교 기준·예산의 선택형 안내 /advisor. 조건 저장·변경·삭제 제공. 자유 대화·아이 연령 추정·LLM 추천은 미구현,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+recommend_03,추천 결과·조건 변경,중요,P0,이승현,부분 반영·검증 중,분야·용도·비교 기준·예산의 선택형 안내 /advisor. 조건 저장·변경·삭제 제공. 자유 대화·아이 연령 추정·LLM 추천은 미구현,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+community_01,커뮤니티 탭,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+community_02,게시글·댓글 관리,중요,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+community_03,커뮤니티 신고,중요,P0,최유정,기존 구현,실제 수요 글/댓글 신고·차단. 결제 후기 신고 기능과 구분,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+seller_apply_01,판매자 권한 신청,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+seller_apply_02,판매자 심사 상태 조회,중요,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_01,상품페이지 등록,필수,P1,최유정,후속 구현 범위,판매자 초안·검토 흐름 목표. 공식 SKU/가격/인증/권한 확인 전 공개 판매·자동 게시 금지,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_02,상품 수정·판매 상태 관리,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_03,상품정보 고지 등록,필수,P1,최유정,후속 구현 범위,판매자 초안·검토 흐름 목표. 공식 SKU/가격/인증/권한 확인 전 공개 판매·자동 게시 금지,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_04,개별구매가·공동구매가 설정,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+groupbuy_06,공동구매 모집 조건 설정,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+groupbuy_07,모집 현황·결과 관리,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+delivery_02,주문·발송 관리,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+inquiry_06,상품 문의 답변,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+reputation_01,판매자 평판 공개,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+reputation_02,판매자 평가 작성,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+seller_manage_01,판매자 신청 심사·승인,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+member_manage_01,계정 권한 관리,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_05,상품·공동구매 검토,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+operation_01,자동 취소·환불 확인,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+operation_02,게시글·후기 신고 검토,중요,P0,최용우,부분 반영,수요 글·댓글 신고 조치만 현재 범위. 거래 후기·환불은 제외,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+permission_01,구매자·판매자·운영자 구분,필수,P0,최용우,기존 구현·범위 제한,구매자·운영자 권한 검사. 공개 판매자 가입은 미개방,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+seo_01,공개 상품 웹페이지,필수,P0,최용우,구현·배포 검증 중,JS 없이 비교 요약·출처·확인일·canonical·Article JSON-LD 제공. 검색 인용은 별도 측정,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+permission_02,개인정보·거래정보 접근 제한,필수,P0,최용우,기존 구현·추가 검증,본인 조건·저장만 조회/변경. 비인증 401·다른 계정 격리,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+design_01,컬러·로고 적용,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+state_01,로딩·오류·빈 상태,중요,P0,최유정,기존 구현·추가 검증,"오류/로딩/빈 결과, 실패 입력 보존, 중복 제출 방지 확인",2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+usability_01,모바일 가독성·조작성,중요,P0,최유정,검증 중,375px·데스크톱에서 전체 라벨 클릭·포커스·하단 탭 겹침 검사,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_06,개별 판매·공구 재고 배정,중요,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+signup_03,가입 방식 선택·소셜 인증,필수,P0,최용우,부분 반영·외부 막힘,실제 활성 제공자만 버튼 표시. Google·네이버 완료로 표시 금지,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mypage_07,최대 5개 등록·선택,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+login_04,본인확인·이메일 아이디 조회,필수,P1,최용우,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+login_05,메일 링크·새 비밀번호 입력,필수,P1,최용우,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+mypage_08,구매·판매 기능 진입,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+main_04,메인 배너 자동 전환·수동 조작,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+browse_07,가격 범위 입력·드래그,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+browse_08,개월·년 연령 필터,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_08,상세 탭 스크롤 고정,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_09,상품상세 접기·펼치기,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_10,구매 방식별 하단 옵션 선택,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_11,담기 완료·장바구니 이동 선택,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+inquiry_07,문의 등록 결과·입력 오류,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+inquiry_08,상품 문의 10개 단위 페이지,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+inquiry_09,판매자 전용 답변 작성·수정,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+browse_09,선택·복수 주문,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+groupbuy_08,주문 목록·결과 상세,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+recommend_04,임신·돌 선물 대화 시나리오,필수,P0,이승현,부분 반영·검증 중,분야·용도·비교 기준·예산의 선택형 안내 /advisor. 조건 저장·변경·삭제 제공. 자유 대화·아이 연령 추정·LLM 추천은 미구현,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+recommend_05,조건 없는 구매 고민 단계 안내,필수,P0,이승현,부분 반영·검증 중,분야·용도·비교 기준·예산의 선택형 안내 /advisor. 조건 저장·변경·삭제 제공. 자유 대화·아이 연령 추정·LLM 추천은 미구현,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+community_04,상단 관리·수정·삭제,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+community_05,게시글·댓글 원문 미리보기,필수,P1,최유정,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_07,판매 방식별 등록 분기,필수,P1,최유정,후속 구현 범위,판매자 초안·검토 흐름 목표. 공식 SKU/가격/인증/권한 확인 전 공개 판매·자동 게시 금지,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_08,옵션·재고 입력,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_09,사진·상세 설명 입력,필수,P1,최유정,후속 구현 범위,판매자 초안·검토 흐름 목표. 공식 SKU/가격/인증/권한 확인 전 공개 판매·자동 게시 금지,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_10,배송·반품 조건 입력,필수,P1,최유정,후속 구현 범위,판매자 초안·검토 흐름 목표. 공식 SKU/가격/인증/권한 확인 전 공개 판매·자동 게시 금지,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_11,상품 등록 검토·제출,필수,P1,최유정,후속 구현 범위,판매자 초안·검토 흐름 목표. 공식 SKU/가격/인증/권한 확인 전 공개 판매·자동 게시 금지,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+groupbuy_09,개별구매 판매 현황,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+delivery_03,택배사 선택·운송장 등록,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+delivery_04,배송 중 목록·상세,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+delivery_05,C/S접수·처리완료,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+seller_manage_02,PC 운영 현황·메뉴 이동,필수,P1,최용우,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+seller_manage_03,판매자 심사 상세·결과,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+member_manage_02,회원 권한·정지 변경 결과,필수,P1,최용우,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+member_manage_03,운영자 조치 이력,필수,P1,최용우,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_manage_12,상품 검토·처리 결과,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+operation_03,환불 실패 확인·재처리,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+operation_04,신고 원문 검토·조치 옵션,필수,P0,최용우,부분 반영,현재 신고 원문 미리보기·숨김·정지·기각 권한 검사,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+operation_05,피신고자 로그인 통보,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+login_06,운영자 모바일 로그인 차단,필수,P1,최용우,후속 구현 범위,실제 카탈로그·권한·검증 자료로 수용조건을 확인한 뒤 상태 변경,2026-11-26,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+product_12,상품·구매 문맥 유지,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+recommend_06,빈 대화 전송 제한,필수,P0,이승현,부분 반영·검증 중,분야·용도·비교 기준·예산의 선택형 안내 /advisor. 조건 저장·변경·삭제 제공. 자유 대화·아이 연령 추정·LLM 추천은 미구현,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+seller_apply_03,정산·증빙 정보 제출,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+seller_apply_04,판매자 신청 철회,중요,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+recommend_07,채팅 끝내기·대화기록 삭제,필수,P0,이승현,부분 반영·검증 중,분야·용도·비교 기준·예산의 선택형 안내 /advisor. 조건 저장·변경·삭제 제공. 자유 대화·아이 연령 추정·LLM 추천은 미구현,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+recommend_08,대화기록 유지·재로그인 후 이어가기,필수,P0,이승현,부분 반영·검증 중,분야·용도·비교 기준·예산의 선택형 안내 /advisor. 조건 저장·변경·삭제 제공. 자유 대화·아이 연령 추정·LLM 추천은 미구현,2026-11-11,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+seller_manage_04,제출 자료 목록·파일 다운로드,필수,P2,최용우,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+history_01,내역 등록 기간 조회,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit
+content_time_01,등록·가입·처리·수정 일시,필수,P2,최유정,중간평가 제외,설계 원본 보존. 실결제·배송·환불·정산·허위 거래를 공개 서비스에 활성화하지 않음,,https://docs.google.com/spreadsheets/d/1vdCgCTCK1tA-NmKWdn7xLzVSfQvy2KQj/edit

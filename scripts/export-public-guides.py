@@ -7,11 +7,14 @@ import argparse
 from html import escape
 import json
 from pathlib import Path
+import runpy
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parents[1]
 ORIGIN = 'https://moduyuga.onrender.com'
-UPDATED = '2026-11-02'
+UPDATED = '2026-11-04'
 CATALOG = json.loads((ROOT/'backend/app/release_catalog.json').read_text('utf-8'))['entries']
+CONTENT = runpy.run_path(str(ROOT/'backend/app/catalog_content.py'))
 GUIDES = [
     {'slug': 'diaper-unit-price', 'title': '기저귀 가격은 어떻게 비교하나요?',
      'answer': '같은 단계·형태·규격을 맞추고, 실제 지불할 상품 금액과 배송비의 합을 총 매수로 나눠 1매당 가격을 비교하세요. 할인율만으로 더 저렴한 상품인지 판단할 수 없습니다.',
@@ -66,12 +69,32 @@ def export(output):
         target = output/path.lstrip('/')
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(page(guide['title'], guide['answer'], path, body, schema), 'utf-8')
+    for entry in CATALOG:
+        detail = CONTENT['guide'](entry)
+        path = CONTENT['guide_path'](entry)
+        # An expired reference remains readable but is excluded from discovery maps.
+        if not detail['expired']:
+            paths.append(path)
+        title = entry['title'] + ' 비교 안내'
+        body = '<p class="meta">'+escape(entry['category'])+' · 공식 참고 목록</p><h1>'+escape(title)+'</h1><p class="answer">'+escape(entry['summary'])+'</p>'
+        body += '<h2>비교할 때 확인할 것</h2><ul>'+''.join('<li>'+escape(note)+'</li>' for note in entry['comparison_notes'])+'</ul>'
+        body += '<h2>확인된 정보와 남은 확인</h2><p>'+escape(detail['limitations'])+'</p>'
+        body += '<p>가격: '+(f"{entry['price']:,}원" if entry['price'] is not None else '미확인 · 판매처에서 확인')+' · 배송비: '+(f"{entry['shipping_fee']:,}원" if entry['shipping_fee'] is not None else '미확인')+'</p>'
+        if detail['expired']:
+            body += '<p>이 안내의 기한이 지났습니다. 현재 판매 조건으로 사용하지 마세요.</p>'
+        body += '<h2>공식 출처</h2><p><a href="'+escape(entry['source_url'], quote=True)+'" rel="noopener noreferrer">'+escape(entry['source_name'])+'</a> · 출처 확인 '+escape(entry['source_checked_at'][:10])+'</p>'
+        body += '<p>가격·재고·규격·호환성과 안전인증은 개별 제품의 원문·증빙에서 다시 확인하세요.</p>'
+        body += '<p><a class="cta" href="/offers/'+quote(entry['id'], safe='')+'">앱·웹에서 자세히 보기</a></p><a href="/advisor">내 조건으로 육아템 찾기</a> · <a href="/calculator">단가 계산하기</a>'
+        target = output/path.lstrip('/')
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(page(title, entry['summary'], path, body, detail['structured_data']), 'utf-8')
     content = '<h1>육아템 선택 가이드</h1><p class="answer">가격·구성·사용 조건을 같은 기준으로 비교할 수 있도록 정리했어요. 공식 출처와 데이터의 한계를 함께 확인하세요.</p>'
     content += ''.join('<article class="guide"><h2><a href="/guides/'+g['slug']+'.html">'+escape(g['title'])+'</a></h2><p>'+escape(g['answer'])+'</p></article>' for g in GUIDES)
+    content += '<h2>품목별 비교 안내</h2><ul>'+''.join('<li><a href="'+CONTENT['guide_path'](entry)+'">'+escape(entry['title'])+'</a></li>' for entry in CATALOG if CONTENT['active'](entry))+'</ul>'
     (output/'guides.html').write_text(page('육아템 선택 가이드', '기저귀 단가, 젖병 구성, 데이터 활용 근거를 출처와 함께 확인하세요.', '/guides.html', content), 'utf-8')
     (output/'robots.txt').write_text('User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /auth/\nDisallow: /admin\nDisallow: /settings\nDisallow: /my\nDisallow: /login\nDisallow: /signup\nDisallow: /reset\nSitemap: '+ORIGIN+'/sitemap.xml\n', 'utf-8')
     (output/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+ORIGIN+p+'</loc><lastmod>'+UPDATED+'</lastmod></url>' for p in paths)+'</urlset>', 'utf-8')
-    (output/'llms.txt').write_text('# 모두의 육아\n\n성인 보호자를 위한 육아용품 비교·공구 수요 서비스. 주문·결제·배송 미제공.\n\n'+''.join('- ['+g['title']+']('+ORIGIN+'/guides/'+g['slug']+'.html)\n' for g in GUIDES)+'\n출처 확인일과 자료의 한계를 각 문서에 표시합니다. 이 목록은 AI 인용이나 노출을 보장하지 않습니다.\n', 'utf-8')
+    (output/'llms.txt').write_text('# 모두의 육아\n\n성인 보호자를 위한 육아용품 비교·공구 수요 서비스. 주문·결제·배송 미제공.\n\n'+''.join('- ['+g['title']+']('+ORIGIN+'/guides/'+g['slug']+'.html)\n' for g in GUIDES)+''.join('- ['+entry['title']+']('+ORIGIN+CONTENT['guide_path'](entry)+')\n' for entry in CATALOG if CONTENT['active'](entry))+'\n출처 확인일과 자료의 한계를 각 문서에 표시합니다. 이 목록은 AI 인용이나 노출을 보장하지 않습니다.\n', 'utf-8')
     return paths
 
 

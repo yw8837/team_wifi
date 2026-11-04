@@ -25,7 +25,7 @@ class Consent(Strict):
 class Event(Strict):
     offer_id: str = Field(default='', max_length=36)
     demand_id: str = Field(default='', max_length=36)
-    placement: Literal['catalog', 'personal', 'detail', 'demand_list', 'demand_detail']
+    placement: Literal['catalog', 'personal', 'detail', 'demand_list', 'demand_detail', 'companion', 'advisor', 'compare_cta']
     channel: Literal['web', 'android']
     action: Literal['view', 'detail', 'source', 'calculator', 'save', 'interest']
     visible_ms: int = Field(ge=0, le=600000)
@@ -73,6 +73,7 @@ def event(body: Event, user=Depends(current_user), db=Depends(get_db)):
         offer_by_id(body.offer_id)
     target = body.demand_id or body.offer_id
     allowed = {'catalog': {'view', 'detail'}, 'personal': {'view', 'detail'}, 'detail': {'view', 'source', 'calculator', 'save'},
+               'companion': {'view', 'detail'}, 'advisor': {'view', 'detail'}, 'compare_cta': {'view', 'source', 'calculator'},
                'demand_list': {'view', 'detail'}, 'demand_detail': {'view', 'interest'}}
     if body.action not in allowed[body.placement]:
         raise HTTPException(422, '이 위치에서 제공하지 않는 행동입니다.')

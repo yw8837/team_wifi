@@ -50,6 +50,16 @@ def checks(c, expect):
     expect(catalog.status_code==200 and all(entry['entry_type']=='shopping_reference' and entry['price'] is None for entry in catalog.json()),
            'checked-in public manifest only with no invented prices')
     offer_id = catalog.json()[0]['id']
+    choices = {'categories': ['수유·이유식'], 'priority': 'composition', 'purpose': 'gift', 'budget_max': None}
+    expect(c.post('/api/release/advisor/preview', json=choices).status_code == 200, 'anonymous advisor preview with deployed request guard')
+    expect(c.put('/api/release/advisor', headers=h1, json=choices).status_code == 200, 'advisor PostgreSQL choice upsert')
+    choices['priority'] = 'care'
+    expect(c.put('/api/release/advisor', headers=h1, json=choices).status_code == 200, 'advisor PostgreSQL choice update')
+    expect(c.get('/api/release/advisor', headers=h1).json()['choices'] == choices, 'advisor persisted choices')
+    expect(not c.get('/api/release/advisor', headers=h2).json()['has_saved_choices'], 'advisor account isolation')
+    expect(c.delete('/api/release/advisor', headers=h1).status_code == 200 and not c.get('/api/release/advisor', headers=h1).json()['has_saved_choices'], 'advisor explicit deletion')
+    expect(c.get('/api/release/offers/'+offer_id+'/companions').status_code == 200, 'companion distinct aggregate PostgreSQL query')
+    expect(c.get('/api/release/offers/'+offer_id+'/guide').json()['structured_data']['@type'] == 'Article', 'public reference schema scope')
     expect(c.post('/api/auth/login', json={'email':'public1@example.com','password':password}).status_code == 200,
            'public PostgreSQL registration and password login roundtrip')
     expect(c.put('/api/release/measurement/consent', headers=h1, json={'enabled':True}).status_code == 200,
