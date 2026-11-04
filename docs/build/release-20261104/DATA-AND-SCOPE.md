@@ -51,3 +51,21 @@
 [중간평가 범위](https://docs.google.com/spreadsheets/d/15TfV_XCtgJCjMyW-cLnYF8oTbvf9ebcfqCzm69SxIrY/edit#gid=611041128): 128행 읽기 재검증 일치, P0 29 / P1 31 / P2 68. 원문 중요도 보존. 원본 파일 접근 제한은 [범위 계획](../../plans/2026-11-04-midterm-scope.md)에 명시했다.
 
 남음: 팀 UI·분석 검토와 발표 리허설, Google 프로젝트 한도 해결/활성화, 새 Android 설치본·실기기 확인, 실제 판매 SKU 확보, 주문·결제·배송·환불·정산, 무료 호스트 첫 응답 지연 대책, DB 복원 검증. 전체 346개 화면·128요구사항 완료로 보고하지 않는다. Play 업로드·main 병합·유료 전환은 하지 않았다.
+
+
+## 운영 배포 확인 — 2026-11-04 14:11 KST
+
+최종 코드 `5ee0378894de26ac0ea60237ca44b348e242909a`의 [CI 41777117967](https://github.com/yw8837/team_wifi/actions/runs/41777117967) 전체 성공(api/ui/unsigned-android). PostgreSQL 영수증 79개 pass를 다운로드해 확인했다. 비교 제목 중복을 없애고 출처 확인 시각을 KST로 명시했으며 관련 로컬 검사 17개도 통과했다.
+
+- API Render 배포: `dep-dblbrebbc2fs73dqpapg`, Deploy succeeded, 2분 57초.
+- 웹 Render 배포: `dep-dblbrvdg1s2s73e8uu20`, Deploy succeeded/Live, 43.3초.
+- 실제 웹: `https://moduyuga.onrender.com/advisor`에서 비회원 선물·수유/이유식·구성 선택 → 더블하트 목록 → 상세 → 가격 기준 CTA → 공개 비교 HTML 이동을 확인했다.
+- 공개 API의 preview 2건, guide, companions, health HTTP 200. 예산 30,000원은 가격·배송비 미확인 1개를 제외하고 빈 결과를 반환했다.
+- `/items/doubleheart-bottles.html`, sitemap, llms, 개인정보 안내와 신규 JS 제공을 확인했다. 최종 API JSON-LD와 실제 정적 HTML JSON-LD가 일치한다.
+- 운영 JS: `/assets/index-CScGOU34.js`, SHA-256 `12431d062ffe05b1ecbea884f12dd94ed3d6142f6c2cf08c440981d3441c2cba`.
+- 최종 비교 HTML SHA-256 `8ac62baf53e6bb671d923929e2d4156a3ec9a38c26bd0e0be416c81b952d62a7`.
+- 공유 시트 최종 128행을 재조회해 로컬 계획과 일치 확인. 담당자 요약·대시보드 검사 범위에 수식 오류 없음. T19·T20 완료, T21~T23은 구현/배포 후 팀 검토 필요, T24 리허설 확인 필요로 구분했다.
+
+비공개 증거: `artifacts/scope-20261104/`의 CI 영수증, live-api.json, live-web.json, final-live.json, 운영 결과/모바일/공개 안내 화면. 원본 로그·운영 회원 원문·키는 커밋하지 않았다. 이 작업에서 띄운 루프백 QA 서버 두 개는 종료했고 회의 안내 서버는 유지했다.
+
+이 조회는 상시 무중단·응답시간 보장이나 구매 전환 개선의 증거가 아니다. 운영자의 실제 로그인 정보를 새로 입력하거나 시험 계정을 운영 DB에 만들지 않았다. 인증 저장/삭제는 격리된 API·PostgreSQL 검증, 공개 동선은 실제 웹 확인으로 구분한다.
