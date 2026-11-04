@@ -59,7 +59,7 @@ def export(output):
         body = '<p class="meta">선택 기준 · 공식 출처 확인</p><h1>'+escape(guide['title'])+'</h1><p class="answer">'+escape(guide['answer'])+'</p>'
         body += ''.join('<section><h2>'+escape(title)+'</h2><p>'+escape(text)+'</p></section>' for title, text in guide['sections'])
         if sources:
-            body += '<h2>공식 출처와 확인 시점</h2><ul>'+''.join('<li><a href="'+escape(entry['source_url'], quote=True)+'" rel="noopener noreferrer">'+escape(entry['source_name'])+'</a> · 출처 확인 '+escape(entry['source_checked_at'][:10])+'<br><small>현재 가격·재고와 제품 조건은 원문을 확인하세요.</small></li>' for entry in sources)+'</ul>'
+            body += '<h2>공식 출처와 확인 시점</h2><ul>'+''.join('<li><a href="'+escape(entry['source_url'], quote=True)+'" rel="noopener noreferrer">'+escape(entry['source_name'])+'</a> · 출처 확인 '+escape(CONTENT['checked_time'](entry))+'<br><small>현재 가격·재고와 제품 조건은 원문을 확인하세요.</small></li>' for entry in sources)+'</ul>'
         else:
             body += '<h2>분석 자료</h2><p>프로젝트 제공 파일: Ecommerce_Consumer_Behavior_Analysis_Data.csv, online_retail.csv, online_retail_II.xlsx, online_shoppers_intention.csv. 원본 개인별 행은 공개하지 않습니다. 제공 파일 분석 결과를 요약했으며 표집과 현재 시장 대표성에 한계가 있습니다.</p>'
         body += '<p><a class="cta" href="'+guide['cta'][0]+'">'+escape(guide['cta'][1])+'</a></p>'
@@ -75,14 +75,14 @@ def export(output):
         # An expired reference remains readable but is excluded from discovery maps.
         if not detail['expired']:
             paths.append(path)
-        title = entry['title'] + ' 비교 안내'
+        title = entry['title']
         body = '<p class="meta">'+escape(entry['category'])+' · 공식 참고 목록</p><h1>'+escape(title)+'</h1><p class="answer">'+escape(entry['summary'])+'</p>'
         body += '<h2>비교할 때 확인할 것</h2><ul>'+''.join('<li>'+escape(note)+'</li>' for note in entry['comparison_notes'])+'</ul>'
         body += '<h2>확인된 정보와 남은 확인</h2><p>'+escape(detail['limitations'])+'</p>'
         body += '<p>가격: '+(f"{entry['price']:,}원" if entry['price'] is not None else '미확인 · 판매처에서 확인')+' · 배송비: '+(f"{entry['shipping_fee']:,}원" if entry['shipping_fee'] is not None else '미확인')+'</p>'
         if detail['expired']:
             body += '<p>이 안내의 기한이 지났습니다. 현재 판매 조건으로 사용하지 마세요.</p>'
-        body += '<h2>공식 출처</h2><p><a href="'+escape(entry['source_url'], quote=True)+'" rel="noopener noreferrer">'+escape(entry['source_name'])+'</a> · 출처 확인 '+escape(entry['source_checked_at'][:10])+'</p>'
+        body += '<h2>공식 출처</h2><p><a href="'+escape(entry['source_url'], quote=True)+'" rel="noopener noreferrer">'+escape(entry['source_name'])+'</a> · 출처 확인 '+escape(CONTENT['checked_time'](entry))+'</p>'
         body += '<p>가격·재고·규격·호환성과 안전인증은 개별 제품의 원문·증빙에서 다시 확인하세요.</p>'
         body += '<p><a class="cta" href="/offers/'+quote(entry['id'], safe='')+'">앱·웹에서 자세히 보기</a></p><a href="/advisor">내 조건으로 육아템 찾기</a> · <a href="/calculator">단가 계산하기</a>'
         target = output/path.lstrip('/')

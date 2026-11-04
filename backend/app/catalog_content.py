@@ -1,8 +1,13 @@
 """Dependency-free public content shared by the API and static web build."""
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from urllib.parse import quote
 
 ORIGIN = 'https://moduyuga.onrender.com'
+
+
+def checked_time(entry):
+    return datetime.fromisoformat(entry['source_checked_at'].replace('Z', '+00:00')).astimezone(
+        timezone(timedelta(hours=9))).strftime('%Y-%m-%d %H:%M KST')
 
 
 def active(entry):
@@ -20,7 +25,7 @@ def guide(entry):
         'comparison_notes': entry['comparison_notes'], 'source_checked_at': entry['source_checked_at'],
         'source_url': entry['source_url'], 'expired': not active(entry),
         'structured_data': {'@context': 'https://schema.org', '@type': 'Article',
-            'headline': entry['title'] + ' 비교 안내', 'description': entry['summary'],
+            'headline': entry['title'], 'description': entry['summary'],
             'mainEntityOfPage': canonical, 'inLanguage': 'ko-KR',
             'author': {'@type': 'Organization', 'name': 'Team_Wifi'},
             'citation': entry['source_url'], 'dateModified': entry['source_checked_at']},
