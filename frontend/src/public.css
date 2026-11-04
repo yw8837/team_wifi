@@ -100,6 +100,10 @@
 .social-button { min-height: 48px; width: 100%; border: 1px solid #c4b7af; }
 .social-google { color: #292929; background: #fff; }
 .social-kakao { color: #191919; background: #fee500; border-color: #e4cd00; }
+.email-signup { margin-top: 24px; padding: 0; border: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); border-radius: 0; font-size: inherit; }
+.email-signup > summary { min-height: 52px; padding: 14px 0; font-weight: 600; }
+.email-signup > form { padding: 8px 0 20px; }
+.email-signup .hint { margin: 0 0 12px; }
 .measurement-row { border-top: 1px solid var(--line); padding: 16px 0; }
 .measurement-row dl { display: flex; gap: 24px; flex-wrap: wrap; }
 .measurement-row dd { margin: 4px 0; font-weight: 700; }

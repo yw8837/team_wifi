@@ -24,6 +24,28 @@ beforeEach(()=>{
 });
 afterEach(()=>vi.unstubAllGlobals());
 describe("public release navigation and safe content",()=>{
+ it("keeps social login loading visible instead of silently hiding it",()=>{
+   state.loading=true;
+   expect(render('/login')).toContain('소셜 로그인 연결을 확인하고 있어요');
+ });
+ it("offers a retry when social login discovery fails",()=>{
+   state.error='서버 연결에 시간이 오래 걸리고 있어요.';
+   const html=render('/login');
+   expect(html).toContain(state.error);
+   expect(html).toContain('소셜 로그인 다시 확인');
+ });
+ it("puts available Kakao before a separate email login form",()=>{
+   state.data.set('/auth/social/providers',{providers:['kakao']});
+   const html=render('/login');
+   expect(html).toContain('카카오');
+   expect(html.indexOf('aria-label="소셜 로그인"')).toBeLessThan(html.indexOf('aria-label="이메일 로그인"'));
+   expect(html).toContain('<summary>이메일로 로그인하기</summary>');
+ });
+ it("separates email signup from social signup",()=>{
+   const html=render('/signup');
+   expect(html).toContain('<summary>이메일로 가입하기</summary>');
+   expect(html).toContain('이메일과 비밀번호를 따로 입력하지 않아요');
+ });
  it("keeps account help and every legal document available to guests",()=>{
    const html=render("/my");
    expect(html).toContain("마이페이지");

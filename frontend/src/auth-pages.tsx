@@ -53,6 +53,7 @@ export function Welcome() {
   );
 }
 export function Login() {
+  const EmailLoginContainer = PUBLIC_RELEASE ? "details" : "div";
   const [params] = useSearchParams(),
     nav = useNavigate(),
     location = useLocation(),
@@ -74,7 +75,10 @@ export function Login() {
           돌아갑니다.
         </p>
       )}
-      <form
+      {PUBLIC_RELEASE && <SocialButtons to={to}/>}
+      <EmailLoginContainer className={PUBLIC_RELEASE ? "email-signup" : undefined}>
+      {PUBLIC_RELEASE && <summary>이메일로 로그인하기</summary>}
+      <form aria-label="이메일 로그인"
         onSubmit={(e) => {
           e.preventDefault();
           void action.run(async () => {
@@ -108,11 +112,11 @@ export function Login() {
           {action.busy ? "로그인 중…" : "로그인"}
         </button>
       </form>
+      </EmailLoginContainer>
       <div className="link-row">
         <Link to={"/signup?returnTo=" + encodeURIComponent(to)}>회원가입</Link>
         <Link to="/reset">비밀번호 재설정</Link>
       </div>
-      {PUBLIC_RELEASE && <SocialButtons to={to}/>}
       <p className="muted">
         {DEPLOYED_MODE ? "이메일 가입 계정은 비밀번호 분실 시 보관한 복구코드가 필요합니다. 이메일 소유 확인은 제공하지 않습니다." : "이 개발 빌드는 이메일 인증을 제공하지 않습니다."} 세션은 현재 탭 또는 앱 실행 동안 유지됩니다.
       </p>
@@ -125,6 +129,7 @@ export function Signup() {
     { setSession } = useAuth(),
     action = useAction();
   const track = !PUBLIC_RELEASE && params.get("track") === "seller" ? "seller" : "buyer";
+  const EmailSignupContainer = PUBLIC_RELEASE ? "details" : "div";
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -149,7 +154,7 @@ export function Signup() {
       >
         <p>{PUBLIC_RELEASE ? "정보 저장과 공구 수요·질문에 참여할 수 있어요. 로그인 후 직접 원하는 행동을 선택해 주세요." : "판매자도 같은 계정으로 구매 기능을 이용할 수 있어요."}</p>
       </PageTitle>
-      {PUBLIC_RELEASE && <SocialButtons to={to}/>}
+      {PUBLIC_RELEASE && <><SocialButtons to={to}/><p className="hint">소셜로 가입하면 이메일과 비밀번호를 따로 입력하지 않아요.</p></>}
       {!PUBLIC_RELEASE && <div className="segmented">
         <button
           type="button"
@@ -170,7 +175,9 @@ export function Signup() {
           판매자
         </button>
       </div>}
-      <form
+      <EmailSignupContainer className={PUBLIC_RELEASE ? "email-signup" : undefined}>
+      {PUBLIC_RELEASE && <summary>이메일로 가입하기</summary>}
+      <form aria-label="이메일 회원가입"
         onSubmit={(e) => {
           e.preventDefault();
           void action.run(async () => {
@@ -218,6 +225,7 @@ export function Signup() {
           value={form.nickname}
           onChange={(e) => setForm({ ...form, nickname: e.target.value })}
         />
+        {PUBLIC_RELEASE && <p className="hint">닉네임은 글·댓글에 표시할 이름이에요. 실명을 입력할 필요는 없어요.</p>}
         {DEPLOYED_MODE ? <>
           {BETA_MODE && <Field label="초대코드" name="invite_code" autoComplete="off" autoCapitalize="none" spellCheck={false} required
             value={form.invite_code} onChange={(e) => setForm({ ...form, invite_code: e.target.value })} />}
@@ -262,9 +270,10 @@ export function Signup() {
             ? "계정 생성 중…"
             : track === "seller"
               ? "계정 만들고 입점 신청"
-              : "계정 만들기"}
+              : PUBLIC_RELEASE ? "이메일로 계정 만들기" : "계정 만들기"}
         </button>
       </form>
+      </EmailSignupContainer>
       <p>
         이미 계정이 있나요?{" "}
         <Link to={"/login?returnTo=" + encodeURIComponent(to)}>로그인</Link>

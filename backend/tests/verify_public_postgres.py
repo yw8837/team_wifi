@@ -28,6 +28,11 @@ def checks(c, expect):
         return response.json()
     first, second = signup(1), signup(2)
     h1, h2 = [{'Authorization':'Bearer '+account['access_token']} for account in (first, second)]
+    renamed = c.put('/api/auth/profile', headers=h1, json={'nickname':'프로필변경'})
+    expect(renamed.status_code == 200 and renamed.json() == {**first['user'], 'nickname':'프로필변경'}, 'profile changes only nickname PostgreSQL')
+    expect(c.get('/api/me', headers=h1).json()['nickname'] == '프로필변경', 'profile persists PostgreSQL')
+    expect(c.get('/api/me', headers=h2).json() == second['user'], 'profile account isolation PostgreSQL')
+    expect(c.put('/api/auth/profile', headers=h1, json={'nickname':'권한변경', 'is_admin':True}).status_code == 422, 'profile rejects privilege change PostgreSQL')
     preferences = {'categories': ['기저귀·물티슈'], 'priority': 'unit_price'}
     expect(c.put('/api/release/preferences', headers=h1, json=preferences).status_code == 200, 'public preferences PostgreSQL upsert insert')
     preferences['priority'] = 'care'

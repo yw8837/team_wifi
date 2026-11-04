@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Literal
+import unicodedata
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 class Strict(BaseModel):
@@ -19,6 +20,16 @@ class Register(Strict):
 class Login(Strict):
     email: EmailStr
     password: str = Field(min_length=1, max_length=128)
+
+class ProfileUpdate(Strict):
+    nickname: str = Field(min_length=2, max_length=30)
+
+    @field_validator('nickname')
+    @classmethod
+    def visible_nickname(cls, value):
+        if any(unicodedata.category(char) in ('Cc', 'Cf', 'Cs') for char in value):
+            raise ValueError('닉네임에 줄바꿈이나 보이지 않는 제어 문자를 사용할 수 없습니다.')
+        return value
 
 class Password(Strict):
     password: str = Field(default='', max_length=128)

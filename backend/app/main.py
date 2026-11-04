@@ -251,6 +251,13 @@ def me(user=Depends(current_user)):
     return profile(user)
 
 
+@app.put('/api/auth/profile')
+def update_profile(body: S.ProfileUpdate, user=Depends(current_user), db=Depends(get_db)):
+    user.nickname = body.nickname
+    db.commit()
+    return profile(user)
+
+
 @app.post('/api/auth/logout')
 def logout(request: Request, user=Depends(current_user), db=Depends(get_db)):
     db.execute(delete(Token).where(Token.digest == token_digest(request.headers['Authorization'][7:])))

@@ -61,7 +61,9 @@ export function SocialButtons({ to = '/', purpose = 'login', only }: { to?: stri
     if (Capacitor.isNativePlatform()) await Browser.open({ url: url.href });
     else window.location.assign(url.href);
   }
-  if (!providers.length) return null;
+  if (available.loading) return <section className="social-login" aria-label="소셜 로그인"><p role="status">소셜 로그인 연결을 확인하고 있어요…</p></section>;
+  if (available.error) return <section className="social-login" aria-label="소셜 로그인"><p role="alert">{available.error}</p><button type="button" className="secondary" onClick={available.reload}>소셜 로그인 다시 확인</button></section>;
+  if (!providers.length) return purpose === 'login' ? <section className="social-login" aria-label="소셜 로그인"><p>현재 소셜 로그인을 이용할 수 없어요. 잠시 후 다시 확인하거나 이메일 로그인을 이용해 주세요.</p><button type="button" className="secondary" onClick={available.reload}>소셜 로그인 다시 확인</button></section> : null;
   return <section className="social-login" aria-label="소셜 로그인"><div className="social-buttons">{providers.map(provider => <button key={provider} type="button" className={'social-button social-' + provider} disabled={action.busy}
     onClick={() => void action.run(() => begin(provider))}>{names[provider]}로 {purpose === 'link' ? '계정 연결' : purpose === 'reauth' ? '다시 인증' : '계속하기'}</button>)}</div><Feedback {...action}/>{purpose === 'login' && <p className="hint">기존 이메일 회원은 먼저 이메일로 로그인한 뒤 계정 관리에서 연결해 주세요. 같은 소셜 계정으로 앱과 웹의 저장·관심을 함께 이용할 수 있어요.</p>}</section>;
 }
@@ -89,8 +91,8 @@ export function SocialReturn() {
     else throw new Error('로그인 응답을 확인하지 못했습니다. 다시 시작해 주세요.');
   }
   useEffect(() => { if (started.current !== flow) { started.current = flow; void action.run(claim); } }, [flow]); // one-use claim must not be replayed by StrictMode
-  return <div className="narrow"><PageTitle title={onboarding ? '처음 오셨네요' : '로그인 확인'}><p>{onboarding ? '닉네임과 서비스 이용 동의를 확인하면 가입이 완료됩니다.' : '로그인을 시작한 기기와 소셜 계정을 확인합니다.'}</p></PageTitle>
-    {onboarding && <form onSubmit={e => { e.preventDefault(); void action.run(claim); }}><Field label="닉네임" required minLength={2} maxLength={30} value={nickname} onChange={e => setNickname(e.target.value)}/><LegalLinks/>
+  return <div className="narrow"><PageTitle title={onboarding ? '처음 오셨네요' : '로그인 확인'}><p>{onboarding ? '이메일·비밀번호 입력 없이, 닉네임과 서비스 이용 동의를 확인하면 가입이 완료됩니다.' : '로그인을 시작한 기기와 소셜 계정을 확인합니다.'}</p></PageTitle>
+    {onboarding && <form onSubmit={e => { e.preventDefault(); void action.run(claim); }}><Field label="닉네임" required minLength={2} maxLength={30} value={nickname} onChange={e => setNickname(e.target.value)}/><p className="hint">닉네임은 글·댓글에 표시할 이름이에요. 실명을 입력할 필요는 없어요.</p><LegalLinks/>
       <label className="check"><input type="checkbox" required checked={adult} onChange={e => setAdult(e.target.checked)}/>만 18세 이상입니다.</label>
       <label className="check"><input type="checkbox" required checked={terms} onChange={e => setTerms(e.target.checked)}/>이용약관에 동의합니다.</label>
       <label className="check"><input type="checkbox" required checked={privacy} onChange={e => setPrivacy(e.target.checked)}/>개인정보 처리에 동의합니다.</label>

@@ -15,6 +15,7 @@ import { PersonalDiscovery, PreferencePage, ServiceInsights } from "./discovery"
 import { NativeAuthReturn, SocialReturn, SocialAccountSettings, REAUTH_KEY } from "./social-auth";
 import { MeasurementProvider, MeasurementSettings, useExposure } from "./measurement";
 import "./public.css";
+import { ProfileSettings } from "./profile-settings";
 
 const privacyNotice="아이의 이름·생일·사진, 연락처·주소, 건강정보 등 아이와 가족의 개인정보는 적지 마세요. 광고·거래 유도·불법 정보는 신고 대상입니다.";
 function Pagination({page,count,change}:{page:number;count:number;change:(page:number)=>void}){if(page===0&&count<20)return null;return <nav className="actions" aria-label="목록 페이지"><button className="secondary" disabled={page===0} onClick={()=>change(page-1)}>이전</button><span>{page+1}페이지</span><button className="secondary" disabled={count<20||page>=500} onClick={()=>change(page+1)}>다음</button></nav>;}
@@ -120,7 +121,7 @@ function PublicMy() {
       <nav className="my-menu" aria-label="내 활동과 계정">
         <Link to="/my/preferences"><IconHome size={23} aria-hidden="true"/><span><strong>관심 육아템 설정</strong><small>관심 분야와 비교 기준 · 앱·웹 함께 적용</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
         <Link to="/my/saved"><IconBookmark size={23} aria-hidden="true"/><span><strong>저장한 육아템</strong><small>다시 보고 싶은 육아템을 한곳에</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
-        <Link to="/settings"><IconUser size={23} aria-hidden="true"/><span><strong>계정 관리</strong><small>로그아웃 · 복구코드 · 차단 · 계정 삭제</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
+        <Link to="/settings"><IconUser size={23} aria-hidden="true"/><span><strong>프로필 · 계정 관리</strong><small>닉네임 변경 · 로그인 연결 · 차단 · 계정 삭제</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
         {user?.is_admin&&<Link to="/admin"><span><strong>콘텐츠 신고 관리</strong><small>접수된 신고 확인과 처리</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}
         {user?.is_admin&&<Link to="/admin/insights"><span><strong>육아템 관심 분석</strong><small>저장·수요 현황과 제공 데이터 분석</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}
       </nav>
@@ -164,6 +165,7 @@ function PublicPolicies() {
 function PublicSettings(){
  const {user,clear}=useAuth(),nav=useNavigate(),action=useAction();const [deleting,setDeleting]=useState(false),[password,setPassword]=useState(""),[confirmed,setConfirmed]=useState(false),[blockPage,setBlockPage]=useState(0);const blocks=usePublicResource<Author[]>("/blocks?limit=20&offset="+blockPage*20,user?.id);
  return <div className="narrow account-settings"><Link className="back-link" to="/my">← 마이페이지</Link><PageTitle title="계정 관리"/>
+ <ProfileSettings key={user?.id}/>
  <section className="panel"><h2>현재 계정</h2><p>{user?.nickname} · {user?.email}</p><p className="muted">로그인은 현재 탭·앱 세션에 유지됩니다. 소셜 연결은 아래에서 관리하며, 이메일 가입은 이메일 소유 확인을 제공하지 않습니다.</p><button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{await api("/auth/logout","POST");clear();nav("/",{replace:true});})}>로그아웃</button></section>{user?.has_password!==false&&<BetaRecoveryCodeSettings/>}<SocialAccountSettings/><MeasurementSettings/>
  <section className="panel"><h2>차단한 작성자</h2><p>차단은 내 로그인 화면에 적용됩니다. 차단을 해제하면 작성자의 글과 댓글이 다시 표시됩니다.</p><ResourceState {...blocks} retry={blocks.reload}/>{!blocks.loading&&!blocks.error&&(blocks.data?.length?<ul className="plain-list">{blocks.data.map(b=><li key={b.id}><span>{b.nickname}</span><button className="secondary" disabled={action.busy} onClick={()=>void action.run(async()=>{await api("/blocks/"+routeId(b.id),"DELETE");blocks.reload();},"차단을 해제했습니다.")}>차단 해제</button></li>)}</ul>:<p>이 페이지에 차단한 작성자가 없습니다.</p>)}{!blocks.loading&&!blocks.error&&<Pagination page={blockPage} count={blocks.data?.length||0} change={setBlockPage}/>}</section>
  <section className="panel"><h2>계정과 데이터 삭제</h2><p>직접 작성한 수요·댓글과 저장·관심·신고·차단 기록을 삭제합니다. 내 수요 글에 달린 다른 회원의 댓글과 관심 기록도 함께 삭제되며, 모든 로그인과 복구코드를 사용할 수 없게 됩니다. 삭제 후에는 복구할 수 없습니다.</p><p>이메일·닉네임·비밀번호는 사용할 수 없게 바뀌고, 데이터 연결 관계를 위한 임의 계정 ID와 탈퇴 상태가 남습니다. <a href={legalUrl("deletion")} target="_blank" rel="noopener noreferrer">삭제 범위와 남는 기록 확인 (새 탭)</a></p>

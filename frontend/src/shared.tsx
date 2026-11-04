@@ -14,6 +14,7 @@ type AuthValue = {
   user: User | null;
   loading: boolean;
   setSession: (token: string, user: User) => void;
+  updateProfile: (user: User) => void;
   refresh: () => Promise<void>;
   clear: () => void;
   requireLogin: () => boolean;
@@ -64,6 +65,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     clear,
     refresh,
+    updateProfile: (updated: User) => {
+      // A late save must never recreate a logged-out or switched account.
+      setUser(current => current?.id === updated.id ? { ...current, nickname: updated.nickname } : current);
+    },
     setSession: (token: string, u: User) => {
       sessionStorage.setItem(TOKEN_KEY, token);
       setUser(u);
