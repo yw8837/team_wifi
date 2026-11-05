@@ -23,6 +23,7 @@ from .security import (DUMMY, admin_user, approved_seller, current_user, issue_t
                        beta_write_guard, charge_claimed_account)
 from . import schemas as S
 from . import config, beta
+from .signup_policy import PUBLIC_MINIMUM_AGE, signup_age_confirmed, signup_consent_action
 from .http_safety import BodyLimitMiddleware
 
 
@@ -212,8 +213,9 @@ def register(body: S.Register, request: Request, db=Depends(get_db)):
     if not body.terms_accepted or not body.privacy_accepted:
         fail('필수 약관과 개인정보 처리에 동의해 주세요.', 422)
     if config.deployed():
-        if not body.adult_confirmed:
-            fail('만 18세 이상만 가입할 수 있습니다.', 422)
+        if not signup_age_confirmed(body):
+            minimum_age = PUBLIC_MINIMUM_AGE if config.PUBLIC_RELEASE else 18
+            fail(f'만 {minimum_age}세 이상인지 확인해 주세요.', 422)
         if body.marketing_opt_in:
             fail('마케팅 수신을 신청할 수 없습니다.', 422)
         if config.PUBLIC_RELEASE and body.track != 'buyer':
@@ -224,7 +226,7 @@ def register(body: S.Register, request: Request, db=Depends(get_db)):
              seller_status='draft' if body.track == 'seller' else None, marketing=body.marketing_opt_in)
     db.add(u)
     db.flush()
-    audit(db, u, 'public-terms-20261102-privacy-20261102-adult-accepted' if config.PUBLIC_RELEASE else 'beta-terms-20261101-privacy-20261101-adult-accepted' if config.BETA else 'terms-v1-and-privacy-v1-accepted', u.id)
+    audit(db, u, signup_consent_action(body), u.id)
     raw = issue_token(db, u)
     recovery = beta.recovery_code(db, u) if config.deployed() else None
     db.commit()

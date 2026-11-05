@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 import unicodedata
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, StrictBool, field_validator
 
 class Strict(BaseModel):
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
@@ -15,7 +15,8 @@ class Register(Strict):
     privacy_accepted: bool
     marketing_opt_in: bool = False
     invite_code: str = Field(default='', max_length=200)
-    adult_confirmed: bool = False
+    age_confirmed: StrictBool | None = None
+    adult_confirmed: StrictBool = False
 
 class Login(Strict):
     email: EmailStr

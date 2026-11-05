@@ -17,12 +17,13 @@ import httpx
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from pydantic import Field
+from pydantic import Field, StrictBool
 from sqlalchemy import delete, select, update
 
 from . import config
 from .db import Record, User, get_db, now, uid
 from .schemas import Strict
+from .signup_policy import signup_age_confirmed, signup_consent_action
 from .security import current_user, global_write_guard, issue_token, optional_user, profile, token_digest
 
 router = APIRouter(prefix='/api/auth/social')
@@ -75,7 +76,8 @@ class Claim(Strict):
     nickname: str = Field(default='', max_length=30)
     terms_accepted: bool = False
     privacy_accepted: bool = False
-    adult_confirmed: bool = False
+    age_confirmed: StrictBool | None = None
+    adult_confirmed: StrictBool = False
 
 
 @router.get('/providers')
@@ -207,7 +209,7 @@ def claim(body: Claim, user=Depends(optional_user), db=Depends(get_db)):
             if not account or account.deleted or db.scalar(select(Record.id).where(Record.kind == 'suspension', Record.owner_id == account.id)):
                 raise HTTPException(403, '사용할 수 없는 계정입니다.')
         else:
-            if not (body.terms_accepted and body.privacy_accepted and body.adult_confirmed and len(body.nickname) >= 2):
+            if not (body.terms_accepted and body.privacy_accepted and signup_age_confirmed(body) and len(body.nickname) >= 2):
                 return {'status': 'onboarding', 'provider': flow.data['provider']}
             account_id = uid()
             account = User(id=account_id, email='social-'+account_id+'@invalid.local', password_hash=DISABLED_PASSWORD, nickname=body.nickname)
@@ -215,7 +217,7 @@ def claim(body: Claim, user=Depends(optional_user), db=Depends(get_db)):
             db.flush()
             db.add(Record(kind=IDENTITY, owner_id=account.id, unique_key=key, data={'provider': flow.data['provider'], 'subject': flow.data['subject']}))
             db.add(Record(kind='audit', owner_id=account.id, parent_id=account.id,
-                          data={'action': 'social-terms-20261102-privacy-20261102-adult-accepted'}))
+                          data={'action': signup_consent_action(body, social=True)}))
         result = {'status': 'authenticated', 'access_token': issue_token(db, account), 'user': profile(account)}
     changed = db.execute(update(Record).where(Record.id == flow.id, Record.status == 'ready').values(status='consumed', data={})).rowcount
     if changed != 1:

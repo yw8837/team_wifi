@@ -8,6 +8,7 @@ import { publicReturnPath } from './release-policy';
 import { usePublicResource } from './release-data';
 import { Feedback, Field, PageTitle, useAction, useAuth } from './shared';
 import { LegalLinks } from './beta';
+import { PUBLIC_AGE_CONFIRMATION, PUBLIC_AGE_HELP } from './signup-policy';
 import type { User } from './types';
 
 type Provider = 'google' | 'kakao';
@@ -73,12 +74,12 @@ export function SocialReturn() {
   const flow = params.get('flow') || '';
   const started = useRef('');
   const [onboarding, setOnboarding] = useState(false), [waiting, setWaiting] = useState(false);
-  const [nickname, setNickname] = useState(''), [adult, setAdult] = useState(false), [terms, setTerms] = useState(false), [privacy, setPrivacy] = useState(false);
+  const [nickname, setNickname] = useState(''), [ageConfirmed, setAgeConfirmed] = useState(false), [terms, setTerms] = useState(false), [privacy, setPrivacy] = useState(false);
   async function claim() {
     let pending: Pending | undefined;
     try { pending = JSON.parse(sessionStorage.getItem(prefix + flow) || 'null') || undefined; } catch { /* invalid local state */ }
     if (!pending || Date.now() - pending.created > 600_000) throw new Error('로그인을 시작한 탭·앱에서 다시 진행해 주세요. 요청이 10분 뒤 만료됩니다.');
-    const result = await api<Result>('/auth/social/claim', 'POST', { flow_id: flow, verifier: pending.verifier, nickname, adult_confirmed: adult, terms_accepted: terms, privacy_accepted: privacy });
+    const result = await api<Result>('/auth/social/claim', 'POST', { flow_id: flow, verifier: pending.verifier, nickname, age_confirmed: ageConfirmed, terms_accepted: terms, privacy_accepted: privacy });
     setWaiting(result.status === 'pending');
     if (result.status === 'pending') return;
     if (result.status === 'onboarding') { setOnboarding(true); return; }
@@ -93,7 +94,8 @@ export function SocialReturn() {
   useEffect(() => { if (started.current !== flow) { started.current = flow; void action.run(claim); } }, [flow]); // one-use claim must not be replayed by StrictMode
   return <div className="narrow"><PageTitle title={onboarding ? '처음 오셨네요' : '로그인 확인'}><p>{onboarding ? '이메일·비밀번호 입력 없이, 닉네임과 서비스 이용 동의를 확인하면 가입이 완료됩니다.' : '로그인을 시작한 기기와 소셜 계정을 확인합니다.'}</p></PageTitle>
     {onboarding && <form onSubmit={e => { e.preventDefault(); void action.run(claim); }}><Field label="닉네임" required minLength={2} maxLength={30} value={nickname} onChange={e => setNickname(e.target.value)}/><p className="hint">닉네임은 글·댓글에 표시할 이름이에요. 실명을 입력할 필요는 없어요.</p><LegalLinks/>
-      <label className="check"><input type="checkbox" required checked={adult} onChange={e => setAdult(e.target.checked)}/>만 18세 이상입니다.</label>
+      <label className="check"><input type="checkbox" required checked={ageConfirmed} aria-describedby="social-age-help" onChange={e => setAgeConfirmed(e.target.checked)}/>{PUBLIC_AGE_CONFIRMATION}</label>
+      <p id="social-age-help" className="hint">{PUBLIC_AGE_HELP}</p>
       <label className="check"><input type="checkbox" required checked={terms} onChange={e => setTerms(e.target.checked)}/>이용약관에 동의합니다.</label>
       <label className="check"><input type="checkbox" required checked={privacy} onChange={e => setPrivacy(e.target.checked)}/>개인정보 처리에 동의합니다.</label>
       <p className="hint">소셜 계정의 고유 식별자와 직접 입력한 닉네임을 보관합니다. 구글·카카오 비밀번호는 받지 않습니다. 카카오에서 이 서비스 연결을 해제하면 카카오 로그인 연결이 삭제됩니다. 다른 로그인 수단이 없는 카카오 전용 회원은 계정과 작성·활동 기록도 함께 삭제됩니다.</p><button disabled={action.busy}>가입 완료</button></form>}

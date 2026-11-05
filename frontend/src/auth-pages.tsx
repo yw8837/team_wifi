@@ -11,6 +11,7 @@ import {
 } from "react-router-dom";
 import { api, safeReturnPath } from "./api";
 import { SocialButtons } from "./social-auth";
+import { PUBLIC_AGE_CONFIRMATION, PUBLIC_AGE_HELP } from "./signup-policy";
 import { BETA_MODE, BETA_NOTICE, BetaRecover, LegalLinks, RecoveryCodeNotice } from "./beta";
 import { signupDestination } from "./beta-policy";
 import type { User } from "./types";
@@ -138,7 +139,7 @@ export function Signup() {
     privacy_accepted: false,
     marketing_opt_in: false,
     invite_code: "",
-    adult_confirmed: false,
+    age_confirmed: false,
   });
   const [pending, setPending] = useState<AuthResponse | null>(null);
   const to = PUBLIC_RELEASE ? publicReturnPath(safeReturnPath(params.get("returnTo"))) : safeReturnPath(params.get("returnTo"));
@@ -181,8 +182,10 @@ export function Signup() {
         onSubmit={(e) => {
           e.preventDefault();
           void action.run(async () => {
+            const { age_confirmed, ...fields } = form;
             const result = await api<AuthResponse>("/auth/register", "POST", {
-              ...form,
+              ...fields,
+              ...(PUBLIC_RELEASE ? { age_confirmed } : { adult_confirmed: age_confirmed }),
               track,
             });
             setForm({ ...form, password: "", invite_code: "" });
@@ -229,8 +232,10 @@ export function Signup() {
         {DEPLOYED_MODE ? <>
           {BETA_MODE && <Field label="초대코드" name="invite_code" autoComplete="off" autoCapitalize="none" spellCheck={false} required
             value={form.invite_code} onChange={(e) => setForm({ ...form, invite_code: e.target.value })} />}
-          <label className="check"><input type="checkbox" required checked={form.adult_confirmed}
-            onChange={(e) => setForm({ ...form, adult_confirmed: e.target.checked })} /><span>[필수] 만 18세 이상입니다.</span></label>
+          <label className="check"><input type="checkbox" required checked={form.age_confirmed}
+            aria-describedby={PUBLIC_RELEASE ? "signup-age-help" : undefined}
+            onChange={(e) => setForm({ ...form, age_confirmed: e.target.checked })} /><span>{PUBLIC_RELEASE ? PUBLIC_AGE_CONFIRMATION : '[필수] 만 18세 이상입니다.'}</span></label>
+          {PUBLIC_RELEASE && <p id="signup-age-help" className="hint">{PUBLIC_AGE_HELP}</p>}
           <p className="notice">{PUBLIC_RELEASE ? "실제 주문·결제·배송은 제공하지 않습니다. 아이와 가족의 개인정보는 입력하지 마세요." : BETA_NOTICE + ". 실제 사업자 정보와 민감정보는 입력하지 마세요."}</p>
           <LegalLinks />
         </> : <details>
