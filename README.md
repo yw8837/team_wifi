@@ -1,12 +1,14 @@
-# 모두의 육아 - 육아템 공동구매,핫딜 · team_wifi
+# 모두의 육아 · Team_Wifi
 
-육아용품 공동구매와 흩어진 핫딜 정보를 확인하고, 조건을 비교하며 함께 참여하는 커뮤니티 앱입니다. 정식 앱명은 **모두의 육아 - 육아템 공동구매,핫딜**, 로고 표기는 **모두의육아**, 개발자 표기는 **Team_Wifi**입니다. 패키지 `kr.moduyuga.app`, 저장소 `yw8837/team_wifi`, 개발 브랜치 `codex/modu-yuga`를 유지합니다.
+[![모두육아 checks](https://github.com/yw8837/team_wifi/actions/workflows/checks.yml/badge.svg?branch=codex%2Fmodu-yuga)](https://github.com/yw8837/team_wifi/actions/workflows/checks.yml)
 
-현재 코드는 제품의 첫 개발 빌드입니다. 가입·판매자 검토·모집·질문/신고·쿠폰/포인트와 공개 데이터 실험을 실제 API와 연결했습니다. 예시 상품·개발용 주문으로 검증하며 **실결제, 배송, 사업자 인증, Play 출시가 완료된 상태는 아닙니다.** 실제 개인정보나 사업자 서류를 넣지 마세요.
+육아 정보와 경험을 나누고 질문을 해결하는 커뮤니티입니다. 육아템 비교·저장·공동구매 수요 연결은 정보 탐색과 교류를 돕습니다. React/Vite·Capacitor, FastAPI, Neon PostgreSQL을 사용합니다. 패키지는 `kr.moduyuga.app`, 작업 브랜치는 `codex/modu-yuga`입니다.
+
+[공개 웹](https://moduyuga.onrender.com)은 비회원 탐색과 회원의 저장·수요/질문·댓글을 제공합니다. 실제 결제·배송·정산은 제공하지 않습니다. 공개 가입 기준은 만 14세 이상이며, 코드·배포·앱 설치·Play 심사 상태를 구분해 기록합니다.
 
 ## 먼저 볼 문서
 
-**현재 무료 시험 서버:** https://moduyuga-beta.onrender.com — 로그인 없이 둘러볼 수 있습니다. 가입은 초대코드가 필요하고 실제 결제·배송은 없습니다. Play 내부 테스트와 실제 Android release 설치 검증의 완료 여부는 아래 베타 현황에서 확인하세요.
+**현재 운영과 변경 상태:** [피드백 반영 기록](docs/plans/2026-11-05-community-feedback.md), [가입 연령 변경](docs/build/release-20261105/SIGNUP-AGE.md), [커뮤니티 수정·서버 이전](docs/build/release-20261105/COMMUNITY-AND-SERVER.md). 기존 Render API 주소는 설치 앱과 소셜 인증 호환을 확인한 뒤 전환합니다.
 
 이 PC의 작업 경로는 **`E:/Team_Wifi`**로 통일했습니다. 이전 기획·회의·데이터는 `_archive/legacy-project`에 보존했습니다. 새 터미널에서는 `. ./scripts/use-workspace.ps1`로 프로젝트 캐시·임시 경로를 설정합니다. 기존 SDK/JDK를 재사용하며 에뮬레이터를 자동 기동하지 않습니다.
 

@@ -64,7 +64,8 @@ def test_privacy_escapes_runtime_disclosures(setup, monkeypatch):
     assert '&lt;script&gt;server&lt;/script&gt;' in html
     assert 'DB &amp; location' in html
     assert 'help+&quot;&lt;&gt;@example.org' in html
-    assert 'HMAC' in html and '10분' in html and '90일' in html and '8시간' in html
+    assert 'HMAC' in html and '10분' in html and '90일' in html and '30일' in html
+    assert '8시간' not in html
 
 
 def test_unknown_legal_document_remains_404(setup, monkeypatch):

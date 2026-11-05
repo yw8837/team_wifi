@@ -86,6 +86,17 @@ def checks(c, expect):
     expect(all(status in (200,409) for status in replies) and 200 in replies,'public concurrent interest serializable outcome')
     expect(c.put(url+'/interest',headers=h2).status_code==200 and c.get(url).json()['interest_count']==1,
            'public interest database uniqueness and retry idempotence')
+    edit_body={'title':'수정한 기저귀 질문','body':'기저귀 단위당 가격과 구성품을 비교합니다.','category':'기저귀·물티슈','revision':1}
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        edits=list(pool.map(lambda _:c.put(url,headers=h1,json=edit_body).status_code,range(2)))
+    expect(sorted(edits)==[200,409], 'concurrent edits reject stale revision PostgreSQL')
+    expect(c.get(url).json()['revision']==2 and c.get(url).json()['interest_count']==1, 'edit preserves unique interests')
+    expect(c.put(url,headers=h2,json={**edit_body,'revision':2}).status_code==404, 'edit rejects non-author PostgreSQL')
+    reply=c.post(url+'/comments',headers=h1,json={'body':'작성자 댓글 검증'}).json()
+    reply_url='/api/release/comments/'+reply['id']
+    expect(c.put(reply_url,headers=h1,json={'body':'작성자 댓글 수정','revision':1}).status_code==200, 'comment edit with durable write quota')
+    expect(c.put(reply_url,headers=h1,json={'body':'충돌한 댓글 수정','revision':1}).status_code==409, 'stale comment edit rejected PostgreSQL')
+    expect(c.delete(reply_url,headers=h1).status_code==200, 'remove owned fixture comment')
     statuses=[c.post(url+'/comments',headers=h2,json={'body':f'실제 요청 제한 검증 질문 {i}'}).status_code for i in range(31)]
     expect(statuses==[201]*30+[429], 'public comments persistent per-account request quota')
     with SessionLocal() as db:

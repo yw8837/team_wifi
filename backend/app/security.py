@@ -150,7 +150,9 @@ def charge_claimed_account(request, label, email):
 def token_digest(raw):
     return hashlib.sha256(raw.encode()).hexdigest()
 
-def issue_token(db, user, kind='session', lifetime=8*3600):
+def issue_token(db, user, kind='session', lifetime=None):
+    if lifetime is None:
+        lifetime = 30*24*3600 if kind == 'session' and config.PUBLIC_RELEASE else 8*3600
     raw = secrets.token_urlsafe(32)
     db.add(Token(digest=token_digest(raw), user_id=user.id, kind=kind, expires=now()+lifetime))
     return raw

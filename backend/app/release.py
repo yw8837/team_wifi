@@ -238,6 +238,14 @@ class CommentInput(Strict):
     body: str = Field(min_length=2, max_length=1000)
 
 
+class DemandEdit(DemandInput):
+    revision: int = Field(ge=1, strict=True)
+
+
+class CommentEdit(CommentInput):
+    revision: int = Field(ge=1, strict=True)
+
+
 class ReportInput(Strict):
     target_type: Literal['demand', 'comment', 'user']
     target_id: str = Field(min_length=1, max_length=36)
@@ -283,13 +291,31 @@ def demand_dto(db, item, user):
     comment_count = db.scalar(select(func.count()).select_from(comments.subquery()))
     interested = bool(user and db.scalar(interests.where(Record.owner_id == user.id).with_only_columns(Record.id).limit(1)))
     return dict(id=item.id, **item.data, author=author(db, item), created_at=timestamp(item.created),
+                revision=item.revision,
                 interest_count=interest_count, interested=interested,
                 comment_count=comment_count, own=bool(user and user.id == item.owner_id))
 
 
 def comment_dto(db, item, user):
     return dict(id=item.id, body=item.data['body'], author=author(db, item),
-                created_at=timestamp(item.created), own=bool(user and user.id == item.owner_id))
+                created_at=timestamp(item.created), updated_at=item.data.get('updated_at'),
+                revision=item.revision, own=bool(user and user.id == item.owner_id))
+
+
+def edit_owned_content(db, kind, id, body, user):
+    item = content(db, kind, id, user)
+    if item.owner_id != user.id:
+        raise HTTPException(404, '본인이 작성한 내용을 찾을 수 없습니다.')
+    if kind == COMMENT:
+        parent = content(db, DEMAND, item.parent_id, user)
+        if db.scalar(select(Record.id).where(Record.kind == 'block', Record.owner_id == parent.owner_id, Record.parent_id == user.id)):
+            raise HTTPException(403, '이 게시물의 댓글을 수정할 수 없습니다.')
+    if item.revision != body.revision:
+        raise HTTPException(409, '다른 화면에서 수정된 내용이 있습니다. 작성 중인 내용은 보관한 뒤 최신 내용을 확인해 주세요.')
+    item.data = {**body.model_dump(exclude={'revision'}), 'updated_at': timestamp(now())}
+    item.revision += 1
+    db.commit()
+    return item
 
 
 @router.get('/demands')
@@ -317,6 +343,12 @@ def create_demand(body: DemandInput, request: Request, user=Depends(current_user
 @router.get('/demands/{id}')
 def demand(id: str, user=Depends(optional_user), db=Depends(get_db)):
     return demand_dto(db, content(db, DEMAND, id, user), user)
+
+
+@router.put('/demands/{id}')
+def edit_demand(id: str, body: DemandEdit, request: Request, user=Depends(current_user), db=Depends(get_db)):
+    throttle(request, 'write', subject=user.id)
+    return demand_dto(db, edit_owned_content(db, DEMAND, id, body, user), user)
 
 
 @router.delete('/demands/{id}')
@@ -380,6 +412,12 @@ def delete_comment(id: str, user=Depends(current_user), db=Depends(get_db)):
     db.delete(item)
     db.commit()
     return {'message': '질문을 삭제했습니다.'}
+
+
+@router.put('/comments/{id}')
+def edit_comment(id: str, body: CommentEdit, request: Request, user=Depends(current_user), db=Depends(get_db)):
+    throttle(request, 'write', subject=user.id)
+    return comment_dto(db, edit_owned_content(db, COMMENT, id, body, user), user)
 
 
 @router.post('/reports', status_code=201)

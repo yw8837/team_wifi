@@ -29,4 +29,3 @@
 
 - [개인정보 보호법 제22조의2](https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029334873): 만 14세 미만 아동의 개인정보를 처리하기 위해 법에 따른 동의가 필요할 때 법정대리인 동의와 확인 필요.
 - [Google Play 대상 연령 및 콘텐츠](https://support.google.com/googleplay/android-developer/answer/9867159?hl=ko): 실제 대상 연령과 선언을 일치시키고 콘텐츠 등급과 구분.
-
