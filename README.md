@@ -6,7 +6,16 @@
 
 [공개 웹](https://moduyuga.onrender.com)은 비회원 탐색과 회원의 저장·수요/질문·댓글을 제공합니다. 실제 결제·배송·정산은 제공하지 않습니다. 공개 가입 기준은 만 14세 이상이며, 코드·배포·앱 설치·Play 심사 상태를 구분해 기록합니다.
 
+## 팀원과 담당
+
+| 이름 | GitHub | 역할 | 주요 담당 |
+| :--- | :--- | :--- | :--- |
+| **최용우** | [@yw8837](https://github.com/yw8837) | Full-Stack / Architecture | 서비스 아키텍처 설계, 백엔드 API & GEO 엔진 구현 |
+| **최유정** | [@cheezcyj](https://github.com/cheezcyj) | Frontend / UI·UX / Design | 요구사항 정의, 화면 설계, UI·UX 디자인, 화면흐름 프로토타입 설계, 동적 인터랙션 구현 및 CTA 담당 |
+| **이승현** | [@LEES999](https://github.com/LEES999) | AI & Data Engineering | 이커머스 트랜잭션 분석, 군집화 및 수요·이탈 예측 모델 |
+
 ## 먼저 볼 문서
+
 
 **현재 운영과 변경 상태:** [피드백 반영 기록](docs/plans/2026-11-05-community-feedback.md), [가입 연령 변경](docs/build/release-20261105/SIGNUP-AGE.md), [커뮤니티 수정·서버 이전](docs/build/release-20261105/COMMUNITY-AND-SERVER.md). 기존 Render API 주소는 설치 앱과 소셜 인증 호환을 확인한 뒤 전환합니다.
 
