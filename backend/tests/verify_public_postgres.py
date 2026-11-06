@@ -125,8 +125,68 @@ def checks(c, expect):
                'public deletion cascades linked content')
         expect(not db.scalar(select(Token.digest).where(Token.user_id==first['user']['id'])),'public deletion revokes tokens')
 
+    from verify_assistant_postgres import checks as extended_checks
+    extended_checks(c, expect)
+
+
+def source_snapshot(root):
+    import hashlib
+    files = [root/'scripts/verify-beta-postgres.py', Path(__file__),
+             root/'backend/tests/verify_assistant_postgres.py',root/'backend/tests/verify_groupbuy_postgres.py', root/'backend/requirements.txt']
+    files.extend(path for path in (root/'backend/app').iterdir() if path.suffix in ('.py', '.json'))
+    return {path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in sorted(files)}
+
 
 if __name__=='__main__':
+    import argparse
+    from datetime import datetime, timezone
+    import importlib.metadata
+    import json
+    import os
+    import socket
+    import subprocess
+    import sys
+    os.environ.update(ASSISTANT_MODEL_ENABLED='false', ASSISTANT_OPIK_ENABLED='false')
     root=Path(__file__).resolve().parents[2]
-    harness=runpy.run_path(str(root/'scripts/verify-beta-postgres.py'))
-    harness['run'](extra_checks=checks,evidence_name='public-release-postgres-results.json')
+    parser=argparse.ArgumentParser(add_help=False)
+    parser.add_argument('--evidence-dir', type=Path, default=root/'artifacts/beta')
+    parser.add_argument('--port', type=int, default=55439)
+    options,_=parser.parse_known_args()
+    evidence=options.evidence_dir.resolve()
+    if not evidence.is_relative_to(root):
+        raise SystemExit('PostgreSQL evidence must stay within this workspace.')
+    evidence.mkdir(parents=True,exist_ok=True)
+    before=source_snapshot(root)
+    started=datetime.now(timezone.utc).isoformat()
+    (evidence/'postgres-source-before.json').write_text(json.dumps({'started_at':started,'sha256':before},
+        ensure_ascii=False,indent=2),encoding='utf-8')
+    status,error='failed',None
+    try:
+        harness=runpy.run_path(str(root/'scripts/verify-beta-postgres.py'))
+        harness['run'](extra_checks=checks,evidence_name='postgres-community-assistant-results.json')
+        status='pass'
+    except BaseException as exc:
+        error=type(exc).__name__  # No exception/SQL/credential content enters the artifact.
+        raise
+    finally:
+        after=source_snapshot(root)
+        changed=sorted(path for path in set(before)|set(after) if before.get(path)!=after.get(path))
+        with socket.socket() as probe:
+            probe.settimeout(.5)
+            port_still_listening=probe.connect_ex(('127.0.0.1',options.port))==0
+        proof={'status':status if not changed else status+'_source_changed','error_type':error,
+            'started_at':started,'completed_at':datetime.now(timezone.utc).isoformat(),
+            'git_head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+            'workspace_dirty':True,'source_before_sha256':before,'source_after_sha256':after,
+            'changed_during_run':changed,'source_unchanged_during_run':not changed,
+            'postgres_port':options.port,'postgres_port_closed_after_run':not port_still_listening,
+            'qa_ports_not_targeted':[55441,18180,18181],'guards_disabled':False,'quota_clock_patched':False,
+            'quota_windows_waited_in_real_time':True,
+            'transport':'Actual ASGI middleware and PostgreSQL; no deployed network server claim',
+            'model_measurement':'Disabled-model fallback; inference barriers test DB races, not model quality or latency',
+            'cloud_deployment_verified':False,'linux_file_journal_verified':False,
+            'versions':{name:importlib.metadata.version(name) for name in ['fastapi','SQLAlchemy','psycopg','httpx']}}
+        (evidence/'postgres-provenance.json').write_text(json.dumps(proof,ensure_ascii=False,indent=2),encoding='utf-8')
+    if changed:
+        raise SystemExit('PG checks completed but source changed during execution; current-source gate remains open.')

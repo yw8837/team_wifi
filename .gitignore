@@ -89,4 +89,5 @@ ai-pipeline/artifacts/requirements_traceability.*
 /_archive/
 /.runtime/
 /.superpowers/
+/.omc/
 /_workspace/

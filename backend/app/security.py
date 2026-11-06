@@ -36,11 +36,11 @@ DUMMY = passwords.hash('dummy-password-never-an-account')
 _attempts = defaultdict(deque)
 _lock = threading.Lock()
 # Only these server-owned labels exist in memory. Rejected requests never grow a deque.
-GLOBAL_LIMITS = {'write': 120, 'expensive-auth': 30, 'register': 10}
+GLOBAL_LIMITS = {'write': 120, 'expensive-auth': 30, 'register': 10, 'assistant': 12}
 _global_attempts = {label: deque() for label in GLOBAL_LIMITS}
 _global_lock = threading.Lock()
 ACCOUNT_LIMITS = {'write': 60, 'question': 30, 'report': 20,
-                  'recovery-code': 5, 'delete-account': 5}
+                  'recovery-code': 5, 'delete-account': 5, 'assistant': 20}
 CLAIMED_LIMITS = {'login': 10, 'recover': 5}
 
 
@@ -58,10 +58,13 @@ def global_write_guard(request):
     labels = ['write']
     if (request.method == 'POST' and request.url.path in (
             '/api/auth/register', '/api/auth/login', '/api/auth/recover', '/api/auth/recovery-code')) or (
-            request.method == 'DELETE' and request.url.path == '/api/me'):
+            request.method == 'DELETE' and request.url.path == '/api/me') or (
+            request.method == 'PUT' and request.url.path.startswith('/api/release/admin/members/')):
         labels.append('expensive-auth')
     if request.method == 'POST' and request.url.path == '/api/auth/register':
         labels.append('register')
+    if request.method == 'POST' and request.url.path == '/api/release/assistant/ask':
+        labels.append('assistant')
     with _global_lock:
         stamp = time.monotonic()
         for bucket in _global_attempts.values():
@@ -107,6 +110,15 @@ def charge_buckets(session, request, scope, subject, limits):
 
 def beta_write_guard(request):
     global_write_guard(request)
+    assistant_request = request.method == 'POST' and request.url.path == '/api/release/assistant/ask'
+    if assistant_request:
+        # Use the transport peer only; arbitrary X-Forwarded-For cannot create
+        # unlimited identities. A reverse proxy may share this conservative
+        # budget. The HMAC bucket stores neither the IP nor a bearer token.
+        peer = request.client.host if request.client else 'unknown-peer'
+        with SessionLocal() as session:
+            session.connection(execution_options={'isolation_level': 'READ COMMITTED'})
+            charge_buckets(session, request, 'assistant-peer', peer, {'assistant': 30})
     auth = request.headers.get('Authorization', '')
     if not auth.startswith('Bearer ') or len(auth) > 250:
         return
@@ -124,10 +136,14 @@ def beta_write_guard(request):
         path = request.url.path
         label = None
         if request.method == 'POST':
-            if path.startswith('/api/release/demands/') and path.endswith('/comments'):
+            if assistant_request:
+                label = 'assistant'
+            elif path.startswith('/api/release/demands/') and path.endswith('/comments'):
                 label = 'question'
             elif path == '/api/release/demands':
                 label = 'question'
+            elif path.startswith('/api/release/groupbuys/') and path.endswith('/reports') and path.count('/') == 5:
+                label = 'report'
             elif path.startswith('/api/campaigns/') and path.endswith('/questions') and path.count('/') == 4:
                 label = 'question'
             else:

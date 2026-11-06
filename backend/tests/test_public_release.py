@@ -138,17 +138,17 @@ def test_reports_admin_hide_dismiss_suspend_and_hostile_targets(public_mode):
     assert c.post(endpoint,headers=p['buyer']['headers'],json={'action':'hide'}).status_code == 403
     assert c.post(endpoint,headers=p['admin']['headers'],json={'action':'hide','note':'운영 검토 완료'}).status_code == 200
     assert c.get('/api/release/demands/'+d['id']).status_code == 404
-    assert c.post(endpoint,headers=p['admin']['headers'],json={'action':'dismiss'}).status_code == 409
+    assert c.post(endpoint,headers=p['admin']['headers'],json={'action':'dismiss','note':'신고 검토 결과 기각'}).status_code == 409
     user_report=c.post('/api/release/reports',headers=p['buyer']['headers'],json={'target_type':'user','target_id':p['buyer2']['id'],'reason':'이용정지 검증 요청입니다.'}).json()
     endpoint='/api/release/admin/reports/'+user_report['id']+'/resolve'
-    assert c.post(endpoint,headers=p['admin']['headers'],json={'action':'hide'}).status_code == 422
-    assert c.post(endpoint,headers=p['admin']['headers'],json={'action':'suspend'}).status_code == 200
+    assert c.post(endpoint,headers=p['admin']['headers'],json={'action':'hide','note':'사용자 숨김 불가 검증'}).status_code == 422
+    assert c.post(endpoint,headers=p['admin']['headers'],json={'action':'suspend','note':'운영정책 위반 검토'}).status_code == 200
     assert c.get('/api/me',headers=p['buyer2']['headers']).status_code == 401
     assert c.post('/api/auth/login',json={'email':'buyer2@example.com','password':PASSWORD}).status_code == 401
     # Moderator can dismiss a valid user report, but cannot use legacy record IDs.
     r=c.post('/api/release/reports',headers=p['buyer']['headers'],json={'target_type':'user','target_id':p['seller']['id'],'reason':'검토 후 기각할 신고'}).json()
-    assert c.post('/api/release/admin/reports/'+r['id']+'/resolve',headers=p['admin']['headers'],json={'action':'dismiss'}).status_code == 200
-    assert c.post('/api/release/admin/reports/'+ids['campaign']+'/resolve',headers=p['admin']['headers'],json={'action':'hide'}).status_code == 404
+    assert c.post('/api/release/admin/reports/'+r['id']+'/resolve',headers=p['admin']['headers'],json={'action':'dismiss','note':'신고 검토 결과 기각'}).status_code == 200
+    assert c.post('/api/release/admin/reports/'+ids['campaign']+'/resolve',headers=p['admin']['headers'],json={'action':'hide','note':'운영정책 위반 검토'}).status_code == 404
 
 
 def signup(c, **kw):
@@ -293,7 +293,7 @@ def test_suspension_hides_all_authored_public_content(public_mode):
     c.post(url+'/comments', headers=p['buyer2']['headers'], json={'body':'정지 후 숨길 질문'})
     r = c.post('/api/release/reports', headers=p['buyer']['headers'], json={
         'target_type':'user', 'target_id':p['buyer2']['id'], 'reason':'계정 정지 후 노출 검증'}).json()
-    assert c.post('/api/release/admin/reports/'+r['id']+'/resolve', headers=p['admin']['headers'], json={'action':'suspend'}).status_code == 200
+    assert c.post('/api/release/admin/reports/'+r['id']+'/resolve', headers=p['admin']['headers'], json={'action':'suspend','note':'운영정책 위반 검토'}).status_code == 200
     assert c.get(url).json()['interest_count'] == 0
     assert c.get(url).json()['comment_count'] == 0
     assert c.get(url+'/comments').json() == []

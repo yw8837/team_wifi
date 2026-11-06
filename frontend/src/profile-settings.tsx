@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { api } from "./api";
+import { useContentRequest } from "./content-session";
 import { Feedback, Field, useAction, useAuth } from "./shared";
 import type { User } from "./types";
 
 export function ProfileSettings() {
   const { user, updateProfile } = useAuth();
   const [nickname, setNickname] = useState(user?.nickname || "");
-  const action = useAction();
+  const action = useAction(), request = useContentRequest();
   const trimmed = nickname.trim();
   const length = Array.from(trimmed).length;
   return <section className="panel" aria-labelledby="profile-settings-title">
@@ -15,7 +15,7 @@ export function ProfileSettings() {
       event.preventDefault();
       if (length < 2 || length > 30 || trimmed === user?.nickname) return;
       void action.run(async () => {
-        const updated = await api<User>("/auth/profile", "PUT", { nickname: trimmed });
+        const updated = await request<User>("/auth/profile", "PUT", { nickname: trimmed });
         updateProfile(updated);
         setNickname(updated.nickname);
       }, "닉네임을 변경했어요.");

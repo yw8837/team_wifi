@@ -1,0 +1,3542 @@
+{
+  "source_url": "https://docs.google.com/spreadsheets/d/126Dpyel1_-mQZT5aS5RAwVgq3LlXeA4T/edit",
+  "source_modified_at": "2026-11-06T07:06:44.551Z",
+  "source_sha256": "20bb64c8a1538cd11eb6499209b1e8afa1940e4445c247d50baa69846a66acb7",
+  "detailed_requirement_count": 21,
+  "distinct_requirement_count": 47,
+  "references": [
+    {
+      "id": "report_02",
+      "sheet": "요구사항 정의서",
+      "row": 2
+    },
+    {
+      "id": "consent_01",
+      "sheet": "요구사항 정의서",
+      "row": 3
+    },
+    {
+      "id": "rule_01",
+      "sheet": "요구사항 정의서",
+      "row": 4
+    },
+    {
+      "id": "broker_01",
+      "sheet": "요구사항 정의서",
+      "row": 5
+    },
+    {
+      "id": "chatbot_01",
+      "sheet": "요구사항 정의서",
+      "row": 6
+    },
+    {
+      "id": "admin_01",
+      "sheet": "요구사항 정의서",
+      "row": 7
+    },
+    {
+      "id": "admreport_01",
+      "sheet": "요구사항 정의서",
+      "row": 8
+    },
+    {
+      "id": "admreport_02",
+      "sheet": "요구사항 정의서",
+      "row": 9
+    },
+    {
+      "id": "admgroupbuy_01",
+      "sheet": "요구사항 정의서",
+      "row": 10
+    },
+    {
+      "id": "insight_01",
+      "sheet": "요구사항 정의서",
+      "row": 11
+    },
+    {
+      "id": "analytics_01",
+      "sheet": "요구사항 정의서",
+      "row": 12
+    },
+    {
+      "id": "insight_02",
+      "sheet": "요구사항 정의서",
+      "row": 13
+    },
+    {
+      "id": "chatbot_02",
+      "sheet": "요구사항 정의서",
+      "row": 14
+    },
+    {
+      "id": "terms_01",
+      "sheet": "요구사항 정의서",
+      "row": 15
+    },
+    {
+      "id": "guide_01",
+      "sheet": "요구사항 정의서",
+      "row": 16
+    },
+    {
+      "id": "seo_01",
+      "sheet": "요구사항 정의서",
+      "row": 17
+    },
+    {
+      "id": "state_01",
+      "sheet": "요구사항 정의서",
+      "row": 18
+    },
+    {
+      "id": "state_02",
+      "sheet": "요구사항 정의서",
+      "row": 19
+    },
+    {
+      "id": "auth_01",
+      "sheet": "요구사항 정의서",
+      "row": 20
+    },
+    {
+      "id": "time_01",
+      "sheet": "요구사항 정의서",
+      "row": 21
+    },
+    {
+      "id": "a11y_01",
+      "sheet": "요구사항 정의서",
+      "row": 22
+    },
+    {
+      "id": "groupbuy_01",
+      "sheet": "한눈에 보기",
+      "row": 9
+    },
+    {
+      "id": "groupbuy_02",
+      "sheet": "한눈에 보기",
+      "row": 10
+    },
+    {
+      "id": "groupbuy_03",
+      "sheet": "한눈에 보기",
+      "row": 11
+    },
+    {
+      "id": "groupbuy_04",
+      "sheet": "한눈에 보기",
+      "row": 12
+    },
+    {
+      "id": "demand_01",
+      "sheet": "한눈에 보기",
+      "row": 13
+    },
+    {
+      "id": "demand_02",
+      "sheet": "한눈에 보기",
+      "row": 14
+    },
+    {
+      "id": "demand_03",
+      "sheet": "한눈에 보기",
+      "row": 15
+    },
+    {
+      "id": "demand_04",
+      "sheet": "한눈에 보기",
+      "row": 15
+    },
+    {
+      "id": "demand_05",
+      "sheet": "한눈에 보기",
+      "row": 16
+    },
+    {
+      "id": "comment_01",
+      "sheet": "한눈에 보기",
+      "row": 17
+    },
+    {
+      "id": "price_01",
+      "sheet": "한눈에 보기",
+      "row": 18
+    },
+    {
+      "id": "save_01",
+      "sheet": "한눈에 보기",
+      "row": 19
+    },
+    {
+      "id": "item_01",
+      "sheet": "한눈에 보기",
+      "row": 20
+    },
+    {
+      "id": "detail_01",
+      "sheet": "한눈에 보기",
+      "row": 20
+    },
+    {
+      "id": "finder_01",
+      "sheet": "한눈에 보기",
+      "row": 21
+    },
+    {
+      "id": "finder_02",
+      "sheet": "한눈에 보기",
+      "row": 21
+    },
+    {
+      "id": "interest_02",
+      "sheet": "한눈에 보기",
+      "row": 22
+    },
+    {
+      "id": "signup_01",
+      "sheet": "한눈에 보기",
+      "row": 23
+    },
+    {
+      "id": "login_01",
+      "sheet": "한눈에 보기",
+      "row": 23
+    },
+    {
+      "id": "logout_01",
+      "sheet": "한눈에 보기",
+      "row": 23
+    },
+    {
+      "id": "account_01",
+      "sheet": "한눈에 보기",
+      "row": 24
+    },
+    {
+      "id": "account_02",
+      "sheet": "한눈에 보기",
+      "row": 24
+    },
+    {
+      "id": "recovery_01",
+      "sheet": "한눈에 보기",
+      "row": 24
+    },
+    {
+      "id": "interest_01",
+      "sheet": "한눈에 보기",
+      "row": 25
+    },
+    {
+      "id": "report_02",
+      "sheet": "한눈에 보기",
+      "row": 25
+    },
+    {
+      "id": "consent_01",
+      "sheet": "한눈에 보기",
+      "row": 25
+    },
+    {
+      "id": "mypage_01",
+      "sheet": "한눈에 보기",
+      "row": 26
+    },
+    {
+      "id": "chatbot_01",
+      "sheet": "한눈에 보기",
+      "row": 27
+    },
+    {
+      "id": "admin_01",
+      "sheet": "한눈에 보기",
+      "row": 28
+    },
+    {
+      "id": "admreport_01",
+      "sheet": "한눈에 보기",
+      "row": 28
+    },
+    {
+      "id": "admreport_02",
+      "sheet": "한눈에 보기",
+      "row": 28
+    },
+    {
+      "id": "admgroupbuy_01",
+      "sheet": "한눈에 보기",
+      "row": 28
+    },
+    {
+      "id": "insight_01",
+      "sheet": "한눈에 보기",
+      "row": 29
+    },
+    {
+      "id": "insight_02",
+      "sheet": "한눈에 보기",
+      "row": 29
+    },
+    {
+      "id": "analytics_01",
+      "sheet": "한눈에 보기",
+      "row": 29
+    },
+    {
+      "id": "chatbot_02",
+      "sheet": "한눈에 보기",
+      "row": 29
+    },
+    {
+      "id": "broker_01",
+      "sheet": "한눈에 보기",
+      "row": 30
+    },
+    {
+      "id": "terms_01",
+      "sheet": "한눈에 보기",
+      "row": 30
+    },
+    {
+      "id": "report_01",
+      "sheet": "한눈에 보기",
+      "row": 31
+    },
+    {
+      "id": "rule_01",
+      "sheet": "한눈에 보기",
+      "row": 31
+    },
+    {
+      "id": "guide_01",
+      "sheet": "한눈에 보기",
+      "row": 32
+    },
+    {
+      "id": "seo_01",
+      "sheet": "한눈에 보기",
+      "row": 32
+    },
+    {
+      "id": "auth_01",
+      "sheet": "한눈에 보기",
+      "row": 33
+    },
+    {
+      "id": "state_01",
+      "sheet": "한눈에 보기",
+      "row": 33
+    },
+    {
+      "id": "state_02",
+      "sheet": "한눈에 보기",
+      "row": 33
+    },
+    {
+      "id": "time_01",
+      "sheet": "한눈에 보기",
+      "row": 33
+    },
+    {
+      "id": "a11y_01",
+      "sheet": "한눈에 보기",
+      "row": 33
+    }
+  ],
+  "source_original_modified": false,
+  "supersedes": "docs/plans/requirements-acceptance-20261106.md",
+  "schema_version": 2,
+  "audited_at": "2026-11-06T09:19:31.571967+00:00",
+  "audit_scope": "원문47ID와 실제 소스/로컬 실행 증거 연결. 최종 출시 수용 판정 아님.",
+  "overview_only_requirement_count": 26,
+  "source_files": {
+    "original_xlsx": {
+      "path": "artifacts/requirements-live-20261106/requirements.xlsx",
+      "sha256": "20bb64c8a1538cd11eb6499209b1e8afa1940e4445c247d50baa69846a66acb7",
+      "authoritative": true,
+      "modified_by_audit": false
+    },
+    "derived_workbook_json": {
+      "path": "artifacts/requirements-live-20261106/workbook.json",
+      "sha256": "87d99827c1d97e3638b8da6bdf1acc797882e74dfcaf36543d14353251f12e50",
+      "authoritative": false
+    },
+    "source_mapping": {
+      "path": "artifacts/requirements-live-20261106/source-mapping.json",
+      "sha256": "071e5ea3307dac57fe2853d8057ccf3f67636f03549ea7cfd77996ac081e207e"
+    }
+  },
+  "status": "audited_mapping_acceptance_open",
+  "release_state": {
+    "production_baseline_commit": "05baede3",
+    "latest_source_production_verified": false,
+    "final_backend_full_suite": "622_passed_on_frozen_source",
+    "frontend_full_suite_latest_source": false,
+    "latest_android_device_acceptance": "not_evidenced_in_this_audit",
+    "operator_app_and_web_required": true,
+    "live_observation_candidate": "user_approved_operational_activation_and_verification_in_progress",
+    "observe_user_approval_received": true
+  },
+  "non_inference_rules": [
+    "상세21개와 한눈에 보기만 있는26개를 구분한다.",
+    "여러ID가 공유한 개요 행은 원문 묶음을 보존하고 개별 의미를 임의 배분하지 않는다.",
+    "최신 회원가입/로그인은 이메일·카카오다. 옛128ID의 Naver/Google 조건을 추가하지 않는다.",
+    "챗봇은 비회원도 이용한다.",
+    "코드·로컬 실행·실서비스/실기기 확인을 분리한다."
+  ],
+  "evidence_registry": {
+    "backend_intermediate_542": {
+      "path": "artifacts/community-completion-20261106/backend-latest-junit.xml",
+      "sha256": "a7c51453cd2afc2f648d51e1b6333b7493edec373f46ae25f94794bb92ec5a96",
+      "scope": "변경 도중 backend 회귀. 최종 소스 전체 통과 증거가 아니다.",
+      "passed": 542,
+      "failed": 0,
+      "timestamp": "2026-11-06T17:32:37.010567+09:00"
+    },
+    "frontend_receipt": {
+      "path": "artifacts/community-completion-20261106/frontend-latest-final-receipt.json",
+      "sha256": "e1b7059f5612acad94a41e09aa70eaea7e15ff02bca0e99d9feea591529e842b",
+      "scope": "334 전체는 직전 소스. header와 inline확인 후 최신95scoped+새 public typecheck/build. 서로 중복이며 합산 금지.",
+      "baseline_full_passed": 334,
+      "latest_scoped_passed": 95,
+      "full_tests_current_for_latest_source": false,
+      "baseline_manifest": "8ceb09e41f3554af868fe910f1d562d5c21c995b7f08f31fc27c85e3241a0b95",
+      "latest_manifest": "61de17cb0d4d2d29eda39eac85e7dea3095e75ecddd2798ab3292ddc0be8e0d4",
+      "prior_scoped_passed": 84,
+      "source_files": 78
+    },
+    "frontend_source_map": {
+      "path": "artifacts/community-completion-20261106/frontend-latest-requirements-map.json",
+      "sha256": "03cc3e00c5e8dc66846a3d5bf2b6bb80a7f377cf7680eb4b09b62d1d6a45cbf3",
+      "scope": "최신78파일 프런트의47ID 소스·테스트 연결표. 자체로 수용조건 전체통과/실기기검증 증거 아님."
+    },
+    "groupbuy_local": {
+      "path": "artifacts/community-completion-20261106/groupbuy-local-results.json",
+      "sha256": "8108acf9dff722558ca432b6823d6c12dc26ffa45299a38b286c576ede86de79",
+      "scope": "작업자 자기검증의 합성 SQLite 회귀. own34, earlier155 overlap이며 합산하지 않는다.",
+      "own_passed": 34,
+      "earlier_overlapping_regression": 155
+    },
+    "groupbuy_real_postgres": {
+      "path": "artifacts/community-completion-20261106/groupbuy-postgres-results.json",
+      "sha256": "9f27e8b8eb57de738a8b17860c9d652f14889669e6fc163c3c39e096477730d3",
+      "scope": "실제 ASGI+로컬 일회성 PostgreSQL, guard 활성, 동시 수정/처리[200,409], 종료·소스불변 확인. 클라우드/실제 판매처 검증 아님.",
+      "passed": 24,
+      "guards_enabled": true,
+      "postgres_stopped": true
+    },
+    "assistant_regression52": {
+      "path": ".runtime/assistant-evaluation/regression52-snapshot08/regression52-v5-snapshot08.json",
+      "sha256": "7d452e6e7a60ce209ca8e0863c430ec782f6f62ea06907b72b1f571df14e7989",
+      "scope": "기존40+검토된12의 반복평가. 새52문항 아님. source08 AI snapshot이며 최종 제품 snapshot 아님.",
+      "source_archive_sha256": "118f2c87103f9e0a8b040dce3c9dba207aed50e4f3a8abeeb08de3a453ae932e",
+      "automatic_passed": 52,
+      "manual_model_answers": 36,
+      "manual_model_answers_covered": 36,
+      "original_gold_recall_at_5": 0.944444
+    },
+    "assistant_opik_persistence": {
+      "path": ".runtime/assistant-evaluation/regression52-snapshot08/regression52-v5-snapshot08.traces.json",
+      "sha256": "271b0da979375c489f352823b0b54c00d3854d1305fd8708420e19183b48d919",
+      "scope": "고정 공개/합성 평가 추적의 실제 저장52/52 및 input/output null 검증. 실서비스 회원질문 전체 관측 증거 아님.",
+      "persisted": 52
+    },
+    "assistant_observation_hooks": {
+      "path": "artifacts/community-completion-20261106/assistant-observation-hooks-junit.xml",
+      "sha256": "8b728d9f5710df6a4b7898d3e33639e76258f2ce85f1c43f68780b35cd3f2442",
+      "scope": "관측 hook 신규15+기존assistant50=65. 합성 SQLite, 전송 비활성. stage/error/실제도구횟수/PII제외/예외1회/기존 동작 회귀.",
+      "passed": 65,
+      "new_hook_cases": 15,
+      "existing_assistant_cases": 50,
+      "transport_enabled": false
+    },
+    "assistant_observation_integration": {
+      "path": "artifacts/community-completion-20261106/assistant-observation-integration-junit.xml",
+      "sha256": "5c1da7ede8f2a2cee37805733f37a6400759f4d0511d152539eb479b3af11302",
+      "scope": "신규hook15+기존assistant50+root HTTPboundary5의 결합70. 기존65/후보240과 중복이며 합산하지 않는다. 전송 비활성 합성 실행.",
+      "passed": 70,
+      "overlaps": [
+        "assistant_observation_hooks",
+        "observation_candidate"
+      ],
+      "transport_enabled": false
+    },
+    "assistant_boundary": {
+      "path": "artifacts/community-completion-20261106/assistant-boundary-junit.xml",
+      "sha256": "11180bc49b168e5703d1d45f294677ad7f1aabb71bfcb57de077cdb032e13105",
+      "scope": "실제 ASGI 422/guard429/503/기록실패 HTTP보존/route401 중복방지. 새 후보 실전송 아님.",
+      "passed": 5,
+      "transport_enabled": false
+    },
+    "observation_candidate": {
+      "path": "artifacts/community-completion-20261106/observation-candidate-results.json",
+      "sha256": "7ad4b7dcb42d99b4548c71ee5e55c4110167aad99dc122eae62b60574d19c73e",
+      "scope": "후보56와 기존회귀 결합240. mock SDK/SSH이며 실제gateway권한/Render활성/Opik실저장 검증 아님.",
+      "passed": 240,
+      "new_candidate_cases": 56,
+      "default_disabled": true,
+      "live_gateway_changed_by_candidate": false
+    },
+    "groupbuy_portable_postgres": {
+      "path": "artifacts/community-completion-20261106/groupbuy-portable-postgres-results.json",
+      "sha256": "7b491b07574604f58e10f1a0c09fb83c48b946b407cb5daa17e3955c67f6acd6",
+      "scope": "portable helper 실제 ASGI+일회성 PostgreSQL24건. CI 호출경로에 연결된 소스. hosted CI/전체174건/클라우드 검증과 구분한다.",
+      "passed": 24
+    },
+    "backend_final_622": {
+      "path": "artifacts/community-completion-20261106/backend-final-junit.xml",
+      "sha256": "bc6a3b7245ea4c89c753dd9cbd70b0a802e0a19319841902e5269ad5e0b742b3",
+      "scope": "동결된 backend 전체622건. app/tests/scripts 소스 전후106파일 일치 영수증을 별도로 확인했다. 배포/hosted CI/Android 증거 아님.",
+      "passed": 622,
+      "failed": 0,
+      "source_unchanged": true,
+      "source_files": 106
+    },
+    "backend_final_receipt": {
+      "path": "artifacts/community-completion-20261106/backend-final-receipt.json",
+      "sha256": "18f0fc688798e0d1fec92cdb08473736ecaefbb90066e81f73674c95350bcb17",
+      "scope": "전체backend 실행 명령·시작/종료·exit0·sourcebefore/after.106파일을 감사 시 현재 소스와도 대조했다.",
+      "exit_code": 0,
+      "source_unchanged": true
+    }
+  },
+  "confirmed_coverage_gap": {
+    "ci_groupbuy_postgres": {
+      "status": "portable_helper_source_integrated_and_local_24_passed_hosted_ci_pending",
+      "chain": [
+        ".github/workflows/checks.yml",
+        "backend/tests/verify_public_postgres.py",
+        "backend/tests/verify_assistant_postgres.py",
+        "backend/tests/verify_groupbuy_postgres.py"
+      ],
+      "local_24_reproduction": ".runtime/groupbuy-verification/verify.py",
+      "portable_helper_recommendation": "다른 작업자가 portable helper와 CI callchain·source snapshot을 연결하고 전용 실제PG24건을 통과했다. 전체PG/hosted CI 완료는 별도 확인한다.",
+      "modified_by_this_audit": false,
+      "initial_finding": "처음 감사 시 CI callchain에 groupbuy24가 없었다.",
+      "portable_helper": "backend/tests/verify_groupbuy_postgres.py",
+      "evidence_id": "groupbuy_portable_postgres"
+    }
+  },
+  "requirements": [
+    {
+      "id": "a11y_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 22,
+          "id_cell": "D22",
+          "description_cell": "F22",
+          "name": "화면 크기·키보드 이용",
+          "description_verbatim": "모바일과 PC에서 주요 메뉴·입력·목록을 이용할 수 있도록 화면을 배치한다. 입력 항목의 이름, 키보드 초점, 오류·처리 상태를 제공하고 화면 이동 시 본문으로 접근할 수 있도록 한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 33,
+          "id_cell": "G33",
+          "ids_verbatim": "auth_01, state_01~02, time_01, a11y_01",
+          "description_cell": "B33",
+          "description_verbatim": "권한·로딩/오류 상태·시간 표시·접근성",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "반응형·이름·초점·오류/상태·route main focus와 새 공구alertdialog의 focus/Tab/Shift-Tab/Escape/취소복귀를 확인했다. root는 로컬320px header nowrap·가로넘침없음과 종료dialog/저장 동작을 관측했다. 최신 Android/스크린리더 수용과 최신 성공후main초점 실관측은 별도 게이트다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/groupbuys.py",
+          "backend/app/assistant.py",
+          "backend/app/security.py",
+          "backend/app/client_policy.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/shared.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/content-session.ts",
+          "frontend/src/groupbuy-confirmation.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_client_policy.py",
+          "backend/tests/test_assistant.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/groupbuys.test.tsx",
+          "frontend/src/groupbuy-actions.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx",
+          "frontend/src/groupbuy-confirmation.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "로딩/빈결과/실패·stale목록·오류입력보존·중복lock·계정변경전송차단·한국시간·semantic controls/초점/반응형"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "account_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 24,
+          "id_cell": "G24",
+          "ids_verbatim": "account_01, account_02, recovery_01",
+          "description_cell": "B24",
+          "description_verbatim": "계정 관리(닉네임·복구코드·탈퇴)",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/main.py",
+          "backend/app/security.py",
+          "backend/app/social_auth.py",
+          "backend/app/schemas.py"
+        ],
+        "frontend_files": [
+          "frontend/src/auth-pages.tsx",
+          "frontend/src/social-auth.tsx",
+          "frontend/src/session-storage.ts",
+          "frontend/src/profile-settings.tsx",
+          "frontend/src/account-exit.ts",
+          "frontend/src/beta.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_profile.py",
+          "backend/tests/test_signup_age.py",
+          "backend/tests/test_social_auth.py",
+          "backend/tests/test_public_release.py",
+          "frontend/src/session-storage.test.ts",
+          "frontend/src/account-exit.test.ts",
+          "frontend/src/signup-recovery-boundary.test.tsx",
+          "frontend/src/auth-refresh-lifecycle.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "account_02",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 24,
+          "id_cell": "G24",
+          "ids_verbatim": "account_01, account_02, recovery_01",
+          "description_cell": "B24",
+          "description_verbatim": "계정 관리(닉네임·복구코드·탈퇴)",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/main.py",
+          "backend/app/security.py",
+          "backend/app/social_auth.py",
+          "backend/app/schemas.py"
+        ],
+        "frontend_files": [
+          "frontend/src/auth-pages.tsx",
+          "frontend/src/social-auth.tsx",
+          "frontend/src/session-storage.ts",
+          "frontend/src/profile-settings.tsx",
+          "frontend/src/account-exit.ts",
+          "frontend/src/beta.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_profile.py",
+          "backend/tests/test_signup_age.py",
+          "backend/tests/test_social_auth.py",
+          "backend/tests/test_public_release.py",
+          "frontend/src/session-storage.test.ts",
+          "frontend/src/account-exit.test.ts",
+          "frontend/src/signup-recovery-boundary.test.tsx",
+          "frontend/src/auth-refresh-lifecycle.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "admgroupbuy_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 10,
+          "id_cell": "D10",
+          "description_cell": "F10",
+          "name": "공구 정보 검토·숨김",
+          "description_verbatim": "관리자는 제보·신고된 공구 정보의 원문과 판매처 링크를 확인하고 숨김·정보 확인 필요 표시·조치 없이 종결 중 처리를 선택한다. 처리 사유와 시각, 처리한 운영자를 기록한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 28,
+          "id_cell": "G28",
+          "ids_verbatim": "admin_01, admreport_01~02, admgroupbuy_01",
+          "description_cell": "B28",
+          "description_verbatim": "신고·공구 정보 검토와 조치",
+          "target_verbatim": "관리자",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "공구 원문·판매처 URL과 숨김/확인필요/종결의 전용 조치·감사 이력을 확인했다. 일반 신고의 정지 조치와 전용 범위를 혼동하지 않는다.",
+        "backend_files": [
+          "backend/app/groupbuys.py",
+          "backend/app/groupbuy_public.py"
+        ],
+        "frontend_files": [
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/groupbuys.css",
+          "frontend/src/groupbuy-confirmation.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_groupbuys.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/groupbuys.test.tsx",
+          "frontend/src/groupbuy-actions.test.tsx",
+          "frontend/src/groupbuy-confirmation.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "groupbuy_local",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
+        "최신 원문은 앱·웹 모두 운영 기능을 요구한다. 브라우저 폭 테스트가 최신 Android 설치본 검증을 대신하지 않는다."
+      ]
+    },
+    {
+      "id": "admin_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 7,
+          "id_cell": "D7",
+          "description_cell": "F7",
+          "name": "관리자 전용 접근",
+          "description_verbatim": "관리자에게만 콘텐츠 신고 관리, 공구 정보 관리, 육아템 관심 분석, 챗봇 평가 메뉴를 제공한다. 일반 회원과 비회원은 운영 정보 조회나 신고 처리 기능을 사용할 수 없도록 한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 28,
+          "id_cell": "G28",
+          "ids_verbatim": "admin_01, admreport_01~02, admgroupbuy_01",
+          "description_cell": "B28",
+          "description_verbatim": "신고·공구 정보 검토와 조치",
+          "target_verbatim": "관리자",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "운영자 역할의 서버 접근 제한과 화면 메뉴를 확인했다. 최신 앱·웹 요구에 따라 종전 모바일 일괄 차단은 제거된 상태다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/groupbuys.py",
+          "backend/app/assistant.py",
+          "backend/app/security.py",
+          "backend/app/client_policy.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/admin-members.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/release-policy.ts",
+          "frontend/src/beta-policy.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_client_policy.py",
+          "backend/tests/test_assistant.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/admin-report-action.test.tsx",
+          "frontend/src/admin-members.test.tsx",
+          "frontend/src/groupbuys.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
+        "최신 원문은 앱·웹 모두 운영 기능을 요구한다. 브라우저 폭 테스트가 최신 Android 설치본 검증을 대신하지 않는다."
+      ]
+    },
+    {
+      "id": "admreport_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 8,
+          "id_cell": "D8",
+          "description_cell": "F8",
+          "name": "신고 목록·원문 확인",
+          "description_verbatim": "신고 대상 유형·대상·신고 사유·접수 시각·처리 상태·메모를 페이지별로 조회하고 접수된 신고가 없으면 빈 상태를 안내한다. 신고한 공구 정보·글·댓글의 내용 일부와 작성자 정보를 확인하고 대상으로 이동한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 28,
+          "id_cell": "G28",
+          "ids_verbatim": "admin_01, admreport_01~02, admgroupbuy_01",
+          "description_cell": "B28",
+          "description_verbatim": "신고·공구 정보 검토와 조치",
+          "target_verbatim": "관리자",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "유형·대상·사유·상태·메모·접수 시각 및 원문 발췌/작성자/링크가 있는 페이지 조회 경로를 확인했다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/admin-members.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/release-policy.ts",
+          "frontend/src/beta-policy.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/admin-report-action.test.tsx",
+          "frontend/src/admin-members.test.tsx",
+          "frontend/src/groupbuys.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
+        "최신 원문은 앱·웹 모두 운영 기능을 요구한다. 브라우저 폭 테스트가 최신 Android 설치본 검증을 대신하지 않는다."
+      ]
+    },
+    {
+      "id": "admreport_02",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 9,
+          "id_cell": "D9",
+          "description_cell": "F9",
+          "name": "신고 처리와 결과 기록",
+          "description_verbatim": "관리자는 콘텐츠 숨김, 조치 없이 종결, 작성자 계정 정지 중 처리를 선택해 적용 전에 확인하고, 2~1,000자의 메모를 필수로 입력한다. 처리 결과·시각·운영자·조치를 기록하고 숨긴 콘텐츠는 공개 조회에서 제외하며 정지 계정의 로그인을 제한하고 완료된 신고는 다시 처리하지 않는다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 28,
+          "id_cell": "G28",
+          "ids_verbatim": "admin_01, admreport_01~02, admgroupbuy_01",
+          "description_cell": "B28",
+          "description_verbatim": "신고·공구 정보 검토와 조치",
+          "target_verbatim": "관리자",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "사전 확인, 공백 제거 후 2~1000자 메모, 숨김/종결/계정정지와 운영자·조치·시각 이력, 정지 토큰 폐기, 완료 재처리409 경로를 확인했다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/admin-members.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/release-policy.ts",
+          "frontend/src/beta-policy.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/admin-report-action.test.tsx",
+          "frontend/src/admin-members.test.tsx",
+          "frontend/src/groupbuys.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
+        "최신 원문은 앱·웹 모두 운영 기능을 요구한다. 브라우저 폭 테스트가 최신 Android 설치본 검증을 대신하지 않는다."
+      ]
+    },
+    {
+      "id": "analytics_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 12,
+          "id_cell": "D12",
+          "description_cell": "F12",
+          "name": "노출·클릭·판매처 이동 분석",
+          "description_verbatim": "최근 30일의 동의한 일반 회원 활동을 화면 위치와 웹·앱별로 집계한다. 공구 정보의 노출·클릭·판매처 이동과 육아템 저장·수요 관심 전환을 산정 기준과 함께 제공하며 판매처 이동을 구매 완료로 집계하지 않는다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 29,
+          "id_cell": "G29",
+          "ids_verbatim": "insight_01~02, analytics_01, chatbot_02",
+          "description_cell": "B29",
+          "description_verbatim": "관심·활동 분석, 챗봇 품질 평가",
+          "target_verbatim": "관리자",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "동의 일반회원 최근30일·노출위치·web/android, 노출/클릭/판매처이동과 서버확정 신규저장/관심 전환을 확인했다. 판매처 이동은 구매로 표시하지 않는다.",
+        "backend_files": [
+          "backend/app/growth.py",
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/discovery_evidence.json"
+        ],
+        "frontend_files": [
+          "frontend/src/measurement.tsx",
+          "frontend/src/discovery.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_growth.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_groupbuys.py",
+          "frontend/src/groupbuy-measurement.test.tsx",
+          "frontend/src/discovery.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "기본미동의·화면50%/연속1초/visible·웹앱분리·공구판매처이동·집계숨김·과거공개실험과실활동구분·구매오표시금지"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "auth_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 20,
+          "id_cell": "D20",
+          "description_cell": "F20",
+          "name": "본인 정보와 기록 보호",
+          "description_verbatim": "저장 목록·관심 설정·찾기 조건·차단 목록·챗봇 대화 등 개인 자료는 본인만 조회·변경한다. 다른 회원의 공구 정보·글·댓글을 임의 수정·삭제하거나 운영 정보를 열람하지 못하도록 한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 33,
+          "id_cell": "G33",
+          "ids_verbatim": "auth_01, state_01~02, time_01, a11y_01",
+          "description_cell": "B33",
+          "description_verbatim": "권한·로딩/오류 상태·시간 표시·접근성",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "저장·설정·찾기·차단·대화 본인 범위, 타인 콘텐츠 수정 금지와 운영자 역할 제한의 서버/화면 검증 경로를 확인했다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/groupbuys.py",
+          "backend/app/assistant.py",
+          "backend/app/security.py",
+          "backend/app/client_policy.py"
+        ],
+        "frontend_files": [
+          "frontend/src/auth-pages.tsx",
+          "frontend/src/social-auth.tsx",
+          "frontend/src/session-storage.ts",
+          "frontend/src/profile-settings.tsx",
+          "frontend/src/account-exit.ts",
+          "frontend/src/beta.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_client_policy.py",
+          "backend/tests/test_assistant.py",
+          "frontend/src/session-storage.test.ts",
+          "frontend/src/account-exit.test.ts",
+          "frontend/src/signup-recovery-boundary.test.tsx",
+          "frontend/src/auth-refresh-lifecycle.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "broker_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 5,
+          "id_cell": "D5",
+          "description_cell": "F5",
+          "name": "통신판매중개 고지",
+          "description_verbatim": "플랫폼은 통신판매중개자로서 거래 당사자가 아니며 상품 정보와 거래 책임은 각 판매처에 있음을 공구 상세, 판매처 이동 안내, 하단 정보 영역, 이용약관에 표시한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 30,
+          "id_cell": "G30",
+          "ids_verbatim": "broker_01, terms_01",
+          "description_cell": "B30",
+          "description_verbatim": "통신판매중개 고지·약관·개인정보 안내",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "공구 상세·판매처 이동·푸터·약관의 중개/판매처 책임 고지 경로를 확인했다.",
+        "backend_files": [
+          "backend/app/legal_public.py",
+          "backend/app/groupbuys.py",
+          "scripts/export-public-guides.py",
+          "backend/app/groupbuy_public.py",
+          "render.yaml"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/admin-members.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/release-policy.ts",
+          "frontend/src/beta-policy.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_legal.py",
+          "backend/tests/test_public_guides.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/admin-report-action.test.tsx",
+          "frontend/src/admin-members.test.tsx",
+          "frontend/src/groupbuys.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "chatbot_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 6,
+          "id_cell": "D6",
+          "description_cell": "F6",
+          "name": "육아템·공구 질문 챗봇",
+          "description_verbatim": "챗봇은 서비스의 공개 육아템 정보·비교 가이드·진행 중 공구 정보를 검색해 답하고 답변마다 근거 출처를 표시하며, 공구 마감·조건 등 바뀌는 정보는 질문 시점의 DB 조회 결과와 조회 시각으로 안내한다. 근거가 없으면 확인할 수 없음을 안내하고 주문·결제 대행이나 가격·재고 확정은 하지 않는다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 27,
+          "id_cell": "G27",
+          "ids_verbatim": "chatbot_01",
+          "description_cell": "B27",
+          "description_verbatim": "육아템·공구 질문 답변(출처 표시, 실시간 조회)",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "비회원 질문, 공개 근거 인용, 확인 불가 거절과 진행 공구 현재 DB/출처 확인/조회 시각·판매처 재확인 경로를 확인했다.",
+        "backend_files": [
+          "backend/app/assistant.py",
+          "backend/app/assistant_tools.py",
+          "backend/app/knowledge.py",
+          "backend/app/model_runtime.py",
+          "backend/app/observability.py",
+          "backend/app/observation_contract.py",
+          "backend/app/main.py"
+        ],
+        "frontend_files": [
+          "frontend/src/chat.tsx",
+          "frontend/src/chat-transport.ts",
+          "frontend/src/admin-assistant.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_assistant.py",
+          "backend/tests/test_assistant_context.py",
+          "backend/tests/test_assistant_retrieval.py",
+          "backend/tests/test_assistant_observation.py",
+          "backend/tests/test_observation_candidate.py",
+          "backend/tests/test_assistant_boundary_observation.py",
+          "frontend/src/chat.test.tsx",
+          "frontend/src/admin-assistant.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "assistant_regression52",
+          "assistant_opik_persistence",
+          "assistant_observation_hooks",
+          "assistant_observation_integration",
+          "assistant_boundary",
+          "observation_candidate",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "질문/계정저장/출처·실제답변mode·중립passive status·public action allowlist·실패/원점수 보존·운영평가 메뉴"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "chatbot_02",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 14,
+          "id_cell": "D14",
+          "description_cell": "F14",
+          "name": "챗봇 답변 품질 평가",
+          "description_verbatim": "챗봇 답변의 검색 근거·도구 호출·응답 품질·지연·오류를 Opik으로 기록하고 고정 평가 질문으로 버전별 결과를 비교한다. 기록 전에 이메일·닉네임 등 개인정보를 제외한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 29,
+          "id_cell": "G29",
+          "ids_verbatim": "insight_01~02, analytics_01, chatbot_02",
+          "description_cell": "B29",
+          "description_verbatim": "관심·활동 분석, 챗봇 품질 평가",
+          "target_verbatim": "관리자",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "partial_candidate_approved_operational_activation_pending",
+        "review": "고정/합성 평가의 실제 Opik 추적 저장과 버전 비교는 증거가 있다. 전체 요청 단계·오류·실제도구횟수의 PII없는 observe후보와 hook/HTTP경계 통합70건을 검증했다. 사용자 observe권한 확대 승인은 받았고 실서비스 연결/저장 검증은 진행 중이다.",
+        "backend_files": [
+          "backend/app/assistant.py",
+          "backend/app/assistant_tools.py",
+          "backend/app/knowledge.py",
+          "backend/app/model_runtime.py",
+          "backend/app/observability.py",
+          "backend/app/observation_contract.py",
+          "backend/app/main.py"
+        ],
+        "frontend_files": [
+          "frontend/src/chat.tsx",
+          "frontend/src/chat-transport.ts",
+          "frontend/src/admin-assistant.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_assistant.py",
+          "backend/tests/test_assistant_context.py",
+          "backend/tests/test_assistant_retrieval.py",
+          "backend/tests/test_assistant_observation.py",
+          "backend/tests/test_observation_candidate.py",
+          "backend/tests/test_assistant_boundary_observation.py",
+          "frontend/src/chat.test.tsx",
+          "frontend/src/admin-assistant.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "assistant_regression52",
+          "assistant_opik_persistence",
+          "assistant_observation_hooks",
+          "assistant_observation_integration",
+          "assistant_boundary",
+          "observation_candidate"
+        ],
+        "frontend_scope": "질문/계정저장/출처·실제답변mode·중립passive status·public action allowlist·실패/원점수 보존·운영평가 메뉴"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "partial_pending_operational_observation_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
+        "observe 사용자 승인 수신. 실제 게이트웨이·수집기·Render 활성과 운영 추적 조회·외부 전달 확인은 아직 완료 증거 없음. 자동 SDK 카운터만으로 저장 완료를 단정하지 않는다.",
+        "validation 단계시간은 tools를 포함한 초기·최종 검증 경과시간이다. 겹치는 단계값을 합쳐 total로 표시하지 않는다.",
+        "인용 전체가 정적map과 맞지 않으면 source목록을 보내지 않으며 모델답변의 품질은 not_assessed다. 수신단에서 mismatched source를 받은 경우에는 이벤트를 거부한다."
+      ]
+    },
+    {
+      "id": "comment_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 17,
+          "id_cell": "G17",
+          "ids_verbatim": "comment_01",
+          "description_cell": "B17",
+          "description_verbatim": "댓글 작성·삭제",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/community-editors.tsx",
+          "frontend/src/groupbuys.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/community.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "consent_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 3,
+          "id_cell": "D3",
+          "description_cell": "F3",
+          "name": "활동 분석 동의·해제",
+          "description_verbatim": "일반 회원은 계정 관리에서 활동 분석 참여를 선택하며 기본 상태는 미동의로 두고 수집 항목·목적·보관 기준을 알린다. 동의한 회원에 한해 공구·육아템·수요 글의 노출(화면 절반 이상 1초)·클릭·저장·관심을 측정하고 이메일·닉네임·검색어는 제외하며, 해제하면 분석 기록을 삭제하되 저장·관심 표시는 유지한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 25,
+          "id_cell": "G25",
+          "ids_verbatim": "interest_01, report_02, consent_01",
+          "description_cell": "B25",
+          "description_verbatim": "관심 설정·차단 관리·활동 분석 동의",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "기본 미동의·일반회원 한정, 50% 연속 1초 노출, 고정 이벤트 필드, 해제 시 분석만 삭제하는 서버와 화면 경로를 확인했다.",
+        "backend_files": [
+          "backend/app/growth.py",
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/discovery_evidence.json"
+        ],
+        "frontend_files": [
+          "frontend/src/measurement.tsx",
+          "frontend/src/discovery.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_growth.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_groupbuys.py",
+          "frontend/src/groupbuy-measurement.test.tsx",
+          "frontend/src/discovery.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "기본미동의·화면50%/연속1초/visible·웹앱분리·공구판매처이동·집계숨김·과거공개실험과실활동구분·구매오표시금지"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "demand_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 13,
+          "id_cell": "G13",
+          "ids_verbatim": "demand_01",
+          "description_cell": "B13",
+          "description_verbatim": "수요 목록·검색",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/community-editors.tsx",
+          "frontend/src/groupbuys.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/community.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "demand_02",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 14,
+          "id_cell": "G14",
+          "ids_verbatim": "demand_02",
+          "description_cell": "B14",
+          "description_verbatim": "수요 글 작성·삭제",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/community-editors.tsx",
+          "frontend/src/groupbuys.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/community.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "demand_03",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 15,
+          "id_cell": "G15",
+          "ids_verbatim": "demand_03, demand_04",
+          "description_cell": "B15",
+          "description_verbatim": "수요 상세·관심 표시",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/community-editors.tsx",
+          "frontend/src/groupbuys.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/community.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "demand_04",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 15,
+          "id_cell": "G15",
+          "ids_verbatim": "demand_03, demand_04",
+          "description_cell": "B15",
+          "description_verbatim": "수요 상세·관심 표시",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/community-editors.tsx",
+          "frontend/src/groupbuys.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/community.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "demand_05",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 16,
+          "id_cell": "G16",
+          "ids_verbatim": "demand_05",
+          "description_cell": "B16",
+          "description_verbatim": "수요에 진행 중 공구 연결",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/groupbuys.py",
+          "backend/app/groupbuy_public.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/community-editors.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/groupbuy-confirmation.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_groupbuys.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/community.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx",
+          "frontend/src/groupbuy-confirmation.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "groupbuy_local",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "detail_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 20,
+          "id_cell": "G20",
+          "ids_verbatim": "item_01, detail_01",
+          "description_cell": "B20",
+          "description_verbatim": "육아템 목록·상세·공식 출처",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/advisor.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/advisor.tsx",
+          "frontend/src/discovery.tsx",
+          "frontend/src/interest-onboarding.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_advisor.py",
+          "frontend/src/advisor.test.tsx",
+          "frontend/src/discovery.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "finder_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 21,
+          "id_cell": "G21",
+          "ids_verbatim": "finder_01, finder_02",
+          "description_cell": "B21",
+          "description_verbatim": "조건 찾기(목적·분야·예산)",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/advisor.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/advisor.tsx",
+          "frontend/src/discovery.tsx",
+          "frontend/src/interest-onboarding.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_advisor.py",
+          "frontend/src/advisor.test.tsx",
+          "frontend/src/discovery.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "finder_02",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 21,
+          "id_cell": "G21",
+          "ids_verbatim": "finder_01, finder_02",
+          "description_cell": "B21",
+          "description_verbatim": "조건 찾기(목적·분야·예산)",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/advisor.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/advisor.tsx",
+          "frontend/src/discovery.tsx",
+          "frontend/src/interest-onboarding.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_advisor.py",
+          "frontend/src/advisor.test.tsx",
+          "frontend/src/discovery.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "groupbuy_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 9,
+          "id_cell": "G9",
+          "ids_verbatim": "groupbuy_01",
+          "description_cell": "B9",
+          "description_verbatim": "진행 중 공구 목록·검색(마감 임박순, 종료 구분)",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/groupbuys.py",
+          "backend/app/groupbuy_public.py"
+        ],
+        "frontend_files": [
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/groupbuys.css"
+        ],
+        "source_test_files": [
+          "backend/tests/test_groupbuys.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/groupbuys.test.tsx",
+          "frontend/src/groupbuy-actions.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "groupbuy_local",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "groupbuy_02",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 10,
+          "id_cell": "G10",
+          "ids_verbatim": "groupbuy_02",
+          "description_cell": "B10",
+          "description_verbatim": "공구 상세 → 판매처로 이동(거래는 판매처에서)",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/groupbuys.py",
+          "backend/app/groupbuy_public.py"
+        ],
+        "frontend_files": [
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/groupbuys.css"
+        ],
+        "source_test_files": [
+          "backend/tests/test_groupbuys.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/groupbuys.test.tsx",
+          "frontend/src/groupbuy-actions.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "groupbuy_local",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "groupbuy_03",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 11,
+          "id_cell": "G11",
+          "ids_verbatim": "groupbuy_03",
+          "description_cell": "B11",
+          "description_verbatim": "공구 정보 공유·수정·종료",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/groupbuys.py",
+          "backend/app/groupbuy_public.py"
+        ],
+        "frontend_files": [
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/groupbuys.css",
+          "frontend/src/groupbuy-confirmation.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_groupbuys.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/groupbuys.test.tsx",
+          "frontend/src/groupbuy-actions.test.tsx",
+          "frontend/src/groupbuy-confirmation.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "groupbuy_local",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "groupbuy_04",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 12,
+          "id_cell": "G12",
+          "ids_verbatim": "groupbuy_04",
+          "description_cell": "B12",
+          "description_verbatim": "잘못된 공구 정보 제보",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/groupbuys.py",
+          "backend/app/groupbuy_public.py"
+        ],
+        "frontend_files": [
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/groupbuys.css"
+        ],
+        "source_test_files": [
+          "backend/tests/test_groupbuys.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/groupbuys.test.tsx",
+          "frontend/src/groupbuy-actions.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "groupbuy_local",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "guide_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 16,
+          "id_cell": "D16",
+          "description_cell": "F16",
+          "name": "육아템 비교 가이드 조회",
+          "description_verbatim": "로그인 없이 육아템 선택 기준과 상품별 공식 출처·확인 시각·비교 사항을 공개 웹페이지로 확인한다. 앱에서 해당 가이드와 상품별 공개 안내로 이동할 수 있도록 한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 32,
+          "id_cell": "G32",
+          "ids_verbatim": "guide_01, seo_01",
+          "description_cell": "B32",
+          "description_verbatim": "공개 비교 가이드·검색 노출",
+          "target_verbatim": "전체",
+          "app_mark": "",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "JavaScript 없는 공개 가이드·공식 출처·확인시각·비교 안내 생성과 앱의 공개 웹 가이드 링크를 확인했다.",
+        "backend_files": [
+          "backend/app/legal_public.py",
+          "backend/app/groupbuys.py",
+          "scripts/export-public-guides.py",
+          "backend/app/groupbuy_public.py",
+          "render.yaml"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/advisor.tsx",
+          "frontend/src/discovery.tsx",
+          "frontend/src/interest-onboarding.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_legal.py",
+          "backend/tests/test_public_guides.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/advisor.test.tsx",
+          "frontend/src/discovery.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
+        "로컬 HTML/robots/sitemap 검증과 운영 호스팅 rewrite·크롤링 결과를 분리한다."
+      ]
+    },
+    {
+      "id": "insight_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 11,
+          "id_cell": "D11",
+          "description_cell": "F11",
+          "name": "관심·공동 저장 집계",
+          "description_verbatim": "카테고리별 저장 계정 수, 수요 글 작성자 수, 수요 관심 계정 수, 공구 정보 공유 수와 두 육아템을 함께 저장한 계정 수·비율을 조회한다. 계정별 중복과 삭제·정지 계정·숨긴 콘텐츠를 제외하고, 1~4계정의 소수 집계는 숨기며 공동 저장을 결제·동시구매 실적으로 표시하지 않는다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 29,
+          "id_cell": "G29",
+          "ids_verbatim": "insight_01~02, analytics_01, chatbot_02",
+          "description_cell": "B29",
+          "description_verbatim": "관심·활동 분석, 챗봇 품질 평가",
+          "target_verbatim": "관리자",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "서로 다른 계정 집계, 카테고리 저장·수요·관심·공구 공유, 공동저장 비율, 비공개/삭제/정지 제외 및 1~4명 숨김 경로를 확인했다.",
+        "backend_files": [
+          "backend/app/growth.py",
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/discovery_evidence.json"
+        ],
+        "frontend_files": [
+          "frontend/src/measurement.tsx",
+          "frontend/src/discovery.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_growth.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_groupbuys.py",
+          "frontend/src/groupbuy-measurement.test.tsx",
+          "frontend/src/discovery.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt",
+          "groupbuy_real_postgres",
+          "groupbuy_portable_postgres"
+        ],
+        "frontend_scope": "기본미동의·화면50%/연속1초/visible·웹앱분리·공구판매처이동·집계숨김·과거공개실험과실활동구분·구매오표시금지"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "insight_02",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 13,
+          "id_cell": "D13",
+          "description_cell": "F13",
+          "name": "분석 근거와 한계 조회",
+          "description_verbatim": "제공 데이터의 출처·분석 결과·서비스 적용 방식과 해석 한계를 확인한다. 과거 공개 데이터의 실험 결과와 현재 서비스의 실제 활동 집계를 구분해 표시한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 29,
+          "id_cell": "G29",
+          "ids_verbatim": "insight_01~02, analytics_01, chatbot_02",
+          "description_cell": "B29",
+          "description_verbatim": "관심·활동 분석, 챗봇 품질 평가",
+          "target_verbatim": "관리자",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "제공 데이터의 출처·실험결과·서비스 적용·한계와 실제 회원 활동을 구분하는 정적 근거 및 분석 화면에 연결했다.",
+        "backend_files": [
+          "backend/app/growth.py",
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/discovery_evidence.json"
+        ],
+        "frontend_files": [
+          "frontend/src/measurement.tsx",
+          "frontend/src/discovery.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_growth.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_groupbuys.py",
+          "frontend/src/groupbuy-measurement.test.tsx",
+          "frontend/src/discovery.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "기본미동의·화면50%/연속1초/visible·웹앱분리·공구판매처이동·집계숨김·과거공개실험과실활동구분·구매오표시금지"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "interest_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 25,
+          "id_cell": "G25",
+          "ids_verbatim": "interest_01, report_02, consent_01",
+          "description_cell": "B25",
+          "description_verbatim": "관심 설정·차단 관리·활동 분석 동의",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/advisor.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/advisor.tsx",
+          "frontend/src/discovery.tsx",
+          "frontend/src/interest-onboarding.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_advisor.py",
+          "frontend/src/advisor.test.tsx",
+          "frontend/src/discovery.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "interest_02",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 22,
+          "id_cell": "G22",
+          "ids_verbatim": "interest_02",
+          "description_cell": "B22",
+          "description_verbatim": "관심 기반 육아템 안내",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/advisor.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/advisor.tsx",
+          "frontend/src/discovery.tsx",
+          "frontend/src/interest-onboarding.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_advisor.py",
+          "frontend/src/advisor.test.tsx",
+          "frontend/src/discovery.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "item_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 20,
+          "id_cell": "G20",
+          "ids_verbatim": "item_01, detail_01",
+          "description_cell": "B20",
+          "description_verbatim": "육아템 목록·상세·공식 출처",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/advisor.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/advisor.tsx",
+          "frontend/src/discovery.tsx",
+          "frontend/src/interest-onboarding.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_advisor.py",
+          "frontend/src/advisor.test.tsx",
+          "frontend/src/discovery.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "login_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 23,
+          "id_cell": "G23",
+          "ids_verbatim": "signup_01, login_01, logout_01",
+          "description_cell": "B23",
+          "description_verbatim": "회원가입·로그인(이메일·카카오)·로그아웃",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/main.py",
+          "backend/app/security.py",
+          "backend/app/social_auth.py",
+          "backend/app/schemas.py"
+        ],
+        "frontend_files": [
+          "frontend/src/auth-pages.tsx",
+          "frontend/src/social-auth.tsx",
+          "frontend/src/session-storage.ts",
+          "frontend/src/profile-settings.tsx",
+          "frontend/src/account-exit.ts",
+          "frontend/src/beta.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_profile.py",
+          "backend/tests/test_signup_age.py",
+          "backend/tests/test_social_auth.py",
+          "backend/tests/test_public_release.py",
+          "frontend/src/session-storage.test.ts",
+          "frontend/src/account-exit.test.ts",
+          "frontend/src/signup-recovery-boundary.test.tsx",
+          "frontend/src/auth-refresh-lifecycle.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
+        "이메일/카카오가 최신 범위다. 합성 소셜 테스트가 실제 카카오 외부 인증 성공을 대신하지 않는다. Naver/Google은 이 행의 필수조건으로 추가하지 않는다."
+      ]
+    },
+    {
+      "id": "logout_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 23,
+          "id_cell": "G23",
+          "ids_verbatim": "signup_01, login_01, logout_01",
+          "description_cell": "B23",
+          "description_verbatim": "회원가입·로그인(이메일·카카오)·로그아웃",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/main.py",
+          "backend/app/security.py",
+          "backend/app/social_auth.py",
+          "backend/app/schemas.py"
+        ],
+        "frontend_files": [
+          "frontend/src/auth-pages.tsx",
+          "frontend/src/social-auth.tsx",
+          "frontend/src/session-storage.ts",
+          "frontend/src/profile-settings.tsx",
+          "frontend/src/account-exit.ts",
+          "frontend/src/beta.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_profile.py",
+          "backend/tests/test_signup_age.py",
+          "backend/tests/test_social_auth.py",
+          "backend/tests/test_public_release.py",
+          "frontend/src/session-storage.test.ts",
+          "frontend/src/account-exit.test.ts",
+          "frontend/src/signup-recovery-boundary.test.tsx",
+          "frontend/src/auth-refresh-lifecycle.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "mypage_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 26,
+          "id_cell": "G26",
+          "ids_verbatim": "mypage_01",
+          "description_cell": "B26",
+          "description_verbatim": "내 공구·내 수요·관심 수요 모아보기",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/main.py",
+          "backend/app/security.py",
+          "backend/app/social_auth.py",
+          "backend/app/schemas.py"
+        ],
+        "frontend_files": [
+          "frontend/src/auth-pages.tsx",
+          "frontend/src/social-auth.tsx",
+          "frontend/src/session-storage.ts",
+          "frontend/src/profile-settings.tsx",
+          "frontend/src/account-exit.ts",
+          "frontend/src/beta.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_profile.py",
+          "backend/tests/test_signup_age.py",
+          "backend/tests/test_social_auth.py",
+          "backend/tests/test_public_release.py",
+          "frontend/src/session-storage.test.ts",
+          "frontend/src/account-exit.test.ts",
+          "frontend/src/signup-recovery-boundary.test.tsx",
+          "frontend/src/auth-refresh-lifecycle.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "price_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 18,
+          "id_cell": "G18",
+          "ids_verbatim": "price_01",
+          "description_cell": "B18",
+          "description_verbatim": "배송비 포함 단가 계산기(저장 안 함, 오프라인 가능)",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/advisor.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/advisor.tsx",
+          "frontend/src/discovery.tsx",
+          "frontend/src/interest-onboarding.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_advisor.py",
+          "frontend/src/advisor.test.tsx",
+          "frontend/src/discovery.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "recovery_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 24,
+          "id_cell": "G24",
+          "ids_verbatim": "account_01, account_02, recovery_01",
+          "description_cell": "B24",
+          "description_verbatim": "계정 관리(닉네임·복구코드·탈퇴)",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/main.py",
+          "backend/app/security.py",
+          "backend/app/social_auth.py",
+          "backend/app/schemas.py"
+        ],
+        "frontend_files": [
+          "frontend/src/auth-pages.tsx",
+          "frontend/src/social-auth.tsx",
+          "frontend/src/session-storage.ts",
+          "frontend/src/profile-settings.tsx",
+          "frontend/src/account-exit.ts",
+          "frontend/src/beta.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_profile.py",
+          "backend/tests/test_signup_age.py",
+          "backend/tests/test_social_auth.py",
+          "backend/tests/test_public_release.py",
+          "frontend/src/session-storage.test.ts",
+          "frontend/src/account-exit.test.ts",
+          "frontend/src/signup-recovery-boundary.test.tsx",
+          "frontend/src/auth-refresh-lifecycle.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "report_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 31,
+          "id_cell": "G31",
+          "ids_verbatim": "report_01, rule_01",
+          "description_cell": "B31",
+          "description_verbatim": "신고·개인정보/직접 거래 주의 안내",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/community-editors.tsx",
+          "frontend/src/groupbuys.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/community.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "report_02",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 2,
+          "id_cell": "D2",
+          "description_cell": "F2",
+          "name": "작성자 차단·해제",
+          "description_verbatim": "회원은 다른 작성자를 차단해 해당 작성자의 글·댓글을 자신의 화면에서 숨기고, 차단된 회원이 본인 수요 글에 새 댓글을 작성하지 못하도록 한다. 계정 관리에서 차단 목록을 조회하고 해제하면 해당 작성자의 글과 댓글을 다시 볼 수 있다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 25,
+          "id_cell": "G25",
+          "ids_verbatim": "interest_01, report_02, consent_01",
+          "description_cell": "B25",
+          "description_verbatim": "관심 설정·차단 관리·활동 분석 동의",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "차단 작성자 글·댓글 제외, 차단된 계정의 새 댓글 제한, 본인 차단 목록·해제 경로를 확인했다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/community-editors.tsx",
+          "frontend/src/groupbuys.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/community.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "rule_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 4,
+          "id_cell": "D4",
+          "description_cell": "F4",
+          "name": "개인정보·직접 거래 주의 안내",
+          "description_verbatim": "공구 정보·수요 글·댓글 작성 시 아이·가족의 이름, 생일, 사진, 연락처, 주소, 건강정보 등을 적지 않도록 안내한다. 회원 간 계좌 이체·연락처 교환 등 플랫폼 밖 직접 거래 요청과 광고·불법 정보는 신고 대상임을 알린다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 31,
+          "id_cell": "G31",
+          "ids_verbatim": "report_01, rule_01",
+          "description_cell": "B31",
+          "description_verbatim": "신고·개인정보/직접 거래 주의 안내",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "공구·수요·댓글 작성 주의문 및 개인정보·플랫폼 밖 직접 거래 신고 안내를 코드와 화면 테스트에 연결했다.",
+        "backend_files": [
+          "backend/app/release.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/community-editors.tsx",
+          "frontend/src/groupbuys.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_community_edit.py",
+          "frontend/src/community.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "save_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 19,
+          "id_cell": "G19",
+          "ids_verbatim": "save_01",
+          "description_cell": "B19",
+          "description_verbatim": "육아템 저장·저장 목록",
+          "target_verbatim": "회원",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": null
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/discovery.py",
+          "backend/app/advisor.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/advisor.tsx",
+          "frontend/src/discovery.tsx",
+          "frontend/src/interest-onboarding.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_discovery.py",
+          "backend/tests/test_advisor.py",
+          "frontend/src/advisor.test.tsx",
+          "frontend/src/discovery.test.tsx",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "seo_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 17,
+          "id_cell": "D17",
+          "description_cell": "F17",
+          "name": "공개·회원 화면 노출 구분",
+          "description_verbatim": "공개 비교 가이드, 상품 안내와 진행 중 공구 정보를 검색 서비스가 읽을 수 있도록 제공한다. 종료된 공구는 종료 상태로 표시하고 마이페이지·계정 관리·로그인·운영자 화면은 검색 색인 대상으로 안내하지 않는다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 32,
+          "id_cell": "G32",
+          "ids_verbatim": "guide_01, seo_01",
+          "description_cell": "B32",
+          "description_verbatim": "공개 비교 가이드·검색 노출",
+          "target_verbatim": "전체",
+          "app_mark": "",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "공개 가이드/육아템 정적HTML, 현재DB 공구HTML/종료표시/JSON-LD/페이지 sitemap, 개인·운영 경로 색인제외 코드가 있다. 새 배포의 rewrite·canonical 동작은 별도 게이트다.",
+        "backend_files": [
+          "backend/app/legal_public.py",
+          "backend/app/groupbuys.py",
+          "scripts/export-public-guides.py",
+          "backend/app/groupbuy_public.py",
+          "render.yaml"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/admin-members.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/release-policy.ts",
+          "frontend/src/beta-policy.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_legal.py",
+          "backend/tests/test_public_guides.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/admin-report-action.test.tsx",
+          "frontend/src/admin-members.test.tsx",
+          "frontend/src/groupbuys.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
+        "로컬 HTML/robots/sitemap 검증과 운영 호스팅 rewrite·크롤링 결과를 분리한다."
+      ]
+    },
+    {
+      "id": "signup_01",
+      "definition_level": "overview_only",
+      "source_references": [
+        {
+          "sheet": "한눈에 보기",
+          "row": 23,
+          "id_cell": "G23",
+          "ids_verbatim": "signup_01, login_01, logout_01",
+          "description_cell": "B23",
+          "description_verbatim": "회원가입·로그인(이메일·카카오)·로그아웃",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "backend_files": [
+          "backend/app/main.py",
+          "backend/app/security.py",
+          "backend/app/social_auth.py",
+          "backend/app/schemas.py"
+        ],
+        "frontend_files": [
+          "frontend/src/auth-pages.tsx",
+          "frontend/src/social-auth.tsx",
+          "frontend/src/session-storage.ts",
+          "frontend/src/profile-settings.tsx",
+          "frontend/src/account-exit.ts",
+          "frontend/src/beta.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_profile.py",
+          "backend/tests/test_signup_age.py",
+          "backend/tests/test_social_auth.py",
+          "backend/tests/test_public_release.py",
+          "frontend/src/session-storage.test.ts",
+          "frontend/src/account-exit.test.ts",
+          "frontend/src/signup-recovery-boundary.test.tsx",
+          "frontend/src/auth-refresh-lifecycle.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
+        "이메일/카카오가 최신 범위다. 합성 소셜 테스트가 실제 카카오 외부 인증 성공을 대신하지 않는다. Naver/Google은 이 행의 필수조건으로 추가하지 않는다."
+      ]
+    },
+    {
+      "id": "state_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 18,
+          "id_cell": "D18",
+          "description_cell": "F18",
+          "name": "로딩·빈 목록 안내",
+          "description_verbatim": "자료를 불러오는 동안 진행 상태를 표시하고, 연결 지연·서비스 버전 불일치 시 재확인과 도움말, 단가 계산기 이동을 안내한다. 자료 없음·조건에 맞는 결과 없음·조회 실패를 구분하고 검색 조건 변경, 첫 글 작성, 재조회 등 다음 행동을 안내한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 33,
+          "id_cell": "G33",
+          "ids_verbatim": "auth_01, state_01~02, time_01, a11y_01",
+          "description_cell": "B33",
+          "description_verbatim": "권한·로딩/오류 상태·시간 표시·접근성",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "진행·지연·버전불일치·자료없음·검색무결과·실패와 재조회/도움말/계산기 다음 행동에 대한 화면 구현과 로컬 테스트를 연결했다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/groupbuys.py",
+          "backend/app/assistant.py",
+          "backend/app/security.py",
+          "backend/app/client_policy.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/shared.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_client_policy.py",
+          "backend/tests/test_assistant.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/groupbuys.test.tsx",
+          "frontend/src/groupbuy-actions.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "로딩/빈결과/실패·stale목록·오류입력보존·중복lock·계정변경전송차단·한국시간·semantic controls/초점/반응형"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "state_02",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 19,
+          "id_cell": "D19",
+          "description_cell": "F19",
+          "name": "오류 안내와 중복 요청 방지",
+          "description_verbatim": "입력 오류와 통신 실패를 구분해 안내하고 작성 중인 내용을 유지하며, 응답 시간이 초과되면 처리 여부를 먼저 확인하도록 안내한다. 저장·등록·삭제·신고 처리 중에는 같은 행동을 중복 실행하지 못하게 하고 완료된 뒤에만 결과를 안내한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 33,
+          "id_cell": "G33",
+          "ids_verbatim": "auth_01, state_01~02, time_01, a11y_01",
+          "description_cell": "B33",
+          "description_verbatim": "권한·로딩/오류 상태·시간 표시·접근성",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "초안·중복잠금·계정변경차단·timeout상태확인에 더해 새공구4행동의 inline2단계 확인·취소·원계정/revision/status재확인을 최신95scoped에 연결했다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/groupbuys.py",
+          "backend/app/assistant.py",
+          "backend/app/security.py",
+          "backend/app/client_policy.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/shared.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/content-session.ts",
+          "frontend/src/groupbuy-confirmation.tsx"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_client_policy.py",
+          "backend/tests/test_assistant.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/groupbuys.test.tsx",
+          "frontend/src/groupbuy-actions.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx",
+          "frontend/src/groupbuy-confirmation.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "로딩/빈결과/실패·stale목록·오류입력보존·중복lock·계정변경전송차단·한국시간·semantic controls/초점/반응형"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "terms_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 15,
+          "id_cell": "D15",
+          "description_cell": "F15",
+          "name": "약관·개인정보·도움말 조회",
+          "description_verbatim": "로그인 없이 이용약관, 개인정보 처리방침, 통신판매중개 고지, 계정·데이터 삭제 방법과 도움말·문의 안내를 조회한다. 마이페이지와 인증 화면에서 해당 안내로 이동할 수 있도록 한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 30,
+          "id_cell": "G30",
+          "ids_verbatim": "broker_01, terms_01",
+          "description_cell": "B30",
+          "description_verbatim": "통신판매중개 고지·약관·개인정보 안내",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "비회원 약관·개인정보·중개·삭제·도움말/연락처 페이지 및 마이·인증 연결 경로를 확인했다.",
+        "backend_files": [
+          "backend/app/legal_public.py",
+          "backend/app/groupbuys.py",
+          "scripts/export-public-guides.py",
+          "backend/app/groupbuy_public.py",
+          "render.yaml"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/admin-members.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/release-policy.ts",
+          "frontend/src/beta-policy.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_legal.py",
+          "backend/tests/test_public_guides.py",
+          "backend/tests/test_groupbuy_public.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/admin-report-action.test.tsx",
+          "frontend/src/admin-members.test.tsx",
+          "frontend/src/groupbuys.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    },
+    {
+      "id": "time_01",
+      "definition_level": "detailed",
+      "source_references": [
+        {
+          "sheet": "요구사항 정의서",
+          "row": 21,
+          "id_cell": "D21",
+          "description_cell": "F21",
+          "name": "일시 기록과 한국 시간 표시",
+          "description_verbatim": "공구 정보·수요 글·댓글·신고 등의 등록·수정 시각과 운영 처리 시각을 기록한다. 화면의 작성·접수 시각과 출처 확인 시각은 한국 시간 기준으로 표시한다."
+        },
+        {
+          "sheet": "한눈에 보기",
+          "row": 33,
+          "id_cell": "G33",
+          "ids_verbatim": "auth_01, state_01~02, time_01, a11y_01",
+          "description_cell": "B33",
+          "description_verbatim": "권한·로딩/오류 상태·시간 표시·접근성",
+          "target_verbatim": "전체",
+          "app_mark": "○",
+          "web_mark": "○",
+          "allocation_note": "같은 행의 여러 ID가 설명을 공유한다. 원문에 없는 개별 기능 배분을 추론하지 않는다."
+        }
+      ],
+      "implementation": {
+        "status": "source_mapped_and_reviewed",
+        "review": "서버 등록·수정·실제 운영처리 시각과 화면 KST 변환 경로를 확인했다. 접수 시각을 처리 시각으로 대체하지 않는다.",
+        "backend_files": [
+          "backend/app/release.py",
+          "backend/app/groupbuys.py",
+          "backend/app/assistant.py",
+          "backend/app/security.py",
+          "backend/app/client_policy.py"
+        ],
+        "frontend_files": [
+          "frontend/src/public-app.tsx",
+          "frontend/src/shared.tsx",
+          "frontend/src/community.tsx",
+          "frontend/src/groupbuys.tsx",
+          "frontend/src/content-session.ts"
+        ],
+        "source_test_files": [
+          "backend/tests/test_public_release.py",
+          "backend/tests/test_community_features.py",
+          "backend/tests/test_client_policy.py",
+          "backend/tests/test_assistant.py",
+          "frontend/src/public-release.test.tsx",
+          "frontend/src/groupbuys.test.tsx",
+          "frontend/src/groupbuy-actions.test.tsx",
+          "frontend/src/community-action-boundary.test.tsx"
+        ]
+      },
+      "local_execution": {
+        "status": "scoped_evidence_available_not_full_acceptance",
+        "evidence_ids": [
+          "backend_final_622",
+          "frontend_receipt"
+        ],
+        "frontend_scope": "로딩/빈결과/실패·stale목록·오류입력보존·중복lock·계정변경전송차단·한국시간·semantic controls/초점/반응형"
+      },
+      "production": {
+        "status": "latest_source_not_deployed_or_not_verified",
+        "baseline_commit": "05baede3"
+      },
+      "acceptance_status": "open_pending_final_release_verification",
+      "limitations": [
+        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
+        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      ]
+    }
+  ]
+}

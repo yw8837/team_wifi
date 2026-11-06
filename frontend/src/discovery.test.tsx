@@ -5,7 +5,7 @@ import { PersonalDiscovery, PreferenceForm, InsightsView } from "./discovery";
 import type { Insights } from "./discovery";
 import evidence from "../../backend/app/discovery_evidence.json";
 import { publicBrowsePath, publicReturnPath } from "./release-policy";
-vi.mock("./shared", () => ({ useAuth: () => ({ user: null }), useAction: () => ({ busy: false, run: vi.fn() }), Feedback: () => null, ResourceState: () => null, PageTitle: () => null }));
+vi.mock("./shared", async () => ({ ...await vi.importActual<typeof import("./shared")>("./shared"), useAuth: () => ({ user: null }), useAction: () => ({ busy: false, run: vi.fn() }), Feedback: () => null, ResourceState: () => null, PageTitle: () => null }));
 vi.mock("./release-data", () => ({ usePublicResource: () => ({ data: null, loading: false, error: "" }) }));
 const render = (node: React.ReactNode) => renderToStaticMarkup(<MemoryRouter>{node}</MemoryRouter>);
 describe("discovery user choices and honest evidence", () => {

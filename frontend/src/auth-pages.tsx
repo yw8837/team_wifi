@@ -1,5 +1,5 @@
 import { PUBLIC_RELEASE, DEPLOYED_MODE, publicBrowsePath, publicReturnPath } from "./release-policy";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BrandLockup } from "./brand";
 import { IconArrowRight, IconBuildingStore } from "@tabler/icons-react";
 import {
@@ -11,6 +11,9 @@ import {
 } from "react-router-dom";
 import { api, safeReturnPath } from "./api";
 import { SocialButtons } from "./social-auth";
+import { RememberLogin } from "./remember-login";
+import { interestOnboardingPath } from "./interest-onboarding";
+import { readSessionToken } from "./session-storage";
 import { PUBLIC_AGE_CONFIRMATION, PUBLIC_AGE_HELP } from "./signup-policy";
 import { BETA_MODE, BETA_NOTICE, BetaRecover, LegalLinks, RecoveryCodeNotice } from "./beta";
 import { signupDestination } from "./beta-policy";
@@ -22,8 +25,10 @@ import {
   PageTitle,
   useAction,
   useAuth,
+  useSessionAttempt,
 } from "./shared";
 type AuthResponse = { access_token: string; user: User; recovery_code?: string };
+type PendingSignup = AuthResponse & { expectedToken:string|null; isCurrent:()=>boolean };
 // Guest navigation must lead to an existing page outside Protected/auth routes.
 const guestBrowseRoutes = [
   "/", "/welcome", "/hotdeals", "/brands", "/brands/:id", "/campaigns/:id", "/benefits", "/my",
@@ -54,6 +59,7 @@ export function Welcome() {
   );
 }
 export function Login() {
+  const attempts = useSessionAttempt();
   const EmailLoginContainer = PUBLIC_RELEASE ? "details" : "div";
   const [params] = useSearchParams(),
     nav = useNavigate(),
@@ -76,18 +82,20 @@ export function Login() {
           돌아갑니다.
         </p>
       )}
-      {PUBLIC_RELEASE && <SocialButtons to={to}/>}
+      {PUBLIC_RELEASE && <><RememberLogin/><SocialButtons to={to}/></>}
       <EmailLoginContainer className={PUBLIC_RELEASE ? "email-signup" : undefined}>
       {PUBLIC_RELEASE && <summary>이메일로 로그인하기</summary>}
       <form aria-label="이메일 로그인"
         onSubmit={(e) => {
           e.preventDefault();
           void action.run(async () => {
+            const attempt = attempts.begin();
             const result = await api<AuthResponse>("/auth/login", "POST", {
               email,
               password,
             });
-            setSession(result.access_token, result.user);
+            if (!attempt.isCurrent()) return;
+            setSession(result.access_token, result.user, attempt.expectedToken);
             nav(to, { replace: true });
           });
         }}
@@ -119,15 +127,16 @@ export function Login() {
         <Link to="/reset">비밀번호 재설정</Link>
       </div>
       <p className="muted">
-        {DEPLOYED_MODE ? "이메일 가입 계정은 비밀번호 분실 시 보관한 복구코드가 필요합니다. 이메일 소유 확인은 제공하지 않습니다." : "이 개발 빌드는 이메일 인증을 제공하지 않습니다."} 세션은 현재 탭 또는 앱 실행 동안 유지됩니다.
+        {DEPLOYED_MODE ? "이메일 가입 계정은 비밀번호 분실 시 보관한 복구코드가 필요합니다. 이메일 소유 확인은 제공하지 않습니다." : "이 개발 빌드는 이메일 인증을 제공하지 않습니다."} 로그인 유지를 선택하지 않으면 현재 탭 또는 앱 실행 동안만 유지됩니다.
       </p>
     </div>
   );
 }
 export function Signup() {
+  const attempts = useSessionAttempt();
   const [params, setParams] = useSearchParams(),
     nav = useNavigate(),
-    { setSession } = useAuth(),
+    { setSession, user } = useAuth(),
     action = useAction();
   const track = !PUBLIC_RELEASE && params.get("track") === "seller" ? "seller" : "buyer";
   const EmailSignupContainer = PUBLIC_RELEASE ? "details" : "div";
@@ -141,13 +150,17 @@ export function Signup() {
     invite_code: "",
     age_confirmed: false,
   });
-  const [pending, setPending] = useState<AuthResponse | null>(null);
+  const [pending, setPending] = useState<PendingSignup | null>(null);
   const to = PUBLIC_RELEASE ? publicReturnPath(safeReturnPath(params.get("returnTo"))) : safeReturnPath(params.get("returnTo"));
-  if (pending?.recovery_code) return <div className="narrow"><RecoveryCodeNotice code={pending.recovery_code} onContinue={() => {
-    setSession(pending.access_token, pending.user);
+  const currentToken = readSessionToken();
+  const pendingIsCurrent = !!pending && pending.isCurrent() && pending.expectedToken === currentToken && (pending.expectedToken !== null || !user);
+  useEffect(() => { if (pending && !pendingIsCurrent) setPending(null); }, [pending, pendingIsCurrent]);
+  if (pendingIsCurrent && pending?.recovery_code) return <div className="narrow"><RecoveryCodeNotice code={pending.recovery_code} onContinue={() => { void action.run(async () => {
+    if (!pending.isCurrent()) return;
+    setSession(pending.access_token, pending.user, pending.expectedToken);
     setPending(null);
-    nav(signupDestination(track, to), { replace: true });
-  }} /></div>;
+    nav(PUBLIC_RELEASE ? interestOnboardingPath(to) : signupDestination(track, to), { replace: true });
+  }); }} /><Feedback {...action}/></div>;
   return (
     <div className="narrow">
       <PageTitle
@@ -155,7 +168,7 @@ export function Signup() {
       >
         <p>{PUBLIC_RELEASE ? "정보 저장과 공구 수요·질문에 참여할 수 있어요. 로그인 후 직접 원하는 행동을 선택해 주세요." : "판매자도 같은 계정으로 구매 기능을 이용할 수 있어요."}</p>
       </PageTitle>
-      {PUBLIC_RELEASE && <><SocialButtons to={to}/><p className="hint">소셜로 가입하면 이메일과 비밀번호를 따로 입력하지 않아요.</p></>}
+      {PUBLIC_RELEASE && <><RememberLogin/><SocialButtons to={to}/><p className="hint">소셜로 가입하면 이메일과 비밀번호를 따로 입력하지 않아요.</p></>}
       {!PUBLIC_RELEASE && <div className="segmented">
         <button
           type="button"
@@ -182,19 +195,23 @@ export function Signup() {
         onSubmit={(e) => {
           e.preventDefault();
           void action.run(async () => {
+            const attempt = attempts.begin();
+            const expectedToken = attempt.expectedToken;
             const { age_confirmed, ...fields } = form;
             const result = await api<AuthResponse>("/auth/register", "POST", {
               ...fields,
               ...(PUBLIC_RELEASE ? { age_confirmed } : { adult_confirmed: age_confirmed }),
               track,
             });
+            if (!attempt.isCurrent()) return;
             setForm({ ...form, password: "", invite_code: "" });
             if (DEPLOYED_MODE) {
               if (!result.recovery_code) throw new Error("복구코드를 받지 못했습니다. 지원·문의에서 안내를 확인해 주세요.");
-              setPending(result);
+              if (readSessionToken() !== expectedToken) throw new Error('로그인 계정이 변경됐어요. 계정을 확인해 주세요.');
+              setPending({ ...result, expectedToken, isCurrent:attempt.isCurrent });
             } else {
-              setSession(result.access_token, result.user);
-              nav(signupDestination(track, to), { replace: true });
+              setSession(result.access_token, result.user, expectedToken);
+              nav(PUBLIC_RELEASE ? interestOnboardingPath(to) : signupDestination(track, to), { replace: true });
             }
           });
         }}

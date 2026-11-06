@@ -6,7 +6,7 @@ import type { Selection, SuggestedItem } from './advisor';
 import { publicBrowsePath, publicReturnPath } from './release-policy';
 import { isPublicRead } from './beta-policy';
 
-vi.mock('./shared', () => ({ useAuth: () => ({ user: null }), ResourceState: () => null, PageTitle: () => null }));
+vi.mock('./shared', async () => ({ ...await vi.importActual<typeof import('./shared')>('./shared'), useAuth: () => ({ user: null }), ResourceState: () => null, PageTitle: () => null }));
 vi.mock('./measurement', () => ({ useExposure: () => ({ ref: null, click: vi.fn() }) }));
 const render = (node: React.ReactNode) => renderToStaticMarkup(<MemoryRouter>{node}</MemoryRouter>);
 const choice = { categories: ['수유·이유식'], priority: 'composition' as const, purpose: 'gift' as const, budget_max: 10000 };

@@ -1,6 +1,7 @@
+import { useContentRequest } from "./content-session";
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, categories, safeExternalUrl } from './api';
+import { categories, safeExternalUrl } from './api';
 import { PageTitle, ResourceState, useAuth } from './shared';
 import { usePublicResource } from './release-data';
 import type { Offer } from './release-data';
@@ -65,7 +66,7 @@ export function AdvisorPage() {
 
 function AdvisorSession({ signedIn, sessionKey }: { signedIn: boolean; sessionKey: string }) {
   const stored = usePublicResource<Selection>(signedIn ? '/release/advisor' : null, sessionKey);
-  return <div className="advisor-page"><Link to="/">← 육아템</Link>
+  return <div className="advisor-page"><Link to="/offers">← 육아템 정보</Link>
     <PageTitle eyebrow="우리에게 맞는 선택" title="어떤 육아템을 찾고 있나요?"><p>필요한 분야와 비교 기준을 고르면 공식 정보를 좁혀드려요.</p></PageTitle>
     {signedIn && <ResourceState {...stored} retry={stored.reload}/>}
     {(!signedIn || (!stored.loading && !stored.error && stored.data)) && <AdvisorForm signedIn={signedIn} saved={stored.data}/>}
@@ -73,6 +74,7 @@ function AdvisorSession({ signedIn, sessionKey }: { signedIn: boolean; sessionKe
 }
 
 export function AdvisorForm({ signedIn, saved }: { signedIn: boolean; saved: Selection | null }) {
+  const request = useContentRequest(), lock = useRef(false);
   const [choices, setChoices] = useState<Choices>(saved?.choices || initial);
   const [budget, setBudget] = useState(saved?.choices.budget_max?.toString() || '');
   const [result, setResult] = useState<Selection | null>(saved?.has_saved_choices ? saved : null);
@@ -81,24 +83,24 @@ export function AdvisorForm({ signedIn, saved }: { signedIn: boolean; saved: Sel
   useEffect(() => { live.current = true; return () => { live.current = false; }; }, []);
   const change = (patch: Partial<Choices>) => { setChoices(c => ({ ...c, ...patch })); setResult(null); setError(''); setMessage(''); };
   const submit = async () => {
-    if (busy) return;
+    if (lock.current) return;
     const amount = budget.trim() ? Number(budget) : null;
     if (amount !== null && (!Number.isSafeInteger(amount) || amount < 0 || amount > 10000000)) { setError('예산은 0~10,000,000원의 정수로 적어주세요.'); return; }
-    setBusy(true); setError(''); setMessage('');
+    lock.current = true; setBusy(true); setError(''); setMessage('');
     try {
-      const response = await api<Selection>(signedIn ? '/release/advisor' : '/release/advisor/preview', signedIn ? 'PUT' : 'POST', { ...choices, budget_max: amount });
+      const response = await request<Selection>(signedIn ? '/release/advisor' : '/release/advisor/preview', signedIn ? 'PUT' : 'POST', { ...choices, budget_max: amount });
       if (live.current) { setResult(response); setMessage(signedIn ? '같은 계정의 앱·웹에서 이 조건을 이어서 볼 수 있어요.' : '이 조건은 계정에 저장하지 않았어요.'); requestAnimationFrame(() => { if (live.current) output.current?.focus(); }); }
     } catch (e) { if (live.current) setError(e instanceof Error ? e.message : '조건을 확인하지 못했어요. 다시 시도해주세요.'); }
-    finally { if (live.current) setBusy(false); }
+    finally { lock.current = false; if (live.current) setBusy(false); }
   };
   const clear = async () => {
-    if (busy) return;
-    setBusy(true); setError('');
+    if (lock.current) return;
+    lock.current = true; setBusy(true); setError('');
     try {
-      if (signedIn) await api('/release/advisor', 'DELETE');
+      if (signedIn) await request('/release/advisor', 'DELETE');
       if (live.current) { setChoices(initial); setBudget(''); setResult(null); setMessage('조건 찾기를 끝냈어요. 저장한 조건도 지웠어요.'); }
     } catch (e) { if (live.current) setError(e instanceof Error ? e.message : '지우지 못했어요. 다시 시도해주세요.'); }
-    finally { if (live.current) setBusy(false); }
+    finally { lock.current = false; if (live.current) setBusy(false); }
   };
   return <>
     <form onSubmit={e => { e.preventDefault(); void submit(); }} className="advisor-form">

@@ -7,7 +7,7 @@ export function publicConfigMatches(config: unknown): boolean {
   return value.public_release === true && value.beta_mode === false;
 }
 export function publicBrowsePath(path: string): string {
-  const match=matchRoutes([ {path:"/demands/new",handle:{owned:true}}, ...["/", "/offers/:id", "/demands", "/demands/:id", "/calculator", "/advisor", "/welcome", "/my", "/my/policies"].map(path => ({ path, handle: {owned:false} }))], path);
+  const match=matchRoutes([ {path:"/demands/new",handle:{owned:true}}, {path:"/groupbuys/new",handle:{owned:true}}, {path:"/groupbuys/:id/edit",handle:{owned:true}}, ...["/", "/groupbuys/:id", "/offers", "/offers/:id", "/chat", "/demands", "/demands/:id", "/calculator", "/advisor", "/welcome", "/my", "/my/policies"].map(path => ({ path, handle: {owned:false} }))], path);
   return match && !match.some(route=>route.route.handle?.owned) ? path : "/";
 }
 export type ComparisonInput = { price: string; shipping: string; quantity: string };
@@ -20,5 +20,5 @@ export function compareUnit(input: ComparisonInput): {total:number; unit:number}
 }
 
 export function publicReturnPath(path:string):string {
- return matchRoutes(["/", "/offers/:id", "/demands", "/demands/new", "/demands/:id", "/calculator", "/advisor", "/welcome", "/my", "/my/policies", "/my/saved", "/my/preferences", "/settings", "/admin", "/admin/insights"].map(path=>({path})),path)?path:"/";
+ return matchRoutes(["/", "/groupbuys/:id", "/offers", "/offers/:id", "/chat", "/demands", "/demands/new", "/demands/:id", "/calculator", "/advisor", "/welcome", "/my", "/my/policies", "/onboarding", "/my/activity", "/my/saved", "/my/preferences", "/settings", "/admin", "/admin/insights", "/admin/members", "/admin/members/:id", "/groupbuys/new", "/groupbuys/:id/edit", "/my/groupbuys", "/admin/groupbuys", "/admin/assistant"].map(path=>({path})),path)?path:"/";
 }

@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import secrets
+import time
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
@@ -25,12 +26,24 @@ from . import schemas as S
 from . import config, beta
 from .signup_policy import PUBLIC_MINIMUM_AGE, signup_age_confirmed, signup_consent_action
 from .http_safety import BodyLimitMiddleware
+from .attachments import (bind_application_file, bind_campaign_files, purge_user_uploads,
+                          validate_application_submission, validate_campaign_submission)
+from .private_inquiries import list_questions, create_question
 
 
 @asynccontextmanager
 async def lifespan(app):
     init_db()
-    yield
+    from .maintenance import conversation_cleanup_loop
+    import asyncio
+    cleanup_task = asyncio.create_task(conversation_cleanup_loop())
+    try:
+        yield
+    finally:
+        cleanup_task.cancel()
+        from contextlib import suppress
+        with suppress(asyncio.CancelledError):
+            await cleanup_task
 
 
 app = FastAPI(title='모두의 육아 - 육아템 공동구매,핫딜 API', version='0.2.0', lifespan=lifespan,
@@ -69,6 +82,31 @@ async def security_headers(request, call_next):
     return response
 
 
+@app.middleware('http')
+async def assistant_failure_observation(request, call_next):
+    """Observe rejected asks without reading bodies, identities or error messages."""
+    if request.method != 'POST' or request.url.path != '/api/release/assistant/ask':
+        return await call_next(request)
+    started = time.perf_counter()
+    response = None
+    try:
+        response = await call_next(request)
+        return response
+    finally:
+        status = response.status_code if response is not None else 500
+        if status >= 400 and not getattr(request.state, 'assistant_observation_recorded', False):
+            # The route owns its own record. Only pre-route failures reach this branch.
+            from . import observability
+            code = {401: 'auth_changed', 403: 'auth_changed', 409: 'evidence_changed',
+                    422: 'invalid_request', 413: 'invalid_request', 429: 'quota'}.get(status, 'unavailable')
+            try:
+                observability.record(secrets.token_hex(16), {'total': (time.perf_counter()-started)*1000},
+                    [], 'error', error_code=code, tools={}, stage_status={'total': 'error'})
+            except Exception:
+                # Telemetry must never change the existing HTTP error or leak its contents.
+                pass
+
+
 @app.exception_handler(IntegrityError)
 async def conflict(request, exc):
     if request.url.path == '/api/auth/register':
@@ -79,8 +117,9 @@ async def conflict(request, exc):
 @app.exception_handler(RequestValidationError)
 async def invalid_request(request, exc):
     # Pydantic's default errors include the original input (including passwords).
+    from .validation_messages import message
     return JSONResponse(status_code=422, content={'detail': [
-        {'loc': list(error['loc']), 'msg': error['msg'], 'type': error['type']} for error in exc.errors()]})
+        {'loc': list(error['loc']), 'msg': message(error), 'type': error['type']} for error in exc.errors()]})
 
 
 @app.exception_handler(OperationalError)
@@ -359,6 +398,13 @@ def erase_account(user, db):
                 withdraw_record(db, reservation)
     for r in rows(db, 'reservation', Record.owner_id == user.id, Record.status == 'active'):
         withdraw_record(db, r)
+    owned = list(db.scalars(select(Record.id).where(Record.owner_id == user.id)))
+    if config.deployed():
+        from .release import delete_user_content
+        delete_user_content(db, user.id, owned)
+        from .admin_members import AUDIT as MEMBER_AUDIT
+        db.execute(delete(Record).where(Record.kind == MEMBER_AUDIT, Record.parent_id == user.id))
+    purge_user_uploads(db, user.id)
     db.execute(delete(Token).where(Token.user_id == user.id))
     db.execute(delete(Record).where(Record.owner_id == user.id, Record.kind.in_(['application', 'saved', 'block'])))
     for b in rows(db, 'brand', Record.owner_id == user.id):
@@ -369,7 +415,6 @@ def erase_account(user, db):
     if config.deployed():
         # No financial retention duty is invented for unpaid test records.
         # Remove authored free text and all per-user beta records after withdrawing.
-        owned = list(db.scalars(select(Record.id).where(Record.owner_id == user.id)))
         # Test coupons from a deleted issuer become harmless expired entries in each
         # recipient's wallet. Their own history survives without deleted seller text.
         db.execute(update(Record).where(Record.kind == 'user_coupon', Record.parent_id.in_(owned))
@@ -379,8 +424,6 @@ def erase_account(user, db):
         db.execute(delete(Record).where(Record.kind.in_(['report', 'saved']), Record.parent_id.in_(owned)))
         db.execute(delete(Record).where(Record.owner_id == user.id))
         db.execute(delete(Record).where(Record.kind == 'report', Record.parent_id == user.id))
-        from .release import delete_user_content
-        delete_user_content(db, user.id, owned)
         user.points, user.created = 0, 0
     user.email, user.nickname = f'deleted-{user.id}@invalid.local', '탈퇴한 회원'
     user.password_hash, user.deleted, user.marketing = passwords.hash(secrets.token_urlsafe(32)), True, False
@@ -516,6 +559,8 @@ def save_application(body, user, db):
         db.add(a)
     a.data = {**body.model_dump(), 'review_note': a.data.get('review_note', '') if a.data else ''}
     user.seller_status = user.seller_status or 'draft'
+    db.flush()
+    bind_application_file(db, a, user)
     db.commit()
     return application_dto(db, user)
 
@@ -544,6 +589,8 @@ def submit_application(user=Depends(current_user), db=Depends(get_db)):
         fail('사업자등록번호 형식을 확인해 주세요. 번호 형식 확인은 사업자 인증을 대신하지 않습니다.', 422)
     if not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', d['contact_email']) or not re.fullmatch(r'[0-9+() -]{8,30}', d['contact_phone']):
         fail('연락처 형식을 확인해 주세요.', 422)
+    if not config.BETA:
+        validate_application_submission(db, a, user)
     changed = db.execute(update(User).where(User.id == user.id, User.seller_status.in_(['draft', 'needs_changes'])).values(seller_status='pending')).rowcount
     if changed != 1:
         fail('신청 상태가 변경되었습니다.')
@@ -568,6 +615,8 @@ def create_campaign(body: S.CampaignInput, user=Depends(approved_seller), db=Dep
     d = body.model_dump(exclude={'stock', 'ends_at'})
     c = Record(kind='campaign', owner_id=user.id, parent_id=brand.id, status='draft', data=d, capacity=body.stock, ends=int(body.ends_at.timestamp()))
     db.add(c)
+    db.flush()
+    bind_campaign_files(db, c, user)
     db.commit()
     return campaign_dto(db, c, user)
 
@@ -575,6 +624,8 @@ def create_campaign(body: S.CampaignInput, user=Depends(approved_seller), db=Dep
 @app.post('/api/seller/campaigns/{id}/submit')
 def submit_campaign(id: str, user=Depends(approved_seller), db=Depends(get_db)):
     c = record(db, 'campaign', id, user.id)
+    if not config.BETA:
+        validate_campaign_submission(db, c, user)
     changed = db.execute(update(Record).where(Record.id == id, Record.status.in_(['draft', 'rejected']), Record.ends > now()).values(status='pending', revision=Record.revision+1)).rowcount
     if changed != 1:
         fail('제출할 수 없는 공구입니다.')
@@ -671,21 +722,15 @@ def wallet(user=Depends(current_user), db=Depends(get_db)):
 
 
 @app.get('/api/campaigns/{id}/questions')
-def questions(id: str, user=Depends(optional_user), db=Depends(get_db)):
-    public_campaign(db, record(db, 'campaign', id), user)
-    blocked = {b.parent_id for b in rows(db, 'block', Record.owner_id == user.id)} if user else set()
-    return {'items': [dict(id=r.id, author_id=r.owner_id, author_name=db.get(User, r.owner_id).nickname, body=r.data['body'], created_at=iso(r.created))
-                      for r in rows(db, 'question', Record.parent_id == id, Record.status == 'active') if r.owner_id not in blocked]}
+def questions(id: str, limit: int = Query(10, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
+              user=Depends(optional_user), db=Depends(get_db)):
+    return list_questions(db, id, user, limit, offset)
 
 
 @app.post('/api/campaigns/{id}/questions', status_code=201)
 def post_question(id: str, body: S.BodyInput, request: Request, user=Depends(current_user), db=Depends(get_db)):
     throttle(request, 'question', 30, subject=user.id)
-    public_campaign(db, record(db, 'campaign', id))
-    r = Record(kind='question', owner_id=user.id, parent_id=id, data={'body': body.body})
-    db.add(r)
-    db.commit()
-    return dict(id=r.id, author_id=user.id, author_name=user.nickname, body=body.body, created_at=iso(r.created))
+    return create_question(db, id, body, user)
 
 
 @app.post('/api/reports', status_code=201)
@@ -911,6 +956,27 @@ app.include_router(growth_router)
 from .advisor import router as advisor_router
 app.include_router(advisor_router)
 
+from .assistant import router as assistant_router
+app.include_router(assistant_router)
+
+from .groupbuys import router as groupbuys_router
+app.include_router(groupbuys_router)
+
+from .groupbuy_public import router as groupbuy_public_router
+app.include_router(groupbuy_public_router)
+
+from .admin_members import router as admin_members_router
+app.include_router(admin_members_router)
+
+from .admin_assistant import router as admin_assistant_router
+app.include_router(admin_assistant_router)
+
+from .attachments import router as attachments_router
+app.include_router(attachments_router)
+
+from .private_inquiries import router as inquiries_router
+app.include_router(inquiries_router)
+
 from .legal import router as legal_router
 app.include_router(legal_router)
 
@@ -931,4 +997,4 @@ if config.STATIC_DIR:
 # The outermost CORS layer also covers rate-limit and body-limit error responses.
 app.add_middleware(CORSMiddleware, allow_origins=config.ORIGINS,
                    allow_credentials=False, allow_methods=['GET', 'POST', 'PUT', 'DELETE'],
-                   allow_headers=['Authorization', 'Content-Type'])
+                   allow_headers=['Authorization', 'Content-Type', 'X-Moduyuga-Client'])

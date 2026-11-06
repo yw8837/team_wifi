@@ -5,7 +5,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import Field, model_validator
-from sqlalchemy import delete, select
+from sqlalchemy import delete, or_, select
 
 from .db import Record, User, get_db, now, uid
 from .schemas import Strict
@@ -25,7 +25,8 @@ class Consent(Strict):
 class Event(Strict):
     offer_id: str = Field(default='', max_length=36)
     demand_id: str = Field(default='', max_length=36)
-    placement: Literal['catalog', 'personal', 'detail', 'demand_list', 'demand_detail', 'companion', 'advisor', 'compare_cta']
+    groupbuy_id: str = Field(default='', max_length=36)
+    placement: Literal['catalog', 'personal', 'detail', 'demand_list', 'demand_detail', 'companion', 'advisor', 'compare_cta', 'groupbuy_list', 'groupbuy_detail']
     channel: Literal['web', 'android']
     action: Literal['view', 'detail', 'source', 'calculator', 'save', 'interest']
     visible_ms: int = Field(ge=0, le=600000)
@@ -33,7 +34,8 @@ class Event(Strict):
     @model_validator(mode='after')
     def target(self):
         demand = self.placement.startswith('demand_')
-        if (demand and (not self.demand_id or self.offer_id)) or (not demand and (not self.offer_id or self.demand_id)):
+        groupbuy = self.placement.startswith('groupbuy_')
+        if sum(bool(value) for value in (self.offer_id,self.demand_id,self.groupbuy_id))!=1 or (demand and not self.demand_id) or (groupbuy and not self.groupbuy_id) or (not demand and not groupbuy and not self.offer_id):
             raise ValueError('A single matching target is required.')
         return self
 
@@ -67,14 +69,18 @@ def event(body: Event, user=Depends(current_user), db=Depends(get_db)):
     from .release import offer_by_id, content, DEMAND
     if not opted_in(db, user):
         return {'recorded': False}
-    if body.demand_id:
+    if body.groupbuy_id:
+        from .groupbuys import content as groupbuy_content
+        groupbuy_content(db,body.groupbuy_id,user)
+    elif body.demand_id:
         content(db, DEMAND, body.demand_id, user)
     else:
         offer_by_id(body.offer_id)
-    target = body.demand_id or body.offer_id
+    target = body.groupbuy_id or body.demand_id or body.offer_id
     allowed = {'catalog': {'view', 'detail'}, 'personal': {'view', 'detail'}, 'detail': {'view', 'source', 'calculator', 'save'},
                'companion': {'view', 'detail'}, 'advisor': {'view', 'detail'}, 'compare_cta': {'view', 'source', 'calculator'},
-               'demand_list': {'view', 'detail'}, 'demand_detail': {'view', 'interest'}}
+               'demand_list': {'view', 'detail'}, 'demand_detail': {'view', 'interest'},
+               'groupbuy_list': {'view','detail'},'groupbuy_detail': {'view','source'}}
     if body.action not in allowed[body.placement]:
         raise HTTPException(422, '이 위치에서 제공하지 않는 행동입니다.')
     purge(db)
@@ -134,9 +140,18 @@ def report(user=Depends(admin_user), db=Depends(get_db)):
     purge(db)
     # Deleted/suspended/admin accounts never contribute to the operational report.
     suspension = select(Record.owner_id).where(Record.kind == 'suspension')
+    from . import release
+    from .groupbuys import visible_query as visible_groupbuys
+    public_groupbuys=visible_groupbuys().with_only_columns(Record.id)
+    public_demands=release.visible_query(release.DEMAND,None).with_only_columns(Record.id).order_by(None)
+    groupbuy_places=['groupbuy_list','groupbuy_detail'];demand_places=['demand_list','demand_detail']
+    visible_target=or_(
+        Record.data['placement'].as_string().in_(groupbuy_places)&Record.parent_id.in_(public_groupbuys),
+        Record.data['placement'].as_string().in_(demand_places)&Record.parent_id.in_(public_demands),
+        Record.data['placement'].as_string().not_in(groupbuy_places+demand_places))
     rows = db.scalars(select(Record).join(User, User.id == Record.owner_id).where(
         Record.kind == EXPOSURE, User.deleted.is_(False), User.is_admin.is_(False),
-        ~User.id.in_(suspension)))
+        ~User.id.in_(suspension), visible_target))
     groups = defaultdict(lambda: {'exposed': set(), 'clicked': set(), 'saved': set(), 'interested': set(), 'actions': defaultdict(set)})
     for row in rows:
         data = row.data
@@ -158,10 +173,13 @@ def report(user=Depends(admin_user), db=Depends(get_db)):
         visible_saves = n >= 5 and (saves == 0 or saves >= 5)
         interests = len(group['interested'])
         visible_interests = n >= 5 and (interests == 0 or interests >= 5)
+        sources=len(group['actions'].get('source',set()))
+        visible_sources=n>=5 and (sources==0 or sources>=5)
         interval = wilson(clicks, n) if visible_clicks else None
         enough = n >= 200 and clicks >= 20 and n-clicks >= 20
         result.append({'placement': placement, 'channel': channel, 'accounts': n if n >= 5 else None,
             'clicked_accounts': clicks if visible_clicks else None, 'saved_accounts': saves if visible_saves else None,
+            'source_accounts':sources if visible_sources else None,'source_rate':sources/n if visible_sources else None,
             'ctr': clicks/n if visible_clicks else None, 'ctr_95_interval': interval,
             'save_rate': saves/n if visible_saves else None,
             'interested_accounts': interests if visible_interests else None, 'interest_rate': interests/n if visible_interests else None,
@@ -170,5 +188,5 @@ def report(user=Depends(admin_user), db=Depends(get_db)):
     db.commit()
     return {'window_days': 30, 'rows': result, 'minimum_cohort': 5,
             'definition': '최근 30일·동의한 일반 회원. 위치·플랫폼별 노출 계정 중 클릭한 계정 비율. 계정은 각 집단에서 한 번만 집계.',
-            'limitations': '50% 이상 1초 연속 보임을 클라이언트가 보고합니다. 자동화·보고 조작을 완전히 검증할 수 없습니다. 비동의·비회원은 제외되며 전체 이용자를 대표하지 않습니다. 위치별 집단은 중복될 수 있어 합산할 수 없습니다. 관찰 구간은 A/B 검정이나 인과 효과가 아닙니다.',
+            'limitations': '50% 이상 1초 연속 보임을 클라이언트가 보고합니다. 자동화·보고 조작을 완전히 검증할 수 없습니다. 비동의·비회원은 제외되며 전체 이용자를 대표하지 않습니다. 판매처 이동은 구매 완료가 아닙니다. 위치별 집단은 중복될 수 있어 합산할 수 없습니다. 관찰 구간은 A/B 검정이나 인과 효과가 아닙니다.',
             'search': '검색 노출·CTR은 Search Console 등 검색 도구의 별도 자료가 필요합니다. AI 답변 노출·인용은 이 서비스 클릭 로그로 측정할 수 없습니다.'}

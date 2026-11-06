@@ -1,5 +1,8 @@
-import { betaApiOrigin, isPublicRead } from "./beta-policy";
-export const TOKEN_KEY = "moduyuga.session";
+import { isPublicRead } from "./beta-policy";
+import { validateRuntimeApiOrigin } from "./api-origin";
+import { clearSessionToken, readSessionToken, SESSION_TOKEN_KEY } from "./session-storage";
+import { clientPlatform } from "./client-platform";
+export const TOKEN_KEY = SESSION_TOKEN_KEY;
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(
   /\/$/,
   "",
@@ -33,12 +36,16 @@ export function safeReturnPath(value: unknown): string {
   }
 }
 export function formatError(detail: unknown): string {
+  const fieldNames: Record<string, string> = { email: '이메일', password: '비밀번호', nickname: '닉네임',
+    title: '제목', body: '내용', question: '질문', start_date: '시작일', end_date: '종료일',
+    categories: '관심 분야', category: '카테고리', priority: '비교 기준', note: '처리 사유',
+    recovery_code: '복구코드', age_confirmed: '가입 연령 확인' };
   if (typeof detail === "string") return detail;
   if (Array.isArray(detail))
     return detail
       .map((e) =>
         typeof e === "object" && e
-          ? `${Array.isArray(e.loc) ? e.loc.filter((x: string) => x !== "body").join(" · ") : "입력"}: ${e.msg || "값을 확인해 주세요."}`
+          ? `${Array.isArray(e.loc) ? e.loc.filter((x: string, i: number) => !(i === 0 && x === "body")).map((x: string) => fieldNames[x] || x).join(" · ") : "입력"}: ${e.msg || "값을 확인해 주세요."}`
           : "입력값을 확인해 주세요.",
       )
       .join("\n");
@@ -63,9 +70,9 @@ export async function api<T>(
   body?: unknown,
 ): Promise<T> {
   if (import.meta.env.VITE_PUBLIC_RELEASE === "1" || import.meta.env.VITE_BETA_MODE === "1") {
-    betaApiOrigin(true, API_BASE);
+    validateRuntimeApiOrigin(API_BASE);
   }
-  const token = sessionStorage.getItem(TOKEN_KEY);
+  const token = readSessionToken();
   const bootstrap = method === "GET" && path === "/config";
   const authentication = method === "POST" && ['/auth/register', '/auth/login'].includes(path);
   const measurement = method === 'POST' && path === '/release/measurement/events';
@@ -97,6 +104,7 @@ export async function api<T>(
         response = await fetch(API_BASE + path, {
           method,
           headers: {
+            'X-Moduyuga-Client': clientPlatform(),
             ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
@@ -123,8 +131,8 @@ export async function api<T>(
       return {};
     });
     if (!response.ok) {
-      if (response.status === 401 && token) {
-        sessionStorage.removeItem(TOKEN_KEY);
+      if (response.status === 401 && token && readSessionToken() === token) {
+        clearSessionToken(token);
         window.dispatchEvent(new CustomEvent("auth-expired", {
           detail: { redirect: method !== "GET", publicRead: isPublicRead(path, method) },
         }));

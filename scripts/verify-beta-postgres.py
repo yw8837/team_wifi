@@ -22,16 +22,22 @@ def run(extra_checks=None, evidence_name='postgres-results.json'):
     parser = argparse.ArgumentParser()
     parser.add_argument('--pg-bin', type=Path, required=True)
     parser.add_argument('--runtime', type=Path, help='Owned ASCII temp parent for Windows PostgreSQL initdb')
+    parser.add_argument('--port', type=int, default=55439, help='Dedicated disposable localhost PostgreSQL port')
+    parser.add_argument('--evidence-dir', type=Path, default=ROOT/'artifacts/beta', help='Evidence directory within this workspace')
     args = parser.parse_args()
     pg = args.pg_bin.resolve()
     pg_version = subprocess.check_output([str(pg / ('pg_ctl.exe' if os.name == 'nt' else 'pg_ctl')), '--version'],
                                          text=True, timeout=15).strip()
     runtime = args.runtime.resolve() if args.runtime else ROOT / 'artifacts/beta/runtime'
     runtime.mkdir(parents=True, exist_ok=True)
-    evidence = ROOT / 'artifacts/beta' / evidence_name
+    evidence_dir = args.evidence_dir.resolve()
+    if not evidence_dir.is_relative_to(ROOT.resolve()) or not 1 <= args.port <= 65535:
+        parser.error('Evidence must stay within the workspace and port must be 1..65535.')
+    evidence_dir.mkdir(parents=True, exist_ok=True)
+    evidence = evidence_dir / evidence_name
     results = []
     password = secrets.token_urlsafe(32)
-    port = 55439
+    port = args.port
     with tempfile.TemporaryDirectory(prefix='pg-beta-', dir=runtime) as scratch:
         scratch = Path(scratch)
         data = scratch / 'data'
@@ -158,7 +164,7 @@ def run(extra_checks=None, evidence_name='postgres-results.json'):
             engine.dispose()
             evidence.write_text(json.dumps({'status':'pass','checks':results,'database':pg_version+' local dedicated cluster',
                 'cloud_deployment_verified':False, 'cleanup':'cluster stopped; temporary directory removed on exit'},ensure_ascii=False,indent=2),encoding='utf-8')
-            print(f'POSTGRES_BETA_PASS: {len(results)} checks; evidence artifacts/beta/{evidence_name}')
+            print(f'POSTGRES_BETA_PASS: {len(results)} checks; evidence {evidence.relative_to(ROOT).as_posix()}')
         finally:
             if started:
                 command('pg_ctl','-D',data,'-m','immediate','-w','stop')

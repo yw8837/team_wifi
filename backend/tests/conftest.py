@@ -52,8 +52,21 @@ def setup():
         yield client, people, ids
 
 
-def application():
-    return dict(business_name='가상 개발업체', business_number='1234567891', representative='예시대표', contact_phone='01000000000',
+def application(bankproof_id=None):
+    return dict(settlement_bank='가상은행', settlement_holder='예시대표', settlement_account='000000000000',
+                bankproof_id=bankproof_id, business_name='가상 개발업체', business_number='1234567891', representative='예시대표', contact_phone='01000000000',
                 contact_email='seller@example.com', business_address='개발용 주소', return_address='개발용 반품주소', commerce_number='',
                 commerce_exempt_reason='개발용 예시', shipping_policy='실제 배송 없음', refund_policy='실제 결제 없음',
                 brand_name='예시브랜드', brand_description='개발용 가상 브랜드', seller_terms_accepted=True)
+
+
+def valid_attachment(client, headers, purpose='bankproof'):
+    """Upload a synthetic valid image through real validation; no guard bypass."""
+    from io import BytesIO
+    from PIL import Image
+    buffer = BytesIO()
+    Image.new('RGB', (640, 640), (100, 120, 140)).save(buffer, format='PNG')
+    response = client.post('/api/attachments', headers=headers, data={'purpose': purpose},
+                           files={'file': ('synthetic-fixture.png', buffer.getvalue(), 'image/png')})
+    assert response.status_code == 201, response.text
+    return response.json()['id']

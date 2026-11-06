@@ -78,7 +78,7 @@ def test_current_legal_documents_explain_age_self_declaration(public_mode):
     privacy = c.get('/legal/privacy').text
     for page in (terms, privacy):
         assert '만 14세 이상' in page
-        assert '2026년 11월 5일' in page
+        assert '2026년 11월 6일' in page
     assert '만 18세 이상 이용자가' not in terms
     assert '이메일과 소셜 가입에 같은 기준' in terms
     assert '법정대리인의 동의·확인 절차는 제공하지 않습니다' in terms

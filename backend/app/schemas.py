@@ -54,6 +54,10 @@ class BetaApplication(Strict):
     seller_terms_accepted: bool
 
 class Application(Strict):
+    settlement_bank: str = Field(default='', max_length=80)
+    settlement_holder: str = Field(default='', max_length=80)
+    settlement_account: str = Field(default='', max_length=80)
+    bankproof_id: str | None = Field(default=None, min_length=36, max_length=36)
     business_name: str = Field(default='', max_length=100)
     business_number: str = Field(default='', max_length=20)
     representative: str = Field(default='', max_length=80)
@@ -70,6 +74,10 @@ class Application(Strict):
     seller_terms_accepted: bool = False
 
 class CampaignInput(Strict):
+    thumbnail_id: str | None = Field(default=None, min_length=36, max_length=36)
+    thumbnail_alt_text: str = Field(default='', max_length=300)
+    detail_image_ids: list[str] = Field(default_factory=list, max_length=3)
+    detail_alt_texts: list[str] = Field(default_factory=list, max_length=3)
     title: str = Field(min_length=2, max_length=120)
     description: str = Field(min_length=5, max_length=3000)
     category: str = Field(min_length=1, max_length=40)
@@ -100,7 +108,14 @@ class CouponInput(Strict):
     points_cost: int = Field(default=0, ge=0, le=100000)
 
 class BodyInput(Strict):
+    title: str = Field(default='상품 문의', min_length=1, max_length=120)
+    private: StrictBool = False
     body: str = Field(min_length=1, max_length=1000)
+
+class InquiryAnswer(Strict):
+    body: str = Field(min_length=1, max_length=1000)
+    revision: int = Field(default=1, ge=1, strict=True)
+
 
 class ReportInput(Strict):
     target_type: Literal['question', 'campaign', 'user']

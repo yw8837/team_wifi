@@ -9,48 +9,85 @@ import {
 import type { ReactNode, InputHTMLAttributes } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { api, ApiError, TOKEN_KEY, safeReturnPath } from "./api";
+import { clearSessionToken, createSessionAttempt, invalidateSessionAttempts, readSessionToken, readTabSessionToken, writeSessionToken } from "./session-storage";
 import type { User } from "./types";
 type AuthValue = {
   user: User | null;
   loading: boolean;
-  setSession: (token: string, user: User) => void;
+  setSession: (token: string, user: User, expectedToken?: string | null) => void;
   updateProfile: (user: User) => void;
   refresh: () => Promise<void>;
-  clear: () => void;
+  clear: (expectedToken?: string | null) => boolean;
   requireLogin: () => boolean;
 };
 const Auth = createContext<AuthValue>(null!);
 export const useAuth = () => useContext(Auth);
+export function useSessionAttempt() {
+  const attempt = useRef(createSessionAttempt());
+  useEffect(() => {
+    attempt.current.setActive(true);
+    return () => attempt.current.setActive(false);
+  }, []);
+  return attempt.current;
+}
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const refreshAttempts = useSessionAttempt();
   const [user, setUser] = useState<User | null>(null),
-    [loading, setLoading] = useState(!!sessionStorage.getItem(TOKEN_KEY));
+    [loading, setLoading] = useState(!!readSessionToken());
   const navigate = useNavigate(),
     loc = useLocation();
-  const clear = useCallback(() => {
-    sessionStorage.removeItem(TOKEN_KEY);
+  const refreshCurrent = useRef<(() => Promise<void>) | null>(null);
+  const clear = useCallback((expectedToken?: string | null) => {
+    if (!clearSessionToken(expectedToken)) return false;
     setUser(null);
+    setLoading(!!readSessionToken());
+    if (readSessionToken()) void refreshCurrent.current?.();
+    return true;
   }, []);
   const refresh = useCallback(async () => {
-    if (!sessionStorage.getItem(TOKEN_KEY)) {
+    const attempt = refreshAttempts.begin(), requestedToken = attempt.expectedToken;
+    if (!attempt.isCurrent()) return;
+    if (!requestedToken) {
       setUser(null);
+      setLoading(false);
       return;
     }
     try {
-      setUser(await api<User>("/me"));
+      const result = await api<User>("/me");
+      if (attempt.isCurrent()) {
+        setUser(result);
+      }
     } catch (e) {
-      if (e instanceof ApiError && e.status === 401) clear();
+      if (e instanceof ApiError && [401, 403].includes(e.status) && attempt.isCurrent()) clear();
     } finally {
-      setLoading(false);
+      if (attempt.isCurrent()) setLoading(false);
     }
-  }, [clear]);
+  }, [clear, refreshAttempts]);
+  refreshCurrent.current = refresh;
   useEffect(() => {
     void refresh();
   }, [refresh]);
   useEffect(() => {
+    const changed = (event: StorageEvent) => {
+      if (event.key !== TOKEN_KEY && event.key !== null) return;
+      // A tab-only login is independent; remembered sessions follow device logout.
+      if (readTabSessionToken()) return;
+      invalidateSessionAttempts();
+      setUser(null);
+      setLoading(!!readSessionToken());
+      void refresh();
+    };
+    window.addEventListener("storage", changed);
+    return () => window.removeEventListener("storage", changed);
+  }, [refresh]);
+  useEffect(() => {
     const expired = (event: Event) => {
-      clear();
+      // api() already removed the failed token. A separate remembered session
+      // may now be visible, so never clear storage for a second time here.
+      setUser(null);
+      void refresh();
       const shouldRedirect = (event as CustomEvent<{ redirect?: boolean }>).detail?.redirect === true;
-      if (shouldRedirect && !["/login", "/signup", "/reset"].includes(loc.pathname))
+      if (shouldRedirect && !readSessionToken() && !["/login", "/signup", "/reset"].includes(loc.pathname))
         navigate(
           "/login?returnTo=" +
             encodeURIComponent(safeReturnPath(loc.pathname + loc.search + loc.hash)),
@@ -59,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("auth-expired", expired);
     return () => window.removeEventListener("auth-expired", expired);
-  }, [clear, loc, navigate]);
+  }, [refresh, loc, navigate]);
   const value = {
     user,
     loading,
@@ -69,13 +106,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // A late save must never recreate a logged-out or switched account.
       setUser(current => current?.id === updated.id ? { ...current, nickname: updated.nickname } : current);
     },
-    setSession: (token: string, u: User) => {
-      sessionStorage.setItem(TOKEN_KEY, token);
+    setSession: (token: string, u: User, expectedToken?: string | null) => {
+      if (expectedToken !== undefined && readSessionToken() !== expectedToken) {
+        throw new Error('다른 로그인으로 계정 상태가 변경됐어요. 현재 계정을 확인하고 다시 진행해 주세요.');
+      }
+      writeSessionToken(token);
       setUser(u);
       setLoading(false);
     },
     requireLogin: () => {
-      if (user && sessionStorage.getItem(TOKEN_KEY)) return true;
+      if (user && readSessionToken()) return true;
       navigate(
         "/login?returnTo=" +
           encodeURIComponent(safeReturnPath(loc.pathname + loc.search + loc.hash)),
@@ -233,7 +273,7 @@ export function PasswordField({
     <label className="field">
       <span>{label}</span>
       <span className="password">
-        <input {...props} type={show ? "text" : "password"} />
+        <input {...props} aria-label={props['aria-label'] || label} type={show ? "text" : "password"} />
         <button
           type="button"
           className="text-button"

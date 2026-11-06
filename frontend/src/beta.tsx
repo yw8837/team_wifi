@@ -1,6 +1,8 @@
+import { useContentRequest, useContentSessionAttempt } from "./content-session";
 import { DEPLOYED_MODE } from "./release-policy";
 import { betaApiOrigin } from "./beta-policy";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { createSessionAttempt } from "./session-storage";
 import { api, API_BASE } from "./api";
 import { Field, Feedback, PageTitle, PasswordField, useAction, useAuth, useResource } from "./shared";
 import { useNavigate } from "react-router-dom";
@@ -50,18 +52,22 @@ export function RecoveryCodeNotice({ code, onContinue, continueLabel = "확인�
 }
 
 export function BetaRecover() {
-  const action = useAction(), nav = useNavigate(), { clear } = useAuth();
+  const action = useAction(), nav = useNavigate(), { clear } = useAuth(), attempts = useContentSessionAttempt();
   const [form, setForm] = useState({ email: "", recovery_code: "", password: "" });
   const [newCode, setNewCode] = useState("");
-  if (newCode) return <div className="narrow"><RecoveryCodeNotice code={newCode}
-    continueLabel="새 코드 확인 후 로그인" onContinue={() => { setNewCode(""); nav("/login", { replace: true }); }} /></div>;
+  const codeOwner=useRef<{isCurrent:()=>boolean}|null>(null);
+  if (newCode&&codeOwner.current?.isCurrent()) return <div className="narrow"><RecoveryCodeNotice code={newCode}
+    continueLabel="새 코드 확인 후 로그인" onContinue={() => { if(!codeOwner.current?.isCurrent()){setNewCode("");return;} setNewCode(""); nav("/login", { replace: true }); }} /></div>;
   return <div className="narrow"><PageTitle title="복구코드로 비밀번호 재설정">
     <p>가입할 때 보관한 복구코드를 입력하세요. 재설정하면 모든 기기의 기존 로그인이 해제되고 복구코드가 바뀝니다.</p>
-  </PageTitle><form onSubmit={(e) => { e.preventDefault(); void action.run(async () => {
-    const result = await api<{ message: string; recovery_code: string }>("/auth/recover", "POST", form);
-    clear();
+  </PageTitle><form onSubmit={(e) => { e.preventDefault(); const attempt=attempts.begin(); if(!attempt.isCurrent())return; void action.run(async () => {
+    let result:{message:string;recovery_code:string};
+    try{result = await api<{ message: string; recovery_code: string }>("/auth/recover", "POST", form);}catch(error){if(attempt.isCurrent())throw error;return;}
+    if(!attempt.isCurrent())return;
     setForm({ email: "", recovery_code: "", password: "" });
+    if(!clear(attempt.expectedToken)){action.setMessage("비밀번호를 재설정했습니다. 현재 로그인 계정이 바뀌어 복구코드를 표시하지 않습니다. 계정을 확인해 주세요.");return;}
     if (!result.recovery_code) throw new Error("새 복구코드를 받지 못했습니다. 지원·문의에서 안내를 확인해 주세요.");
+    codeOwner.current=createSessionAttempt().begin();
     setNewCode(result.recovery_code);
   }); }}>
     <Field label="계정 이메일" name="email" type="email" autoComplete="email" required value={form.email}
@@ -76,7 +82,7 @@ export function BetaRecover() {
 }
 
 export function BetaRecoveryCodeSettings() {
-  const action = useAction();
+  const action = useAction(), request = useContentRequest();
   const [password, setPassword] = useState(""), [newCode, setNewCode] = useState("");
   if (newCode) return <RecoveryCodeNotice code={newCode} continueLabel="새 코드 확인 완료" onContinue={() => {
     setNewCode("");
@@ -89,7 +95,7 @@ export function BetaRecoveryCodeSettings() {
     <form onSubmit={(e) => {
       e.preventDefault();
       void action.run(async () => {
-        const result = await api<{ message: string; recovery_code: string }>("/auth/recovery-code", "POST", { password });
+        const result = await request<{ message: string; recovery_code: string }>("/auth/recovery-code", "POST", { password });
         setPassword("");
         if (!result.recovery_code) throw new Error("새 복구코드를 받지 못했습니다. 지원·문의에서 안내를 확인해 주세요.");
         setNewCode(result.recovery_code);

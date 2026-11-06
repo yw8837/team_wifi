@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAccountExit } from "./account-exit";
 import { BETA_MODE, BetaRecoveryCodeSettings, LegalLinks } from "./beta";
 import { Link, useNavigate } from "react-router-dom";
 import { api, date, money, statusName } from "./api";
@@ -269,7 +270,7 @@ export function Reservations() {
 export function Settings() {
   const { user, clear } = useAuth(),
     nav = useNavigate(),
-    action = useAction();
+    exit = useAccountExit(user?.id, clear);
   const [deleting, setDeleting] = useState(false),
     [password, setPassword] = useState(""),
     [confirmed, setConfirmed] = useState(false);
@@ -284,13 +285,9 @@ export function Settings() {
         <p className="muted">로그인은 현재 탭·앱 세션에만 유지됩니다.</p>
         <button
           className="secondary"
-          disabled={action.busy}
+          disabled={exit.busy}
           onClick={() =>
-            void action.run(async () => {
-              await api("/auth/logout", "POST");
-              clear();
-              nav("/");
-            })
+            void exit.run(() => api("/auth/logout", "POST"), () => nav("/"))
           }
         >
           로그아웃
@@ -316,6 +313,7 @@ export function Settings() {
         {!deleting ? (
           <button
             className="danger secondary"
+            disabled={exit.busy}
             onClick={() => setDeleting(true)}
           >
             회원탈퇴 진행
@@ -325,11 +323,7 @@ export function Settings() {
             onSubmit={(e) => {
               e.preventDefault();
               if (!confirmed) return;
-              void action.run(async () => {
-                await api("/me", "DELETE", { password });
-                clear();
-                nav("/welcome", { replace: true });
-              });
+              void exit.run(() => api("/me", "DELETE", { password }), () => nav("/welcome", { replace: true }));
             }}
           >
             <PasswordField
@@ -349,12 +343,13 @@ export function Settings() {
               <span>탈퇴 결과를 확인했으며 계정을 탈퇴합니다.</span>
             </label>
             <div className="actions">
-              <button className="danger" disabled={action.busy}>
+              <button className="danger" disabled={exit.busy}>
                 탈퇴 확정
               </button>
               <button
                 className="secondary"
                 type="button"
+                disabled={exit.busy}
                 onClick={() => {
                   setDeleting(false);
                   setPassword("");
@@ -366,7 +361,7 @@ export function Settings() {
           </form>
         )}
       </section>
-      <Feedback {...action} />
+      <Feedback {...exit} />
       <LegalLinks />
       <Link to="/welcome">서비스 소개</Link>
     </div>

@@ -6,7 +6,7 @@ from sqlalchemy import select, update
 from app import schemas as S
 from app.db import RUNTIME, Record, SessionLocal, User, now
 from app.main import put_application, withdraw_record
-from conftest import PASSWORD, application
+from conftest import PASSWORD, application, valid_attachment
 
 
 def body():
@@ -117,7 +117,9 @@ def test_low_points_roll_back_coupon_stock(setup):
 def test_seller_pending_owner_and_publishing(setup):
     c, p, _ = setup
     assert c.post('/api/seller/campaigns', json=body(), headers=p['pending']['headers']).status_code == 403
-    r = c.post('/api/seller/campaigns', json=body(), headers=p['seller']['headers'])
+    payload = {**body(), 'thumbnail_id': valid_attachment(c, p['seller']['headers'], 'thumbnail'),
+               'thumbnail_alt_text': '합성 상품 이미지'}
+    r = c.post('/api/seller/campaigns', json=payload, headers=p['seller']['headers'])
     assert r.status_code == 201
     id = r.json()['id']
     assert c.get('/api/campaigns/'+id).status_code == 404
@@ -149,15 +151,16 @@ def test_application_staged_submit_review_lock(setup):
     h = p['buyer']['headers']
     assert c.put('/api/seller/application', json={'brand_name': '임시'}, headers=h).status_code == 200
     assert c.post('/api/seller/application/submit', headers=h).status_code == 422
-    assert c.put('/api/seller/application', json=application(), headers=h).status_code == 200
+    proof = valid_attachment(c, h)
+    assert c.put('/api/seller/application', json=application(bankproof_id=proof), headers=h).status_code == 200
     assert c.post('/api/seller/application/submit', headers=h).status_code == 200
-    assert c.put('/api/seller/application', json=application(), headers=h).status_code == 409
+    assert c.put('/api/seller/application', json=application(bankproof_id=proof), headers=h).status_code == 409
     review = '/api/admin/applications/'+p['buyer']['id']+'/review'
     assert c.post(review, json={'decision': 'needs_changes', 'note': '연락처 보완'}, headers=p['admin']['headers']).status_code == 200
-    assert c.put('/api/seller/application', json=application(), headers=h).status_code == 200
+    assert c.put('/api/seller/application', json=application(bankproof_id=proof), headers=h).status_code == 200
     assert c.post('/api/seller/application/submit', headers=h).status_code == 200
     assert c.post(review, json={'decision': 'approved', 'note': '개발용 심사'}, headers=p['admin']['headers']).status_code == 200
-    assert c.put('/api/seller/application', json=application(), headers=h).status_code == 409
+    assert c.put('/api/seller/application', json=application(bankproof_id=proof), headers=h).status_code == 409
 
 
 def test_stale_application_cannot_modify_approved_identity(setup):

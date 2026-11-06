@@ -1,7 +1,9 @@
+import { useContentRequest } from "./content-session";
 import { MeasurementReport, useExposure } from "./measurement";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { api, categories, safeExternalUrl } from "./api";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { categories, safeExternalUrl, safeReturnPath } from "./api";
+import { publicReturnPath } from "./release-policy";
 import { CategoryIcon } from "./brand";
 import { Feedback, PageTitle, ResourceState, useAction, useAuth } from "./shared";
 import { usePublicResource } from "./release-data";
@@ -32,11 +34,11 @@ export function PersonalDiscovery() {
   </section>;
 }
 
-export function PreferenceForm({ initial }: { initial: Preferences }) {
+export function PreferenceForm({ initial, onSaved }: { initial: Preferences; onSaved?: () => void }) {
   const [value, setValue] = useState(initial);
-  const action = useAction();
+  const action = useAction(), request = useContentRequest();
   const toggle = (category: string) => setValue(v => ({ ...v, categories: v.categories.includes(category) ? v.categories.filter(c => c !== category) : [...v.categories, category].slice(0, 3) }));
-  return <form className="preference-form" onSubmit={e => { e.preventDefault(); void action.run(async () => { setValue(await api<Preferences>("/release/preferences", "PUT", value)); }, "관심 설정을 저장했어요. 같은 계정의 앱과 웹에 적용됩니다."); }}>
+  return <form className="preference-form" onSubmit={e => { e.preventDefault(); void action.run(async () => { setValue(await request<Preferences>("/release/preferences", "PUT", value)); onSaved?.(); }, "관심 설정을 저장했어요. 같은 계정의 앱과 웹에 적용됩니다."); }}>
     <fieldset disabled={action.busy}><legend>어떤 육아템을 살펴볼까요?</legend><p id="category-help">최대 3개 · 선택하지 않아도 전체 목록을 볼 수 있어요.</p>
       <div className="preference-options">{categories.map(category => <label className={value.categories.includes(category) ? "preference-option selected" : "preference-option"} key={category}>
         <input type="checkbox" aria-describedby="category-help" checked={value.categories.includes(category)} disabled={!value.categories.includes(category) && value.categories.length >= 3} onChange={() => toggle(category)}/><CategoryIcon category={category} size={23}/><span>{category}</span>
@@ -46,8 +48,8 @@ export function PreferenceForm({ initial }: { initial: Preferences }) {
       <input type="radio" name="comparison-priority" value={key} checked={value.priority === key} onChange={() => setValue(v => ({ ...v, priority: key as Preferences["priority"] }))}/><span><strong>{choice.label}</strong><small>{choice.detail}</small></span>
     </label>)}</div></fieldset>
     <p className="hint">선택은 이 계정에만 저장돼요. 언제든 수정하거나 지울 수 있으며 아이의 개인정보는 입력하지 않아요.</p>
-    <Feedback {...action}/><div className="actions"><button type="submit" disabled={action.busy}>{action.busy ? "처리 중…" : "관심 설정 저장"}</button><button type="button" className="secondary" disabled={action.busy} onClick={() => void action.run(async () => { setValue(await api<Preferences>("/release/preferences", "DELETE")); }, "관심 설정을 지웠어요. 저장한 육아템은 그대로예요.")}>설정 지우기</button></div>
-    <p><Link to="/">육아템 목록에서 확인하기 →</Link></p>
+    <Feedback {...action}/><div className="actions"><button type="submit" disabled={action.busy}>{action.busy ? "처리 중…" : "관심 설정 저장"}</button><button type="button" className="secondary" disabled={action.busy} onClick={() => void action.run(async () => { setValue(await request<Preferences>("/release/preferences", "DELETE")); }, "관심 설정을 지웠어요. 저장한 육아템은 그대로예요.")}>설정 지우기</button></div>
+    {!onSaved && <p><Link to="/offers">육아템 목록에서 확인하기 →</Link></p>}
   </form>;
 }
 
@@ -55,6 +57,22 @@ export function PreferencePage() {
   const { user } = useAuth();
   const result = usePublicResource<Preferences>("/release/preferences", user?.id);
   return <section className="preference-page"><Link to="/my">← 마이페이지</Link><PageTitle eyebrow="나에게 맞게" title="관심 육아템 설정"><p>필요한 분야와 비교 기준을 직접 골라 주세요.</p></PageTitle><ResourceState {...result} retry={result.reload}/>{result.data && !result.loading && !result.error && <PreferenceForm key={user?.id} initial={result.data}/>}</section>;
+}
+
+export function InterestOnboardingPage() {
+  const { user } = useAuth();
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const requested = publicReturnPath(safeReturnPath(params.get('returnTo')));
+  const destination = requested.startsWith('/onboarding') ? '/' : requested;
+  const result = usePublicResource<Preferences>('/release/preferences', user?.id);
+  return <section className="preference-page"><PageTitle eyebrow="선택 사항" title="어떤 육아 이야기가 궁금하세요?">
+    <p>관심 분야를 최대 3개 골라 주세요. 같은 계정의 앱과 웹에서 비교 안내에 반영됩니다. 마이페이지에서 언제든 바꿀 수 있어요.</p>
+  </PageTitle><Link className="button secondary" to={destination} replace>지금은 건너뛰기</Link>
+    <p className="hint">건너뛰면 이미 저장된 관심 설정을 바꾸지 않고 보던 화면으로 돌아갑니다.</p>
+    <ResourceState {...result} retry={result.reload}/>
+    {result.data && !result.loading && !result.error && <PreferenceForm key={user?.id} initial={result.data} onSaved={() => navigate(destination, { replace: true })}/>}
+  </section>;
 }
 
 type Evidence = {
@@ -65,7 +83,7 @@ type Evidence = {
   sources: { id: string; name: string; url: string; rows: number }[];
 };
 export type Insights = { minimum_cohort: number; saved_accounts: number | null; note: string;
-  categories: { category: string; saved_accounts: number | null; demand_authors: number | null; interested_accounts: number | null }[];
+  categories: { category: string; saved_accounts: number | null; demand_authors: number | null; interested_accounts: number | null; groupbuy_shared_accounts?: number | null }[];
   pairs: { first: string; second: string; accounts: number; support: number; first_to_second: number; second_to_first: number }[];
   evidence: Evidence;
 };
@@ -76,7 +94,7 @@ export function InsightsView({ data }: { data: Insights }) {
   const e = data.evidence;
   return <>
     <section className="panel"><h2>어떤 분야에 관심이 모였나요?</h2><p>{data.note}</p><p>현재 육아템을 저장한 계정: <strong>{countLabel(data.saved_accounts)}</strong></p>
-      <div className="insight-categories">{data.categories.map(c => <article key={c.category}><h3>{c.category}</h3><dl><dt>저장한 계정</dt><dd>{countLabel(c.saved_accounts)}</dd><dt>수요 글 작성자</dt><dd>{countLabel(c.demand_authors)}</dd><dt>수요에 관심 표시</dt><dd>{countLabel(c.interested_accounts)}</dd></dl></article>)}</div>
+      <div className="insight-categories">{data.categories.map(c => <article key={c.category}><h3>{c.category}</h3><dl><dt>저장한 계정</dt><dd>{countLabel(c.saved_accounts)}</dd><dt>수요 글 작성자</dt><dd>{countLabel(c.demand_authors)}</dd><dt>수요에 관심 표시</dt><dd>{countLabel(c.interested_accounts)}</dd><dt>공구 정보 공유 계정</dt><dd>{countLabel(c.groupbuy_shared_accounts??null)}</dd></dl></article>)}</div>
       <p className="hint">각 항목은 서로 다른 계정 수이며 더해서 전체 이용자 수로 계산하지 않습니다. 삭제·정지 계정과 숨긴 수요 글은 제외합니다.</p>
     </section>
     <section className="panel"><h2>함께 저장한 육아템</h2><p>함께 비교할 구성이나 공구 조사 주제를 정하는 데 참고하세요. 결제·동시구매 기록은 아닙니다.</p>

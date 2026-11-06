@@ -1,5 +1,6 @@
 """Bound request buffering before JSON parsing (including chunked requests)."""
 from starlette.responses import JSONResponse
+from . import config
 
 
 class BodyLimitMiddleware:
@@ -9,14 +10,18 @@ class BodyLimitMiddleware:
     async def __call__(self, scope, receive, send):
         if scope['type'] != 'http' or scope['method'] not in ('POST', 'PUT', 'PATCH', 'DELETE'):
             return await self.app(scope, receive, send)
+        limit = self.limit
+        if scope['method'] == 'POST' and scope.get('path') == '/api/attachments' and not config.PUBLIC_RELEASE:
+            limit = 20*1024*1024 + 65536
         body = bytearray()
         while True:
             message = await receive()
             if message['type'] == 'http.disconnect':
                 return
-            body.extend(message.get('body', b''))
-            if len(body) > self.limit:
+            chunk = message.get('body', b'')
+            if len(body)+len(chunk) > limit:
                 return await JSONResponse({'detail': '요청이 너무 큽니다.'}, status_code=413)(scope, receive, send)
+            body.extend(chunk)
             if not message.get('more_body', False):
                 break
         consumed = False

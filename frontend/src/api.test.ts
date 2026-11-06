@@ -164,6 +164,7 @@ describe("API failures and session", () => {
     expect(await api("/me")).toEqual({ ok: true });
     expect(fetch.mock.calls[0][1].headers).toEqual({
       Authorization: "Bearer test-session",
+      "X-Moduyuga-Client": "web",
     });
   });
   it("clears expired token and notifies authentication boundary", async () => {

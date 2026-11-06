@@ -6,7 +6,9 @@ from urllib.parse import urlsplit
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import Field, field_validator
-from sqlalchemy import delete, exists, func, select
+from sqlalchemy import delete, exists, func, select, update
+
+from .community_dates import filter_created, korea_date_bounds
 
 from . import config
 from . import discovery
@@ -20,6 +22,8 @@ COMMENT = 'release_comment'
 INTEREST = 'release_interest'
 SAVE = 'release_save'
 REPORT = 'release_report'
+NOTICE = 'release_notice'
+PostType = Literal['question', 'experience', 'information', 'demand']
 
 
 def public_only():
@@ -156,6 +160,8 @@ def service_insights(user=Depends(admin_user), db=Depends(get_db)):
               'support': n / total, 'first_to_second': n / counts[left],
               'second_to_first': n / counts[right]} for left, right, n in db.execute(pairs_query)]
     pairs.sort(key=lambda row: (-row['accounts'], row['first'], row['second']))
+    from .groupbuys import visible_query as visible_groupbuys
+    shared_rows = visible_groupbuys().subquery()
     demand_rows = visible_query(DEMAND, None).order_by(None).subquery()
     interests = visible_query(INTEREST, None).order_by(None).subquery()
     categories = []
@@ -166,7 +172,8 @@ def service_insights(user=Depends(admin_user), db=Depends(get_db)):
         writers = db.scalar(select(func.count(func.distinct(demand_rows.c.owner_id))).where(demand_condition)) or 0
         interest_count = db.scalar(select(func.count(func.distinct(interests.c.owner_id)))
             .join(demand_rows, interests.c.parent_id == demand_rows.c.id).where(demand_condition)) or 0
-        categories.append({'category': category, 'saved_accounts': discovery.masked_count(saved_count),
+        groupbuy_authors=db.scalar(select(func.count(func.distinct(shared_rows.c.owner_id))).where(shared_rows.c.data['category'].as_string()==category)) or 0
+        categories.append({'category': category, 'groupbuy_shared_accounts': discovery.masked_count(groupbuy_authors), 'saved_accounts': discovery.masked_count(saved_count),
             'demand_authors': discovery.masked_count(writers), 'interested_accounts': discovery.masked_count(interest_count)})
     evidence = json.loads(Path(__file__).with_name('discovery_evidence.json').read_text('utf-8'))
     return {'minimum_cohort': discovery.MIN_COHORT, 'saved_accounts': discovery.masked_count(total),
@@ -229,6 +236,7 @@ def saved_offers(limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge
 
 
 class DemandInput(Strict):
+    post_type: PostType = 'demand'
     title: str = Field(min_length=3, max_length=120)
     body: str = Field(min_length=10, max_length=3000)
     category: str = Field(min_length=1, max_length=40)
@@ -247,14 +255,14 @@ class CommentEdit(CommentInput):
 
 
 class ReportInput(Strict):
-    target_type: Literal['demand', 'comment', 'user']
+    target_type: Literal['demand', 'comment', 'user', 'groupbuy']
     target_id: str = Field(min_length=1, max_length=36)
     reason: str = Field(min_length=5, max_length=1000)
 
 
 class ResolveInput(Strict):
-    action: Literal['hide', 'dismiss', 'suspend']
-    note: str = Field(default='', max_length=1000)
+    action: Literal['hide', 'remove', 'dismiss', 'suspend', 'needs_review']
+    note: str = Field(min_length=2, max_length=1000)
 
 
 def author_available():
@@ -284,14 +292,22 @@ def author(db, item):
     return {'id': user.id, 'nickname': user.nickname}
 
 
+def post_type(item):
+    return item.data.get('post_type') or 'demand'
+
+
 def demand_dto(db, item, user):
     interests = visible_query(INTEREST, None, Record.parent_id == item.id).order_by(None)
     comments = visible_query(COMMENT, user, Record.parent_id == item.id).order_by(None)
-    interest_count = db.scalar(select(func.count()).select_from(interests.subquery()))
+    is_demand = post_type(item) == 'demand'
+    interest_count = db.scalar(select(func.count()).select_from(interests.subquery())) if is_demand else 0
     comment_count = db.scalar(select(func.count()).select_from(comments.subquery()))
-    interested = bool(user and db.scalar(interests.where(Record.owner_id == user.id).with_only_columns(Record.id).limit(1)))
-    return dict(id=item.id, **item.data, author=author(db, item), created_at=timestamp(item.created),
-                revision=item.revision,
+    interested = bool(is_demand and user and db.scalar(interests.where(Record.owner_id == user.id).with_only_columns(Record.id).limit(1)))
+    from .groupbuys import linked_dto
+    # Explicit public allowlist: storage may contain legacy/internal metadata.
+    return dict(linked_groupbuy=linked_dto(db,item,user),id=item.id, title=item.data['title'], body=item.data['body'], category=item.data['category'],
+                post_type=post_type(item), updated_at=item.data.get('updated_at'),
+                author=author(db, item), created_at=timestamp(item.created), revision=item.revision,
                 interest_count=interest_count, interested=interested,
                 comment_count=comment_count, own=bool(user and user.id == item.owner_id))
 
@@ -312,7 +328,15 @@ def edit_owned_content(db, kind, id, body, user):
             raise HTTPException(403, '이 게시물의 댓글을 수정할 수 없습니다.')
     if item.revision != body.revision:
         raise HTTPException(409, '다른 화면에서 수정된 내용이 있습니다. 작성 중인 내용은 보관한 뒤 최신 내용을 확인해 주세요.')
-    item.data = {**body.model_dump(exclude={'revision'}), 'updated_at': timestamp(now())}
+    values = body.model_dump(exclude={'revision'}, exclude_unset=True)
+    if kind == DEMAND and 'post_type' not in values:
+        values['post_type'] = post_type(item)
+    if kind == DEMAND and post_type(item) == 'demand' and values['post_type'] != 'demand':
+        if db.scalar(select(Record.id).where(Record.kind == INTEREST, Record.parent_id == item.id).limit(1)):
+            raise HTTPException(409, '관심이 등록된 수요 글은 유형을 변경할 수 없습니다.')
+    if kind == DEMAND and item.data.get('groupbuy_id'):
+        values['groupbuy_id'] = item.data['groupbuy_id'] if values['post_type'] == 'demand' else None
+    item.data = {**values, 'updated_at': timestamp(now())}
     item.revision += 1
     db.commit()
     return item
@@ -320,9 +344,12 @@ def edit_owned_content(db, kind, id, body, user):
 
 @router.get('/demands')
 def demands(q: str = Query('', max_length=100), category: str = Query('', max_length=40),
+            post_type: PostType | None = None, start_date: str | None = None, end_date: str | None = None,
             limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
             user=Depends(optional_user), db=Depends(get_db)):
-    query = visible_query(DEMAND, user)
+    query = filter_created(visible_query(DEMAND, user), start_date, end_date)
+    if post_type:
+        query = query.where(func.coalesce(Record.data['post_type'].as_string(), 'demand') == post_type)
     if category:
         query = query.where(Record.data['category'].as_string() == category)
     if q.strip():
@@ -338,6 +365,37 @@ def create_demand(body: DemandInput, request: Request, user=Depends(current_user
     db.add(item)
     db.commit()
     return demand_dto(db, item, user)
+
+
+@router.get('/activity')
+def activity(tab: Literal['posts', 'comments', 'interests'] = 'posts', q: str = Query('', max_length=100),
+             start_date: str | None = None, end_date: str | None = None,
+             limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
+             user=Depends(current_user), db=Depends(get_db)):
+    kind = {'posts': DEMAND, 'comments': COMMENT, 'interests': INTEREST}[tab]
+    query = filter_created(visible_query(kind, user, Record.owner_id == user.id), start_date, end_date)
+    if tab != 'posts':
+        parents = visible_query(DEMAND, user).order_by(None)
+        if tab == 'interests':
+            parents = parents.where(func.coalesce(Record.data['post_type'].as_string(), 'demand') == 'demand')
+        if q.strip() and tab == 'interests':
+            parents = parents.where((Record.data['title'].as_string()+' '+Record.data['body'].as_string()).icontains(q.strip(), autoescape=True))
+        query = query.where(Record.parent_id.in_(parents.with_only_columns(Record.id)))
+    if q.strip() and tab != 'interests':
+        text = Record.data['body'].as_string()
+        if tab == 'posts':
+            text = Record.data['title'].as_string()+' '+text
+        query = query.where(text.icontains(q.strip(), autoescape=True))
+    rows = list(db.scalars(query.limit(limit+1).offset(offset)))
+    items = []
+    for item in rows[:limit]:
+        if tab == 'comments':
+            parent = db.get(Record, item.parent_id)
+            items.append({'comment': comment_dto(db, item, user), 'post_id': parent.id, 'post_title': parent.data['title']})
+        else:
+            parent = item if tab == 'posts' else db.get(Record, item.parent_id)
+            items.append({'post': demand_dto(db, parent, user)})
+    return {'tab': tab, 'items': items, 'has_more': len(rows) > limit}
 
 
 @router.get('/demands/{id}')
@@ -368,6 +426,8 @@ def delete_demand(id: str, user=Depends(current_user), db=Depends(get_db)):
 @router.put('/demands/{id}/interest')
 def add_interest(id: str, user=Depends(current_user), db=Depends(get_db)):
     item = content(db, DEMAND, id, user)
+    if post_type(item) != 'demand':
+        raise HTTPException(422, '수요 글에만 관심을 등록할 수 있습니다.')
     created = put_unique(db, INTEREST, user.id, id, commit=False)
     if created:
         from .growth import confirm_save
@@ -427,6 +487,9 @@ def report(body: ReportInput, request: Request, user=Depends(current_user), db=D
         target = db.get(User, body.target_id)
         if not target or target.deleted:
             raise HTTPException(404, '신고할 사용자를 찾을 수 없습니다.')
+    elif body.target_type == 'groupbuy':
+        from .groupbuys import content as groupbuy_content
+        groupbuy_content(db,body.target_id)
     else:
         # Reports remain available even when the reporter blocked the author.
         content(db, DEMAND if body.target_type == 'demand' else COMMENT, body.target_id)
@@ -444,6 +507,15 @@ def report_dto(db, item):
     target_type = item.data['target_type']
     target = db.get(User if target_type == 'user' else Record, item.parent_id)
     preview, demand_id, nickname = '', None, ''
+    if target_type == 'groupbuy':
+        from .groupbuys import GROUPBUY, dto as groupbuy_dto
+        groupbuy = groupbuy_dto(db,target) if target and target.kind == GROUPBUY else None
+        return dict(id=item.id,groupbuy_id=item.parent_id,groupbuy=groupbuy,
+            target_type='groupbuy',target_id=item.parent_id,target_preview=((target.data.get('title','')+' '+target.data.get('body','')).strip()[:300] if groupbuy else ''),
+            author_nickname=groupbuy['author']['nickname'] if groupbuy else '',demand_id=None,
+            reason=item.data['reason'],status=item.status,created_at=timestamp(item.created),
+            resolved_at=item.data.get('resolved_at'),resolved_by=item.data.get('resolved_by'),
+            action=item.data.get('action'),note=item.data.get('note',''))
     if target_type == 'user' and target and not target.deleted:
         preview = nickname = target.nickname
     elif target and target.kind in (DEMAND, COMMENT):
@@ -452,31 +524,62 @@ def report_dto(db, item):
         account = db.get(User, target.owner_id)
         nickname = account.nickname if account and not account.deleted else '탈퇴한 회원'
     return dict(target_preview=preview, demand_id=demand_id, author_nickname=nickname, id=item.id, target_type=item.data['target_type'], target_id=item.parent_id,
-                reason=item.data['reason'], status=item.status, created_at=timestamp(item.created), note=item.data.get('note', ''))
+                reason=item.data['reason'], status=item.status, created_at=timestamp(item.created),
+                note=item.data.get('note', ''), action=item.data.get('action'),
+                resolved_at=item.data.get('resolved_at'), resolved_by=item.data.get('resolved_by'))
 
 
 @router.get('/admin/reports')
-def admin_reports(limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
+def admin_reports(q: str = Query('', max_length=100), start_date: str | None = None, end_date: str | None = None,
+                  date_basis: Literal['received', 'action'] = 'received',
+                  limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
                   user=Depends(admin_user), db=Depends(get_db)):
-    return [report_dto(db, item) for item in db.scalars(select(Record).where(Record.kind == REPORT)
-            .order_by(Record.created.desc(), Record.id).limit(limit).offset(offset))]
+    query = select(Record).where(Record.kind == REPORT)
+    if date_basis == 'action':
+        lower, upper = korea_date_bounds(start_date, end_date)
+        action_at = Record.data['resolved_at'].as_string()
+        query = query.where(action_at.is_not(None))
+        if lower is not None:
+            query = query.where(action_at >= timestamp(lower))
+        if upper is not None:
+            query = query.where(action_at < timestamp(upper))
+    else:
+        query = filter_created(query, start_date, end_date)
+    if q.strip():
+        query = query.where(Record.data['reason'].as_string().icontains(q.strip(), autoescape=True))
+    return [report_dto(db, item) for item in db.scalars(query.order_by(Record.data['resolved_at'].as_string().desc() if date_basis == 'action' else Record.created.desc(), Record.id).limit(limit).offset(offset))]
 
 
 @router.post('/admin/reports/{id}/resolve')
-def resolve_report(id: str, body: ResolveInput, user=Depends(admin_user), db=Depends(get_db)):
+def resolve_report(id: str, body: ResolveInput, request: Request, user=Depends(admin_user), db=Depends(get_db)):
+    throttle(request, 'write', subject=user.id)
     report = db.get(Record, id)
     if not report or report.kind != REPORT:
         raise HTTPException(404, '신고를 찾을 수 없습니다.')
     if report.status != 'active':
         raise HTTPException(409, '이미 처리된 신고입니다.')
     target_type = report.data['target_type']
+    if target_type == 'groupbuy':
+        from .groupbuys import resolve_existing
+        return resolve_existing(db,report,body,user)
+    if body.action == 'needs_review':
+        raise HTTPException(422,'정보 확인 필요 표시는 공구 제보에만 적용할 수 있습니다.')
     target = db.get(User if target_type == 'user' else Record, report.parent_id)
     if not target or (target_type != 'user' and target.kind != (DEMAND if target_type == 'demand' else COMMENT)) or (target_type == 'user' and target.deleted):
         raise HTTPException(404, '신고 대상을 찾을 수 없습니다.')
-    if body.action == 'hide':
+    if target_type != 'user' and target.status == 'deleted' and body.action != 'dismiss':
+        raise HTTPException(409, '이미 삭제된 콘텐츠입니다. 남은 신고는 기각으로 종료해 주세요.')
+    if body.action in ('hide', 'remove'):
         if target_type == 'user':
             raise HTTPException(422, '사용자 신고는 이용정지 또는 기각으로 처리해 주세요.')
-        target.status = 'hidden'
+        target.status = 'hidden' if body.action == 'hide' else 'deleted'
+        if body.action == 'remove':
+            target.data = {}
+            target.revision += 1
+            if target_type == 'demand':
+                # Delete the displayed content, retaining only IDs and audit linkage.
+                db.execute(update(Record).where(Record.kind == COMMENT, Record.parent_id == target.id)
+                           .values(status='deleted', data={}, revision=Record.revision+1))
     elif body.action == 'suspend':
         account = target if target_type == 'user' else db.get(User, target.owner_id)
         if not account or account.deleted or account.is_admin or account.id == user.id:
@@ -484,16 +587,85 @@ def resolve_report(id: str, body: ResolveInput, user=Depends(admin_user), db=Dep
         if not db.scalar(select(Record.id).where(Record.kind == 'suspension', Record.owner_id == account.id)):
             db.add(Record(kind='suspension', owner_id=account.id, unique_key=account.id, data={}))
         db.execute(delete(Token).where(Token.user_id == account.id))
+    action_time = now()
     report.status = 'resolved'
-    report.data = {**report.data, 'action': body.action, 'note': body.note, 'resolved_at': timestamp(now())}
-    db.add(Record(kind='audit', owner_id=user.id, parent_id=report.id, data={'action': 'release-report-'+body.action}))
+    report.data = {**report.data, 'action': body.action, 'note': body.note,
+                   'resolved_at': timestamp(action_time), 'resolved_by': user.id}
+    db.add(Record(kind='audit', owner_id=user.id, parent_id=report.id, created=action_time,
+                  data={'action': 'release-report-'+body.action, 'report_id': report.id,
+                        'target_type': target_type, 'target_id': report.parent_id,
+                        'reason': body.note, 'received_at': timestamp(report.created),
+                        'acted_at': timestamp(action_time)}))
+    if body.action in ('hide', 'remove', 'suspend'):
+        account_id = target.id if target_type == 'user' else target.owner_id
+        # Never copy removed text, reporter text or private moderator notes to a member notice.
+        db.add(Record(kind=NOTICE, owner_id=account_id, parent_id=report.id, created=action_time,
+                      data={'target_type': target_type, 'target_id': report.parent_id, 'action': body.action,
+                            'reason': {'hide': '커뮤니티 운영정책에 따라 게시물이 숨김 처리되었습니다.',
+                                       'remove': '커뮤니티 운영정책에 따라 콘텐츠가 삭제되었습니다.',
+                                       'suspend': '커뮤니티 운영정책에 따라 계정 이용이 제한되었습니다.'}[body.action]}))
     db.commit()
     return report_dto(db, report)
 
 
+def notice_dto(item):
+    return {'id': item.id, 'report_id': item.parent_id, 'target_type': item.data['target_type'],
+            'target_id': item.data['target_id'], 'action': item.data['action'], 'reason': item.data['reason'],
+            'created_at': timestamp(item.created), 'acknowledged_at': item.data.get('acknowledged_at')}
+
+
+@router.get('/notices')
+def notices(start_date: str | None = None, end_date: str | None = None, pending_only: bool = False,
+            limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
+            user=Depends(current_user), db=Depends(get_db)):
+    query = filter_created(select(Record).where(Record.kind == NOTICE, Record.owner_id == user.id), start_date, end_date)
+    if pending_only:
+        query=query.where(Record.data['acknowledged_at'].as_string().is_(None))
+    rows = list(db.scalars(query.order_by(Record.created.desc(), Record.id).limit(limit+1).offset(offset)))
+    return {'items': [notice_dto(item) for item in rows[:limit]], 'has_more': len(rows) > limit}
+
+
+@router.post('/notices/{id}/ack')
+def acknowledge_notice(id: str, request: Request, user=Depends(current_user), db=Depends(get_db)):
+    throttle(request, 'write', subject=user.id)
+    item = db.scalar(select(Record).where(Record.kind == NOTICE, Record.id == id, Record.owner_id == user.id))
+    if not item:
+        raise HTTPException(404, '안내를 찾을 수 없습니다.')
+    if not item.data.get('acknowledged_at'):
+        item.data = {**item.data, 'acknowledged_at': timestamp(now())}
+        db.commit()
+    return notice_dto(item)
+
+
 def delete_user_content(db, user_id, owned):
-    """Remove public content and references, including other users' replies to deleted posts."""
-    # owned IDs were collected before owner rows were removed by account deletion.
-    related_comments = list(db.scalars(select(Record.id).where(Record.kind == COMMENT, Record.parent_id.in_(owned))))
+    """Erase linked content, reports and quoted moderator text without retention claims.
+
+    Call before deleting owner/report metadata so even legacy audits linked only by
+    report ID can be found. ``owned`` must include every account-owned record ID.
+    """
+    related_comments = list(db.scalars(select(Record.id).where(
+        Record.kind.in_([COMMENT, 'question']), Record.parent_id.in_(owned))))
     targets = [user_id, *owned, *related_comments]
-    db.execute(delete(Record).where(Record.kind.in_([COMMENT, INTEREST, SAVE, REPORT, 'block', 'growth_exposure']), Record.parent_id.in_(targets)))
+    reports = list(db.scalars(select(Record.id).where(Record.kind.in_([REPORT, 'report']),
+        (Record.parent_id.in_(targets) | (Record.owner_id == user_id) |
+         Record.id.in_(owned) | Record.data['target_id'].as_string().in_(targets)))))
+    references = [*targets, *reports]
+    linked_demands=list(db.scalars(select(Record).where(Record.kind==DEMAND,Record.data['groupbuy_id'].as_string().in_(owned))))
+    for linked in linked_demands:
+        linked.data={**linked.data,'groupbuy_id':None,'updated_at':timestamp(now())}
+        linked.revision+=1
+    # Current service has no monetary retention duty. Delete whole related audit
+    # rows rather than retaining an actor/target link or a private quoted reason.
+    db.execute(delete(Record).where(Record.kind == 'audit',
+        ((Record.owner_id == user_id) | Record.parent_id.in_(references) |
+         Record.data['target_id'].as_string().in_(targets) |
+         Record.data['report_id'].as_string().in_(references) |
+         Record.data['question_id'].as_string().in_(targets) |
+         Record.data['campaign_id'].as_string().in_(targets) |
+         (Record.data['user_id'].as_string() == user_id))))
+    db.execute(delete(Record).where(Record.kind.in_([COMMENT, 'question', INTEREST, SAVE, REPORT,
+                                                   'report', 'block', 'growth_exposure']),
+                                   Record.parent_id.in_(targets)))
+    db.execute(delete(Record).where(Record.kind.in_([REPORT, 'report']), Record.id.in_(reports)))
+    db.execute(delete(Record).where(Record.kind == NOTICE,
+        (Record.data['target_id'].as_string().in_(targets) | Record.parent_id.in_(reports))))

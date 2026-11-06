@@ -26,7 +26,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: public-postgres-evidence
-          path: artifacts/beta/public-release-postgres-results.json
+          path: artifacts/beta/postgres-community-assistant-results.json
           if-no-files-found: error
   ui:
     runs-on: ubuntu-latest
@@ -72,8 +72,8 @@ jobs:
       VITE_API_BASE_URL: https://moduyuga-beta.onrender.com/api
       VITE_PUBLIC_WEB_ORIGIN: https://moduyuga.onrender.com
       MODU_LOCAL_ANDROID: '0'
-      MODU_VERSION_CODE: '9'
-      MODU_VERSION_NAME: '0.5.2'
+      MODU_VERSION_CODE: '10'
+      MODU_VERSION_NAME: '0.6.0'
       MODU_UNSIGNED_CI: '1'
     steps:
       - uses: actions/checkout@v4
@@ -93,6 +93,6 @@ jobs:
       - run: python scripts/prepare-unsigned-android.py
       - uses: actions/upload-artifact@v4
         with:
-          name: unsigned-android-9
+          name: unsigned-android-10
           path: artifacts/android/unsigned-ci
           if-no-files-found: error

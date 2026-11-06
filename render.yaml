@@ -8,7 +8,7 @@ services:
     region: singapore
     branch: codex/modu-yuga
     buildCommand: bash scripts/render-build.sh
-    startCommand: cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port "$PORT" --no-access-log --limit-concurrency 12 --timeout-keep-alive 5
+    startCommand: bash scripts/render-start.sh
     healthCheckPath: /api/health
     autoDeployTrigger: off
     envVars:
@@ -58,6 +58,15 @@ services:
       - key: DATABASE_LOCATION
         value: Neon · AWS 싱가포르
     routes:
+      - type: rewrite
+        source: /groupbuys/sitemap.xml
+        destination: https://moduyuga-beta.onrender.com/api/release/groupbuy-pages/sitemap.xml
+      - type: rewrite
+        source: /groupbuys/sitemaps/:page
+        destination: https://moduyuga-beta.onrender.com/api/release/groupbuy-pages/sitemaps/:page
+      - type: rewrite
+        source: /groupbuys/:id/public
+        destination: https://moduyuga-beta.onrender.com/api/release/groupbuys/:id/public
       - type: rewrite
         source: /legal/:kind
         destination: /legal/:kind/index.html
