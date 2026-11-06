@@ -8,8 +8,12 @@ from app import knowledge
 
 def frozen_cases():
     path=Path(__file__).with_name('fixtures')/'assistant-evaluation.json'
-    assert hashlib.sha256(path.read_bytes()).hexdigest()=='73d03184ced03cc8ab8e83c5356aa6d8787c4439ddec72979652d9f7dcd50f97'
-    cases=json.loads(path.read_text(encoding='utf-8'))['cases']
+    # Git checkouts may translate CRLF/LF; freeze every other gold byte.
+    raw=path.read_bytes().replace(b'\r\n',b'\n')
+    assert hashlib.sha256(raw).hexdigest()=='5660262f19d042d2dc9130cb875fa8cf304b9ffa617d401a9395b487b45684ac'
+    # Retain the original Windows fixture hash as an additional provenance check.
+    assert hashlib.sha256(raw.replace(b'\n',b'\r\n')).hexdigest()=='73d03184ced03cc8ab8e83c5356aa6d8787c4439ddec72979652d9f7dcd50f97'
+    cases=json.loads(raw)['cases']
     return [case for case in cases if case['split']=='frozen']
 
 

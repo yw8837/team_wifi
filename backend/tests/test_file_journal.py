@@ -98,9 +98,11 @@ with SessionLocal() as db:
         db.flush()
         os._exit(23)
 '''
-    root=Path(__file__).resolve().parents[2]
+    backend_root=Path(__file__).resolve().parents[1]
+    child_env=os.environ.copy()
+    child_env.pop('PYTHONPATH',None)  # The real crash child must also work on a clean CI runner.
     process=subprocess.run([sys.executable,'-c',code,str(A.UPLOAD_ROOT),p['buyer']['id'],'commit' if commit else 'rollback'],
-                           cwd=root,env=os.environ.copy(),capture_output=True,timeout=60)
+                           cwd=backend_root,env=child_env,capture_output=True,timeout=60)
     assert process.returncode==(24 if commit else 23),process.stderr.decode(errors='replace')
     assert not any(path.exists() for path in A.storage_paths(item))
     with SessionLocal() as db:
