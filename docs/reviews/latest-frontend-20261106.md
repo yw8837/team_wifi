@@ -49,4 +49,10 @@ SSR 시험은 문구·컨트롤·경로/가림 속성만 증명한다. API mock�
 
 메인은 새 종료dialog의 제목초점/Tab/ShiftTab/Escape/원버튼 복귀와 최종 종료 저장·관리도구 제거를 실제 확인했다. 성공 후 본문 초점은 후속 수정 상태에서 메인이 추가 관찰한다.
 
-최신 관련 **5파일95 tests PASS** (18:15:27,5.04초), 공개 `tsc -b && vite build` PASS,6,353 modules,주 JS460.37kB. 최신78개 소스 manifest `61de17cb0d4d2d29eda39eac85e7dea3095e75ecddd2798ab3292ddc0be8e0d4`는 범위시험/빌드 전후 동일하다. 전체334는 이전 전체snapshot이며 반복·합산하지 않았다. [갱신 영수증](../../artifacts/community-completion-20261106/frontend-latest-final-receipt.json)에 각 버전과 초기 시험 helper 타입 오류 후 수정/최종 빌드 결과를 구분했다.
+최신 관련 **5파일95 tests PASS** (18:15:27,5.04초), 공개 `tsc -b && vite build` PASS,6,353 modules,주 JS460.37kB. 당시78개 소스 manifest `61de17cb0d4d2d29eda39eac85e7dea3095e75ecddd2798ab3292ddc0be8e0d4`는 범위시험/빌드 전후 동일하다. 전체334는 이전 전체snapshot이며 반복·합산하지 않았다. [갱신 영수증](../../artifacts/community-completion-20261106/frontend-latest-final-receipt.json)에 각 버전과 초기 시험 helper 타입 오류 후 수정/최종 빌드 결과를 구분했다.
+
+## 제보 접수 결과 안내 보완 — 본인 UI 후속
+
+메인 실제 CUA에서 서버의 기존 신고 응답(“이미 접수한 신고입니다.”)을 공구 UI가 새 접수 고정 문구로 덮는 문제가 발견됐다. 공구 제보와 동일한 일반 글·댓글 신고 경로만 서버 `message`를 그대로 표시하도록 수정했다. 서버 중복 키·요청 대상·계정scope·재시도 정책은 변경하지 않았다. 본인 작성 UI의 후속 수정이며 독립 Standards 검토로 주장하지 않는다.
+
+새 접수/중복 접수의 두 화면 실제 form callback4개를 추가해 **관련2파일69 tests PASS** (18:36:12,6.18초). 지정 공개환경의 `tsc -b && vite build` PASS,6,353 modules,주 JS460.30kB. 최신78개 소스 manifest는 `5ab74e3b9d96f5a40a2fc75c8abf10a647142e5f2dbcd5823bce9ee1c0f8d4d6`이며 수집/빌드 전후 동일하다. [새 영수증](../../artifacts/community-completion-20261106/frontend-report-message-receipt.json)과 [이전 영수증](../../artifacts/community-completion-20261106/frontend-before-report-message-receipt.json)을 구분한다. 전체334와 이전 범위 검증을 반복·합산하지 않았다. 실제 화면 재확인은 메인 소유다.

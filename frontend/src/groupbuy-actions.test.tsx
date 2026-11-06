@@ -17,9 +17,10 @@ vi.mock("./shared",async()=>{
 });
 vi.mock("react-router-dom",async()=>({...await vi.importActual<typeof import("react-router-dom")>("react-router-dom"),useParams:()=>({id:"synthetic-g1"})}));
 vi.mock("./community",async()=>({...await vi.importActual<typeof import("./community")>("./community"),useCommunityResource:()=>({data:state.resource,error:"",loading:false,stale:false,reload:vi.fn()})}));
-vi.mock("./measurement",()=>({useExposure:()=>({ref:{current:null},click:vi.fn()})}));
+vi.mock("./measurement",async()=>({...await vi.importActual<typeof import("./measurement")>("./measurement"),useExposure:()=>({ref:{current:null},click:vi.fn()})}));
 vi.mock("./groupbuy-confirmation",()=>({useGroupbuyConfirmation:()=>({waiting:false,dialog:null,request:(make:()=>import("./groupbuy-confirmation").GroupbuyConfirmationOptions)=>{state.confirmation=make();}})}));
 import { AdminGroupbuyReport, BROKER_NOTICE, DemandGroupbuyLink, GroupbuyDetail, GroupbuyEditor, GroupbuyIssueForm, groupbuyDraft, type Groupbuy } from "./groupbuys";
+import { Moderation } from "./public-app";
 import { SESSION_TOKEN_KEY, writeSessionToken } from "./session-storage";
 const item:Groupbuy={id:"synthetic-g1",title:"합성 공구 검증",body:"테스트 전용 합성 공구 내용입니다.",category:"기저귀·물티슈",seller_name:"합성 판매처",seller_url:"https://seller.example.org/deal",price:null,shipping_fee:null,unit:"",price_conditions:"",expires_at:"2099-01-01T00:00:00Z",source_checked_at:"2026-11-06T00:00:00Z",author:{id:"synthetic-author",nickname:"합성 작성자"},created_at:"2026-11-06T01:00:00Z",updated_at:null,revision:2,own:true,can_edit:true,status:"active",review_state:"clear",queried_at:"2026-11-06T02:00:00Z",broker_notice:BROKER_NOTICE};
 function memory(){const map=new Map<string,string>();return {getItem:(key:string)=>map.get(key)??null,setItem:(key:string,value:string)=>{map.set(key,value);},removeItem:(key:string)=>{map.delete(key);}};}
@@ -63,4 +64,17 @@ it("reviews the exact report in a second step with the selected action and trimm
  state.firstIndex=0;state.first="needs_review";state.overrides[1]="  판매 조건 확인 필요  ";
  const node=AdminGroupbuyReport({report:{id:"synthetic-report",groupbuy_id:item.id,groupbuy:item,reason:"잘못된 조건",status:"active",created_at:item.created_at,resolved_at:null,resolved_by:null,action:null,note:""},reload:vi.fn()});
  await submit(node);expect(state.api).not.toHaveBeenCalled();expect(state.confirmation?.details).toContainEqual({label:"처리 사유",value:"판매 조건 확인 필요"});expect(state.confirmation?.details).toContainEqual({label:"감사 대상",value:"제보 synthetic-report · 공구 synthetic-g1"});await applyCaptured();expect(state.api).toHaveBeenCalledExactlyOnceWith("/release/admin/groupbuys/reports/synthetic-report/resolve","POST",{action:"needs_review",note:"판매 조건 확인 필요"});
+});
+
+it.each([["new","신고가 접수되었습니다."],["existing","이미 접수한 신고입니다."]])("shows the server's %s groupbuy report receipt without claiming a new report",async(_state,message)=>{
+ state.firstIndex=3;state.first="합성 정보 오류 제보";state.api.mockResolvedValue({id:"synthetic-report",message});
+ const node=GroupbuyIssueForm({item,reload:vi.fn()});await submit(node);
+ expect(state.api).toHaveBeenCalledExactlyOnceWith("/release/groupbuys/synthetic-g1/reports","POST",{reason:"합성 정보 오류 제보"});
+ expect(state.setters[2]).toHaveBeenCalledWith(message);expect(state.setters[2]).not.toHaveBeenCalledWith("제보를 접수했습니다. 운영자가 확인합니다.");expect(state.setters[3]).toHaveBeenCalledWith("");
+});
+it.each([["new","신고가 접수되었습니다."],["existing","이미 접수한 신고입니다."]])("shows the server's %s ordinary report receipt without overwriting it",async(_state,message)=>{
+ state.firstIndex=3;state.first="합성 정보 오류 신고";state.api.mockResolvedValue({id:"synthetic-report",message});
+ const node=Moderation({kind:"demand",id:"synthetic-demand-id",author:item.author,own:false,preview:"합성 원문",allowDelete:false,onChange:vi.fn(),onDelete:async()=>undefined});await submit(node);
+ expect(state.api).toHaveBeenCalledExactlyOnceWith("/release/reports","POST",{target_type:"demand",target_id:"synthetic-demand-id",reason:"합성 정보 오류 신고"});
+ expect(state.setters[2]).toHaveBeenCalledWith(message);expect(state.setters[2]).not.toHaveBeenCalledWith("신고를 접수했습니다. 운영자가 확인합니다.");expect(state.setters[3]).toHaveBeenCalledWith("");
 });

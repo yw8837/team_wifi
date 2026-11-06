@@ -42,20 +42,39 @@ Render는 기존과 동일한 전용 키와 고정 SSH 명령을 사용하되, �
 - 프로세스 재시작 시 대기 이벤트와 누적 카운터는 소실된다. 분당 제한·대기열 포화·소스 맵 불일치·네트워크/SDK 장애로 기록이 빠질 수 있다. failed/dropped/rejected와 마지막 원격 카운터를 운영 화면에 드러내며 전량 보존을 주장하지 않는다.
 - 추적 수집기 하나의 메모리/CPU 사용량은 실제 설치 SDK로 활성화 전 계측해야 한다. 이 후보는 추가 유료 서비스나 새 인스턴스를 만들지 않는다. 기존 서버의 추론·Opik과 자원을 공유하므로 부족하면 관측을 끄고 추론을 유지한다.
 
-## 승인 후에만 바뀔 권한과 설정
+## 승인받아 적용한 권한과 설정
 
-현재 등록된 공개키의 지문은 `SHA256:3BwQiYDzH0g6+fM5CZcFFsqAmDWdU8vJZszATm9dqTk`이다. 기존 동일 키의 강제 명령 줄에 **`--enable-observe`를 추가하는 권한 변경**을 검토한다. 다른 키와 줄은 보존한다. 새 셸·파일 전송·포트/에이전트/X11 전달·PTY 권한은 추가하지 않는다.
+현재 등록된 공개키의 지문은 `SHA256:3BwQiYDzH0g6+fM5CZcFFsqAmDWdU8vJZszATm9dqTk`이다. 별도 명시적 승인 후 기존 동일 키의 강제 명령 줄에 **`--enable-observe`만 추가**했다. 다른 키와 줄은 바이트 단위로 보존했고 해당 전용 공개키는 한 줄만 존재한다. 새 셸·파일 전송·포트/에이전트/X11 전달·PTY 권한은 추가하지 않는다.
 
 ```text
 restrict,command="/home/elicer/Team_Wifi/.venv/bin/python /home/elicer/Team_Wifi/.runtime/restricted-inference-v1/scripts/serve-restricted-inference.py --port 8091 --enable-observe" ssh-ed25519 EXISTING_DEDICATED_PUBLIC_KEY
 ```
 
-승인 뒤에만 후보 파일/공개 출처 맵 배치, `ASSISTANT_OBSERVE_COLLECTOR_ENABLED=true`인 수집기 시작, Render의 `ASSISTANT_OPIK_ENABLED=true` 및 `ASSISTANT_SSH_OBSERVE_ENABLED=true`를 진행한다. Opik의 목적지는 고정 자체 호스팅 loopback이며 클라우드 기본값을 사용하지 않는다. 현재 후보의 기본값과 기존 강제 명령은 관측을 허용하지 않는다.
+승인 후 파일/공개 출처 맵과 수집기 하나를 배치했다. 수집기는 `ASSISTANT_OBSERVE_COLLECTOR_ENABLED=true`로 기존 `.runtime/community-candidate/venv`의 Opik SDK를 재사용한다. 고정 Unix 소켓과 게이트웨이는 같은 `restricted-inference-v1` 루트를 사용한다. Opik 목적지는 기존 `http://127.0.0.1:15173/api`이며 클라우드 기본값을 사용하지 않는다. 코드 기본값은 계속 비활성이므로 새 배포도 명시적 플래그가 필요하다. Render의 두 관측 환경변수 Save only 및 공개 검증은 root 담당자가 진행할 예정이다. 추론용 연결 환경변수·전용 비밀 파일의 기존 저장 완료 상태와 구분한다.
 
 철회는 Render 관측 플래그를 끄고, 동일 키 줄에서 `--enable-observe`를 제거하고, 관측 수집기만 중단하는 순서다. 추론/건강 확인과 기존 모델·Opik 프로세스를 유지한다. 이후 안전한 공개/합성 요청으로 별도 프로젝트의 실제 SDK 저장과 본문/식별자 부재를 확인하기 전에는 운영 기록 연결이 완료됐다고 말하지 않는다.
 
 ## 검증 기록
 
-후보 프로토콜의 원문/ID/자유 필드 거부, 정적 출처·해시 검증, 시간/상태/오류 열거형, 프레임 크기, 별도 실행 슬롯, 분당/큐 제한, SDK 실패 누적, 입력/출력 미수집, ACK와 영속 저장의 구분을 모의 SDK·SSH로 검사한다. 기존 추론·건강 확인 회귀도 함께 실행한다. 실제 운영 Opik이나 현재 게이트웨이에 새 동작을 호출한 결과가 아니다. 최종 테스트와 소스 해시는 `artifacts/community-completion-20261106/observation-candidate-results.json`에 기록한다.
+후보 프로토콜의 원문/ID/자유 필드 거부, 정적 출처·해시 검증, 시간/상태/오류 열거형, 프레임 크기, 별도 실행 슬롯, 분당/큐 제한, SDK 실패 누적, 입력/출력 미수집, ACK와 영속 저장의 구분을 모의 SDK·SSH로 검사한다. 기존 추론·건강 확인 회귀도 함께 실행한다. 로컬 후보 검사와 승인 후 실제 설치 검증을 구분한다. 최종 테스트와 소스 해시는 `artifacts/community-completion-20261106/observation-candidate-results.json`에 기록한다.
 
-최종 로컬 검증: 후보 56개와 기존 추론·관측·운영 요약·도우미·공구·키 준비 회귀를 합해 **240 passed**. SDK·SSH는 새 후보 검사에서 모의했고 실제 관측 권한이나 운영 기록 연결은 활성화하지 않았다. 회원 공구·커뮤니티 레코드 ID는 전송하지 않고 도구 종류·호출 횟수만 기록한다.
+최종 로컬 검증: 후보 56개와 기존 추론·관측·운영 요약·도우미·공구·키 준비 회귀를 합해 **240 passed**. SDK·SSH는 새 후보 검사에서 모의했고 이 240건의 로컬 검사 시점에는 실제 관측 권한을 활성화하지 않았고, 아래 승인을 받은 뒤 별도로 설치·검증했다. 회원 공구·커뮤니티 레코드 ID는 전송하지 않고 도구 종류·호출 횟수만 기록한다.
+
+
+## 승인 후 실제 확인한 결과
+
+- 기존 추론 잠금 파일의 inode를 보존한 채 파일별 원자 교체로 배치했다. 다른 모델·Opik 프로세스를 중지하지 않았고 패키지나 유료 자원을 추가하지 않았다.
+- 실제 1.7B 모델이 공개·합성 질문에 대해 승인된 안내 단위를 선택한 뒤, 질문·답변을 제외한 메타데이터 한 건을 새 제한 SSH 동작으로 전달했다. 이는 연결 검증용 합성 요청이며 실제 공개 웹 이용자 요청의 증거로 표시하지 않는다.
+- 실제 Opik SDK 2.2.142의 검색과 전체 trace 조회로 **한 건의 영속 저장**을 따로 확인했다. input/output/thread_id는 null, metadata는 정확한 허용 키만 포함했고 공개 출처·revision 검증을 통과했다. 요청 UUID·회원/대화 ID·이메일·닉네임·질문·답변 키는 없었다.
+- 자유 문자열·회원 ID·미등록 출처를 넣은 세 요청은 게이트웨이에서 invalid_request로 거부됐고 Opik 기록은 한 건으로 유지됐다.
+- 권한 변경 뒤 건강 확인과 셸·임의 명령·scp·sftp·PTY·TCP/원격 포트 전달 등 **15개 경계 검사**를 통과했다. 실제 scp 전송 파일은 만들어지지 않았다.
+- 수집기의 관측 RSS/peak RSS는 98.71MiB, 스레드는 8개였다. 별도의 1초 유휴 표본 CPU는 1.0%였다. 부하 시험이나 운영 지연 보증을 의미하지 않는다.
+
+안전한 영수증은 다음 파일이다. 원본 질문·답변, 실제 회원 정보나 개인키를 포함하지 않는다.
+
+- `artifacts/community-completion-20261106/observation-deployment-results.json`
+- `artifacts/community-completion-20261106/observation-restricted-ssh-client-proof.json`
+- `artifacts/community-completion-20261106/observation-actual-persistence-proof.json`
+- `artifacts/community-completion-20261106/observation-boundary-recheck.json`
+
+남은 검증은 Render 최신 코드 배포 뒤 공개 웹·앱의 성공·거절·오류 요청을 보내고, 해당 운영 메타데이터가 별도 프로젝트에 저장되며 원문/식별자가 없는지 실제로 대조하는 것이다. 기존 평가 기록이나 위 연결 확인 한 건으로 이 단계를 완료 처리하지 않는다.

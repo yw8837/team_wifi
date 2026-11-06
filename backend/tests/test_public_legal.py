@@ -51,6 +51,22 @@ def test_deletion_guidance_matches_real_controls_and_retention(setup, monkeypatc
     assert '임의 계정 ID와 탈퇴 상태' in html
     assert '다른 회원의 댓글' in html
     assert '/login?returnTo=%2Fsettings' in html and '/reset' in html
+    deleted = html.split('3. 삭제되는 정보와 남는 기록</h2>', 1)[1].split('<h2>', 1)[0]
+    assert '본인 공구 정보·커뮤니티 글·댓글' in deleted and '저장 대화' in deleted
+
+
+
+def test_privacy_discloses_groupbuy_measurement_without_external_browsing(setup, monkeypatch):
+    client, _, _ = setup
+    monkeypatch.setattr(config, 'PUBLIC_RELEASE', True)
+    response = client.get('/legal/privacy')
+    assert response.status_code == 200
+    measurement = response.text.split('<dt>선택 동의한 활동 분석</dt>', 1)[1].split('</dd>', 1)[0]
+    assert '공구·육아템·수요 글 ID' in measurement
+    assert '클릭 종류(판매처 이동 포함)' in measurement
+    assert '외부 사이트에서의 방문·열람 내역은 분석 항목에 넣지 않습니다' in measurement
+    assert '별도 선택한 일반 회원만' in measurement
+    assert '최근 30일' in measurement and '동의를 끄면 본인 분석 기록을 즉시 삭제' in measurement
 
 
 def test_privacy_escapes_runtime_disclosures(setup, monkeypatch):
