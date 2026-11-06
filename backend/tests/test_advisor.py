@@ -34,6 +34,8 @@ def test_budget_includes_shipping_and_expired_entries_are_excluded(discovery_mod
     data = c.post('/api/release/advisor/preview', json={'budget_max': 10000}).json()
     assert [item['id'] for item in data['items']] == ['diapers']
     assert data['unknown_price_count'] == 0
+    assert data['over_budget_count'] == 3
+    assert '배송비 포함 예산 상한을 넘는' in data['note']
 
 
 @pytest.mark.parametrize('payload', [{'budget_max': -1}, {'budget_max': True}, {'budget_max': '1000'},
@@ -110,3 +112,21 @@ def test_new_measurement_placements_respect_opt_in(discovery_mode):
         assert c.post('/api/release/measurement/events', headers=h, json={**payload, 'placement': placement}).json()['recorded']
         assert c.post('/api/release/measurement/events', headers=h, json={**payload, 'placement': placement, 'action': action}).json()['recorded']
     assert c.post('/api/release/measurement/events', headers=h, json={**payload, 'placement': 'compare_cta', 'action': 'save'}).status_code == 422
+
+
+def test_budget_exclusion_counts_are_disjoint_and_match_active_selected_categories(discovery_mode):
+    c, _, _ = discovery_mode
+    manifest = json.loads(release.CATALOG_PATH.read_text('utf-8'))
+    entries = manifest['entries']
+    entries[1]['price'], entries[1]['shipping_fee'] = 8000, 2000
+    entries[2]['price'], entries[2]['shipping_fee'] = 8000, 2001
+    entries.append({**deepcopy(entries[1]), 'id': 'unknown-shipping', 'shipping_fee': None})
+    release.CATALOG_PATH.write_text(json.dumps(manifest), 'utf-8')
+    body = {'categories': ['수유·이유식'], 'budget_max': 10000}
+    data = c.post('/api/release/advisor/preview', json=body).json()
+    assert [item['id'] for item in data['items']] == ['bottle']
+    assert data['unknown_price_count'] == data['over_budget_count'] == 1
+    assert '금액을 확인하지 못한' in data['note']
+    data = c.post('/api/release/advisor/preview', json={'categories': ['수유·이유식']}).json()
+    assert data['unknown_price_count'] == data['over_budget_count'] == 0
+    assert len(data['items']) == 3

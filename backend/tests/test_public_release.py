@@ -306,3 +306,16 @@ def test_malformed_manifest_cannot_leak_or_use_seed(public_mode):
     release.CATALOG_PATH.write_text(json.dumps(raw), encoding='utf-8')
     response = c.get('/api/release/offers')
     assert response.status_code == 503 and 'javascript' not in response.text
+
+
+def test_item_catalog_default_pages_are_twenty_and_can_resume(public_mode):
+    from copy import deepcopy
+    c, _, _ = public_mode
+    manifest = json.loads(release.CATALOG_PATH.read_text('utf-8'))
+    base = manifest['entries'][0]
+    manifest['entries'] = [{**deepcopy(base), 'id': f'item-{i:02}'} for i in range(25)]
+    release.CATALOG_PATH.write_text(json.dumps(manifest), 'utf-8')
+    first = c.get('/api/release/offers').json()
+    second = c.get('/api/release/offers?offset=20').json()
+    assert len(first) == 20 and len(second) == 5
+    assert [item['id'] for item in first + second] == [item['id'] for item in manifest['entries']]

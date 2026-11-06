@@ -72,8 +72,8 @@ jobs:
       VITE_API_BASE_URL: https://moduyuga-beta.onrender.com/api
       VITE_PUBLIC_WEB_ORIGIN: https://moduyuga.onrender.com
       MODU_LOCAL_ANDROID: '0'
-      MODU_VERSION_CODE: '10'
-      MODU_VERSION_NAME: '0.6.0'
+      MODU_VERSION_CODE: '11'
+      MODU_VERSION_NAME: '0.6.1'
       MODU_UNSIGNED_CI: '1'
     steps:
       - uses: actions/checkout@v4
@@ -93,6 +93,6 @@ jobs:
       - run: python scripts/prepare-unsigned-android.py
       - uses: actions/upload-artifact@v4
         with:
-          name: unsigned-android-10
+          name: unsigned-android-11
           path: artifacts/android/unsigned-ci
           if-no-files-found: error

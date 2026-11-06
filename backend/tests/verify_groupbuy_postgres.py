@@ -47,9 +47,9 @@ def checks(c,expect):
     demand=write('/api/release/demands',1,{'title':'기저귀 공구 수요 '+tag,'body':'동일 구성과 판매처 조건의 공구 연결을 희망합니다.','category':'기저귀·물티슈'})
     expect(demand.status_code==201,'groupbuy linked demand created under actual question quota PostgreSQL')
     demandurl='/api/release/demands/'+demand.json()['id']
-    linked=write(demandurl+'/groupbuy',1,{'groupbuy_id':item['id'],'revision':1},'PUT')
-    expect(linked.status_code==200 and linked.json()['linked_groupbuy']['id']==item['id'],'groupbuy visible ongoing information linked PostgreSQL')
-    expect(write(demandurl+'/groupbuy',2,{'groupbuy_id':item['id'],'revision':2},'PUT').status_code==404,'groupbuy non-owner cannot edit demand link PostgreSQL')
+    linked=write(demandurl+'/groupbuy',2,{'groupbuy_id':item['id'],'revision':1},'PUT')
+    expect(linked.status_code==200 and linked.json()['linked_groupbuy']['id']==item['id'],'groupbuy ordinary member links visible ongoing information to another member demand PostgreSQL')
+    expect(write(demandurl+'/groupbuy',2,{'groupbuy_id':item['id'],'revision':2},'PUT').status_code==409,'groupbuy duplicate member link rejected without revision increment PostgreSQL')
     report=write(url+'/reports',2,{'reason':'공구 조건의 추가 확인이 필요합니다.'})
     expect(report.status_code==201,'groupbuy information report uses actual durable report quota PostgreSQL')
     report_id=report.json()['id'];resolve='/api/release/admin/groupbuys/reports/'+report_id+'/resolve'
@@ -84,5 +84,25 @@ def checks(c,expect):
     reviewed=c.get('/api/release/admin/groupbuys/reports',headers=headers[3],params={'status':'resolved','limit':100}).json()['items']
     original=next(row['groupbuy'] for row in reviewed if row['id']==second)
     expect(original['seller_url']==body['seller_url'],'groupbuy operator can inspect hidden original PostgreSQL')
+    removed=write(url,0,{'revision':mine[0]['revision']},'DELETE')
+    expect(removed.status_code==200,'groupbuy owner deletes hidden shared information PostgreSQL')
+    with SessionLocal() as db:
+        expect(not list(db.scalars(select(Record.id).where(Record.kind=='audit',Record.parent_id.in_([report_id,second])))),
+               'groupbuy deletion erases linked moderator quotes PostgreSQL')
+    race_item=write(api,0,{**body,'title':'삭제와 연결 경합 '+tag}).json()
+    race_post=write('/api/release/demands',1,{'title':'삭제와 연결 수요 '+tag,'body':'삭제와 연결의 경합에도 잘못된 참조가 남지 않아야 합니다.','category':'기저귀·물티슈'}).json()
+    race_url=api+'/'+race_item['id'];race_demand='/api/release/demands/'+race_post['id']
+    pace(2)
+    with ThreadPoolExecutor(2) as pool:
+        deleting=pool.submit(c.request,'DELETE',race_url,headers=headers[0],json={'revision':1})
+        linking=pool.submit(c.put,race_demand+'/groupbuy',headers=headers[2],json={'revision':1,'groupbuy_id':race_item['id']})
+        deletion,linkage=deleting.result(),linking.result()
+    expect(deletion.status_code in (200,409) and linkage.status_code in (200,404,409),
+           'groupbuy concurrent delete/link returns handled results without deadlock: '+str([deletion.status_code,linkage.status_code]))
+    if deletion.status_code==409:
+        expect(write(race_url,0,{'revision':1},'DELETE').status_code==200,'groupbuy delete retry after serializable link conflict succeeds')
+    with SessionLocal() as db:
+        expect(db.get(Record,race_item['id']) is None and db.get(Record,race_post['id']).data.get('groupbuy_id') is None,
+               'groupbuy delete/link race leaves preserved demand without dangling reference PostgreSQL')
     with SessionLocal() as db:
         expect(db.bind.dialect.name=='postgresql' and db.connection().get_isolation_level()=='SERIALIZABLE','groupbuy uses actual PostgreSQL serializable isolation')

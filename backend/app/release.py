@@ -183,7 +183,7 @@ def service_insights(user=Depends(admin_user), db=Depends(get_db)):
 
 @router.get('/offers')
 def offers(q: str = Query('', max_length=100), category: str = Query('', max_length=40),
-           limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
+           limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
            user=Depends(optional_user), db=Depends(get_db)):
     saved = saved_ids(db, user)
     matches = [entry for entry in catalog() if (not category or entry['category'] == category) and
@@ -345,7 +345,8 @@ def edit_owned_content(db, kind, id, body, user):
 @router.get('/demands')
 def demands(q: str = Query('', max_length=100), category: str = Query('', max_length=40),
             post_type: PostType | None = None, start_date: str | None = None, end_date: str | None = None,
-            limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
+            sort: Literal['recent', 'popular'] = 'recent',
+            limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
             user=Depends(optional_user), db=Depends(get_db)):
     query = filter_created(visible_query(DEMAND, user), start_date, end_date)
     if post_type:
@@ -355,6 +356,13 @@ def demands(q: str = Query('', max_length=100), category: str = Query('', max_le
     if q.strip():
         # Escape SQL LIKE metacharacters; input is always a bound value.
         query = query.where((Record.data['title'].as_string()+' '+Record.data['body'].as_string()).icontains(q.strip(), autoescape=True))
+    if sort == 'popular':
+        # Use the same visible, available-account interests as demand_dto, before
+        # pagination. Ties retain the normal stable newest-first ordering.
+        interests = visible_query(INTEREST, None).order_by(None).subquery()
+        counts = select(interests.c.parent_id, func.count().label('total')).group_by(interests.c.parent_id).subquery()
+        query = query.outerjoin(counts, counts.c.parent_id == Record.id).order_by(None).order_by(
+            func.coalesce(counts.c.total, 0).desc(), Record.created.desc(), Record.id)
     return [demand_dto(db, item, user) for item in db.scalars(query.limit(limit).offset(offset))]
 
 
@@ -445,7 +453,7 @@ def remove_interest(id: str, user=Depends(current_user), db=Depends(get_db)):
 
 
 @router.get('/demands/{id}/comments')
-def comments(id: str, limit: int = Query(30, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
+def comments(id: str, limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
              user=Depends(optional_user), db=Depends(get_db)):
     content(db, DEMAND, id, user)
     return [comment_dto(db, item, user) for item in db.scalars(visible_query(COMMENT, user, Record.parent_id == id).limit(limit).offset(offset))]
@@ -489,7 +497,7 @@ def report(body: ReportInput, request: Request, user=Depends(current_user), db=D
             raise HTTPException(404, '신고할 사용자를 찾을 수 없습니다.')
     elif body.target_type == 'groupbuy':
         from .groupbuys import content as groupbuy_content
-        groupbuy_content(db,body.target_id)
+        target = groupbuy_content(db,body.target_id,lock=True)
     else:
         # Reports remain available even when the reporter blocked the author.
         content(db, DEMAND if body.target_type == 'demand' else COMMENT, body.target_id)
@@ -499,6 +507,15 @@ def report(body: ReportInput, request: Request, user=Depends(current_user), db=D
         return {'id': existing.id, 'message': '이미 접수한 신고입니다.'}
     item = Record(kind=REPORT, owner_id=user.id, parent_id=body.target_id, unique_key=key, data=body.model_dump())
     db.add(item)
+    if body.target_type == 'groupbuy':
+        target.data = {**target.data, 'review_state': 'needs_review', 'updated_at': timestamp(now())}
+        target.revision += 1
+        db.flush()
+        # The operator receives the report through the existing restricted queue.
+        # The sharer receives a safe notice without the reporter's identity/text.
+        db.add(Record(kind=NOTICE, owner_id=target.owner_id, parent_id=item.id,
+                      data={'target_type':'groupbuy','target_id':target.id,'action':'needs_review',
+                            'reason':'공구 정보 제보가 접수되었습니다. 판매처 조건을 확인해 주세요.'}))
     db.commit()
     return {'id': item.id, 'message': '신고가 접수되었습니다.'}
 

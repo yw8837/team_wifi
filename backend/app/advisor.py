@@ -30,6 +30,7 @@ class Selection(Strict):
     choices: Choices
     items: list[Suggestion]
     unknown_price_count: int
+    over_budget_count: int
     focus: str
     basis: Literal['declared_choices']
     note: str
@@ -48,18 +49,22 @@ class Companions(Strict):
 def selection(entries, choices):
     candidates = [entry for entry in entries if active(entry) and
                   (not choices.categories or entry['category'] in choices.categories)]
-    unknown = 0
+    unknown = over_budget = 0
     if choices.budget_max is not None:
         unknown = sum(entry['price'] is None or entry['shipping_fee'] is None for entry in candidates)
-        candidates = [entry for entry in candidates if entry['price'] is not None and entry['shipping_fee'] is not None
-                      and entry['price'] + entry['shipping_fee'] <= choices.budget_max]
+        known = [entry for entry in candidates if entry['price'] is not None and entry['shipping_fee'] is not None]
+        over_budget = sum(entry['price'] + entry['shipping_fee'] > choices.budget_max for entry in known)
+        candidates = [entry for entry in known if entry['price'] + entry['shipping_fee'] <= choices.budget_max]
     reason = '직접 고른 관심 분야' if choices.categories else '공식 출처가 있는 육아템 목록'
     focus = discovery.FOCUS[choices.priority]
     if choices.purpose == 'gift':
         focus += ' 선물은 받는 분이 이미 가진 구성과 교환 가능 여부를 먼저 확인하세요.'
+    note = '선택한 조건으로 좁힌 공식 참고 목록입니다. 구매 확률·최저가·연령 적합성을 예측하지 않습니다.'
+    if choices.budget_max is not None:
+        note += f' 배송비 포함 예산 상한을 넘는 {over_budget}개와 금액을 확인하지 못한 {unknown}개는 제외했습니다.'
     return {'choices': choices.model_dump(), 'items': [{**entry, 'saved': False, 'reason': reason} for entry in candidates[:6]],
-            'unknown_price_count': unknown, 'focus': focus, 'basis': 'declared_choices',
-            'note': '선택한 조건으로 좁힌 공식 참고 목록입니다. 구매 확률·최저가·연령 적합성을 예측하지 않습니다.'}
+            'unknown_price_count': unknown, 'over_budget_count': over_budget, 'focus': focus, 'basis': 'declared_choices',
+            'note': note}
 
 
 @router.post('/advisor/preview', response_model=Selection)

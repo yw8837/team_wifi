@@ -21,12 +21,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--pg-bin', type=Path, required=True)
     parser.add_argument('--runtime', type=Path, required=True)
+    parser.add_argument('--database-port', type=int, default=55441)
+    parser.add_argument('--api-port', type=int, default=18180)
+    parser.add_argument('--web-port', type=int, default=18181)
     args = parser.parse_args()
     runtime = args.runtime.resolve()
     if ROOT not in runtime.parents or runtime.exists():
         raise SystemExit('Use a new disposable runtime below the active workspace.')
     pg = args.pg_bin.resolve(strict=True)
-    for port in (55441, 18180, 18181):
+    ports = (args.database_port, args.api_port, args.web_port)
+    if len(set(ports)) != 3 or any(not 1024 <= port <= 65535 for port in ports):
+        raise SystemExit('Use three distinct non-privileged local ports.')
+    for port in ports:
         with socket.socket() as candidate:
             candidate.bind(('127.0.0.1', port))
     runtime.mkdir(parents=True)
@@ -44,9 +50,9 @@ def main():
     database_command('initdb', '-D', data, '-U', 'community_qa', '-A', 'scram-sha-256',
                      '--pwfile', password_file, '--encoding=UTF8', '--locale=C')
     database_command('pg_ctl', '-D', data, '-l', runtime / 'postgres.log', '-o',
-                     '-h 127.0.0.1 -p 55441 -c shared_buffers=32MB -c max_connections=25', '-w', 'start')
+                     f'-h 127.0.0.1 -p {args.database_port} -c shared_buffers=32MB -c max_connections=25', '-w', 'start')
     values = dict(MODU_ENV='public_release', PUBLIC_ORIGIN='https://community-qa.example.test',
-        DATABASE_URL=f'postgresql+psycopg://community_qa:{password}@127.0.0.1:55441/postgres',
+        DATABASE_URL=f'postgresql+psycopg://community_qa:{password}@127.0.0.1:{args.database_port}/postgres',
         RATE_LIMIT_SECRET=secrets.token_urlsafe(32), SUPPORT_EMAIL='qa@example.test',
         HOSTING_LOCATION='독립 로컬 검증 환경', DATABASE_LOCATION='독립 로컬 PostgreSQL',
         RUNTIME_DIR=str(runtime / 'app'), ASSISTANT_MODEL_ENABLED='false', ASSISTANT_OPIK_ENABLED='false')
@@ -65,18 +71,18 @@ def main():
         db.commit()
     log = (runtime / 'api.log').open('a')
     command = [sys.executable, str(ROOT / 'scripts/serve-deployment.py'), '--environment',
-               str(environment), '--host', '127.0.0.1', '--port', '18180']
+               str(environment), '--host', '127.0.0.1', '--port', str(args.api_port)]
     process = subprocess.Popen(command, cwd=ROOT, stdin=subprocess.DEVNULL, stdout=log,
                                stderr=log, creationflags=flags)
     log.close()
     (runtime / 'receipt.json').write_text(json.dumps({'api_pid': process.pid, 'api_command': command,
-        'database_directory': str(data), 'database_port': 55441, 'api_url': 'http://127.0.0.1:18180',
+        'database_directory': str(data), 'database_port': args.database_port, 'api_url': f'http://127.0.0.1:{args.api_port}',
         'synthetic_only': True, 'guards_disabled': False}, indent=2), encoding='utf-8')
     for _ in range(30):
         if process.poll() is not None:
             raise SystemExit('API exited; inspect the private runtime log.')
         try:
-            with urllib.request.urlopen('http://127.0.0.1:18180/api/health', timeout=1) as response:
+            with urllib.request.urlopen(f'http://127.0.0.1:{args.api_port}/api/health', timeout=1) as response:
                 if response.status == 200:
                     print('Loopback QA API ready; real authentication and PostgreSQL rate limits enabled.')
                     return

@@ -30,6 +30,7 @@ class GroupbuyInput(Strict):
     seller_url: str = Field(max_length=2048)
     price: int | None = Field(default=None, ge=0, le=1000000000, strict=True)
     shipping_fee: int | None = Field(default=None, ge=0, le=1000000000, strict=True)
+    minimum_quantity: int | None = Field(default=None, ge=1, le=1000000000, strict=True)
     unit: str = Field(default='', max_length=100)
     price_conditions: str = Field(default='', max_length=1000)
     expires_at: datetime
@@ -154,7 +155,7 @@ def listing(db,user,q,category,status,sort,limit,offset,start_date,end_date,mine
 @router.get('/groupbuys')
 def groupbuys(q:str=Query('',max_length=100),category:str=Query('',max_length=40),
     status:Literal['active','ended','all']='active',sort:Literal['ending','recent']='ending',
-    start_date:str|None=None,end_date:str|None=None,limit:int=Query(30,ge=1,le=100),offset:int=Query(0,ge=0,le=10000),
+    start_date:str|None=None,end_date:str|None=None,limit:int=Query(20,ge=1,le=100),offset:int=Query(0,ge=0,le=10000),
     user=Depends(optional_user),db=Depends(get_db)):
     return listing(db,user,q,category,status,sort,limit,offset,start_date,end_date)
 
@@ -162,7 +163,7 @@ def groupbuys(q:str=Query('',max_length=100),category:str=Query('',max_length=40
 @router.get('/groupbuys/mine')
 def mine(q:str=Query('',max_length=100),category:str=Query('',max_length=40),
     status:Literal['active','ended','all']='all',sort:Literal['ending','recent']='recent',
-    start_date:str|None=None,end_date:str|None=None,limit:int=Query(30,ge=1,le=100),offset:int=Query(0,ge=0,le=10000),
+    start_date:str|None=None,end_date:str|None=None,limit:int=Query(20,ge=1,le=100),offset:int=Query(0,ge=0,le=10000),
     user=Depends(current_user),db=Depends(get_db)):
     return listing(db,user,q,category,status,sort,limit,offset,start_date,end_date,True)
 
@@ -217,6 +218,29 @@ def report_information(id:str,body:InformationReport,request:Request,user=Depend
     return release.report(release.ReportInput(target_type='groupbuy',target_id=id,reason=body.reason),request,user,db)
 
 
+@router.delete('/groupbuys/{id}')
+def remove(id:str,body:Revision,request:Request,user=Depends(current_user),db=Depends(get_db)):
+    throttle(request,'write',subject=user.id);active_actor(db,user)
+    item=db.scalar(select(Record).where(Record.kind==GROUPBUY,Record.id==id).with_for_update().execution_options(populate_existing=True))
+    if not item or item.owner_id!=user.id:raise HTTPException(404,'본인이 공유한 공구 정보를 찾을 수 없습니다.')
+    if item.revision!=body.revision:raise HTTPException(409,'다른 화면에서 변경되었습니다. 최신 정보를 확인해 주세요.')
+    # Shared links must not outlive the deleted information. Preserve each demand.
+    for demand in db.scalars(select(Record).where(Record.kind==release.DEMAND,Record.data['groupbuy_id'].as_string()==id).with_for_update()):
+        demand.data={**demand.data,'groupbuy_id':None,'updated_at':release.timestamp(now())};demand.revision+=1
+    reports=list(db.scalars(select(Record.id).where(Record.kind==release.REPORT,Record.parent_id==id)))
+    # Remove quoted moderator text with the content. Keeping orphaned audit
+    # references would make later account erasure unable to locate those notes.
+    references=[id,*reports]
+    db.execute(delete(Record).where(Record.kind=='audit',
+        Record.parent_id.in_(references)|
+        (Record.data['target_id'].as_string()==id)|
+        Record.data['report_id'].as_string().in_(reports)))
+    db.execute(delete(Record).where(Record.kind==release.NOTICE,(Record.data['target_id'].as_string()==id)|Record.parent_id.in_(reports)))
+    db.execute(delete(Record).where(Record.kind==release.REPORT,Record.parent_id==id))
+    db.delete(item);db.commit()
+    return {'message':'공구 정보를 삭제했습니다.'}
+
+
 @router.put('/demands/{id}/groupbuy')
 def link(id:str,body:LinkInput,request:Request,user=Depends(current_user),db=Depends(get_db)):
     return change_link(id,body.revision,body.groupbuy_id,request,user,db)
@@ -229,12 +253,17 @@ def unlink(id:str,body:Revision,request:Request,user=Depends(current_user),db=De
 
 def change_link(id,revision,groupbuy_id,request,user,db):
     throttle(request,'write',subject=user.id);active_actor(db,user)
+    # Match remove(): lock the group before its demand references. Unlinking
+    # does not lock a group later, so cannot reverse this order.
+    if groupbuy_id:content(db,groupbuy_id,user,lock=True,active=True)
     item=db.scalar(release.visible_query(release.DEMAND,user,Record.id==id).with_for_update().execution_options(populate_existing=True))
-    if not item or item.owner_id!=user.id:raise HTTPException(404,'본인 수요를 찾을 수 없습니다.')
+    if not item:raise HTTPException(404,'공개된 수요를 찾을 수 없습니다.')
+    if groupbuy_id is None and item.owner_id!=user.id:raise HTTPException(404,'본인 수요를 찾을 수 없습니다.')
     if release.post_type(item)!='demand':raise HTTPException(422,'공구 수요에만 연결할 수 있습니다.')
     if item.revision!=revision:raise HTTPException(409,'다른 화면에서 변경되었습니다. 최신 수요를 확인해 주세요.')
-    if groupbuy_id:content(db,groupbuy_id,user,lock=True,active=True)
     if item.data.get('groupbuy_id')==groupbuy_id:raise HTTPException(409,'이미 같은 연결 상태입니다.')
+    if groupbuy_id and item.owner_id!=user.id and linked_dto(db,item,None):
+        raise HTTPException(409,'이미 연결된 진행 중 공구가 있습니다. 작성자만 연결을 변경할 수 있습니다.')
     item.data={**item.data,'groupbuy_id':groupbuy_id,'updated_at':release.timestamp(now())};item.revision+=1;db.commit()
     return release.demand_dto(db,item,user)
 

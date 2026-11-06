@@ -27,9 +27,10 @@ describe('grounded selection and CTA', () => {
     expect(html).toContain('value="10000"');
   });
   it('does not substitute unknown prices with zero or make up a result', () => {
-    const result: Selection = { choices: choice, items: [], unknown_price_count: 2, focus: '구성 확인', note: '선택 기준' };
+    const result: Selection = { choices: choice, items: [], unknown_price_count: 2, over_budget_count: 3, focus: '구성 확인', note: '선택 기준' };
     const html = render(<SelectionResults result={result}/>);
     expect(html).toContain('가격·배송비 미확인 목록 2개');
+    expect(html).toContain('예산 상한을 넘는 육아템 3개는 제외');
     expect(html).toContain('예산을 비우면');
     expect(html).not.toContain('0원');
   });

@@ -12,7 +12,7 @@ import './advisor.css';
 
 export type Choices = Preferences & { purpose: 'own' | 'gift'; budget_max: number | null };
 export type SuggestedItem = Offer & { reason: string; accounts?: number | null };
-export type Selection = { choices: Choices; items: SuggestedItem[]; unknown_price_count: number; focus: string; note: string; has_saved_choices?: boolean };
+export type Selection = { choices: Choices; items: SuggestedItem[]; unknown_price_count: number; over_budget_count?: number; focus: string; note: string; has_saved_choices?: boolean };
 const initial: Choices = { categories: [], priority: 'none', purpose: 'own', budget_max: null };
 
 export function SuggestedCard({ item, placement }: { item: SuggestedItem; placement: 'advisor' | 'companion' }) {
@@ -54,6 +54,7 @@ function ComparisonChoice({ offer, priority }: { offer: Offer; priority: Prefere
       </label>)}
     </div></fieldset>
     <p aria-live="polite">{comparisonChoices[choice].detail}</p>
+    {choice !== 'unit_price' && source && <p className="hint">공식 출처의 외부 사이트를 새 탭으로 엽니다. 제품 사양과 사용·관리 기준은 원문에서 확인하세요.</p>}
     {choice === 'unit_price' ? <Link className="button" to="/calculator" onClick={() => void exposure.click('calculator')}>배송비까지 단가 비교하기</Link> : source && <a className="button" href={source} target="_blank" rel="noopener noreferrer" onClick={() => void exposure.click('source')}>{choice === 'care' ? '공식 사용·관리 안내 확인' : '공식 구성·규격 확인'} ↗</a>}
     <p className="hint">직접 선택한 기준에 맞춰 안내해요. 현재 화면의 선택은 관심 설정을 바꾸지 않아요.</p>
   </section>;
@@ -126,6 +127,7 @@ export function AdvisorForm({ signedIn, saved }: { signedIn: boolean; saved: Sel
 export function SelectionResults({ result, outputRef }: { result: Selection; outputRef?: React.RefObject<HTMLElement | null> }) {
   return <section className="advisor-results" ref={outputRef} tabIndex={-1} aria-labelledby="advisor-result-title">
     <p className="eyebrow">선택한 조건의 결과</p><h2 id="advisor-result-title">{result.items.length ? '이 목록부터 살펴보세요' : '지금 확인할 수 있는 목록이 없어요'}</h2><p className="comparison-focus">{result.focus}</p>
+    {(result.over_budget_count ?? 0) > 0 && <p>배송비 포함 예산 상한을 넘는 육아템 {result.over_budget_count}개는 제외했어요. 예산을 높이거나 비우면 다시 살펴볼 수 있어요.</p>}
     {result.unknown_price_count > 0 && <p>가격·배송비 미확인 목록 {result.unknown_price_count}개는 예산에 맞는지 판단할 수 없어 제외했어요. 예산을 비우면 공식 정보를 살펴볼 수 있어요.</p>}
     <div className="suggestion-grid">{result.items.map(item => <SuggestedCard key={item.id} item={item} placement="advisor"/>)}</div>
     <p className="hint">{result.note}</p><Link to="/calculator">가격을 확인했다면 단가 비교하기 →</Link>

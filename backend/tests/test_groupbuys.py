@@ -115,7 +115,7 @@ def test_actual_expiry_ends_and_cannot_link(public_mode):
 def test_demand_link_ownership_revision_visibility_and_edit_preservation(public_mode):
     c,p,_=public_mode;item=create(c,p);demand=post_demand(c,p['buyer']['headers']);url='/api/release/demands/'+demand['id']
     link={'revision':1,'groupbuy_id':item['id']}
-    assert c.put(url+'/groupbuy',headers=p['buyer2']['headers'],json=link).status_code==404
+    assert c.put(url+'/groupbuy',json=link).status_code==401
     assert c.put(url+'/groupbuy',headers=p['buyer']['headers'],json={**link,'groupbuy_id':'missing'}).status_code==404
     linked=c.put(url+'/groupbuy',headers=p['buyer']['headers'],json=link)
     assert linked.status_code==200 and linked.json()['revision']==2 and linked.json()['linked_groupbuy']['id']==item['id']
