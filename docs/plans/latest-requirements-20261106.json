@@ -349,8 +349,8 @@
   "source_original_modified": false,
   "supersedes": "docs/plans/requirements-acceptance-20261106.md",
   "schema_version": 2,
-  "audited_at": "2026-11-06T09:19:31.571967+00:00",
-  "audit_scope": "원문47ID와 실제 소스/로컬 실행 증거 연결. 최종 출시 수용 판정 아님.",
+  "audited_at": "2026-11-06T10:39:07.794410+00:00",
+  "audit_scope": "원문47ID의 구현·CI·배포와 실제UI/API 관측 범위를 연결한다. 확인된소프트웨어 동작과 실제기기·외부인증·Play·장기성과 등 별도범위를 구분하며 전체47완료율을 만들지 않는다.",
   "overview_only_requirement_count": 26,
   "source_files": {
     "original_xlsx": {
@@ -369,16 +369,48 @@
       "sha256": "071e5ea3307dac57fe2853d8057ccf3f67636f03549ea7cfd77996ac081e207e"
     }
   },
-  "status": "audited_mapping_acceptance_open",
+  "status": "implemented_tested_deployed_scoped_acceptance_external_gates_separate",
   "release_state": {
-    "production_baseline_commit": "05baede3",
-    "latest_source_production_verified": false,
-    "final_backend_full_suite": "622_passed_on_frozen_source",
-    "frontend_full_suite_latest_source": false,
-    "latest_android_device_acceptance": "not_evidenced_in_this_audit",
+    "production_baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+    "latest_source_production_verified": true,
+    "final_backend_full_suite": "hosted_pr_42202013901_643_passed",
+    "frontend_full_suite_latest_source": true,
+    "latest_android_device_acceptance": "not_claimed_by_signed_offline_verification",
     "operator_app_and_web_required": true,
-    "live_observation_candidate": "user_approved_operational_activation_and_verification_in_progress",
-    "observe_user_approval_received": true
+    "live_observation_candidate": "existing_server_boundary15_and_exact002_public_runtime3_metadata_traces_verified",
+    "observe_user_approval_received": true,
+    "latest_source_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+    "latest_hosted_ci_run": 42202013901,
+    "latest_hosted_ci_receipt_pending": false,
+    "latest_hosted_ci_frontend": "27_files_353_passed",
+    "push_ci_run": 42202005369,
+    "push_android_build": "success_unsigned",
+    "production_web_observation_verified": true,
+    "render_deployment": {
+      "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+      "state": "api_and_static_live_verified",
+      "live_verified": true,
+      "api_deploy_id": "dep-dbmqmtm1egvs73dbuchg",
+      "web_deploy_id": "dep-dbmqomrrjlhs73c8eerg",
+      "evidence_ids": [
+        "render_final_deployment",
+        "public_assistant_requests"
+      ],
+      "previous_failure_evidence_ids": [
+        "render_initial_keyprep_failure",
+        "render_permission_failure"
+      ]
+    },
+    "android_signed_release": "0.6.0_code10_APK_AAB_offline49_of49",
+    "existing_server_api_commit": "b23d9385222f4dcb1842cd7795a5fa854c087df8",
+    "existing_server_api_deployed_verified": true,
+    "android_inputs_current_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+    "android_inputs_equivalent_to_signed_release": true,
+    "historical_product_source_before_ci_portability_fix": "0eb0614",
+    "public_assistant_http_verified": true,
+    "public_http_checks": "73_of73_passed",
+    "public_runtime_opik_traces_verified": 3,
+    "public_browser_guest_chat_verified": true
   },
   "non_inference_rules": [
     "상세21개와 한눈에 보기만 있는26개를 구분한다.",
@@ -398,19 +430,22 @@
     },
     "frontend_receipt": {
       "path": "artifacts/community-completion-20261106/frontend-latest-final-receipt.json",
-      "sha256": "e1b7059f5612acad94a41e09aa70eaea7e15ff02bca0e99d9feea591529e842b",
-      "scope": "334 전체는 직전 소스. header와 inline확인 후 최신95scoped+새 public typecheck/build. 서로 중복이며 합산 금지.",
+      "sha256": "51d70068c4765eb2faa80542890b6a6577b5c088458bf213305f43b3a2bac9f7",
+      "scope": "로컬334 전체는 이전 manifest. 후속84/95/69 scoped는 서로 다른 manifest이며 합산하지 않는다. 최신 로컬69+public typecheck/build; 최종 hosted UI 전체는 별도 CI 증거.",
       "baseline_full_passed": 334,
-      "latest_scoped_passed": 95,
+      "latest_scoped_passed": 69,
       "full_tests_current_for_latest_source": false,
       "baseline_manifest": "8ceb09e41f3554af868fe910f1d562d5c21c995b7f08f31fc27c85e3241a0b95",
-      "latest_manifest": "61de17cb0d4d2d29eda39eac85e7dea3095e75ecddd2798ab3292ddc0be8e0d4",
-      "prior_scoped_passed": 84,
+      "latest_manifest": "5ab74e3b9d96f5a40a2fc75c8abf10a647142e5f2dbcd5823bce9ee1c0f8d4d6",
+      "prior_scoped_passed": [
+        84,
+        95
+      ],
       "source_files": 78
     },
     "frontend_source_map": {
       "path": "artifacts/community-completion-20261106/frontend-latest-requirements-map.json",
-      "sha256": "03cc3e00c5e8dc66846a3d5bf2b6bb80a7f377cf7680eb4b09b62d1d6a45cbf3",
+      "sha256": "9ad20f0a34d49492954f38736dea41615160a91738671fae1f21a25565f41465",
       "scope": "최신78파일 프런트의47ID 소스·테스트 연결표. 자체로 수용조건 전체통과/실기기검증 증거 아님."
     },
     "groupbuy_local": {
@@ -501,11 +536,232 @@
       "scope": "전체backend 실행 명령·시작/종료·exit0·sourcebefore/after.106파일을 감사 시 현재 소스와도 대조했다.",
       "exit_code": 0,
       "source_unchanged": true
+    },
+    "ui_report_hide_final": {
+      "path": "artifacts/community-completion-20261106/ui-report-hide-final.json",
+      "sha256": "8d551e6b2812ff075e4db26ee9f718e51ccce25c9e79f33223e9a4a9beb4997e",
+      "scope": "root의 실제 로컬 CUA 관측. 숨김 취소→trigger, 성공→main 초점, 숨김 본문·판매처링크 제거, 연결수요 공구 제외, 신규/중복 신고문구. 일회성 합성 데이터이며 운영/Android/스크린리더 검증 아님.",
+      "actual_local_browser": true,
+      "production_data_changed": false
+    },
+    "observation_actual_persistence": {
+      "path": "artifacts/community-completion-20261106/observation-actual-persistence-proof.json",
+      "sha256": "a4f6f2b51ffeb2c4fefcc396d8cd9ed8bb3cf67f632b421887cb1f2383a830c6",
+      "scope": "실제 기존 서버 Opik SDK 읽기조회로 공개·합성 모델요청 추적1건 저장 확인. input/output/thread_id null, 정확한 metadata allowlist, 개인정보 키 제외. 운영 웹 요청 또는 회원 데이터 관측 증거 아님.",
+      "verified_trace_count": 1,
+      "actual_readonly_sdk_query": true,
+      "actual_production_web_request_claim": false
+    },
+    "observation_actual_boundaries": {
+      "path": "artifacts/community-completion-20261106/observation-boundary-recheck.json",
+      "sha256": "df660ec4e0a5bd4c8c62f8e141ad9de12d9480886b2af46648eef0024129b186",
+      "scope": "승인 후 실제 제한 gateway 검사15건. shell/임의명령/flag/scp/sftp/freeform/memberID/미허용출처/PTY/forward 차단 및 inference health 유지. mock240/로컬70과 구분한다.",
+      "passed": 15,
+      "private_or_member_payload_used": false
+    },
+    "observation_existing_server_installation": {
+      "path": "artifacts/community-completion-20261106/observation-deployment-results.json",
+      "sha256": "477c7ead1d8677294feba3e98796c0cbfad4741c16410afd8c88ff21e3fce123",
+      "scope": "기존 서버 제한 gateway와 collector 설치·공개소스해시 확인, 실제 추적1건 및 제한15건. 기존 inference lock/다른 키/다른 프로세스 보존. 운영 웹 트래픽 검증과 구분한다.",
+      "installed": true,
+      "actual_trace_persistence_verified": true,
+      "verified_trace_count": 1,
+      "restriction_recheck_passed": 15,
+      "production_web_traffic_verification": false
+    },
+    "observation_actual_public_inference": {
+      "path": "artifacts/community-completion-20261106/observation-restricted-ssh-client-proof.json",
+      "sha256": "c0d12c9734c0782bfce7bd1f368bedb1206f5d2e5217408086a7b2750b24cd56",
+      "scope": "공개 합성질문으로 실제 지정모델 추론 및 제한SSH client 전달1건 remote accepted. client 카운터 자체는 persistence_verified=false이며 실제 저장은 별도 SDK조회 증거에 따른다.",
+      "actual_model_request": true,
+      "model_selection_validated": true,
+      "real_member_data_used": false,
+      "question_or_answer_logged": false,
+      "generation_elapsed_ms": 1406.0
+    },
+    "render_saved_configuration": {
+      "path": "artifacts/community-completion-20261106/render-inference-configuration.json",
+      "sha256": "9646213e3479239545ef03afb6df4870f56bf6cf9d002f1eefc38f70b1109bf6",
+      "scope": "초기 Render 전용 추론연결 Save only 영수증. 08:32UTC 당시 live05baede3·new_release_deployed=false. 이후 observe flags/start command와 신규 배포 상태는 root의 후속 증빙과 구분한다.",
+      "ui_saved": true,
+      "new_release_deployed": false
+    },
+    "ci_portability_local12": {
+      "path": "artifacts/community-completion-20261106/ci-api-portability-42196978550.json",
+      "sha256": "b0670cad77673ce4f3b8e8221a5b149169dbe649fc9887d0289115740a91229e",
+      "scope": "초기 hosted3fail/620pass의 이식성 수정 후 로컬CI방식12passed. fixture gold 무수정, CRLF/LF 정규화·실제crash23/24 복구. 최종 hosted 결과와 합산하지 않는다.",
+      "passed": 12,
+      "fixture_original_gold_unchanged": true
+    },
+    "backend_linux_622": {
+      "path": "artifacts/community-completion-20261106/linux-final-junit.xml",
+      "sha256": "50db20869a357e4380e933be4c1a710f18f77394c48d2bd651a43e676c9c90a3",
+      "scope": "별도 Linux Python3.12.16 전체622passed/44.686초. Windows622와 합산하지 않으며 최종 hosted623은 별도 증거.",
+      "passed": 622,
+      "failed": 0
+    },
+    "backend_linux_receipt": {
+      "path": "artifacts/community-completion-20261106/linux-final-receipt.json",
+      "sha256": "21668edc291fe9256f7fdfc222348d9d83a44f7e59aacf7456f15f4acf4759c8",
+      "scope": "Linux 전체 회귀 exit0, archive SHA와139개 소스 전후불변. 통과건수는 별도 JUnit에 따른다.",
+      "exit_code": 0,
+      "source_unchanged": true,
+      "source_files": 139
+    },
+    "ci_final_parent_verified": {
+      "path": "artifacts/community-completion-20261106/ci-c455c9b-summary.json",
+      "sha256": "6873db8de9b214b33fb034e04a3e8b278b2e11e8544af6622bdbda93453eac6e",
+      "scope": "직전 c455c9b의 PR/push CI 성공. API639·PG174·UI353/27파일·public build·audit0·unsignedAndroid. 최신002의 결과는 후속 증거와 구분한다.",
+      "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+      "pr_run_id": 42202013901,
+      "push_run_id": 42202005369,
+      "pr_conclusion": "success",
+      "push_conclusion": "success",
+      "api_passed": 643,
+      "postgres_passed": 174,
+      "frontend_passed": 353,
+      "frontend_files": 27,
+      "production_build_passed": true,
+      "npm_audit_vulnerabilities": 0,
+      "unsigned_android": "success",
+      "receipt_pending": false
+    },
+    "android_signed_release_provenance": {
+      "path": "artifacts/android/releases/10-0.6.0/release-provenance.json",
+      "sha256": "aa47fcd3d1a2d0d4629fee00b15d97ef1a7ae93959337b4051ec953ea07978f6",
+      "scope": "0.6.0/code10 public_release 서명 APK/AAB,158개 Android/frontend/build 입력해시 불변.0eb0614 빌드 중 HEAD b23d938로 이동했으나 차이는 backend 테스트2파일뿐. 오프라인49/49; 실제설치·Play배송/승인과 구분.",
+      "source_commit": "0eb0614da59dcbd5c669322913059dad042565ac",
+      "runtime_identical_to_commit": "b23d9385222f4dcb1842cd7795a5fa854c087df8",
+      "source_unchanged": true,
+      "passed": 49,
+      "total": 49,
+      "actual_device_acceptance": false
+    },
+    "android_signed_offline_verification": {
+      "path": "artifacts/android/releases/10-0.6.0/verification/android-release-verification.json",
+      "sha256": "eebbad844b30c33227e9552d6a03ad9693b9dbb83ead3f3532014a25cd37671a",
+      "scope": "서명APK/AAB 해시·포함web bundle·원본브랜드·package/name·HTTPS API·기존 upload certificate·target36·manifest/permission 오프라인49/49. Android 실행·Play 배포는 별도.",
+      "passed": 49,
+      "total": 49
+    },
+    "existing_server_product_api_deployment": {
+      "path": "artifacts/community-completion-20261106/elice-product-api-deployment.json",
+      "sha256": "f112727933a87204fa660aaabea86f53159cbf4b658dd98a2400da9f6335bd22",
+      "scope": "기존서버 moduyuga-api만 b23d938 배포. health·새groupbuy route·정확한 release process·기존옵션모델설정/보호프로세스 보존 확인. frontend dist·DB restore/migration 변경 없음. 공개 Render live 배포 또는 회원요청 Opik 저장 증거와 구분.",
+      "commit": "b23d9385222f4dcb1842cd7795a5fa854c087df8",
+      "success": true,
+      "health": true,
+      "latest_groupbuy_route": true,
+      "protected_processes_unchanged": true,
+      "frontend_dist_touched": false,
+      "database_restore_or_migration_performed": false
+    },
+    "ci_latest_002_verified": {
+      "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+      "pr_run_id": 42202013901,
+      "push_run_id": 42202005369,
+      "api_passed": 643,
+      "postgres_passed": 174,
+      "frontend_passed": 353,
+      "frontend_files": 27,
+      "public_build_passed": true,
+      "npm_audit_vulnerabilities": 0,
+      "unsigned_android": "success",
+      "receipt_pending": false,
+      "scope": "최신002d46c의 PR42202013901/push42202005369 connector job states+logs 확인. API643·POSTGRES_BETA_PASS174·UI353/27파일·public build·audit0·unsignedAndroid 성공. 운영live/실기기 수용과 구분한다.",
+      "path": "artifacts/community-completion-20261106/ci-final-summary.json",
+      "sha256": "8e372499e5174e8c30d34f750d73c21d2f2cab65d4779f1a00710840be94f8e6"
+    },
+    "android_current_input_equivalence": {
+      "path": "artifacts/community-completion-20261106/android-current-input-equivalence.json",
+      "sha256": "1de53e2eb512eb6d9ceb57e39dbc926b4f9a8a418cfd0c57699e629936e4bda1",
+      "scope": "서명0eb0614 입력158개와 최신002d46c 입력 비교. changed_inputs=[]·same_android_inputs=true. Android 재빌드나 실제기기 실행 증거 아님.",
+      "current_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+      "signed_source": "0eb0614da59dcbd5c669322913059dad042565ac",
+      "android_inputs": 158,
+      "same_android_inputs": true
+    },
+    "render_initial_keyprep_failure": {
+      "path": "artifacts/community-completion-20261106/render-startup-first-failure.json",
+      "sha256": "30f04642a428f57a26182f215d30be604f64d7d8f335f6b26cf79d16103812cb",
+      "scope": "b23d938 첫 Render 배포 keyprep 실패 및 기존05baede3 health 정상. 진단22건과 observe flags save-only, 공개관측 미확인.",
+      "commit": "b23d938",
+      "deployment": "dep-dbmq74ugekts73e6sn30",
+      "old_health_ok": true,
+      "public_observe_verified": false
+    },
+    "render_permission_failure": {
+      "path": "artifacts/community-completion-20261106/render-startup-permission-failure.json",
+      "sha256": "4e5f2ee88fe656fc74d3776ac8652b6c2a1aa7521d09a3c9cfb839da7e391957",
+      "scope": "c455c9b 배포 실패 원인 고정enum private_permissions_invalid. secret읽기/생성 도달, 기존서비스 유지.002d46c는 전용mode 강제 후 엄격검사 유지하는 후속 수정이며 실제live는 별도.",
+      "commit": "c455c9b",
+      "deployment": "dep-dbmqg4s9v7es73ag8ljg",
+      "outcome": "failed",
+      "reason": "private_permissions_invalid",
+      "old_service_remains_active": true
+    },
+    "render_final_deployment": {
+      "path": "artifacts/community-completion-20261106/render-final-deployment.json",
+      "sha256": "27ba234794ba6fc9cd00f6cd8bd123fe6fa8a8128541effd8b699142f363b949",
+      "scope": "정확한002d46c API·static 모두 Deploy succeeded|Live. APIhealth200/public-release, 웹rewrite 저장·새로고침 확인. 이전실패 보존. 운영요청Opik 저장 및 실제기기 수용은 별도.",
+      "source_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+      "api_deploy_id": "dep-dbmqmtm1egvs73dbuchg",
+      "web_deploy_id": "dep-dbmqomrrjlhs73c8eerg",
+      "api_live": true,
+      "web_live": true,
+      "health_http_status": 200
+    },
+    "public_assistant_requests": {
+      "path": "artifacts/community-completion-20261106/public-assistant-requests.json",
+      "sha256": "f7074ee9830362d8711f88fd40fb3684bed6c9f5e332905152d3073bab05b1cd",
+      "scope": "정확한002 공개API 비회원/기억저장off 합성요청3건. 지원질문200/local_extractive+공식인용, 의료200/abstained, 잘못된본문422. 초기status no_recent_request는 실제요청전값이며 지속장애 판정에 사용하지 않는다.",
+      "source_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+      "requests": 3,
+      "all_expected_responses": true,
+      "expected_modes": {
+        "local_extractive": 1,
+        "abstained": 1,
+        "error": 1
+      },
+      "real_member_data_used": false
+    },
+    "render_public_opik_persistence": {
+      "path": "artifacts/community-completion-20261106/render-public-opik-persistence-proof.json",
+      "sha256": "b5c21fea59395da8d74b7fe6e21624912cabb75c5744e2376e1e7a32bd86cdc8",
+      "scope": "정확한002 공개 합성요청3건의닫힌시간창을SDK로읽기조회. unique trace3, local_extractive/abstained/error 각1, invalid_request1/none2 일치. input/output/thread_id null·정확metadata allowlist·captureoff 확인. 초기bootstrap1과분리하며실회원질문품질/장기성과를뜻하지않는다.",
+      "unique_window_trace_count": 3,
+      "actual_sdk_readonly_verification": true,
+      "outcomes_exact_match": true,
+      "requested_error_counts_match": true,
+      "all_privacy_checks_passed": true,
+      "passed": true,
+      "real_member_data_used": false
+    },
+    "public_http_deployment": {
+      "path": "artifacts/community-completion-20261106/public-http-deployment-002d46c.json",
+      "sha256": "acccc30f6aa4e39774a5c74aead7749d5eb598d2eeb1708b1ea67579152b34b7",
+      "scope": "정확한002 공개 GET/OPTIONS27요청73/73. health/config·공구목록·API/공식sitemap·robots·가이드/품목HTML/canonical·정책/삭제/약관/문의·실제bundlehash·CSP·CORS 확인. 운영공구표본0으로양수상세/종료동적HTML은미관측;인증/쓰기/ask/브라우저검사가아니다.",
+      "source_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+      "passed": 73,
+      "total": 73,
+      "requests": 27,
+      "public_groupbuy_sample_count": 0,
+      "production_writes": false
+    },
+    "public_browser_final": {
+      "path": "artifacts/community-completion-20261106/public-browser-final.json",
+      "sha256": "e45bd273fb006ad11db845a0aa3f425dbaaa3bae513b49f35eac2cc745943555",
+      "scope": "정확한002 공식웹 /chat 비회원·기억off·공개합성질문. 모델선택근거 안내·답변·출처카드·현재정보시각·5nav 실제관측. 카카오제공자로그인창까지도달했으나인증/콜백은미수행. 별도브라우저질문은앞선3건Opik시간창에포함하지않는다."
+    },
+    "public_browser_screenshot": {
+      "path": "artifacts/community-completion-20261106/public-chat-live.jpg",
+      "sha256": "0eef3732cd623d40226f58d7c3314e61f25c02171e2d48022e74aec723bfdd71",
+      "scope": "공식웹 비회원 챗봇 화면의 실제관측 스크린샷. 브라우저영수증의 범위이며 실제Android/추가Opik저장을뜻하지않는다."
     }
   },
   "confirmed_coverage_gap": {
     "ci_groupbuy_postgres": {
-      "status": "portable_helper_source_integrated_and_local_24_passed_hosted_ci_pending",
+      "status": "portable_helper_integrated_latest002_hosted_postgres174_passed",
       "chain": [
         ".github/workflows/checks.yml",
         "backend/tests/verify_public_postgres.py",
@@ -513,11 +769,16 @@
         "backend/tests/verify_groupbuy_postgres.py"
       ],
       "local_24_reproduction": ".runtime/groupbuy-verification/verify.py",
-      "portable_helper_recommendation": "다른 작업자가 portable helper와 CI callchain·source snapshot을 연결하고 전용 실제PG24건을 통과했다. 전체PG/hosted CI 완료는 별도 확인한다.",
+      "portable_helper_recommendation": "portable helper 로컬24건 재현 및 CI callchain 연결 후 최종 PR/push CI 성공 영수증에서 PostgreSQL174 PASS 확인. 실제 운영 DB 검증과 구분한다.",
       "modified_by_this_audit": false,
       "initial_finding": "처음 감사 시 CI callchain에 groupbuy24가 없었다.",
       "portable_helper": "backend/tests/verify_groupbuy_postgres.py",
-      "evidence_id": "groupbuy_portable_postgres"
+      "evidence_id": "groupbuy_portable_postgres",
+      "evidence_ids": [
+        "groupbuy_portable_postgres",
+        "ci_final_parent_verified",
+        "ci_latest_002_verified"
+      ]
     }
   },
   "requirements": [
@@ -548,7 +809,7 @@
       ],
       "implementation": {
         "status": "source_mapped_and_reviewed",
-        "review": "반응형·이름·초점·오류/상태·route main focus와 새 공구alertdialog의 focus/Tab/Shift-Tab/Escape/취소복귀를 확인했다. root는 로컬320px header nowrap·가로넘침없음과 종료dialog/저장 동작을 관측했다. 최신 Android/스크린리더 수용과 최신 성공후main초점 실관측은 별도 게이트다.",
+        "review": "반응형·이름·초점·오류/상태·route main focus와 공구 alertdialog의 focus/Tab/Shift-Tab/Escape/취소복귀를 확인했다. root는 로컬320px header nowrap·가로넘침없음, 종료 저장, 숨김 취소→trigger 및 성공→main 초점을 실제 관측했다. 최신 Android/스크린리더 수용은 별도 게이트다.",
         "backend_files": [
           "backend/app/release.py",
           "backend/app/groupbuys.py",
@@ -574,25 +835,79 @@
           "frontend/src/groupbuy-actions.test.tsx",
           "frontend/src/community-action-boundary.test.tsx",
           "frontend/src/groupbuy-confirmation.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ui_report_hide_final",
+          "ci_latest_002_verified",
+          "public_browser_final"
         ],
         "frontend_scope": "로딩/빈결과/실패·stale목록·오류입력보존·중복lock·계정변경전송차단·한국시간·semantic controls/초점/반응형"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_browser_accessibility_verified_device_scope_separate",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "최신Android실기기및스크린리더접근성관측"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "actual_observation_evidence_ids": [
+          "ui_report_hide_final",
+          "public_browser_final"
+        ],
+        "additional_scope_status": "specified_separately"
+      }
     },
     {
       "id": "account_01",
@@ -639,25 +954,71 @@
           "frontend/src/signup-recovery-boundary.test.tsx",
           "frontend/src/auth-refresh-lifecycle.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "account_02",
@@ -704,25 +1065,71 @@
           "frontend/src/signup-recovery-boundary.test.tsx",
           "frontend/src/auth-refresh-lifecycle.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "admgroupbuy_01",
@@ -751,7 +1158,7 @@
       ],
       "implementation": {
         "status": "source_mapped_and_reviewed",
-        "review": "공구 원문·판매처 URL과 숨김/확인필요/종결의 전용 조치·감사 이력을 확인했다. 일반 신고의 정지 조치와 전용 범위를 혼동하지 않는다.",
+        "review": "공구 원문·판매처 URL과 숨김/확인필요/종결의 전용 조치·감사 이력을 확인했다. 일반 신고의 정지 조치와 전용 범위를 혼동하지 않는다. root 로컬 CUA에서 숨김 확인·취소복귀·성공main초점, 공개본문/판매처링크 제거와 연결수요의 숨김공구 제외를 실제 확인했다.",
         "backend_files": [
           "backend/app/groupbuys.py",
           "backend/app/groupbuy_public.py"
@@ -767,7 +1174,8 @@
           "frontend/src/groupbuys.test.tsx",
           "frontend/src/groupbuy-actions.test.tsx",
           "frontend/src/groupbuy-confirmation.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -776,20 +1184,72 @@
           "frontend_receipt",
           "groupbuy_real_postgres",
           "groupbuy_local",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "ui_report_hide_final",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
+      "acceptance_status": "software_delivered_scoped_verification_complete",
       "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
         "최신 원문은 앱·웹 모두 운영 기능을 요구한다. 브라우저 폭 테스트가 최신 Android 설치본 검증을 대신하지 않는다."
-      ]
+      ],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "운영자기능최신Android실기기실행;웹/서버권한·조치검증은기존증거범위에서완료"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "actual_observation_evidence_ids": [
+          "ui_report_hide_final"
+        ],
+        "additional_scope_status": "specified_separately"
+      }
     },
     {
       "id": "admin_01",
@@ -842,26 +1302,75 @@
           "frontend/src/admin-report-action.test.tsx",
           "frontend/src/admin-members.test.tsx",
           "frontend/src/groupbuys.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
+      "acceptance_status": "software_delivered_scoped_verification_complete",
       "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
         "최신 원문은 앱·웹 모두 운영 기능을 요구한다. 브라우저 폭 테스트가 최신 Android 설치본 검증을 대신하지 않는다."
-      ]
+      ],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "운영자기능최신Android실기기실행;웹/서버권한·조치검증은기존증거범위에서완료"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "specified_separately"
+      }
     },
     {
       "id": "admreport_01",
@@ -909,26 +1418,75 @@
           "frontend/src/admin-report-action.test.tsx",
           "frontend/src/admin-members.test.tsx",
           "frontend/src/groupbuys.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
+      "acceptance_status": "software_delivered_scoped_verification_complete",
       "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
         "최신 원문은 앱·웹 모두 운영 기능을 요구한다. 브라우저 폭 테스트가 최신 Android 설치본 검증을 대신하지 않는다."
-      ]
+      ],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "운영자기능최신Android실기기실행;웹/서버권한·조치검증은기존증거범위에서완료"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "specified_separately"
+      }
     },
     {
       "id": "admreport_02",
@@ -976,26 +1534,75 @@
           "frontend/src/admin-report-action.test.tsx",
           "frontend/src/admin-members.test.tsx",
           "frontend/src/groupbuys.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
+      "acceptance_status": "software_delivered_scoped_verification_complete",
       "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
         "최신 원문은 앱·웹 모두 운영 기능을 요구한다. 브라우저 폭 테스트가 최신 Android 설치본 검증을 대신하지 않는다."
-      ]
+      ],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "운영자기능최신Android실기기실행;웹/서버권한·조치검증은기존증거범위에서완료"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "specified_separately"
+      }
     },
     {
       "id": "analytics_01",
@@ -1041,7 +1648,8 @@
           "backend/tests/test_groupbuys.py",
           "frontend/src/groupbuy-measurement.test.tsx",
           "frontend/src/discovery.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -1049,19 +1657,64 @@
           "backend_final_622",
           "frontend_receipt",
           "groupbuy_real_postgres",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "기본미동의·화면50%/연속1초/visible·웹앱분리·공구판매처이동·집계숨김·과거공개실험과실활동구분·구매오표시금지"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "auth_01",
@@ -1117,7 +1770,8 @@
           "frontend/src/signup-recovery-boundary.test.tsx",
           "frontend/src/auth-refresh-lifecycle.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -1125,19 +1779,64 @@
           "backend_final_622",
           "frontend_receipt",
           "groupbuy_real_postgres",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "broker_01",
@@ -1189,25 +1888,75 @@
           "frontend/src/admin-report-action.test.tsx",
           "frontend/src/admin-members.test.tsx",
           "frontend/src/groupbuys.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_http_deployment"
         ],
         "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit",
+        "actual_observation_evidence_ids": [
+          "public_http_deployment"
+        ]
+      }
     },
     {
       "id": "chatbot_01",
@@ -1236,7 +1985,7 @@
       ],
       "implementation": {
         "status": "source_mapped_and_reviewed",
-        "review": "비회원 질문, 공개 근거 인용, 확인 불가 거절과 진행 공구 현재 DB/출처 확인/조회 시각·판매처 재확인 경로를 확인했다.",
+        "review": "비회원 질문, 공개 근거 인용, 확인 불가 거절과 진행 공구 현재 DB/출처 확인/조회 시각·판매처 재확인 경로를 확인했다. 정확한002 공개API 지원질문의 local_extractive·공식인용, 의료abstained, 잘못된본문422를 실제확인했다. 공식웹의비회원질문→모델선택근거안내·출처카드·현재정보시각도실제브라우저에서관측했다. 이브라우저질문은앞선3요청Opik시간창과별도다.",
         "backend_files": [
           "backend/app/assistant.py",
           "backend/app/assistant_tools.py",
@@ -1260,7 +2009,8 @@
           "backend/tests/test_assistant_boundary_observation.py",
           "frontend/src/chat.test.tsx",
           "frontend/src/admin-assistant.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -1274,19 +2024,76 @@
           "assistant_observation_integration",
           "assistant_boundary",
           "observation_candidate",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "observation_actual_public_inference",
+          "observation_actual_persistence",
+          "observation_actual_boundaries",
+          "observation_existing_server_installation",
+          "ci_latest_002_verified",
+          "public_assistant_requests",
+          "public_browser_final"
         ],
         "frontend_scope": "질문/계정저장/출처·실제답변mode·중립passive status·public action allowlist·실패/원점수 보존·운영평가 메뉴"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "actual_observation_evidence_ids": [
+          "public_assistant_requests",
+          "observation_actual_persistence",
+          "observation_actual_boundaries",
+          "public_browser_final"
+        ],
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "chatbot_02",
@@ -1314,8 +2121,8 @@
         }
       ],
       "implementation": {
-        "status": "partial_candidate_approved_operational_activation_pending",
-        "review": "고정/합성 평가의 실제 Opik 추적 저장과 버전 비교는 증거가 있다. 전체 요청 단계·오류·실제도구횟수의 PII없는 observe후보와 hook/HTTP경계 통합70건을 검증했다. 사용자 observe권한 확대 승인은 받았고 실서비스 연결/저장 검증은 진행 중이다.",
+        "status": "implemented_tested_deployed_public_runtime_observation_verified",
+        "review": "고정 평가 실제Opik52/52 저장·버전 비교와 기존 서버 공개 합성 추적1건·제한15건을 확인했다. 정확한002 공개API의 지원 local_extractive·의료 abstained·422오류3요청은 SDK 닫힌시간창에서 실제추적3건으로확인됐고 결과/오류enum·단계·null/allowlist 개인정보검사를통과했다. 답변품질은고정평가의검토범위에한정한다.",
         "backend_files": [
           "backend/app/assistant.py",
           "backend/app/assistant_tools.py",
@@ -1339,7 +2146,8 @@
           "backend/tests/test_assistant_boundary_observation.py",
           "frontend/src/chat.test.tsx",
           "frontend/src/admin-assistant.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -1351,22 +2159,80 @@
           "assistant_observation_hooks",
           "assistant_observation_integration",
           "assistant_boundary",
-          "observation_candidate"
+          "observation_candidate",
+          "ci_final_parent_verified",
+          "observation_actual_public_inference",
+          "observation_actual_persistence",
+          "observation_actual_boundaries",
+          "observation_existing_server_installation",
+          "ci_latest_002_verified",
+          "public_assistant_requests",
+          "render_public_opik_persistence"
         ],
         "frontend_scope": "질문/계정저장/출처·실제답변mode·중립passive status·public action allowlist·실패/원점수 보존·운영평가 메뉴"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "partial_pending_operational_observation_verification",
+      "acceptance_status": "software_delivered_public_runtime_observation_verified",
       "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
-        "observe 사용자 승인 수신. 실제 게이트웨이·수집기·Render 활성과 운영 추적 조회·외부 전달 확인은 아직 완료 증거 없음. 자동 SDK 카운터만으로 저장 완료를 단정하지 않는다.",
         "validation 단계시간은 tools를 포함한 초기·최종 검증 경과시간이다. 겹치는 단계값을 합쳐 total로 표시하지 않는다.",
-        "인용 전체가 정적map과 맞지 않으면 source목록을 보내지 않으며 모델답변의 품질은 not_assessed다. 수신단에서 mismatched source를 받은 경우에는 이벤트를 거부한다."
-      ]
+        "인용 전체가 정적map과 맞지 않으면 source목록을 보내지 않으며 모델답변의 품질은 not_assessed다. 수신단에서 mismatched source를 받은 경우에는 이벤트를 거부한다.",
+        "실제 공개 합성요청3건과 고정평가의 제한된 품질검토를 실제회원 전체 질문 정확도·사람 평가·장기효과로 일반화하지 않는다."
+      ],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "actual_observation_evidence_ids": [
+          "public_assistant_requests",
+          "observation_actual_persistence",
+          "observation_actual_boundaries",
+          "render_public_opik_persistence"
+        ],
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "comment_01",
@@ -1404,25 +2270,71 @@
           "frontend/src/community.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "consent_01",
@@ -1468,25 +2380,71 @@
           "backend/tests/test_groupbuys.py",
           "frontend/src/groupbuy-measurement.test.tsx",
           "frontend/src/discovery.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "기본미동의·화면50%/연속1초/visible·웹앱분리·공구판매처이동·집계숨김·과거공개실험과실활동구분·구매오표시금지"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "demand_01",
@@ -1524,25 +2482,71 @@
           "frontend/src/community.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "demand_02",
@@ -1580,25 +2584,71 @@
           "frontend/src/community.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "demand_03",
@@ -1636,25 +2686,71 @@
           "frontend/src/community.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "demand_04",
@@ -1692,25 +2788,71 @@
           "frontend/src/community.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "demand_05",
@@ -1731,7 +2873,7 @@
       ],
       "implementation": {
         "status": "source_mapped_and_reviewed",
-        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다. root 로컬 CUA에서 숨긴 연결공구가 수요 상세에 표시되지 않음을 관측했다.",
         "backend_files": [
           "backend/app/groupbuys.py",
           "backend/app/groupbuy_public.py"
@@ -1750,7 +2892,8 @@
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx",
           "frontend/src/groupbuy-confirmation.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -1759,19 +2902,68 @@
           "frontend_receipt",
           "groupbuy_real_postgres",
           "groupbuy_local",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "ui_report_hide_final",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "actual_observation_evidence_ids": [
+          "ui_report_hide_final"
+        ],
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "detail_01",
@@ -1812,25 +3004,75 @@
           "frontend/src/discovery.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_http_deployment"
         ],
         "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit",
+        "actual_observation_evidence_ids": [
+          "public_http_deployment"
+        ]
+      }
     },
     {
       "id": "finder_01",
@@ -1871,25 +3113,71 @@
           "frontend/src/discovery.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "finder_02",
@@ -1930,25 +3218,71 @@
           "frontend/src/discovery.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "groupbuy_01",
@@ -1983,7 +3317,8 @@
           "backend/tests/test_groupbuy_public.py",
           "frontend/src/groupbuys.test.tsx",
           "frontend/src/groupbuy-actions.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -1992,19 +3327,69 @@
           "frontend_receipt",
           "groupbuy_real_postgres",
           "groupbuy_local",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_http_deployment"
         ],
         "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit",
+        "actual_observation_evidence_ids": [
+          "public_http_deployment"
+        ],
+        "positive_production_groupbuy_limit": "운영표본0;등록/수정/종료·상세의양수실제관측은일회성합성UI/PG범위.프로덕션데이터를생성하지않았다."
+      }
     },
     {
       "id": "groupbuy_02",
@@ -2039,7 +3424,8 @@
           "backend/tests/test_groupbuy_public.py",
           "frontend/src/groupbuys.test.tsx",
           "frontend/src/groupbuy-actions.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -2048,19 +3434,69 @@
           "frontend_receipt",
           "groupbuy_real_postgres",
           "groupbuy_local",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "ui_report_hide_final",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "actual_observation_evidence_ids": [
+          "ui_report_hide_final"
+        ],
+        "additional_scope_status": "none_in_this_software_audit",
+        "positive_production_groupbuy_limit": "운영표본0;등록/수정/종료·상세의양수실제관측은일회성합성UI/PG범위.프로덕션데이터를생성하지않았다."
+      }
     },
     {
       "id": "groupbuy_03",
@@ -2097,7 +3533,8 @@
           "frontend/src/groupbuys.test.tsx",
           "frontend/src/groupbuy-actions.test.tsx",
           "frontend/src/groupbuy-confirmation.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -2106,19 +3543,65 @@
           "frontend_receipt",
           "groupbuy_real_postgres",
           "groupbuy_local",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit",
+        "positive_production_groupbuy_limit": "운영표본0;등록/수정/종료·상세의양수실제관측은일회성합성UI/PG범위.프로덕션데이터를생성하지않았다."
+      }
     },
     {
       "id": "groupbuy_04",
@@ -2139,7 +3622,7 @@
       ],
       "implementation": {
         "status": "source_mapped_and_reviewed",
-        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다. root 로컬 CUA에서 신규 신고와 중복 신고의 서로 다른 서버 결과문구를 확인했다.",
         "backend_files": [
           "backend/app/groupbuys.py",
           "backend/app/groupbuy_public.py"
@@ -2153,7 +3636,8 @@
           "backend/tests/test_groupbuy_public.py",
           "frontend/src/groupbuys.test.tsx",
           "frontend/src/groupbuy-actions.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -2162,19 +3646,68 @@
           "frontend_receipt",
           "groupbuy_real_postgres",
           "groupbuy_local",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "ui_report_hide_final",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공개검색·상태/정렬/페이지·출처/중개고지·본인공유/수정/종료·제보·정확한 운영검토 대상과 조치"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "actual_observation_evidence_ids": [
+          "ui_report_hide_final"
+        ],
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "guide_01",
@@ -2225,26 +3758,75 @@
           "frontend/src/discovery.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_http_deployment"
         ],
         "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
-        "로컬 HTML/robots/sitemap 검증과 운영 호스팅 rewrite·크롤링 결과를 분리한다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit",
+        "actual_observation_evidence_ids": [
+          "public_http_deployment"
+        ]
+      }
     },
     {
       "id": "insight_01",
@@ -2290,7 +3872,8 @@
           "backend/tests/test_groupbuys.py",
           "frontend/src/groupbuy-measurement.test.tsx",
           "frontend/src/discovery.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
@@ -2298,19 +3881,64 @@
           "backend_final_622",
           "frontend_receipt",
           "groupbuy_real_postgres",
-          "groupbuy_portable_postgres"
+          "groupbuy_portable_postgres",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "기본미동의·화면50%/연속1초/visible·웹앱분리·공구판매처이동·집계숨김·과거공개실험과실활동구분·구매오표시금지"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "insight_02",
@@ -2356,25 +3984,71 @@
           "backend/tests/test_groupbuys.py",
           "frontend/src/groupbuy-measurement.test.tsx",
           "frontend/src/discovery.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "기본미동의·화면50%/연속1초/visible·웹앱분리·공구판매처이동·집계숨김·과거공개실험과실활동구분·구매오표시금지"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "interest_01",
@@ -2415,25 +4089,71 @@
           "frontend/src/discovery.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "interest_02",
@@ -2474,25 +4194,71 @@
           "frontend/src/discovery.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "item_01",
@@ -2533,25 +4299,75 @@
           "frontend/src/discovery.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_http_deployment"
         ],
         "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit",
+        "actual_observation_evidence_ids": [
+          "public_http_deployment"
+        ]
+      }
     },
     {
       "id": "login_01",
@@ -2598,26 +4414,79 @@
           "frontend/src/signup-recovery-boundary.test.tsx",
           "frontend/src/auth-refresh-lifecycle.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_browser_final"
         ],
         "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
+      "acceptance_status": "software_delivered_provider_human_flow_separate",
       "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
         "이메일/카카오가 최신 범위다. 합성 소셜 테스트가 실제 카카오 외부 인증 성공을 대신하지 않는다. Naver/Google은 이 행의 필수조건으로 추가하지 않는다."
-      ]
+      ],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "공유원문묶음의카카오제공자로그인창진입은관측했으나사용자인증·동의·서비스복귀완료는별도;자격증명/세션사용없음"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "specified_separately",
+        "actual_observation_evidence_ids": [
+          "public_browser_final"
+        ]
+      }
     },
     {
       "id": "logout_01",
@@ -2664,25 +4533,77 @@
           "frontend/src/signup-recovery-boundary.test.tsx",
           "frontend/src/auth-refresh-lifecycle.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_browser_final"
         ],
         "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_provider_human_flow_separate",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "공유원문묶음의카카오제공자로그인창진입은관측했으나사용자인증·동의·서비스복귀완료는별도;자격증명/세션사용없음"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "specified_separately",
+        "actual_observation_evidence_ids": [
+          "public_browser_final"
+        ]
+      }
     },
     {
       "id": "mypage_01",
@@ -2729,25 +4650,71 @@
           "frontend/src/signup-recovery-boundary.test.tsx",
           "frontend/src/auth-refresh-lifecycle.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "price_01",
@@ -2788,25 +4755,73 @@
           "frontend/src/discovery.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "최신Android실제오프라인단가계산관측;계산로직·포함asset검증과구분"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "specified_separately"
+      }
     },
     {
       "id": "recovery_01",
@@ -2853,25 +4868,71 @@
           "frontend/src/signup-recovery-boundary.test.tsx",
           "frontend/src/auth-refresh-lifecycle.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "report_01",
@@ -2892,7 +4953,7 @@
       ],
       "implementation": {
         "status": "source_mapped_and_reviewed",
-        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다.",
+        "review": "한눈에 보기의 원문 기능 묶음을 프런트·서버 경로와 기존 로컬 검증에 연결했다. ID별 추가 세부조건을 만들지 않았다. root 로컬 CUA에서 신규 신고와 중복 신고의 서로 다른 서버 결과문구를 확인했다.",
         "backend_files": [
           "backend/app/release.py"
         ],
@@ -2909,25 +4970,75 @@
           "frontend/src/community.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ui_report_hide_final",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "actual_observation_evidence_ids": [
+          "ui_report_hide_final"
+        ],
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "report_02",
@@ -2973,25 +5084,71 @@
           "frontend/src/community.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "rule_01",
@@ -3037,25 +5194,71 @@
           "frontend/src/community.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "유형/기존 URL 유지·작성자CRUD·관심·원수요 작성자의 공구연결/해제·신고/차단/해제·개인정보/직접거래 안내"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "save_01",
@@ -3096,25 +5299,71 @@
           "frontend/src/discovery.test.tsx",
           "frontend/src/public-release.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "공식출처·미확인가격·조건선택/명시삭제·복수관심/skip·배송포함오프라인단가·계정저장"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "seo_01",
@@ -3143,7 +5392,7 @@
       ],
       "implementation": {
         "status": "source_mapped_and_reviewed",
-        "review": "공개 가이드/육아템 정적HTML, 현재DB 공구HTML/종료표시/JSON-LD/페이지 sitemap, 개인·운영 경로 색인제외 코드가 있다. 새 배포의 rewrite·canonical 동작은 별도 게이트다.",
+        "review": "공개가이드/품목HTML과현재DB공구HTML/종료표시/JSON-LD·sitemap·개인/운영색인제외를구현했다. 정확한002공개HTTP73/73에서rewrite·canonical·robots·API/공식sitemap·실제bundle/CSP/CORS를확인했다. 운영공구표본0이므로양수상세/종료HTML의운영실관측은확대하지않는다.",
         "backend_files": [
           "backend/app/legal_public.py",
           "backend/app/groupbuys.py",
@@ -3166,26 +5415,77 @@
           "frontend/src/admin-report-action.test.tsx",
           "frontend/src/admin-members.test.tsx",
           "frontend/src/groupbuys.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_http_deployment"
         ],
         "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
-        "로컬 HTML/robots/sitemap 검증과 운영 호스팅 rewrite·크롤링 결과를 분리한다."
-      ]
+      "acceptance_status": "software_delivered_public_paths_verified_positive_dynamic_sample_unobserved",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "공개목록표본0으로양수공구상세·종료동적HTML/canonical의운영표본실관측은별도;합성UI/PG/CI검증은확인"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "specified_separately",
+        "actual_observation_evidence_ids": [
+          "public_http_deployment"
+        ]
+      }
     },
     {
       "id": "signup_01",
@@ -3232,26 +5532,79 @@
           "frontend/src/signup-recovery-boundary.test.tsx",
           "frontend/src/auth-refresh-lifecycle.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_browser_final"
         ],
         "frontend_scope": "이메일/활성소셜·재인증/복구·닉네임/탈퇴·계정별 기록·저장소거부/동시세션/늦은응답·이전 초안 전송 차단"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
+      "acceptance_status": "software_delivered_provider_human_flow_separate",
       "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다.",
         "이메일/카카오가 최신 범위다. 합성 소셜 테스트가 실제 카카오 외부 인증 성공을 대신하지 않는다. Naver/Google은 이 행의 필수조건으로 추가하지 않는다."
-      ]
+      ],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [
+        "공유원문묶음의카카오제공자로그인창진입은관측했으나사용자인증·동의·서비스복귀완료는별도;자격증명/세션사용없음"
+      ],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "specified_separately",
+        "actual_observation_evidence_ids": [
+          "public_browser_final"
+        ]
+      }
     },
     {
       "id": "state_01",
@@ -3304,25 +5657,75 @@
           "frontend/src/groupbuys.test.tsx",
           "frontend/src/groupbuy-actions.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_http_deployment"
         ],
         "frontend_scope": "로딩/빈결과/실패·stale목록·오류입력보존·중복lock·계정변경전송차단·한국시간·semantic controls/초점/반응형"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit",
+        "actual_observation_evidence_ids": [
+          "public_http_deployment"
+        ]
+      }
     },
     {
       "id": "state_02",
@@ -3351,7 +5754,7 @@
       ],
       "implementation": {
         "status": "source_mapped_and_reviewed",
-        "review": "초안·중복잠금·계정변경차단·timeout상태확인에 더해 새공구4행동의 inline2단계 확인·취소·원계정/revision/status재확인을 최신95scoped에 연결했다.",
+        "review": "초안·중복잠금·계정변경차단·timeout상태확인에 더해 새공구4행동의 inline2단계 확인·취소·원계정/revision/status재확인을 당시95 scoped 및 후속69/최신353 전체회귀에 연결했다. root 로컬 CUA에서 신규 신고와 중복 신고의 서로 다른 서버 결과문구를 확인했다.",
         "backend_files": [
           "backend/app/release.py",
           "backend/app/groupbuys.py",
@@ -3377,25 +5780,75 @@
           "frontend/src/groupbuy-actions.test.tsx",
           "frontend/src/community-action-boundary.test.tsx",
           "frontend/src/groupbuy-confirmation.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ui_report_hide_final",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "로딩/빈결과/실패·stale목록·오류입력보존·중복lock·계정변경전송차단·한국시간·semantic controls/초점/반응형"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "actual_observation_evidence_ids": [
+          "ui_report_hide_final"
+        ],
+        "additional_scope_status": "none_in_this_software_audit"
+      }
     },
     {
       "id": "terms_01",
@@ -3447,25 +5900,75 @@
           "frontend/src/admin-report-action.test.tsx",
           "frontend/src/admin-members.test.tsx",
           "frontend/src/groupbuys.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified",
+          "public_http_deployment"
         ],
         "frontend_scope": "역할Protected·앱웹운영접근·정확한신고대상/사유/시각·공구허용조치분기·공통중개footer·법적문서·회원화면noindex"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
-      ]
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit",
+        "actual_observation_evidence_ids": [
+          "public_http_deployment"
+        ]
+      }
     },
     {
       "id": "time_01",
@@ -3518,25 +6021,129 @@
           "frontend/src/groupbuys.test.tsx",
           "frontend/src/groupbuy-actions.test.tsx",
           "frontend/src/community-action-boundary.test.tsx"
-        ]
+        ],
+        "delivery_status": "implemented_tested_and_deployed"
       },
       "local_execution": {
         "status": "scoped_evidence_available_not_full_acceptance",
         "evidence_ids": [
           "backend_final_622",
-          "frontend_receipt"
+          "frontend_receipt",
+          "ci_final_parent_verified",
+          "ci_latest_002_verified"
         ],
         "frontend_scope": "로딩/빈결과/실패·stale목록·오류입력보존·중복lock·계정변경전송차단·한국시간·semantic controls/초점/반응형"
       },
       "production": {
-        "status": "latest_source_not_deployed_or_not_verified",
-        "baseline_commit": "05baede3"
+        "status": "exact_002_api_and_static_deployed_verified",
+        "baseline_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "existing_server_api": {
+          "status": "b23d938_deployed_health_and_groupbuy_route_verified",
+          "evidence_ids": [
+            "existing_server_product_api_deployment"
+          ],
+          "public_render_equivalence_claim": false
+        },
+        "public_render": {
+          "status": "exact_002_api_and_static_live_verified",
+          "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+          "evidence_ids": [
+            "render_final_deployment"
+          ]
+        }
       },
-      "acceptance_status": "open_pending_final_release_verification",
-      "limitations": [
-        "최신 전체 소스의 배포·실기기 수용 검증은 이 행에서 완료로 판정하지 않는다.",
-        "프런트 전체334는 header·확인대화상자 수정 전 기준이며 최신95 scoped와 합산하지 않는다."
+      "acceptance_status": "software_delivered_scoped_verification_complete",
+      "limitations": [],
+      "continuous_integration": {
+        "status": "latest002_pr_and_push_checks_passed_receipted",
+        "evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0",
+        "scope": "API643·PG174·UI353/27파일·public build·push unsignedAndroid 성공. ID별 전체수용·실기기와 구분."
+      },
+      "android_package": {
+        "status": "signed_offline_verified_not_device_accepted",
+        "version": "0.6.0",
+        "version_code": 10,
+        "source_commit": "0eb0614",
+        "evidence_ids": [
+          "android_signed_release_provenance",
+          "android_signed_offline_verification",
+          "android_current_input_equivalence"
+        ],
+        "android_inputs_equivalent_to_commit": "002d46cc95cd3cf1b708ffd4df0c059134b23be0"
+      },
+      "remaining_scopes": [],
+      "verification_disposition": {
+        "software_acceptance": "implemented_ci_passed_exact_source_deployed",
+        "ci_evidence_ids": [
+          "ci_latest_002_verified"
+        ],
+        "deployment_evidence_ids": [
+          "render_final_deployment"
+        ],
+        "observation_scope": "실제관측은연결된영수증의범위;원문전체47실기기수용완료를뜻하지않음",
+        "additional_scope_status": "none_in_this_software_audit"
+      }
+    }
+  ],
+  "historical_ci_verifications": [
+    {
+      "commit": "b23d9385222f4dcb1842cd7795a5fa854c087df8",
+      "pr_run_id": 42197964086,
+      "push_run_id": 42197958358,
+      "api_passed": 623,
+      "postgres_passed": 174,
+      "frontend_passed": 353,
+      "source_path": "artifacts/community-completion-20261106/ci-final-summary.json",
+      "observed_sha256": "109a72e30ffe07d1397f38ccbabe95ef46a4050c2b845ab8ef5b7290aa8b8537",
+      "scope": "당시 확인한 CI 요약 이력. 가변 source_path는 후속 결과로 갱신되므로 현재 파일 내용의 증거로 사용하지 않으며 건수를 합산하지 않는다."
+    }
+  ],
+  "acceptance_scope_rules": [
+    "구현·회귀·정확한소스배포를 확인한 기능을 미구현/미배포로 표시하지 않는다.",
+    "실제 관측은 해당영수증의로컬CUA/공개HTTP/SDK조회 범위에 한정한다.",
+    "같은개요행을공유하는ID는묶음의동작을공유하며ID별조건을새로배분하지않는다.",
+    "Android서명/정적49건·158입력동등성은 실제기기실행/Play승인을뜻하지않는다.",
+    "장기CTR·매출·검색인용효과는집계소프트웨어의구현수용과구분한다."
+  ],
+  "external_and_extended_scopes": {
+    "android_actual_device": {
+      "status": "not_evidenced",
+      "scope": "최신앱설치/실행,접근성·운영자흐름·오프라인계산기 실기기관측",
+      "not_a_claim_of_missing_software": true
+    },
+    "play_delivery": {
+      "status": "external_release_step_not_claimed",
+      "scope": "Play업로드·심사·기존설치본업데이트"
+    },
+    "kakao_human_authentication": {
+      "status": "provider_login_prompt_reached_human_auth_and_return_separate",
+      "shared_ids": [
+        "signup_01",
+        "login_01",
+        "logout_01"
+      ],
+      "observed_entry_source": "public_browser_final"
+    },
+    "long_term_outcomes": {
+      "status": "not_measured_not_software_acceptance_blocker",
+      "scope": "실제CTR/구매/매출증가·검색엔진/AI답변인용효과",
+      "related_ids": [
+        "analytics_01",
+        "insight_01",
+        "insight_02",
+        "seo_01"
       ]
     }
-  ]
+  },
+  "extended_observation_limits": {
+    "public_positive_groupbuy_sample": {
+      "status": "not_observed_because_public_list_empty",
+      "scope": "양수 공구상세·종료동적HTML/canonical;실제공개표본0",
+      "software_tests": "합성UI·실제PG·CI검증은별도로확인",
+      "production_fixtures_inserted": false
+    }
+  }
 }

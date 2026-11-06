@@ -50,7 +50,7 @@ Render는 기존과 동일한 전용 키와 고정 SSH 명령을 사용하되, �
 restrict,command="/home/elicer/Team_Wifi/.venv/bin/python /home/elicer/Team_Wifi/.runtime/restricted-inference-v1/scripts/serve-restricted-inference.py --port 8091 --enable-observe" ssh-ed25519 EXISTING_DEDICATED_PUBLIC_KEY
 ```
 
-승인 후 파일/공개 출처 맵과 수집기 하나를 배치했다. 수집기는 `ASSISTANT_OBSERVE_COLLECTOR_ENABLED=true`로 기존 `.runtime/community-candidate/venv`의 Opik SDK를 재사용한다. 고정 Unix 소켓과 게이트웨이는 같은 `restricted-inference-v1` 루트를 사용한다. Opik 목적지는 기존 `http://127.0.0.1:15173/api`이며 클라우드 기본값을 사용하지 않는다. 코드 기본값은 계속 비활성이므로 새 배포도 명시적 플래그가 필요하다. Render의 두 관측 환경변수 Save only 및 공개 검증은 root 담당자가 진행할 예정이다. 추론용 연결 환경변수·전용 비밀 파일의 기존 저장 완료 상태와 구분한다.
+승인 후 파일/공개 출처 맵과 수집기 하나를 배치했다. 수집기는 `ASSISTANT_OBSERVE_COLLECTOR_ENABLED=true`로 기존 `.runtime/community-candidate/venv`의 Opik SDK를 재사용한다. 고정 Unix 소켓과 게이트웨이는 같은 `restricted-inference-v1` 루트를 사용한다. Opik 목적지는 기존 `http://127.0.0.1:15173/api`이며 클라우드 기본값을 사용하지 않는다. 코드 기본값은 계속 비활성이므로 새 배포도 명시적 플래그가 필요하다. Render의 두 관측 환경변수 Save only와 시작 명령 저장을 root 담당자가 실제 확인한 뒤 API를 배포했다. 공개 요청의 저장 검증은 아래 별도 시간 구간 증거로 확인했다.
 
 철회는 Render 관측 플래그를 끄고, 동일 키 줄에서 `--enable-observe`를 제거하고, 관측 수집기만 중단하는 순서다. 추론/건강 확인과 기존 모델·Opik 프로세스를 유지한다. 이후 안전한 공개/합성 요청으로 별도 프로젝트의 실제 SDK 저장과 본문/식별자 부재를 확인하기 전에는 운영 기록 연결이 완료됐다고 말하지 않는다.
 
@@ -77,4 +77,20 @@ restrict,command="/home/elicer/Team_Wifi/.venv/bin/python /home/elicer/Team_Wifi
 - `artifacts/community-completion-20261106/observation-actual-persistence-proof.json`
 - `artifacts/community-completion-20261106/observation-boundary-recheck.json`
 
-남은 검증은 Render 최신 코드 배포 뒤 공개 웹·앱의 성공·거절·오류 요청을 보내고, 해당 운영 메타데이터가 별도 프로젝트에 저장되며 원문/식별자가 없는지 실제로 대조하는 것이다. 기존 평가 기록이나 위 연결 확인 한 건으로 이 단계를 완료 처리하지 않는다.
+아래 공개 Render 검증을 추가해 연결 확인 한 건과 실제 공개 요청 세 건을 구분했다. 고정 평가 자료와도 별도로 기록했다. 이 결과는 확인한 합성 요청 범위의 증거이며 모든 요청의 영구 보존이나 의미 품질 보증을 뜻하지 않는다.
+
+
+## 공개 Render 요청의 독립 영속성 검증
+
+Render API 배포 `002d46c`(`002d46cc95cd3cf1b708ffd4df0c059134b23be0`)가 LIVE인 것을 root 담당자가 확인한 뒤, 공개 합성 요청만 세 건 보냈다. HTTP 결과는 200/200/422였고, 승인된 공개 안내 단위를 선택한 응답은 실제 `moduyuga-qwen3-1.7b` 모델과 인용 한 개를 사용했다. 이 검증자는 추가 공개 질문을 보내지 않고 기존 Opik을 읽기 전용 SDK로 독립 조회했다.
+
+- 요청 구간(UTC): `2026-11-06T10:29:36.970468+00:00` ~ `2026-11-06T10:29:41.716558+00:00`.
+- 비동기 전송 여유를 30초로 분리하여 관측 구간을 `2026-11-06T10:30:11.716558+00:00`에 닫았다.
+- 기존 bootstrap 한 건은 보존했고 프로젝트 전체는 4건, 증가분과 해당 구간의 서로 다른 기록은 각각 **3건**이었다.
+- outcome은 local_extractive 1 / abstained 1 / error 1, error_code는 none 2 / invalid_request 1로 예상과 정확히 일치했다.
+- 세 기록 모두 SDK가 제공하는 input/output/thread_id 필드가 존재하면서 null이었다. metadata 키는 정확한 허용 목록에 맞았고, 공개 출처·SHA 및 상태·오류·시간 검증을 통과했다. 질문·답변·회원/대화/요청 식별자는 복사하거나 출력하지 않았다.
+- 전체 세 건에 total 단계가 있었다. 요청 본문 검증 전에 끝난 422 한 건에는 실행하지 않은 검색·도구·생성 단계를 꾸며 넣지 않았고, 나머지 두 건에는 네 단계가 각각 존재했다.
+
+SDK의 서버 시간 필터 호출에서 400을 받아, input/output/metadata를 제외한 요약(ID·시간)만 가져와 같은 UTC 구간을 필터한 뒤 해당 세 기록만 전체 조회했다. 구간 밖 기록의 원문·metadata는 전체 조회하거나 출력하지 않았고 조회 결과는 잘리지 않았다.
+
+안전 영수증: `artifacts/community-completion-20261106/render-public-opik-persistence-proof.json`. 공개 HTTP 실행 증거 `public-assistant-requests.json`과 독립 저장 검증을 구분한다. 실제 회원 질문이나 개인정보를 사용하지 않았다.
