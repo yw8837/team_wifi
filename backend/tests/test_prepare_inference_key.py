@@ -55,7 +55,7 @@ def test_cli_failure_has_no_key_path_or_traceback(tmp_path):
     response=subprocess.run([sys.executable,str(Path(module.__file__))],env={**os.environ,
         'ASSISTANT_SSH_SECRET_FILE':str(tmp_path/private_marker),'RUNTIME_DIR':str(tmp_path/'runtime')},capture_output=True)
     assert response.returncode!=0 and response.stdout==b''
-    assert response.stderr.strip()==b'Dedicated inference key preparation failed.'
+    assert response.stderr.strip()==b'Dedicated inference key preparation failed. reason=source_missing'
     assert private_marker.encode() not in response.stderr and b'Traceback' not in response.stderr
 
 
@@ -79,3 +79,95 @@ def test_start_script_stops_before_server_when_key_preparation_fails(tmp_path,en
         assert b'Dedicated inference key preparation failed.' in response.stderr
     else:
         assert response.returncode==0 and b'UVICORN_WOULD_START' in response.stdout
+
+
+@pytest.mark.parametrize('scenario,expected',[
+    ('missing_config','secret_config_missing'),
+    ('relative_source','source_path_not_absolute'),
+    ('relative_runtime','runtime_path_not_absolute'),
+    ('missing_source','source_missing'),
+    ('directory_source','source_not_regular'),
+    ('short_source','source_size_invalid'),
+    ('invalid_key','key_format_invalid'),
+    ('runtime_file','runtime_create_failed'),
+])
+def test_real_cli_reasons_never_include_submitted_values(tmp_path,scenario,expected):
+    import subprocess,sys
+    marker='PRIVATE_CANARY_DO_NOT_PRINT'
+    source=tmp_path/marker
+    source.write_bytes(b'-----BEGIN OPENSSH PRIVATE KEY-----\n'+b'SYNTHETIC'*20)
+    runtime=tmp_path/(marker+'-runtime')
+    env={**os.environ,'ASSISTANT_SSH_SECRET_FILE':str(source),'RUNTIME_DIR':str(runtime)}
+    if scenario=='missing_config':env.pop('ASSISTANT_SSH_SECRET_FILE')
+    elif scenario=='relative_source':env['ASSISTANT_SSH_SECRET_FILE']=marker
+    elif scenario=='relative_runtime':env['RUNTIME_DIR']=marker
+    elif scenario=='missing_source':source.unlink()
+    elif scenario=='directory_source':source.unlink();source.mkdir()
+    elif scenario=='short_source':source.write_bytes(b'short')
+    elif scenario=='invalid_key':source.write_bytes(marker.encode()*10)
+    elif scenario=='runtime_file':runtime.write_bytes(b'file')
+    result=subprocess.run([sys.executable,module.__file__],env=env,capture_output=True,timeout=15)
+    assert result.returncode!=0 and result.stdout==b''
+    assert result.stderr.strip()==('Dedicated inference key preparation failed. reason='+expected).encode()
+    assert marker.encode() not in result.stderr and b'Traceback' not in result.stderr
+
+
+@pytest.mark.parametrize('stage,exception,expected',[
+    ('stat',PermissionError,'source_stat_denied'),
+    ('stat',OSError,'source_stat_failed'),
+    ('read',PermissionError,'source_read_denied'),
+    ('read',OSError,'source_read_failed'),
+    ('runtime',PermissionError,'runtime_create_denied'),
+])
+def test_os_errors_are_fixed_reasons_without_raw_details(monkeypatch,tmp_path,stage,exception,expected):
+    source=tmp_path/'source'
+    source.write_bytes(b'-----BEGIN OPENSSH PRIVATE KEY-----\n'+b'SYNTHETIC'*20)
+    runtime=tmp_path/'runtime'
+    original_stat=Path.stat;original_open=Path.open;original_mkdir=Path.mkdir
+    def fail():raise exception('PRIVATE_PATH SECRET_OS_DETAIL')
+    if stage=='stat':
+        def stat_file(self,*args,**kwargs):
+            if self==source:fail()
+            return original_stat(self,*args,**kwargs)
+        monkeypatch.setattr(Path,'stat',stat_file)
+    elif stage=='read':
+        def open_file(self,*args,**kwargs):
+            if self==source:fail()
+            return original_open(self,*args,**kwargs)
+        monkeypatch.setattr(Path,'open',open_file)
+    else:
+        def mkdir(self,*args,**kwargs):
+            if self==runtime:fail()
+            return original_mkdir(self,*args,**kwargs)
+        monkeypatch.setattr(Path,'mkdir',mkdir)
+    monkeypatch.setenv('ASSISTANT_SSH_SECRET_FILE',str(source))
+    monkeypatch.setenv('RUNTIME_DIR',str(runtime))
+    with pytest.raises(SystemExit) as error:module.main()
+    assert str(error.value)=='Dedicated inference key preparation failed. reason='+expected
+    assert 'PRIVATE' not in str(error.value)
+
+
+def test_runtime_owner_guard_remains_fail_closed(monkeypatch,tmp_path):
+    source=tmp_path/'source';source.write_bytes(b'-----BEGIN OPENSSH PRIVATE KEY-----\n'+b'SYNTHETIC'*20)
+    runtime=tmp_path/'runtime';runtime.mkdir()
+    monkeypatch.setattr(module,'service_uid',lambda:runtime.stat().st_uid+1)
+    monkeypatch.setenv('ASSISTANT_SSH_SECRET_FILE',str(source));monkeypatch.setenv('RUNTIME_DIR',str(runtime))
+    with pytest.raises(SystemExit) as error:module.main()
+    assert str(error.value)=='Dedicated inference key preparation failed. reason=runtime_owner_mismatch'
+    assert not list(runtime.iterdir())
+
+
+def test_unexpected_failure_cli_still_has_no_raw_exception(monkeypatch,tmp_path):
+    monkeypatch.setenv('ASSISTANT_SSH_SECRET_FILE',str(tmp_path/'private-marker'))
+    def fail(*args):raise RuntimeError('PRIVATE_KEY_AND_PATH')
+    monkeypatch.setattr(module,'prepare',fail)
+    with pytest.raises(SystemExit) as error:module.main()
+    assert str(error.value)=='Dedicated inference key preparation failed. reason=unexpected'
+
+
+def test_reason_enum_never_accepts_freeform_details(monkeypatch,tmp_path):
+    monkeypatch.setenv('ASSISTANT_SSH_SECRET_FILE',str(tmp_path/'source'))
+    def fail(*args):raise module.PreparationError('PRIVATE_PATH_AND_SECRET')
+    monkeypatch.setattr(module,'prepare',fail)
+    with pytest.raises(SystemExit) as error:module.main()
+    assert str(error.value)=='Dedicated inference key preparation failed. reason=unexpected'
