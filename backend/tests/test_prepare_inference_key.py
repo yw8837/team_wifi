@@ -171,3 +171,59 @@ def test_reason_enum_never_accepts_freeform_details(monkeypatch,tmp_path):
     monkeypatch.setattr(module,'prepare',fail)
     with pytest.raises(SystemExit) as error:module.main()
     assert str(error.value)=='Dedicated inference key preparation failed. reason=unexpected'
+
+
+@pytest.mark.skipif(os.name!='posix',reason='Actual POSIX mode inheritance is required')
+def test_setgid_parent_keeps_its_mode_but_private_directory_does_not_inherit(monkeypatch,tmp_path):
+    import stat
+    source=tmp_path/'platform-secret'
+    raw=b'-----BEGIN OPENSSH PRIVATE KEY-----\n'+b'SYNTHETIC'*20+b'\n-----END OPENSSH PRIVATE KEY-----\n'
+    source.write_bytes(raw);source.chmod(0o640)
+    source_mode=stat.S_IMODE(source.stat().st_mode)
+    runtime=tmp_path/'runtime';runtime.mkdir();runtime.chmod(0o2700)
+    assert stat.S_IMODE(runtime.stat().st_mode)==0o2700
+    original=module.tempfile.mkdtemp;inherited=[]
+    def record_inheritance(*args,**kwargs):
+        result=original(*args,**kwargs)
+        inherited.append(stat.S_IMODE(Path(result).stat().st_mode))
+        return result
+    monkeypatch.setattr(module.tempfile,'mkdtemp',record_inheritance)
+    result=module.prepare(source,runtime)
+    assert inherited==[0o2700]
+    assert stat.S_IMODE(result.parent.stat().st_mode)==0o700
+    assert stat.S_IMODE(result.stat().st_mode)==0o400
+    assert stat.S_IMODE(runtime.stat().st_mode)==0o2700
+    assert stat.S_IMODE(source.stat().st_mode)==source_mode
+    assert source.read_bytes()==result.read_bytes()==raw
+
+
+@pytest.mark.skipif(os.name!='posix',reason='Actual POSIX chmod/fchmod is required')
+@pytest.mark.parametrize('stage,expected',[
+    ('directory','private_chmod_denied'),('key','private_key_chmod_denied'),
+])
+def test_mode_enforcement_denial_fails_closed_without_raw_details(monkeypatch,tmp_path,stage,expected):
+    source=tmp_path/'source';source.write_bytes(b'-----BEGIN OPENSSH PRIVATE KEY-----\n'+b'SYNTHETIC'*20)
+    runtime=tmp_path/'runtime'
+    def denied(*args,**kwargs):raise PermissionError('PRIVATE_PATH_AND_KEY')
+    if stage=='directory':monkeypatch.setattr(Path,'chmod',denied)
+    else:monkeypatch.setattr(module.os,'fchmod',denied)
+    monkeypatch.setenv('ASSISTANT_SSH_SECRET_FILE',str(source));monkeypatch.setenv('RUNTIME_DIR',str(runtime))
+    with pytest.raises(SystemExit) as error:module.main()
+    assert str(error.value)=='Dedicated inference key preparation failed. reason='+expected
+    assert 'PRIVATE' not in str(error.value)
+    assert not list(runtime.glob('inference-*/key'))
+
+
+@pytest.mark.skipif(os.name!='posix',reason='Actual POSIX setgid postcheck is required')
+def test_strict_final_mode_check_still_rejects_ineffective_chmod(monkeypatch,tmp_path):
+    import stat
+    source=tmp_path/'source';source.write_bytes(b'-----BEGIN OPENSSH PRIVATE KEY-----\n'+b'SYNTHETIC'*20)
+    runtime=tmp_path/'runtime';runtime.mkdir();runtime.chmod(0o2700)
+    original=Path.chmod
+    def ineffective(self,mode,*args,**kwargs):
+        if self.parent==runtime and self.name.startswith('inference-'):return None
+        return original(self,mode,*args,**kwargs)
+    monkeypatch.setattr(Path,'chmod',ineffective)
+    with pytest.raises(module.PreparationError) as error:module.prepare(source,runtime)
+    assert error.value.code=='private_permissions_invalid'
+    assert stat.S_IMODE(runtime.stat().st_mode)==0o2700

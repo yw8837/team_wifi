@@ -11,6 +11,10 @@ import tempfile
 
 REASONS = frozenset({
     'key_format_invalid',
+    'private_chmod_denied',
+    'private_chmod_failed',
+    'private_key_chmod_denied',
+    'private_key_chmod_failed',
     'private_directory_denied',
     'private_directory_failed',
     'private_key_create_denied',
@@ -95,20 +99,30 @@ def prepare(source, runtime):
         raise PreparationError('runtime_owner_mismatch')
     private=Path(checked_io(lambda:tempfile.mkdtemp(prefix='inference-',dir=runtime),
         missing='private_parent_missing',denied='private_directory_denied',failed='private_directory_failed'))
+    # mkdir can inherit setgid/default ACL bits from the shared runtime parent.
+    # Tighten only this newly created directory, never the parent or mounted secret.
+    if os.name=='posix':
+        checked_io(lambda:private.chmod(0o700),missing='private_missing',
+            denied='private_chmod_denied',failed='private_chmod_failed')
     target=private/'key'
     descriptor=checked_io(lambda:os.open(target,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o400),
         missing='private_parent_missing',denied='private_key_create_denied',failed='private_key_create_failed')
     try:
         with os.fdopen(descriptor,'wb') as output:
+            if os.name=='posix':
+                checked_io(lambda:os.fchmod(output.fileno(),0o400),missing='private_key_missing',
+                    denied='private_key_chmod_denied',failed='private_key_chmod_failed')
             output.write(raw)
             output.flush()
             os.fsync(output.fileno())
-    except Exception:
+    except Exception as error:
         try:
             target.unlink(missing_ok=True)
             private.rmdir()
         except OSError:
             pass
+        if isinstance(error,PreparationError):
+            raise
         raise PreparationError('private_key_write_failed') from None
     if os.name=='posix':
         private_metadata=checked_io(private.stat,missing='private_missing',denied='private_stat_denied',failed='private_stat_failed')
