@@ -93,6 +93,7 @@ def test_public_session_survives_eight_hours_but_logout_revokes(public_mode, mon
 def test_public_session_expires_after_thirty_days(public_mode, monkeypatch):
     c, p, _ = public_mode
     stamp=security.now()
+    monkeypatch.setattr(security,'now',lambda:stamp)
     with SessionLocal() as db:
         raw=security.issue_token(db,db.get(User,p['buyer']['id']))
         recovery=security.issue_token(db,db.get(User,p['buyer']['id']),kind='recovery',lifetime=300)
