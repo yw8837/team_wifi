@@ -1,0 +1,21 @@
+Frontend Vitest infrastructure failure — 2026-11-02
+Workspace: E:/Team_Wifi/frontend
+Actual Node command: E:/Team_Wifi/.runtime/toolchains/node/node.exe node_modules/vitest/vitest.mjs run src/public-release.test.tsx src/release-transport.test.ts src/beta.test.tsx src/startup.test.tsx src/api.test.ts --maxWorkers=1
+Process-local PATH explicitly prepended E:/Team_Wifi/.runtime/toolchains/node.
+The attempted relative dot-source ./scripts/use-workspace.ps1 in frontend cwd failed before this command; no tests depend on that relative path, Node execution continued with explicit E runtime. Later shell calls use absolute workspace script path.
+Process launch: 02:09:32 KST. Vitest runner start: 02:17:13 KST.
+Runner: Vitest v4.1.12
+Result: Test Files no tests; Tests no tests; Errors 5; Duration 334.23s.
+Transform 0ms; setup 0ms; import 0ms; tests 0ms; environment 0ms.
+Every selected file failed before test execution:
+- src/public-release.test.tsx
+- src/startup.test.tsx
+- src/api.test.ts
+- src/beta.test.tsx
+- src/release-transport.test.ts
+Each error: [vitest-pool]: Failed to start forks worker for test files.
+Cause: [vitest-pool-runner]: Timeout waiting for worker to respond.
+Stack: vitest/dist/chunks/cli-api.B0Pz1_R7.js Pool.schedule at 3532; worker timeout at 3108.
+No assertion failure or pass can be inferred. This is incomplete validation.
+Root observed concurrent unrelated Robocopy Docker/WSL C-to-E copy and E disk queue contention. No unrelated process was stopped.
+No retry launched. Linux GitHub Actions validation delegated to main agent.

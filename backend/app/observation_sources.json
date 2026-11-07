@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "sources": {
+    "analysis:d1": "25d9db419590a5c522aed91fb67e59abcbf9b45e3dafd4b410bfcd8ed007ec6c",
+    "analysis:d2": "0c9b289c5571ae0d3cded61f5f3185a2c911d14d9f5c59851a2de7af82336d40",
+    "analysis:d3": "9a322a0b1d6ea058251c288292fa691f11ee2a2b220e1055fe9bf06678ffac02",
+    "analysis:d4": "f83e7cd18ed662c2828a761db49b1890c29a41c138d182df1022d89d281067d9",
+    "catalog:bluerabbit-books": "bf6ae3ff7ea16e402320781692dcb185601c51ce6bdbe3e104f34dde2f3724ad",
+    "catalog:doubleheart-bottles": "f5467a76055db40096bcf10056fb03acf47189e37708c6eed4794393415f2fbd",
+    "catalog:doubleheart-hygiene": "57df492f8b37608278eec4b0c8811d8e56a0304493e2f15d0cf2562c93a8b6f0",
+    "catalog:momq-diapers": "5469c083da6ee9616cf439d1e78fd2bf2422e3cf56ed795e2bcf7659535a1a32",
+    "catalog:motherk-cleaning": "267e17c81174b45491f682fd2cd9117485c1b851f38d1c4ec63dec0ca77293ba",
+    "catalog:motherk-hygiene": "8750f7bfa8e4aab2ccc39e0cbdf37632ff323c4cf5dc668dc8e3a197beff7b69",
+    "catalog:ryan-strollers": "ec43f5a0f6ba7d634f064b8d6a2b9899f06a381f7dab8183e41643ed67e206f3",
+    "guide:chat-history": "b4f4685f00d4fb4b9ce6e7053215eca1cb0151cdd31d866cc5eecfcef78a4cad",
+    "guide:community-guide": "d3bfd99f49de019cfc21dd770354d837871e56f7fe45b0bd147522506a14e0eb",
+    "guide:compare-unit": "2046b0d41b196f3c70dc5ce6e427d742c40801ef16621a7762577b44321a90d2",
+    "guide:discount-gift": "bc295be3591fb9c422087c9eff7de1e6b14fe9a44d4a164307e48bdd35910091",
+    "guide:privacy-chat": "7e5fe538789dc1563b82c63bbf3e54920fb0f1c23833d65513fd3fa99d4e728b",
+    "guide:privacy-companions": "6989ff93294fa46f7589ec804cb24ac5faa07e6c8a302317f66c0bfe0f63495a",
+    "guide:saved-guide": "be8e1f22f7f546b2a6cc3dcbbc59e5f881cee796701e768a32b29ca9f4eb5022",
+    "guide:scope-guide": "fa953feea593b76581d2457f172e4158e691441044a58d76fd1ee730adc5abf5"
+  }
+}

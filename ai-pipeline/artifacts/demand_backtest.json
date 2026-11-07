@@ -1,0 +1,90 @@
+{
+  "target": "monthly positive sold units, not latent market demand",
+  "test_months": 11,
+  "evaluation": "expanding rolling origin; each prediction uses only prior months; no parameter fitting or test-based model selection",
+  "observations": [
+    {
+      "month": "2011-01",
+      "actual_units": 386736,
+      "previous_month_units": 357523,
+      "seasonal_12month_units": 390408
+    },
+    {
+      "month": "2011-02",
+      "actual_units": 282622,
+      "previous_month_units": 386736,
+      "seasonal_12month_units": 381619
+    },
+    {
+      "month": "2011-03",
+      "actual_units": 376144,
+      "previous_month_units": 282622,
+      "seasonal_12month_units": 525030
+    },
+    {
+      "month": "2011-04",
+      "actual_units": 307647,
+      "previous_month_units": 376144,
+      "seasonal_12month_units": 366057
+    },
+    {
+      "month": "2011-05",
+      "actual_units": 394641,
+      "previous_month_units": 307647,
+      "seasonal_12month_units": 395435
+    },
+    {
+      "month": "2011-06",
+      "actual_units": 388124,
+      "previous_month_units": 394641,
+      "seasonal_12month_units": 406197
+    },
+    {
+      "month": "2011-07",
+      "actual_units": 399263,
+      "previous_month_units": 388124,
+      "seasonal_12month_units": 337547
+    },
+    {
+      "month": "2011-08",
+      "actual_units": 420689,
+      "previous_month_units": 399263,
+      "seasonal_12month_units": 471930
+    },
+    {
+      "month": "2011-09",
+      "actual_units": 568698,
+      "previous_month_units": 420689,
+      "seasonal_12month_units": 583362
+    },
+    {
+      "month": "2011-10",
+      "actual_units": 619596,
+      "previous_month_units": 568698,
+      "seasonal_12month_units": 619493
+    },
+    {
+      "month": "2011-11",
+      "actual_units": 746951,
+      "previous_month_units": 619596,
+      "seasonal_12month_units": 724226
+    }
+  ],
+  "models": {
+    "previous_month_units": {
+      "mae_units": 67971.27272727272,
+      "wape": 0.15286588261848894
+    },
+    "seasonal_12month_units": {
+      "mae_units": 43571.0,
+      "wape": 0.09799021122194937
+    }
+  },
+  "limitations": [
+    "24 full months only",
+    "no inventory/stockout/exposure/price covariates",
+    "aggregate UK gifts/wholesale",
+    "2011-12 excluded as partial month",
+    "no current childcare demand forecast"
+  ]
+}

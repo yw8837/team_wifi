@@ -1,0 +1,12 @@
+
+> modu-yuga@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.12 <repo>/frontend
+
+
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+   Start at  15:56:46
+   Duration  215ms (transform 41ms, setup 0ms, import 55ms, tests 24ms, environment 0ms)

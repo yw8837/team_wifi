@@ -1,0 +1,315 @@
+{
+  "rows": 12330,
+  "positive_labels": 1908,
+  "label_prevalence": 0.15474452554744525,
+  "features": [
+    "Administrative",
+    "Administrative_Duration",
+    "Informational",
+    "Informational_Duration",
+    "ProductRelated",
+    "ProductRelated_Duration",
+    "SpecialDay",
+    "Weekend"
+  ],
+  "excluded_features": [
+    "BounceRates",
+    "ExitRates",
+    "PageValues",
+    "Month",
+    "OperatingSystems",
+    "Browser",
+    "Region",
+    "TrafficType",
+    "VisitorType"
+  ],
+  "seed": 20261101,
+  "split_method": "60/20/20 grouped by all selected feature values (not label); GroupShuffleSplit; validation selects model, test never selects",
+  "duplicate_full_rows": 125,
+  "duplicate_selected_feature_rows": 846,
+  "feature_group_overlap": 0,
+  "splits": {
+    "train": {
+      "rows": 7219,
+      "positive_labels": 1076,
+      "prevalence": 0.1490511151128965,
+      "indices_sha256": "7f930647f60121c8fb46324410e36ccb3931a120b8161d1ea3e9019789f09d3c"
+    },
+    "validation": {
+      "rows": 2365,
+      "positive_labels": 414,
+      "prevalence": 0.17505285412262156,
+      "indices_sha256": "cf239ade15886cdf5aca9e70e0f87ae947afea2072cd99bc745060708741e4b1"
+    },
+    "test": {
+      "rows": 2746,
+      "positive_labels": 418,
+      "prevalence": 0.15222141296431171,
+      "indices_sha256": "4e0bb3b8050b28e3ad6d47ff5c092f0b147e38dbba11042664cd4a7dbf0ec2b6"
+    }
+  },
+  "models": {
+    "dummy_prevalence": {
+      "validation": {
+        "auroc": 0.5,
+        "pr_auc_average_precision": 0.17505285412262156,
+        "brier": 0.1450854428176756,
+        "log_loss": 0.466356275251373,
+        "ece_10bins": 0.02600173900972505,
+        "calibration_bins": [
+          {
+            "lower": 0.1,
+            "count": 2365,
+            "mean_probability": 0.1490511151128965,
+            "observed_rate": 0.17505285412262156
+          }
+        ]
+      },
+      "test": {
+        "auroc": 0.5,
+        "pr_auc_average_precision": 0.15222141296431171,
+        "brier": 0.12906010518792688,
+        "log_loss": 0.42658247184225423,
+        "ece_10bins": 0.003170297851415177,
+        "calibration_bins": [
+          {
+            "lower": 0.1,
+            "count": 2746,
+            "mean_probability": 0.14905111511289654,
+            "observed_rate": 0.15222141296431171
+          }
+        ]
+      }
+    },
+    "logistic_regression": {
+      "validation": {
+        "auroc": 0.6543089509405557,
+        "pr_auc_average_precision": 0.2757597806788971,
+        "brier": 0.1402982193689428,
+        "log_loss": 0.4494034875965609,
+        "ece_10bins": 0.02634745724121831,
+        "calibration_bins": [
+          {
+            "lower": 0.0,
+            "count": 213,
+            "mean_probability": 0.05297902806990191,
+            "observed_rate": 0.08450704225352113
+          },
+          {
+            "lower": 0.1,
+            "count": 1859,
+            "mean_probability": 0.1442498651374984,
+            "observed_rate": 0.16514254975793438
+          },
+          {
+            "lower": 0.2,
+            "count": 229,
+            "mean_probability": 0.2323522389297379,
+            "observed_rate": 0.28820960698689957
+          },
+          {
+            "lower": 0.3,
+            "count": 40,
+            "mean_probability": 0.3371673225956205,
+            "observed_rate": 0.325
+          },
+          {
+            "lower": 0.4,
+            "count": 16,
+            "mean_probability": 0.4426588167225206,
+            "observed_rate": 0.375
+          },
+          {
+            "lower": 0.5,
+            "count": 5,
+            "mean_probability": 0.554855089932312,
+            "observed_rate": 0.4
+          },
+          {
+            "lower": 0.6,
+            "count": 2,
+            "mean_probability": 0.6423691475054674,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.9,
+            "count": 1,
+            "mean_probability": 0.9066602338541317,
+            "observed_rate": 0.0
+          }
+        ]
+      },
+      "test": {
+        "auroc": 0.722320533057104,
+        "pr_auc_average_precision": 0.30541904473455433,
+        "brier": 0.12258690141165933,
+        "log_loss": 0.40339771902374055,
+        "ece_10bins": 0.013877734869249682,
+        "calibration_bins": [
+          {
+            "lower": 0.0,
+            "count": 238,
+            "mean_probability": 0.050618069454038725,
+            "observed_rate": 0.06302521008403361
+          },
+          {
+            "lower": 0.1,
+            "count": 2265,
+            "mean_probability": 0.13926475706830124,
+            "observed_rate": 0.13730684326710818
+          },
+          {
+            "lower": 0.2,
+            "count": 184,
+            "mean_probability": 0.23305043027771996,
+            "observed_rate": 0.33695652173913043
+          },
+          {
+            "lower": 0.3,
+            "count": 37,
+            "mean_probability": 0.33868000172689056,
+            "observed_rate": 0.5405405405405406
+          },
+          {
+            "lower": 0.4,
+            "count": 10,
+            "mean_probability": 0.4289868622186751,
+            "observed_rate": 0.5
+          },
+          {
+            "lower": 0.5,
+            "count": 4,
+            "mean_probability": 0.5410482262970691,
+            "observed_rate": 0.5
+          },
+          {
+            "lower": 0.6,
+            "count": 3,
+            "mean_probability": 0.6287704361550408,
+            "observed_rate": 0.3333333333333333
+          },
+          {
+            "lower": 0.7,
+            "count": 3,
+            "mean_probability": 0.7581349579830414,
+            "observed_rate": 0.3333333333333333
+          },
+          {
+            "lower": 0.8,
+            "count": 1,
+            "mean_probability": 0.8595640511720233,
+            "observed_rate": 1.0
+          },
+          {
+            "lower": 0.9,
+            "count": 1,
+            "mean_probability": 0.9576485420702331,
+            "observed_rate": 0.0
+          }
+        ]
+      }
+    },
+    "lightgbm": {
+      "validation": {
+        "auroc": 0.6884745095417438,
+        "pr_auc_average_precision": 0.28109382402483923,
+        "brier": 0.13645630432442166,
+        "log_loss": 0.43119012461651474,
+        "ece_10bins": 0.024602823474418417,
+        "calibration_bins": [
+          {
+            "lower": 0.0,
+            "count": 704,
+            "mean_probability": 0.04670464937606538,
+            "observed_rate": 0.05113636363636364
+          },
+          {
+            "lower": 0.1,
+            "count": 948,
+            "mean_probability": 0.1501998646328085,
+            "observed_rate": 0.18881856540084388
+          },
+          {
+            "lower": 0.2,
+            "count": 579,
+            "mean_probability": 0.24078862259561237,
+            "observed_rate": 0.2659758203799655
+          },
+          {
+            "lower": 0.3,
+            "count": 100,
+            "mean_probability": 0.3393582524871832,
+            "observed_rate": 0.32
+          },
+          {
+            "lower": 0.4,
+            "count": 32,
+            "mean_probability": 0.4351841797937801,
+            "observed_rate": 0.375
+          },
+          {
+            "lower": 0.5,
+            "count": 2,
+            "mean_probability": 0.5050579151961436,
+            "observed_rate": 0.5
+          }
+        ]
+      },
+      "test": {
+        "auroc": 0.744809393446127,
+        "pr_auc_average_precision": 0.2937280662857413,
+        "brier": 0.11784350964162792,
+        "log_loss": 0.37304750621741384,
+        "ece_10bins": 0.02227828604624313,
+        "calibration_bins": [
+          {
+            "lower": 0.0,
+            "count": 1122,
+            "mean_probability": 0.034248193344904476,
+            "observed_rate": 0.040106951871657755
+          },
+          {
+            "lower": 0.1,
+            "count": 914,
+            "mean_probability": 0.14767250380876185,
+            "observed_rate": 0.18161925601750548
+          },
+          {
+            "lower": 0.2,
+            "count": 579,
+            "mean_probability": 0.23914097053352604,
+            "observed_rate": 0.27461139896373055
+          },
+          {
+            "lower": 0.3,
+            "count": 104,
+            "mean_probability": 0.33630007688816926,
+            "observed_rate": 0.3557692307692308
+          },
+          {
+            "lower": 0.4,
+            "count": 25,
+            "mean_probability": 0.43882402928731173,
+            "observed_rate": 0.4
+          },
+          {
+            "lower": 0.5,
+            "count": 2,
+            "mean_probability": 0.5212720501365882,
+            "observed_rate": 0.5
+          }
+        ]
+      }
+    }
+  },
+  "selected_model": "lightgbm",
+  "selection_criterion": "maximum validation average precision among logistic and LightGBM",
+  "model_sha256": "6dc6e4269671949f5a5f4b80a7dc11647604a4be50647d2303534bcb19f3c0ec",
+  "calibration": "Uncalibrated probabilities evaluated with Brier/ECE and reliability bins on held-out test; no post-hoc calibration fit",
+  "limitations": [
+    "UCI 과거 세션의 구매 여부 분류 실험이며 한국 육아용품 구매 확률이 아닙니다.",
+    "방문 수와 체류시간은 세션 종료 집계입니다. 진행 중 세션의 실시간 성능은 검증하지 않았습니다.",
+    "확률의 국내 서비스 보정과 외부 검증이 없으며 할인·이탈·공구 성사 원인을 설명하지 않습니다.",
+    "PageValues, BounceRates, ExitRates, Revenue는 입력에서 제외했습니다."
+  ]
+}

@@ -1,0 +1,95 @@
+import { beforeAll, beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
+import { AuthProvider } from "./shared";
+import type { Offer, Demand, Comment } from "./release-data";
+const state=vi.hoisted(()=>({data:new Map<string,unknown>(),loading:false,error:""}));
+vi.mock("./release-data",async()=>{
+ const actual=await vi.importActual<typeof import("./release-data")>("./release-data");
+ return {...actual,usePublicResource:(path:string|null)=>({data:path?state.data.get(path.split("?")[0])??[]:null,loading:state.loading,error:state.error,reload:vi.fn()})};
+});
+let PublicApp:typeof import("./public-app").PublicApp,PublicGate:typeof import("./public-app").PublicGate;
+let AdminReport:typeof import("./public-app").AdminReport;
+let policy:typeof import("./release-policy");
+function render(path:string){return renderToStaticMarkup(<MemoryRouter initialEntries={[path]}><AuthProvider><PublicApp/></AuthProvider></MemoryRouter>);}
+const offer:Offer={id:"ref-1",title:"안전한 용품 선택",category:"외출·안전",summary:"공식 안전 정보",source_name:"공식 기관",source_url:"https://example.org/safety",source_checked_at:"2026-11-01T00:00:00Z",entry_type:"shopping_reference",price:null,shipping_fee:null,unit:null,expires_at:null,comparison_notes:["규격을 확인하세요."],is_affiliate:false,saved:false};
+const demand:Demand={id:"d1",title:"안전용품 수요",body:'<img src=x onerror="alert(1)"> 육아용품 질문',category:"외출·안전",author:{id:"u1",nickname:"작성자"},created_at:"2026-11-01T00:00:00Z",interest_count:0,interested:false,comment_count:1,own:false};
+beforeAll(async()=>{vi.stubEnv("VITE_PUBLIC_RELEASE","1");vi.stubEnv("VITE_BETA_MODE","0");({PublicApp,PublicGate,AdminReport}=await import("./public-app"));policy=await import("./release-policy");});
+beforeEach(()=>{
+ vi.stubGlobal("sessionStorage",{getItem:()=>null,setItem:vi.fn(),removeItem:vi.fn()});
+ vi.stubGlobal("navigator",{onLine:true});vi.stubGlobal("window",{location:{origin:"https://app.example.test"}});
+ vi.stubGlobal("fetch",vi.fn());state.data.clear();state.loading=false;state.error="";
+ state.data.set("/config",{public_release:true,beta_mode:false});state.data.set("/release/offers",[offer]);state.data.set("/release/offers/ref-1",offer);state.data.set("/release/demands",[demand]);state.data.set("/release/demands/d1",demand);
+ const comment:Comment={id:"c1",body:"규격 확인이 궁금해요",author:{id:"u2",nickname:"질문자"},created_at:demand.created_at,own:false};state.data.set("/release/demands/d1/comments",[comment]);
+});
+afterEach(()=>vi.unstubAllGlobals());
+describe("public release navigation and safe content",()=>{
+ it("keeps social login loading visible instead of silently hiding it",()=>{
+   state.loading=true;
+   expect(render('/login')).toContain('소셜 로그인 연결을 확인하고 있어요');
+ });
+ it("offers a retry when social login discovery fails",()=>{
+   state.error='서버 연결에 시간이 오래 걸리고 있어요.';
+   const html=render('/login');
+   expect(html).toContain(state.error);
+   expect(html).toContain('소셜 로그인 다시 확인');
+ });
+ it("puts available Kakao before a separate email login form",()=>{
+   state.data.set('/auth/social/providers',{providers:['kakao']});
+   const html=render('/login');
+   expect(html).toContain('카카오');
+   expect(html.indexOf('aria-label="소셜 로그인"')).toBeLessThan(html.indexOf('aria-label="이메일 로그인"'));
+   expect(html).toContain('<summary>이메일로 로그인하기</summary>');
+ });
+ it("separates email signup from social signup",()=>{
+   const html=render('/signup');
+   expect(html).toContain('<summary>이메일로 가입하기</summary>');
+   expect(html).toContain('이메일과 비밀번호를 따로 입력하지 않아요');
+ });
+ it("keeps account help and every legal document available to guests",()=>{
+   const html=render("/my");
+   expect(html).toContain("마이페이지");
+   expect(html).toContain('aria-label="내 활동과 계정"');
+   expect(html).toContain('aria-label="서비스와 이용 안내"');
+   expect(html).toContain('href="/my/policies"');
+   expect(html).toContain('/legal/support');
+   expect(html).not.toContain('/legal/privacy');
+   const policies=render('/my/policies');
+   for(const kind of ["terms","privacy","deletion"]) expect(policies).toContain(`/legal/${kind}`);
+   expect(policies).not.toContain('로그인이 필요해요');
+   expect(html).toContain("새 탭에서 열림");
+   expect(html).not.toContain("로그인이 필요해요");
+   expect(html).not.toContain("콘텐츠 신고 관리");
+   expect(fetch).not.toHaveBeenCalled();
+ });
+ it("opens current groupbuy discovery with five required tabs and a separate chatbot button",()=>{const html=render("/");expect(html).toContain("공구 찾기");expect(html).toContain('type="search"');expect(html).toContain('<option value="ending" selected="">마감 임박순</option>');for(const label of ["공구 찾기","공구 수요","단가 비교","저장","마이"])expect(html.slice(html.indexOf('class="bottom-nav"'))).toContain(label);expect(html).toContain('class="header-chat" href="/chat"');expect(html).toContain('href="/demands"');expect(html).toContain('href="/offers"');expect(html).not.toMatch(/href="\/(?:seller|benefits|campaigns|brands|hotdeals)/);expect(html).not.toContain("포인트");expect(fetch).not.toHaveBeenCalled();});
+ it.each(["/my/saved","/settings","/demands/new","/admin"])("protects owned route %s without hiding guest exploration",path=>{const html=render(path);expect(html).toContain("로그인이 필요해요");expect(html).toContain("/login?returnTo="+encodeURIComponent(path));expect(fetch).not.toHaveBeenCalled();});
+ it("does not expose legacy beta routes",()=>{expect(render("/benefits")).toContain("화면을 찾을 수 없어요");expect(render("/seller")).not.toContain("입점 신청");});
+ it("renders null prices as unknown and labels official reference sources",()=>{const html=render("/offers/ref-1");expect(html).toContain("가격 정보 없음");expect(html).toContain("배송비 정보 없음");expect(html).toContain("공식 참고 정보 · 특가 아님");expect(html).toContain('href="https://example.org/safety"');expect(html).not.toContain("0원");});
+ it("escapes UGC, shows accurate zero interest and report/block for post and comment",()=>{const html=render("/demands/d1");expect(html).toContain("&lt;img");expect(html).not.toContain('<img src="x"');expect(html).toContain("현재 관심 0명");expect(html).toContain("아이의 이름·생일·사진");expect(html).toContain("이 글 신고");expect(html).toContain("이 댓글 신고");expect(html).toContain("작성자 작성자 차단");expect(html).not.toContain("내 글 삭제");expect(html).not.toContain("내 글 수정");expect(html).not.toContain("내 댓글 수정");});
+ it("provides own delete on UGC when server marks it owned",()=>{state.data.set("/release/demands/d1",{...demand,own:true});const html=render("/demands/d1");expect(html).toContain("내 글 삭제");expect(html).toContain("내 글 수정");});
+ it("places author management before the post body and preserves separate KST creation/update times",()=>{state.data.set("/release/demands/d1",{...demand,own:true,updated_at:"2026-11-02T03:00:00Z"});const html=render("/demands/d1");expect(html.indexOf('aria-label="내 글 관리"')).toBeLessThan(html.indexOf("&lt;img"));expect(html).toContain("작성 2026.11.01 09:00");expect(html).toContain("수정 2026.11.02 12:00");});
+ it("links the exact post and paged comment original before report reasons",()=>{const html=render("/demands/d1?comment_page=2");expect(html).toContain('href="/demands/d1#post-d1"');expect(html).toContain('href="/demands/d1?comment_page=2#comment-c1"');expect(html).toContain('id="comment-c1"');expect(html.indexOf("신고 대상 글 원문 보기")).toBeLessThan(html.indexOf("신고 사유"));const comment=html.slice(html.indexOf('id="comment-c1"'));expect(comment.indexOf("신고 대상 댓글 원문 보기")).toBeLessThan(comment.indexOf("신고 사유"));});
+ it("makes public signup buyer-only with age-14 confirmation and no marketing/invite",()=>{const html=render("/signup?track=seller");expect(html).toContain("모두의 육아 시작하기");expect(html).toContain("만 14세 이상");expect(html).not.toContain("만 18세 이상");expect(html).toContain("signup-age-help");expect(html).toContain("[필수] 이용약관");expect(html).not.toContain("초대코드");expect(html).not.toContain("마케팅 정보");expect(html).not.toContain("판매자로 시작하기");});
+ it("uses recovery code reset instead of development outbox",()=>{const html=render("/reset");expect(html).toContain("복구코드로 비밀번호 재설정");expect(html).not.toContain("outbox");});
+ it("keeps guest return to original public detail without automatic actions",()=>{const html=render("/login?returnTo="+encodeURIComponent("/demands/d1?view=comments#question"));expect(html).toContain('href="/demands/d1?view=comments#question"');expect(fetch).not.toHaveBeenCalled();});
+ it("offers useful empty states without fabricated records",()=>{state.data.set("/release/demands",[]);const html=render("/demands");expect(html).toContain("목록을 불러오고 있어요");expect(html).toContain("이야기 쓰기");expect(html).not.toContain("안전용품 수요");});
+ it("blocks mismatched server mode before rendering public children",()=>{state.data.set("/config",{public_release:false,beta_mode:true});const html=renderToStaticMarkup(<MemoryRouter><PublicGate enabled><p>SHOULD_NOT_RENDER</p></PublicGate></MemoryRouter>);expect(html).toContain("현재 서버와 앱 버전이 맞지 않아");expect(html).not.toContain("SHOULD_NOT_RENDER");expect(html).toContain("연결 다시 확인");});
+ it("lets an admin inspect real active report context before selecting an action",()=>{state.data.set("/release/admin/reports",[{id:"r1",target_type:"comment",target_id:"c1",reason:"개인정보 노출 의심",status:"active",target_preview:"<script>unsafe</script>",demand_id:"d1",author_nickname:"작성자"}]);const html=renderToStaticMarkup(<MemoryRouter><AdminReport report={(state.data.get("/release/admin/reports") as import("./public-app").ReleaseReport[])[0]} reload={()=>{}}/></MemoryRouter>);expect(html).toContain("접수 · 검토 필요");expect(html).toContain("&lt;script&gt;");expect(html).toContain('href="/demands/d1"');expect(html).toContain('value="hide"');expect(html).toContain('value="remove"');expect(html).toContain('value="dismiss"');expect(html).toContain('value="suspend"');expect(html).toContain("대상 확인 후 선택하세요");});
+ it("keeps report and target identifiers and does not invent an open report completion time",()=>{const html=renderToStaticMarkup(<MemoryRouter><AdminReport report={{id:"report-7",target_type:"comment",target_id:"comment-9",reason:"신고 사유",status:"active",created_at:"2026-11-06T00:00:00Z",resolved_at:null}} reload={()=>{}}/></MemoryRouter>);expect(html).toContain("신고 ID: report-7");expect(html).toContain("대상 ID: comment-9");expect(html).toContain("처리 시각: 아직 처리하지 않음");expect(html).not.toContain("실제 처리:");expect(html).toContain('minLength="2"');expect(html).toContain('maxLength="1000"');expect(html).toContain("운영자 권한으로 확인하는 신고 근거");});
+ it("shows recorded completed action and actor without offering repeat actions",()=>{const html=renderToStaticMarkup(<MemoryRouter><AdminReport report={{id:"r8",target_type:"demand",target_id:"p8",reason:"신고 사유",status:"resolved",action:"dismiss",resolved_at:"2026-11-06T01:00:00Z",resolved_by:"admin-1"}} reload={()=>{}}/></MemoryRouter>);expect(html).toContain("실제 처리:");expect(html).toContain("신고 종결 · 조치 없음");expect(html).toContain("처리 운영자 ID: admin-1");expect(html).not.toContain("선택한 처리 적용");});
+ it("labels a completed removal and limits content actions to content targets",()=>{const removed=renderToStaticMarkup(<MemoryRouter><AdminReport report={{id:"r-remove",target_type:"comment",target_id:"c-remove",reason:"사유",status:"resolved",action:"remove"}} reload={()=>{}}/></MemoryRouter>);expect(removed).toContain("적용한 조치: 콘텐츠 삭제");expect(removed).not.toContain("선택한 처리 적용");const user=renderToStaticMarkup(<MemoryRouter><AdminReport report={{id:"r-user",target_type:"user",target_id:"u1",reason:"사유",status:"active"}} reload={()=>{}}/></MemoryRouter>);expect(user).not.toContain('value="remove"');expect(user).not.toContain('value="hide"');expect(user).toContain('value="suspend"');});
+ it("routes groupbuy reports to the exact public target and offers only compatible groupbuy actions",()=>{const html=renderToStaticMarkup(<MemoryRouter><AdminReport report={{id:"r-groupbuy",target_type:"groupbuy",target_id:"g-exact",groupbuy_id:"g-exact",reason:"가격 정보 오류",status:"active",target_preview:"검토 원문"}} reload={()=>{}}/></MemoryRouter>);expect(html).toContain("공구 정보 신고");expect(html).toContain('href="/groupbuys/g-exact"');expect(html).toContain('href="/admin/groupbuys"');for(const action of ["hide","dismiss","needs_review"])expect(html).toContain('value="'+action+'"');expect(html).not.toContain('value="remove"');expect(html).not.toContain('value="suspend"');});
+ it("keeps calculator usable while server is offline without exposing network routes",()=>{state.error="인터넷 연결을 확인하세요.";const html=renderToStaticMarkup(<MemoryRouter initialEntries={["/calculator"]}><PublicGate enabled><p>NETWORK_ROUTES</p></PublicGate></MemoryRouter>);expect(html).toContain("단가 비교 계산기");expect(html).not.toContain("NETWORK_ROUTES");expect(html).toContain("서버에 전송하거나 저장하지 않습니다");});
+});
+describe("release policy and calculator",()=>{
+ it("treats only release browse GETs as guest readable",async()=>{const {isPublicRead}=await import("./beta-policy");expect(isPublicRead("/release/demands/d1/comments")).toBe(true);expect(isPublicRead("/release/offers?q=safe")).toBe(true);expect(isPublicRead("/release/saved")).toBe(false);expect(isPublicRead("/release/demands/d1/interest","PUT")).toBe(false);});
+ it("keeps deployed security enabled for public release independently of beta",()=>{expect(policy.PUBLIC_RELEASE).toBe(true);expect(policy.DEPLOYED_MODE).toBe(true);});
+ it.each([null,{}, {public_release:true},{public_release:false,beta_mode:false},{public_release:true,beta_mode:true}])("fails closed for config %j",config=>expect(policy.publicConfigMatches(config)).toBe(false));
+ it("accepts only explicit public server config",()=>expect(policy.publicConfigMatches({public_release:true,beta_mode:false})).toBe(true));
+ it.each(["/demands/new","/DEMANDS/new/","/%64emands/new","/settings","/admin","/my/saved","/seller"])("keeps guest escape away from owned/legacy path %s",path=>expect(policy.publicBrowsePath(path)).toBe("/"));
+ it("preserves full public detail return path",()=>expect(policy.publicBrowsePath("/demands/d1?view=comments#q")).toBe("/demands/d1?view=comments#q"));
+ it("includes shipping before dividing by quantity",()=>expect(policy.compareUnit({price:"12000",shipping:"3000",quantity:"30"})).toEqual({total:15000,unit:500}));
+ it("supports zero price/shipping with a positive quantity",()=>expect(policy.compareUnit({price:"0",shipping:"0",quantity:"5"})).toEqual({total:0,unit:0}));
+ it.each([{price:"",shipping:"0",quantity:"1"},{price:"100",shipping:"",quantity:"1"},{price:"-1",shipping:"0",quantity:"1"},{price:"100",shipping:"-1",quantity:"1"},{price:"100",shipping:"0",quantity:"0"},{price:"100",shipping:"0",quantity:"-5"},{price:"NaN",shipping:"0",quantity:"1"},{price:"Infinity",shipping:"0",quantity:"1"},{price:"100",shipping:"0",quantity:"1e-320"}])("rejects invalid comparison %j",input=>expect(policy.compareUnit(input)).toBeNull());
+});

@@ -1,0 +1,21 @@
+{
+  "features": [
+    "Administrative",
+    "Administrative_Duration",
+    "Informational",
+    "Informational_Duration",
+    "ProductRelated",
+    "ProductRelated_Duration",
+    "SpecialDay",
+    "Weekend"
+  ],
+  "selected_model": "lightgbm",
+  "model_sha256": "6dc6e4269671949f5a5f4b80a7dc11647604a4be50647d2303534bcb19f3c0ec",
+  "limitations": [
+    "UCI 과거 세션의 구매 여부 분류 실험이며 한국 육아용품 구매 확률이 아닙니다.",
+    "방문 수와 체류시간은 세션 종료 집계입니다. 진행 중 세션의 실시간 성능은 검증하지 않았습니다.",
+    "확률의 국내 서비스 보정과 외부 검증이 없으며 할인·이탈·공구 성사 원인을 설명하지 않습니다.",
+    "PageValues, BounceRates, ExitRates, Revenue는 입력에서 제외했습니다."
+  ],
+  "seed": 20261101
+}

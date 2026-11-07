@@ -1,0 +1,179 @@
+import { isPublicRead } from "./beta-policy";
+import { validateRuntimeApiOrigin } from "./api-origin";
+import { clearSessionToken, readSessionToken, SESSION_TOKEN_KEY } from "./session-storage";
+import { clientPlatform } from "./client-platform";
+export const TOKEN_KEY = SESSION_TOKEN_KEY;
+export const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(
+  /\/$/,
+  "",
+);
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+export function safeReturnPath(value: unknown): string {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith("/") ||
+    value.startsWith("//") ||
+    /[\\\r\n]/.test(value)
+  )
+    return "/";
+  try {
+    const url = new URL(value, "https://local.invalid");
+    if (
+      url.origin !== "https://local.invalid" ||
+      ["/login", "/signup", "/reset"].some((p) => url.pathname === p)
+    )
+      return "/";
+    return url.pathname + url.search + url.hash;
+  } catch {
+    return "/";
+  }
+}
+export function formatError(detail: unknown): string {
+  const fieldNames: Record<string, string> = { email: '이메일', password: '비밀번호', nickname: '닉네임',
+    title: '제목', body: '내용', question: '질문', start_date: '시작일', end_date: '종료일',
+    categories: '관심 분야', category: '카테고리', priority: '비교 기준', note: '처리 사유',
+    recovery_code: '복구코드', age_confirmed: '가입 연령 확인' };
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail))
+    return detail
+      .map((e) =>
+        typeof e === "object" && e
+          ? `${Array.isArray(e.loc) ? e.loc.filter((x: string, i: number) => !(i === 0 && x === "body")).map((x: string) => fieldNames[x] || x).join(" · ") : "입력"}: ${e.msg || "값을 확인해 주세요."}`
+          : "입력값을 확인해 주세요.",
+      )
+      .join("\n");
+  return "요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+}
+export function safeExternalUrl(
+  value: string | null | undefined,
+): string | null {
+  try {
+    if (!value) return null;
+    const u = new URL(value);
+    return u.protocol === "https:" && !u.username && !u.password
+      ? u.href
+      : null;
+  } catch {
+    return null;
+  }
+}
+export async function api<T>(
+  path: string,
+  method = "GET",
+  body?: unknown,
+): Promise<T> {
+  if (import.meta.env.VITE_PUBLIC_RELEASE === "1" || import.meta.env.VITE_BETA_MODE === "1") {
+    validateRuntimeApiOrigin(API_BASE);
+  }
+  const token = readSessionToken();
+  const bootstrap = method === "GET" && path === "/config";
+  const authentication = method === "POST" && ['/auth/register', '/auth/login'].includes(path);
+  const measurement = method === 'POST' && path === '/release/measurement/events';
+  const readOnly = method === "GET";
+  const controller = new AbortController();
+  // The free host can take 50+ seconds to wake. Keep one bounded deadline
+  // for bootstrap retries; never replay writes after an ambiguous failure.
+  const timeout = setTimeout(() => controller.abort(), measurement ? 2_000 : bootstrap || authentication ? 90_000 : 15_000);
+  const timeoutMessage = readOnly
+    ? "서버 연결에 시간이 오래 걸리고 있어요. 잠시 후 다시 연결해 주세요."
+    : "응답 시간이 초과되었습니다. 처리 여부를 먼저 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다.";
+  const connectionMessage = readOnly
+    ? "서버에 연결할 수 없습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요."
+    : "서버에 연결할 수 없습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. 입력 내용은 유지됩니다.";
+  const retryDelay = (ms: number) => new Promise<void>((resolve, reject) => {
+    if (controller.signal.aborted) { reject(new ApiError(0, timeoutMessage)); return; }
+    const abort = () => { clearTimeout(timer); reject(new ApiError(0, timeoutMessage)); };
+    const timer = setTimeout(() => {
+      controller.signal.removeEventListener("abort", abort);
+      resolve();
+    }, ms);
+    controller.signal.addEventListener("abort", abort, { once: true });
+  });
+  try {
+    let response: Response | undefined;
+    const attempts = bootstrap ? 3 : 1;
+    for (let attempt = 0; attempt < attempts; attempt++) {
+      try {
+        response = await fetch(API_BASE + path, {
+          method,
+          headers: {
+            'X-Moduyuga-Client': clientPlatform(),
+            ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: body !== undefined ? JSON.stringify(body) : undefined,
+          signal: controller.signal,
+        });
+      } catch {
+        if (!controller.signal.aborted && attempt + 1 < attempts) {
+          await retryDelay(1_500 * (attempt + 1));
+          continue;
+        }
+        throw new ApiError(0, controller.signal.aborted ? timeoutMessage : connectionMessage);
+      }
+      if ([502, 503, 504].includes(response.status) && attempt + 1 < attempts) {
+        await response.body?.cancel();
+        await retryDelay(1_500 * (attempt + 1));
+        continue;
+      }
+      break;
+    }
+    if (!response) throw new ApiError(0, connectionMessage);
+    const data = await response.json().catch(() => {
+      if (controller.signal.aborted) throw new ApiError(0, timeoutMessage);
+      return {};
+    });
+    if (!response.ok) {
+      if (response.status === 401 && token && readSessionToken() === token) {
+        clearSessionToken(token);
+        window.dispatchEvent(new CustomEvent("auth-expired", {
+          detail: { redirect: method !== "GET", publicRead: isPublicRead(path, method) },
+        }));
+      }
+      throw new ApiError(response.status, formatError(data.detail));
+    }
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+export const money = (value: number) =>
+  new Intl.NumberFormat("ko-KR").format(value) + "원";
+export const date = (value: string) =>
+  value
+    ? new Intl.DateTimeFormat("ko-KR", {
+        timeZone: "Asia/Seoul",
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(value))
+    : "미정";
+export const categories = [
+  "기저귀·물티슈",
+  "수유·이유식",
+  "목욕·위생",
+  "외출·안전",
+  "놀이·도서",
+  "육아생활",
+];
+export const statusName: Record<string, string> = {
+  draft: "임시저장",
+  pending: "심사 중",
+  needs_changes: "보완 필요",
+  approved: "승인 완료",
+  suspended: "이용 정지",
+  active: "모집 중",
+  ended: "종료",
+  rejected: "반려",
+  withdrawn: "참여 철회",
+  stale: "정보 재확인 필요",
+  available: "사용 가능",
+  used: "사용됨",
+  expired: "만료",
+};
