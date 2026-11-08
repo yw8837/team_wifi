@@ -52,7 +52,10 @@ app = FastAPI(title='모두의 육아 - 육아템 공동구매,핫딜 API', vers
 app.add_middleware(BodyLimitMiddleware)
 if config.deployed():
     from urllib.parse import urlsplit
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=[urlsplit(config.PUBLIC_ORIGIN).hostname, 'localhost', '127.0.0.1'])
+    allowed_hosts = [urlsplit(config.PUBLIC_ORIGIN).hostname, 'localhost', '127.0.0.1']
+    if os.getenv('RAILWAY_PROJECT_ID'):
+        allowed_hosts.append('healthcheck.railway.app')
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=allowed_hosts)
 
 
 @app.middleware('http')
