@@ -1,4 +1,15 @@
 .git
+.runtime
+artifacts
+_archive
+output
+.codex
+.agents
+**/*.pem
+**/*.key
+**/*.p12
+**/*.jks
+**/*.keystore
 **/.venv
 **/node_modules
 **/runtime

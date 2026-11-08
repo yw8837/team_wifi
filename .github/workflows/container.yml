@@ -1,0 +1,38 @@
+name: API container verification
+on:
+  push:
+    branches: ['codex/**']
+    paths: ['backend/**', 'ai-pipeline/**', '.dockerignore', 'railway.json', '.github/workflows/container.yml']
+  pull_request:
+    paths: ['backend/**', 'ai-pipeline/**', '.dockerignore', 'railway.json', '.github/workflows/container.yml']
+permissions:
+  contents: read
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build portable API image
+        run: docker build -f backend/Dockerfile -t moduyuga-api:verify .
+      - name: Verify dynamic port and API without model service
+        run: |
+          docker run -d --name moduyuga-api-verify -e PORT=8080 -e MODU_ENV=local -e ASSISTANT_MODEL_ENABLED=false -p 127.0.0.1:18080:8080 moduyuga-api:verify
+          python - <<'PY'
+          import json, time, urllib.request
+          for attempt in range(30):
+              try:
+                  with urllib.request.urlopen('http://127.0.0.1:18080/api/health', timeout=2) as response:
+                      assert json.load(response)['status'] == 'ok'
+                  break
+              except OSError:
+                  time.sleep(1)
+          else:
+              raise SystemExit('Container health check failed')
+          with urllib.request.urlopen('http://127.0.0.1:18080/api/config', timeout=2) as response:
+              assert response.status == 200
+          print('CONTAINER_DYNAMIC_PORT_AND_API_PASS')
+          PY
+      - name: Container diagnostics
+        if: failure()
+        run: docker logs --tail 50 moduyuga-api-verify

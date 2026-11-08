@@ -1,4 +1,5 @@
 FROM python:3.11-slim
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 OMP_NUM_THREADS=1
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/*
 WORKDIR /workspace
 COPY backend/requirements.txt /tmp/requirements.txt
@@ -10,4 +11,4 @@ RUN useradd --create-home --uid 10001 app && mkdir -p backend/runtime && chown -
 USER app
 WORKDIR /workspace/backend
 EXPOSE 8000
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+CMD ["sh", "-c", "exec python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --no-access-log --limit-concurrency 24 --timeout-keep-alive 5"]
