@@ -143,12 +143,14 @@ def recommended_offers(user=Depends(current_user), db=Depends(get_db)):
 
 
 @router.get('/admin/insights')
-def service_insights(user=Depends(admin_user), db=Depends(get_db)):
+def service_insights(dataset: Literal['service', 'demo'] = 'service', user=Depends(admin_user), db=Depends(get_db)):
     import json
     entries = catalog()
     current_ids = [e['id'] for e in entries]
-    # Active accounts only; no raw customer/person rows leave this endpoint.
-    saves = visible_query(SAVE, None, Record.parent_id.in_(current_ids)).order_by(None).subquery()
+    demo_members = select(Record.owner_id).where(Record.kind == 'demo_actor', Record.owner_id.is_not(None))
+    scope = Record.owner_id.in_(demo_members) if dataset == 'demo' else Record.owner_id.not_in(demo_members)
+    # Keep simulated activity separate from actual service statistics.
+    saves = visible_query(SAVE, None, scope, Record.parent_id.in_(current_ids)).order_by(None).subquery()
     total = db.scalar(select(func.count(func.distinct(saves.c.owner_id)))) or 0
     counts = dict(db.execute(select(saves.c.parent_id, func.count(func.distinct(saves.c.owner_id))).group_by(saves.c.parent_id)).all())
     a, b = saves.alias('a'), saves.alias('b')
@@ -161,9 +163,9 @@ def service_insights(user=Depends(admin_user), db=Depends(get_db)):
               'second_to_first': n / counts[right]} for left, right, n in db.execute(pairs_query)]
     pairs.sort(key=lambda row: (-row['accounts'], row['first'], row['second']))
     from .groupbuys import visible_query as visible_groupbuys
-    shared_rows = visible_groupbuys().subquery()
-    demand_rows = visible_query(DEMAND, None).order_by(None).subquery()
-    interests = visible_query(INTEREST, None).order_by(None).subquery()
+    shared_rows = visible_groupbuys(None, scope).subquery()
+    demand_rows = visible_query(DEMAND, None, scope).order_by(None).subquery()
+    interests = visible_query(INTEREST, None, scope).order_by(None).subquery()
     categories = []
     for category in discovery.CATEGORIES:
         ids = [e['id'] for e in entries if e['category'] == category]
@@ -176,7 +178,7 @@ def service_insights(user=Depends(admin_user), db=Depends(get_db)):
         categories.append({'category': category, 'groupbuy_shared_accounts': discovery.masked_count(groupbuy_authors), 'saved_accounts': discovery.masked_count(saved_count),
             'demand_authors': discovery.masked_count(writers), 'interested_accounts': discovery.masked_count(interest_count)})
     evidence = json.loads(Path(__file__).with_name('discovery_evidence.json').read_text('utf-8'))
-    return {'minimum_cohort': discovery.MIN_COHORT, 'saved_accounts': discovery.masked_count(total),
+    return {'dataset': dataset, 'minimum_cohort': discovery.MIN_COHORT, 'saved_accounts': discovery.masked_count(total),
             'categories': categories, 'pairs': pairs[:20], 'evidence': evidence,
             'note': '현재 계정의 저장·수요·관심 신호입니다. 구매·매출·주문 예측이 아닙니다. 1~4계정의 집계는 숨깁니다.'}
 

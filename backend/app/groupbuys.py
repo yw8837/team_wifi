@@ -129,6 +129,7 @@ def dto(db,item,user=None):
         author=release.author(db,item),created_at=release.timestamp(item.created),updated_at=data.get('updated_at'),
         revision=item.revision,own=bool(user and user.id==item.owner_id),status=status,
         can_edit=bool(user and user.id==item.owner_id and status=='active'),
+        is_demo=data.get('is_demo') is True,
         review_state=data.get('review_state','clear'),queried_at=release.timestamp(now()),broker_notice=BROKER_NOTICE)
 
 

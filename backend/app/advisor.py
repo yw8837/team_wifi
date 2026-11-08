@@ -114,6 +114,7 @@ def companions(id: str, db=Depends(get_db)):
         return {'items': [], 'basis': 'expired', 'minimum_cohort': discovery.MIN_COHORT}
     # Only real active non-admin accounts; duplicated rows count once.
     saves = release.visible_query(release.SAVE, None, Record.parent_id.in_(entries),
+        Record.owner_id.not_in(select(Record.owner_id).where(Record.kind == 'demo_actor', Record.owner_id.is_not(None))),
         Record.owner_id.in_(select(User.id).where(User.is_admin.is_(False)))).order_by(None).subquery()
     a, b = saves.alias('a'), saves.alias('b')
     counts = (select(b.c.parent_id, func.count(func.distinct(a.c.owner_id)).label('n'))

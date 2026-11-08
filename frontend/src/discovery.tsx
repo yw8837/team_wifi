@@ -112,8 +112,9 @@ export function InsightsView({ data }: { data: Insights }) {
 
 export function ServiceInsights() {
   const { user } = useAuth();
-  const result = usePublicResource<Insights>("/release/admin/insights", user?.id);
-  return <section><Link to="/my">← 마이페이지</Link><PageTitle eyebrow="운영자 전용" title="육아템 관심 분석"><p>실제 서비스 활동으로 다음 조사·공구 준비의 우선순위를 정하세요.</p></PageTitle><ResourceState {...result} retry={result.reload}/>{result.data && !result.loading && !result.error && <InsightsView data={result.data}/>}<button className="secondary" disabled={result.loading} onClick={result.reload}>최신 활동으로 새로고침</button><MeasurementReport/></section>;
+  const [dataset,setDataset]=useState<"service"|"demo">("service");
+  const result = usePublicResource<Insights>("/release/admin/insights"+(dataset==="demo"?"?dataset=demo":""), user?.id);
+  return <section><Link to="/my">← 마이페이지</Link><PageTitle eyebrow="운영자 전용" title="육아템 관심 분석"><p>{dataset==="demo"?"가상 회원의 저장·수요로 분석 기능을 시연합니다.":"실제 서비스 활동으로 다음 조사·공구 준비의 우선순위를 정하세요."}</p></PageTitle><label className="field"><span>분석할 데이터</span><select value={dataset} onChange={event=>setDataset(event.target.value as "service"|"demo")}><option value="service">실제 서비스 활동</option><option value="demo">가상 시연 데이터</option></select></label><ResourceState {...result} retry={result.reload}/>{result.data && !result.loading && !result.error && <InsightsView data={result.data}/>}<button className="secondary" disabled={result.loading} onClick={result.reload}>최신 활동으로 새로고침</button>{dataset==="service"&&<MeasurementReport/>}</section>;
 }
 
 function MeasuredRecommendation({item}:{item:Recommendations["items"][number]}) {
