@@ -42,18 +42,20 @@
 .chat-widget-panel .chat-messages { flex:1 1 220px; min-height:120px; overflow:auto; margin:8px 0; }
 .chat-widget-panel .chat-message { padding:12px; }
 .chat-widget-panel .chat-message h2 { font-size:15px; margin-bottom:8px; }
-.chat-widget-panel .chat-form { padding:12px; flex-shrink:0; }
+.chat-widget-panel .chat-form { padding:12px; flex-shrink:0; display:grid; grid-template-columns:minmax(0,1fr) 64px; gap:6px 8px; }
 .chat-widget-panel .chat-form textarea { min-height:64px; max-height:160px; }
-.chat-widget-panel .chat-form .field>span { font-size:13px; }
-.chat-widget-panel .chat-form>.hint { font-size:11px; margin:4px 0; }
-.chat-widget-panel .chat-retention { margin:4px 0; }
-.chat-widget-panel .chat-compose-actions { margin:4px 0 0; }
+.chat-widget-panel .chat-form .field { grid-column:1; grid-row:1; }
+.chat-widget-panel .chat-form .field>span { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.chat-widget-panel .chat-form>.hint { grid-column:1/-1; font-size:11px; margin:0; }
+.chat-widget-panel .chat-retention { grid-column:1/-1; margin:0; }
+.chat-widget-panel .chat-form>[role] { grid-column:1/-1; }
+.chat-widget-panel .chat-compose-actions { grid-column:2; grid-row:1; margin:0; align-self:stretch; }
 .chat-widget-panel .chat-compose-actions>button { width:100%; }
 .chat-widget-panel .chat-retention .hint { font-size:12px; }
 .chat-widget-panel .chat-compose-actions button { min-height:44px; }
 @media(max-width:540px) {
  .chat-widget { right:12px; bottom:calc(80px + env(safe-area-inset-bottom)); }
- .chat-widget-panel { width:calc(100vw - 24px); height:min(620px,calc(100dvh - 164px)); bottom:62px; }
+ .chat-widget-panel { position:fixed; left:12px; right:12px; width:auto; height:min(620px,calc(100dvh - 164px)); bottom:calc(142px + env(safe-area-inset-bottom)); }
  .chat-widget-launcher { min-height:48px; padding:10px 14px; }
 }
 @media(max-width:540px) { .chat-heading h1 { font-size:25px; } .chat-form { padding:12px; } .chat-message { padding:16px; } .chat-message.user { margin-left:12px; } .chat-page .actions { gap:8px; flex-wrap:wrap; } .chat-compose-actions>button[type="submit"] { flex-basis:100%; } }
