@@ -81,8 +81,12 @@ E:/Team_Wifi에서 실제 확인된 값을 전달한다.
 - 증거는 `artifacts/hosting-migration-20261107/demo-seed-receipt.json`, `demo-live-http.json`, `demo-home-live.jpg`, `demo-detail-live.jpg`, `android-community/android-release-verification.json`이다.
 - 설치 파일은 `artifacts/android/releases/13-0.6.3/moduyuga.apk`와 `moduyuga.aab`다. 실기기 설치와 Play 업로드는 이번 검증 범위에 포함되지 않았다.
 
-### 연결 후속 범위
+### 시연 데이터 배포 당시 연결 후속 범위
 
 새 주소의 카카오 로그인은 Developers 로그인 세션이 없어 콜백 등록이 대기 중이다. 등록 대상은 `https://moduyuga-api.yeolmaeapps.kr/api/auth/social/kakao/callback`이다. 기존 콜백을 보존하며 새 주소를 추가해야 한다. 사용자에게 앱 브라우저 로그인 요청을 전달했다.
 
 기존 설치 앱은 기존 Render 주소를 사용한다. 새 연결과 가상 데이터 표시를 적용하려면 새 APK 설치가 필요하다. 기존 Render 배포에는 새 가상 데이터 DTO와 판매처 이동 제한 UI가 적용되지 않았으므로 구버전 동작을 신버전 검증으로 대체하지 않는다.
+
+### 11월8일 후속 반영
+
+이후 실제 판매처 공구 수집, 공공자료 기반 챗봇 답변, 팝업 챗봇을 배포했다. 카카오 Developers에서 새 콜백 등록도 저장 후 재조회로 확인했다. 최신 범위와 검증은 `docs/build/release-20261108/EXTERNAL-DATA-AND-CHAT.md`에 기록한다.
