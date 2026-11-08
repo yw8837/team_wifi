@@ -35,3 +35,14 @@ E:/Team_Wifi에서 실제 확인된 값을 전달한다.
 확인된 주소로 엘리스 PUBLIC_ORIGIN·PUBLIC_WEB_ORIGIN과 CORS, 카카오 콜백을 맞춘다. 웹 탐색·가입·로그인·카카오 복귀·글·저장·챗봇·공구 공개 HTML을 확인하고 Android의 API 주소와 서명 빌드를 갱신한다. 기존 설치본의 주소 전환도 함께 확인한다.
 
 검증 자료는 artifacts/hosting-migration-20261107, 서버 준비 경로는 /home/elicer/Team_Wifi/.runtime/hosting-migration-20261107 이다. 원본 로그·키·환경 비밀값은 Git에 포함하지 않는다.
+
+
+## 2026-11-08 운영 안정성 보완
+
+사용자가 엘리스에 한정하지 않고 안정적인 배포와 앱 연동을 요청했다. 공개 웹은 HTTP200이지만 기존 API health/config는25초 및65초 검사에서 응답하지 않았다. Render 재시작 접수 후에도 health/config/공구 조회가 시간 초과였다. 16:15 KST에 검증된 운영 커밋 e4123ae 재배포로 접속 복구를 진행했다.
+
+별도 상시 API 후보로 Railway 배포 구성을 준비했다. 비용은 월 최소5달러에 사용량이 적용되며 월20달러 이내 예산을 사용자에게 요청했다. 기존 무료 전용 조건에 따라 유료 실행은 명시적 응답 후 진행한다. Serverless(절전) 해제는 서비스 설정에서 적용한다. railway.json은 이미지 빌드·배포 시 healthcheck·프로세스 실패 재시작을 정의한다. 배포 healthcheck는 지속 모니터링과 구분된다.
+
+코드04cba1c에서 컨테이너를 실제 빌드하고 PostgreSQL과 함께 public_release 모드로 실행했다. GitHub Actions42457939135에서 동적PORT, 정상health, 웹 Origin과 Android https://localhost CORS, Railway healthcheck Host 허용, 임의Host400을 확인했다. AI 모델 서버 없이 기본API가 기동했다. 같은 커밋의 API와 UI 작업도 성공했다.
+
+앱과 웹은 기존 PostgreSQL을 공유하도록 이전하며, 실제 API 주소가 연결된 뒤 Android 서명 빌드와 카카오 callback/앱 복귀 검증을 실행한다. 주소가 미연결인 현재 시점에는 새 Android 배포가 완료된 것으로 표시하지 않는다.
