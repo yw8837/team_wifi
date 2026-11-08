@@ -122,7 +122,7 @@ def live_read(db, user, question):
                 if regular <= 0:
                     continue
                 difference = regular - deal
-                direction = '저렴' if difference >= 0 else '비쌈'
+                direction = '동일 금액' if difference == 0 else '저렴' if difference > 0 else '비쌈'
                 notes.append(f"동일 기본 구성 비교 · {reference['seller_name']} 배송 포함 {regular:,}원 대비 공구 {deal:,}원 · {abs(difference):,}원({abs(difference)/regular*100:.1f}%) {direction} · 비교 출처 확인 {groupbuys.display_time(reference['checked_at'])}. 옵션·쿠폰·지역 배송비는 각 판매처에서 확인하세요.")
             references.append((row.id,row.revision))
         if not groupbuy_rows:notes.append('DB 조회 '+checked+' 기준 공개 가능한 진행 중 공구를 찾지 못했어요. 가격·재고·구매 가능 여부는 확정할 수 없어요.')

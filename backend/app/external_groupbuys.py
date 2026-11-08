@@ -130,7 +130,7 @@ def parse_cafe24(html, source, *, groupbuy=True):
             'source_type': 'seller_page', 'availability': 'sold_out' if soldout == 'T' else 'listed',
             'body': '판매처의 공동구매 페이지에서 확인한 상품입니다. 옵션별 구성과 배송비, 최종 결제금액은 판매처에서 확인하세요.',
             'price_conditions': ('판매처 회원가입·로그인 후 구매할 수 있습니다. ' if member_only else '')
-                + '판매처 표시 할인판매가 기준입니다. 마감 일시는 공개 페이지에서 확인되지 않았습니다.',
+                + '판매처 표시 판매가 기준입니다. 마감 일시는 공개 페이지에서 확인되지 않았습니다.',
             'is_demo': False, 'review_state': 'clear', 'updated_at': release.timestamp(stamp)}
 
 
