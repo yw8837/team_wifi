@@ -46,3 +46,10 @@ E:/Team_Wifi에서 실제 확인된 값을 전달한다.
 코드04cba1c에서 컨테이너를 실제 빌드하고 PostgreSQL과 함께 public_release 모드로 실행했다. GitHub Actions42457939135에서 동적PORT, 정상health, 웹 Origin과 Android https://localhost CORS, Railway healthcheck Host 허용, 임의Host400을 확인했다. AI 모델 서버 없이 기본API가 기동했다. 같은 커밋의 API와 UI 작업도 성공했다.
 
 앱과 웹은 기존 PostgreSQL을 공유하도록 이전하며, 실제 API 주소가 연결된 뒤 Android 서명 빌드와 카카오 callback/앱 복귀 검증을 실행한다. 주소가 미연결인 현재 시점에는 새 Android 배포가 완료된 것으로 표시하지 않는다.
+
+
+### 11월8일 접속 복구 확인
+
+16:17 KST Render의 e4123ae 재배포가 Live에 도달했다. 이후 health/config/공구 조회는 모두 HTTP200이며 각 응답은0.86~0.89초였다. 브라우저에서 홈의 실제 수요 목록과 메뉴 로딩을 확인했다. 이 조치는 현재 웹과 설치 앱이 사용하는 API 접속 복구이며, 상시 호스팅 이전은 비용 승인과 계정 연결 후 실행한다. 새 설치본의 실기기 검증을 대체하지 않는다.
+
+근거는 artifacts/hosting-reliability-20261108/redeploy-http.json 및 컨테이너 CI42457939135이다. 기존 무료 인스턴스의 유휴 중지 조건은 재배포 이후에도 적용된다.
