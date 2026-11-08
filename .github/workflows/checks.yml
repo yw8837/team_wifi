@@ -50,8 +50,8 @@ jobs:
         env:
           VITE_PUBLIC_RELEASE: '1'
           VITE_BETA_MODE: '0'
-          VITE_API_BASE_URL: https://moduyuga-beta.onrender.com/api
-          VITE_PUBLIC_WEB_ORIGIN: https://moduyuga.onrender.com
+          VITE_API_BASE_URL: https://moduyuga-api.yeolmaeapps.kr/api
+          VITE_PUBLIC_WEB_ORIGIN: https://moduyuga.yeolmaeapps.kr
       - name: Export crawlable public answer pages
         run: python scripts/export-public-guides.py
       - uses: actions/upload-artifact@v4
@@ -69,11 +69,11 @@ jobs:
     env:
       VITE_PUBLIC_RELEASE: '1'
       VITE_BETA_MODE: '0'
-      VITE_API_BASE_URL: https://moduyuga-beta.onrender.com/api
-      VITE_PUBLIC_WEB_ORIGIN: https://moduyuga.onrender.com
+      VITE_API_BASE_URL: https://moduyuga-api.yeolmaeapps.kr/api
+      VITE_PUBLIC_WEB_ORIGIN: https://moduyuga.yeolmaeapps.kr
       MODU_LOCAL_ANDROID: '0'
-      MODU_VERSION_CODE: '11'
-      MODU_VERSION_NAME: '0.6.1'
+      MODU_VERSION_CODE: '14'
+      MODU_VERSION_NAME: '0.6.4'
       MODU_UNSIGNED_CI: '1'
     steps:
       - uses: actions/checkout@v4
@@ -88,11 +88,16 @@ jobs:
           java-version: '21'
       - run: npm ci && npm run build && npx cap sync android
         working-directory: frontend
-      - run: chmod +x gradlew && ./gradlew bundleRelease assembleRelease --no-daemon --max-workers=2
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '8.14.3'
+          cache-provider: basic
+          cache-read-only: false
+      - run: gradle bundleRelease assembleRelease --no-daemon --max-workers=2
         working-directory: frontend/android
       - run: python scripts/prepare-unsigned-android.py
       - uses: actions/upload-artifact@v4
         with:
-          name: unsigned-android-11
+          name: unsigned-android-14
           path: artifacts/android/unsigned-ci
           if-no-files-found: error

@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import zipfile
+from urllib.parse import urlsplit
 
 root = Path(__file__).resolve().parents[1]
 assert os.environ.get('GITHUB_ACTIONS') == 'true'
@@ -17,10 +18,13 @@ commit = os.environ['GITHUB_SHA']
 assert re.fullmatch(r'[a-f0-9]{40}', commit)
 assert os.environ['VITE_PUBLIC_RELEASE'] == '1' and os.environ['VITE_BETA_MODE'] == '0'
 api = os.environ['VITE_API_BASE_URL']
-assert api == 'https://moduyuga-beta.onrender.com/api'
+api_url = urlsplit(api)
+assert api_url.scheme == 'https' and api_url.hostname and api_url.path == '/api'
+assert not (api_url.username or api_url.password or api_url.query or api_url.fragment)
 out = root / 'artifacts/android/unsigned-ci'
 out.mkdir(parents=True, exist_ok=False)
 dist = root / 'frontend/dist'
+assert any(api in file.read_text(encoding='utf-8') for file in (dist / 'assets').glob('*.js'))
 shutil.copytree(dist, out / 'web')
 sources = {
     'moduyuga-unsigned.apk': root / 'frontend/android/app/build/outputs/apk/release/app-release-unsigned.apk',
