@@ -21,6 +21,10 @@ def test_seller_parser_requires_verified_fields_and_rejects_redirects():
     quantities = external_groupbuys.parse_cafe24(seller_html() + "var product_min = '1'; var buy_unit = '1';", external_groupbuys.SOURCES[0])
     assert quantities['order_minimum'] == quantities['order_step'] == 1
     assert quantities['minimum_quantity'] is None
+    html = seller_html() + '''<select option_product_no="222"><option value="P00000IO000A">블랙</option></select>
+        <select option_product_no="111"><option value="P00000AA000A">추가 상품</option></select>
+        <select><option value="PA">SHIPPING TO : 파나마</option></select>'''
+    assert external_groupbuys.parse_cafe24(html, external_groupbuys.SOURCES[0])['option_labels'] == ['블랙']
     assert '회원가입' in entry['price_conditions']
     assert external_groupbuys.parse_cafe24(seller_html('T'), external_groupbuys.SOURCES[0])['availability'] == 'sold_out'
     with pytest.raises(ValueError):

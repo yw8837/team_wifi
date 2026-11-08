@@ -4,7 +4,7 @@ import re
 import secrets
 import uuid
 from html import unescape
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from sqlalchemy import select, text
@@ -111,8 +111,11 @@ def parse_cafe24(html, source, *, groupbuy=True):
         fulfillment.append('판매처 일반 배송 안내 ' + delivery.group(1) + ' · 옵션별 출고 일정은 별도 확인')
     if '산간벽지나 도서지방은 별도의 추가금액' in plain:
         fulfillment.append('도서산간은 추가 배송비가 발생할 수 있습니다.')
+    product_number = dict(parse_qsl(urlsplit(source['url']).query)).get('product_no', '')
+    option_selects = re.findall(r'<select\b[^>]*option_product_no="' + re.escape(product_number)
+                               + r'"[^>]*>(.*?)</select>', html, re.S) if product_number else []
     options = [unescape(re.sub('<[^>]+>', '', value)).strip() for value in
-               re.findall(r'<option\b[^>]*value="P[^\"]+"[^>]*>(.*?)</option>', html, re.S)]
+               re.findall(r'<option\b[^>]*value="P[A-Z0-9]+"[^>]*>(.*?)</option>', ''.join(option_selects), re.S)]
     return_note = '단순 변심 교환·반품의 반송비는 구매자 부담으로 안내합니다. 적용 기한·제외 사유는 판매처 구매안내를 확인하세요.' if '상품반송 비용은 고객님께서 부담' in plain else ''
     stamp = now()
     return {'source_id': source['id'], 'source_url': source['url'],
