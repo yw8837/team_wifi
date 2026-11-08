@@ -285,8 +285,16 @@ def content(db, kind, id, user=None):
     if not item:
         raise HTTPException(404, '게시물을 찾을 수 없습니다.')
     if kind == COMMENT:
-        content(db, DEMAND, item.parent_id, user)
+        comment_parent(db, item.parent_id, user)
     return item
+
+
+def comment_parent(db, identifier, user=None):
+    from .groupbuys import GROUPBUY, content as groupbuy_content
+    parent = db.get(Record, identifier)
+    if parent and parent.kind == GROUPBUY:
+        return groupbuy_content(db, identifier, user)
+    return content(db, DEMAND, identifier, user)
 
 
 def author(db, item):
@@ -325,7 +333,7 @@ def edit_owned_content(db, kind, id, body, user):
     if item.owner_id != user.id:
         raise HTTPException(404, '본인이 작성한 내용을 찾을 수 없습니다.')
     if kind == COMMENT:
-        parent = content(db, DEMAND, item.parent_id, user)
+        parent = comment_parent(db, item.parent_id, user)
         if db.scalar(select(Record.id).where(Record.kind == 'block', Record.owner_id == parent.owner_id, Record.parent_id == user.id)):
             raise HTTPException(403, '이 게시물의 댓글을 수정할 수 없습니다.')
     if item.revision != body.revision:
@@ -390,7 +398,11 @@ def activity(tab: Literal['posts', 'comments', 'interests'] = 'posts', q: str = 
             parents = parents.where(func.coalesce(Record.data['post_type'].as_string(), 'demand') == 'demand')
         if q.strip() and tab == 'interests':
             parents = parents.where((Record.data['title'].as_string()+' '+Record.data['body'].as_string()).icontains(q.strip(), autoescape=True))
-        query = query.where(Record.parent_id.in_(parents.with_only_columns(Record.id)))
+        parent_ids = parents.with_only_columns(Record.id)
+        if tab == 'comments':
+            from .groupbuys import visible_query as groupbuy_query
+            parent_ids = parent_ids.union(groupbuy_query(user).with_only_columns(Record.id))
+        query = query.where(Record.parent_id.in_(parent_ids))
     if q.strip() and tab != 'interests':
         text = Record.data['body'].as_string()
         if tab == 'posts':
@@ -401,7 +413,9 @@ def activity(tab: Literal['posts', 'comments', 'interests'] = 'posts', q: str = 
     for item in rows[:limit]:
         if tab == 'comments':
             parent = db.get(Record, item.parent_id)
-            items.append({'comment': comment_dto(db, item, user), 'post_id': parent.id, 'post_title': parent.data['title']})
+            items.append({'comment': comment_dto(db, item, user), 'post_id': parent.id,
+                          'parent_kind': 'groupbuy' if parent.kind == 'release_groupbuy' else 'demand',
+                          'post_title': parent.data['title']})
         else:
             parent = item if tab == 'posts' else db.get(Record, item.parent_id)
             items.append({'post': demand_dto(db, parent, user)})
@@ -525,7 +539,7 @@ def report(body: ReportInput, request: Request, user=Depends(current_user), db=D
 def report_dto(db, item):
     target_type = item.data['target_type']
     target = db.get(User if target_type == 'user' else Record, item.parent_id)
-    preview, demand_id, nickname = '', None, ''
+    preview, demand_id, nickname, groupbuy_id = '', None, '', None
     if target_type == 'groupbuy':
         from .groupbuys import GROUPBUY, dto as groupbuy_dto
         groupbuy = groupbuy_dto(db,target) if target and target.kind == GROUPBUY else None
@@ -540,9 +554,12 @@ def report_dto(db, item):
     elif target and target.kind in (DEMAND, COMMENT):
         preview = (target.data.get('title', '')+' '+target.data.get('body', '')).strip()[:300]
         demand_id = target.id if target.kind == DEMAND else target.parent_id
+        parent = db.get(Record, target.parent_id) if target.kind == COMMENT else None
+        if parent and parent.kind == 'release_groupbuy':
+            groupbuy_id, demand_id = parent.id, None
         account = db.get(User, target.owner_id)
         nickname = account.nickname if account and not account.deleted else '탈퇴한 회원'
-    return dict(target_preview=preview, demand_id=demand_id, author_nickname=nickname, id=item.id, target_type=item.data['target_type'], target_id=item.parent_id,
+    return dict(target_preview=preview, demand_id=demand_id, groupbuy_id=groupbuy_id, author_nickname=nickname, id=item.id, target_type=item.data['target_type'], target_id=item.parent_id,
                 reason=item.data['reason'], status=item.status, created_at=timestamp(item.created),
                 note=item.data.get('note', ''), action=item.data.get('action'),
                 resolved_at=item.data.get('resolved_at'), resolved_by=item.data.get('resolved_by'))

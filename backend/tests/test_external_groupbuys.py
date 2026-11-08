@@ -17,6 +17,10 @@ def test_seller_parser_requires_verified_fields_and_rejects_redirects():
     assert entry['price'] == 109000
     assert entry['expires_at'] == '' and entry['shipping_fee'] is None
     assert entry['availability'] == 'listed' and entry['is_demo'] is False
+    assert entry['order_minimum'] is None and entry['order_step'] is None
+    quantities = external_groupbuys.parse_cafe24(seller_html() + "var product_min = '1'; var buy_unit = '1';", external_groupbuys.SOURCES[0])
+    assert quantities['order_minimum'] == quantities['order_step'] == 1
+    assert quantities['minimum_quantity'] is None
     assert '회원가입' in entry['price_conditions']
     assert external_groupbuys.parse_cafe24(seller_html('T'), external_groupbuys.SOURCES[0])['availability'] == 'sold_out'
     with pytest.raises(ValueError):

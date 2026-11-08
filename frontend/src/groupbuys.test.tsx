@@ -2,7 +2,7 @@ import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 const state=vi.hoisted(()=>({data:null as unknown,popular:null as unknown,error:"",loading:false,stale:false,paths:[] as Array<string|null>,user:{id:"synthetic-author",is_admin:false},reload:vi.fn()}));
-vi.mock("./community",async()=>({...await vi.importActual<typeof import("./community")>("./community"),useCommunityResource:(path:string|null)=>{state.paths.push(path);return {data:state.data,error:state.error,loading:state.loading,stale:state.stale,reload:state.reload};}}));
+vi.mock("./community",async()=>({...await vi.importActual<typeof import("./community")>("./community"),useCommunityResource:(path:string|null)=>{state.paths.push(path);return {data:path?.includes("/comments?")?[]:state.data,error:state.error,loading:state.loading,stale:state.stale,reload:state.reload};}}));
 vi.mock("./shared",async()=>({...await vi.importActual<typeof import("./shared")>("./shared"),useAuth:()=>({user:state.user,requireLogin:()=>true})}));
 vi.mock("./release-data",async()=>({...await vi.importActual<typeof import("./release-data")>("./release-data"),usePublicResource:()=>({data:state.popular,error:state.error,loading:state.loading,reload:state.reload})}));
 vi.mock("./measurement",()=>({useExposure:()=>({ref:{current:null},click:vi.fn()})}));
@@ -12,6 +12,12 @@ function feed(path="/",mine=false){return renderToStaticMarkup(<MemoryRouter ini
 function detail(){return renderToStaticMarkup(<MemoryRouter initialEntries={["/groupbuys/synthetic-g1"]}><Routes><Route path="/groupbuys/:id" element={<GroupbuyDetail/>}/></Routes></MemoryRouter>);}
 beforeEach(()=>{state.data={items:[item],has_more:false,queried_at:item.queried_at};state.paths=[];state.popular=null;state.loading=false;state.error="";state.stale=false;vi.stubGlobal("sessionStorage",{getItem:()=>null,setItem:vi.fn(),removeItem:vi.fn()});});afterEach(()=>vi.unstubAllGlobals());
 describe("current groupbuy discovery and honest external commerce",()=>{
+ it("shows verified order conditions and the community comment entry",()=>{
+  state.data={...item,order_minimum:1,order_step:1,option_labels:["베이지 순차 출고"],fulfillment_notes:["일반 배송 1~3일"],return_note:"반송비 구매자 부담"};
+  const html=detail();
+  for(const text of ["주문 최소 수량","구매 단위","공구 성사 수량","베이지 순차 출고","일반 배송 1~3일","반송비 구매자 부담","이 육아템, 함께 이야기해요","댓글 작성","커뮤니티 게시판 보기"])expect(html).toContain(text);
+  expect(state.paths.some(path=>path?.includes("/groupbuys/synthetic-g1/comments?"))).toBe(true);
+ });
  it("labels virtual demonstrations and suppresses the seller link",()=>{
   state.data={...item,is_demo:true,own:false};
   const html=detail();

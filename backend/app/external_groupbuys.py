@@ -96,16 +96,33 @@ def parse_cafe24(html, source, *, groupbuy=True):
     if soldout not in ('T', 'F'):
         raise ValueError('Unknown seller availability')
     member_only = variable('sIsNonmemberLimit') == 'T'
+    def quantity(name):
+        matches = re.findall(r'\bvar\s+' + re.escape(name) + r"\s*=\s*'(\d+)'", html)
+        values = set(matches)
+        return int(matches[0]) if len(values) == 1 and 0 < int(matches[0]) <= 1_000_000_000 else None
     shipping_rows = [unescape(re.sub('<[^>]+>', ' ', row)) for row in
                      re.findall(r'<tr\b[^>]*>.*?</tr>', html, re.S) if '배송비' in row]
     shipping_free = bool(shipping_rows) and all(
         re.sub(r'\s+', '', row) == '배송비무료' for row in shipping_rows)
+    plain = re.sub(r'\s+', ' ', unescape(re.sub('<[^>]+>', ' ', html)))
+    delivery = re.search(r'배송 기간\s*:\s*(\d+일\s*~\s*\d+일)', plain)
+    fulfillment = []
+    if delivery:
+        fulfillment.append('판매처 일반 배송 안내 ' + delivery.group(1) + ' · 옵션별 출고 일정은 별도 확인')
+    if '산간벽지나 도서지방은 별도의 추가금액' in plain:
+        fulfillment.append('도서산간은 추가 배송비가 발생할 수 있습니다.')
+    options = [unescape(re.sub('<[^>]+>', '', value)).strip() for value in
+               re.findall(r'<option\b[^>]*value="P[^\"]+"[^>]*>(.*?)</option>', html, re.S)]
+    return_note = '단순 변심 교환·반품의 반송비는 구매자 부담으로 안내합니다. 적용 기한·제외 사유는 판매처 구매안내를 확인하세요.' if '상품반송 비용은 고객님께서 부담' in plain else ''
     stamp = now()
     return {'source_id': source['id'], 'source_url': source['url'],
             'source_hash': hashlib.sha256(html.encode()).hexdigest(),
             'title': title, 'category': source['category'], 'seller_name': source['seller'],
             'seller_url': source['url'], 'price': price, 'shipping_fee': 0 if shipping_free else None,
             'minimum_quantity': None, 'unit': '', 'expires_at': '',
+            'order_minimum': quantity('product_min'), 'order_step': quantity('buy_unit'),
+            'fulfillment_notes': fulfillment, 'option_labels': list(dict.fromkeys(options))[:30],
+            'return_note': return_note,
             'source_checked_at': release.timestamp(stamp), 'source_fresh_until': stamp + FRESH_SECONDS,
             'source_type': 'seller_page', 'availability': 'sold_out' if soldout == 'T' else 'listed',
             'body': '판매처의 공동구매 페이지에서 확인한 상품입니다. 옵션별 구성과 배송비, 최종 결제금액은 판매처에서 확인하세요.',
@@ -137,7 +154,7 @@ def store(db, entries):
             db.add(row)
         else:
             row.revision += 1
-        row.data = dict(entry)
+        row.data = {**entry, 'review_state': (row.data or {}).get('review_state', 'clear')}
         row.ends = entry['source_fresh_until']
         row.status = 'ended' if entry['availability'] == 'sold_out' else 'active'
         updated += 1

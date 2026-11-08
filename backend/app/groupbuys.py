@@ -136,6 +136,9 @@ def dto(db,item,user=None):
         source_url=data.get('source_url'),
         source_fresh_until=release.timestamp(data['source_fresh_until']) if data.get('source_fresh_until') else None,
         comparison_quantity=data.get('comparison_quantity'),
+        order_minimum=data.get('order_minimum'), order_step=data.get('order_step'),
+        fulfillment_notes=data.get('fulfillment_notes', []), option_labels=data.get('option_labels', []),
+        return_note=data.get('return_note', ''),
         price_references=[{key:value for key,value in reference.items() if key != 'source_hash'}
             for reference in data.get('price_references', []) if reference.get('fresh_until',0)>now()],
         review_state=data.get('review_state','clear'),queried_at=release.timestamp(now()),broker_notice=BROKER_NOTICE)
@@ -196,6 +199,27 @@ def detail(id:str,user=Depends(optional_user),db=Depends(get_db)):
     return dto(db,content(db,id,user),user)
 
 
+@router.get('/groupbuys/{id}/comments')
+def comments(id: str, limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
+             user=Depends(optional_user), db=Depends(get_db)):
+    content(db, id, user)
+    rows = db.scalars(release.visible_query(release.COMMENT, user, Record.parent_id == id).limit(limit).offset(offset))
+    return [release.comment_dto(db, item, user) for item in rows]
+
+
+@router.post('/groupbuys/{id}/comments', status_code=201)
+def create_comment(id: str, body: release.CommentInput, request: Request, user=Depends(current_user), db=Depends(get_db)):
+    throttle(request, 'question', subject=user.id)
+    active_actor(db, user)
+    parent = content(db, id, user, lock=True)
+    if db.scalar(select(Record.id).where(Record.kind == 'block', Record.owner_id == parent.owner_id, Record.parent_id == user.id)):
+        raise HTTPException(403, '이 공구에 댓글을 작성할 수 없습니다.')
+    item = Record(kind=release.COMMENT, owner_id=user.id, parent_id=id, data=body.model_dump())
+    db.add(item)
+    db.commit()
+    return release.comment_dto(db, item, user)
+
+
 def owned(db,id,user,revision):
     active_actor(db,user)
     item=content(db,id,user,lock=True)
@@ -236,16 +260,19 @@ def remove(id:str,body:Revision,request:Request,user=Depends(current_user),db=De
     # Shared links must not outlive the deleted information. Preserve each demand.
     for demand in db.scalars(select(Record).where(Record.kind==release.DEMAND,Record.data['groupbuy_id'].as_string()==id).with_for_update()):
         demand.data={**demand.data,'groupbuy_id':None,'updated_at':release.timestamp(now())};demand.revision+=1
-    reports=list(db.scalars(select(Record.id).where(Record.kind==release.REPORT,Record.parent_id==id)))
+    comments=list(db.scalars(select(Record.id).where(Record.kind==release.COMMENT,Record.parent_id==id)))
+    targets=[id,*comments]
+    reports=list(db.scalars(select(Record.id).where(Record.kind==release.REPORT,Record.parent_id.in_(targets))))
     # Remove quoted moderator text with the content. Keeping orphaned audit
     # references would make later account erasure unable to locate those notes.
-    references=[id,*reports]
+    references=[*targets,*reports]
     db.execute(delete(Record).where(Record.kind=='audit',
         Record.parent_id.in_(references)|
-        (Record.data['target_id'].as_string()==id)|
+        Record.data['target_id'].as_string().in_(targets)|
         Record.data['report_id'].as_string().in_(reports)))
-    db.execute(delete(Record).where(Record.kind==release.NOTICE,(Record.data['target_id'].as_string()==id)|Record.parent_id.in_(reports)))
-    db.execute(delete(Record).where(Record.kind==release.REPORT,Record.parent_id==id))
+    db.execute(delete(Record).where(Record.kind==release.NOTICE,Record.data['target_id'].as_string().in_(targets)|Record.parent_id.in_(reports)))
+    db.execute(delete(Record).where(Record.kind==release.REPORT,Record.parent_id.in_(targets)))
+    db.execute(delete(Record).where(Record.kind==release.COMMENT,Record.parent_id==id))
     db.delete(item);db.commit()
     return {'message':'공구 정보를 삭제했습니다.'}
 
