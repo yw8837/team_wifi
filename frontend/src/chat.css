@@ -50,7 +50,7 @@
 .chat-widget-panel .chat-retention { grid-column:1/-1; margin:0; }
 .chat-widget-panel .chat-form>[role] { grid-column:1/-1; }
 .chat-widget-panel .chat-compose-actions { grid-column:2; grid-row:1; margin:0; align-self:stretch; }
-.chat-widget-panel .chat-compose-actions>button { width:100%; }
+.chat-widget-panel .chat-compose-actions>button { width:100%; min-width:0; padding:8px; }
 .chat-widget-panel .chat-retention .hint { font-size:12px; }
 .chat-widget-panel .chat-compose-actions button { min-height:44px; }
 @media(max-width:540px) {
