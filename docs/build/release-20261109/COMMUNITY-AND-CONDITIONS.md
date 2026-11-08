@@ -50,3 +50,8 @@ Play Console에서 프로덕션 0.3.0(code 4)이 2026-11-03 16:19에 공개됐�
 - 오프라인 서명·패키지·권한·연결 주소 등 51개 검사 통과. 증거는 `artifacts/community-20261109/android/android-release-verification.json`이다.
 - 최신 제품 커밋 `6506eca`의 [GitHub Actions 실행 42493377207](https://github.com/yw8837/team_wifi/actions/runs/42493377207)은 api·ui·unsigned-android 모두 성공했다. API 컨테이너 워크플로는 별도 실행 기록으로 확인한다.
 - Play 현재 공개 버전과 이번 서명 산출물의 버전 차이를 사용자에게 명시했다. 실제 기기에서 설치·로그인한 결과로 이 검증을 설명하지 않는다.
+
+
+## 후속 출시 제출 — 2026-11-09
+
+사용자가 스토어 출시를 명시적으로 요청해0.6.6(code16)을 프로덕션에 업로드하고 전체 사용자100% 출시로 검토 전송했다. Google 자동 사전 검사 종료 후 심사 중 상태를 확인했다. 승인 후 자동 게시 설정이다. 스토어 설명과 개인정보·계정 삭제 URL, OAuth 계정 생성 선언도 함께 갱신했다. 상세는 [Play 제출 기록](PLAY-SUBMISSION.md)에 있다. 위의 업로드 전 상태는 당시 이력이다.
