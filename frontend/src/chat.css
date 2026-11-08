@@ -16,6 +16,7 @@
 .chat-message h4 { margin:0 0 8px; font-size:16px; }
 .chat-generation { font-weight:600; }
 .chat-sources article { border-top:1px solid var(--line); padding:16px 0; min-width:0; }
+.chat-sources>summary { min-height:44px; display:list-item; padding:10px 0; cursor:pointer; font-weight:600; }
 .chat-sources h4 a { max-width:100%; overflow-wrap:anywhere; }
 .chat-sources a,.chat-guidance a,.chat-message .actions a { min-height:48px; display:inline-flex; align-items:center; }
 .chat-form { padding:16px; margin:0; border:1px solid var(--line); border-radius:16px; background:var(--cream); }
@@ -38,11 +39,16 @@
 .chat-widget-panel .chat-page { flex:1; width:100%; min-height:0; margin:0; padding:12px; overflow:auto; display:flex; flex-direction:column; }
 .chat-widget-panel .chat-heading { display:none; }
 .chat-widget-panel .chat-mode { margin:0 0 8px; font-size:13px; }
-.chat-widget-panel .chat-messages { flex:1 1 160px; min-height:80px; overflow:auto; margin:8px 0; }
+.chat-widget-panel .chat-messages { flex:1 1 220px; min-height:120px; overflow:auto; margin:8px 0; }
 .chat-widget-panel .chat-message { padding:12px; }
 .chat-widget-panel .chat-message h2 { font-size:15px; margin-bottom:8px; }
 .chat-widget-panel .chat-form { padding:12px; flex-shrink:0; }
 .chat-widget-panel .chat-form textarea { min-height:64px; max-height:160px; }
+.chat-widget-panel .chat-form .field>span { font-size:13px; }
+.chat-widget-panel .chat-form>.hint { font-size:11px; margin:4px 0; }
+.chat-widget-panel .chat-retention { margin:4px 0; }
+.chat-widget-panel .chat-compose-actions { margin:4px 0 0; }
+.chat-widget-panel .chat-compose-actions>button { width:100%; }
 .chat-widget-panel .chat-retention .hint { font-size:12px; }
 .chat-widget-panel .chat-compose-actions button { min-height:44px; }
 @media(max-width:540px) {
