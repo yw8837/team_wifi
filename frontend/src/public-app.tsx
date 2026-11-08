@@ -21,6 +21,7 @@ import { AdvisorPage, ComparisonCta, CompanionList } from "./advisor";
 import { CommunityFeed, CommunityFilters, ListFeedback, MyActivity, ModerationNotices, communityTime, periodError, postType, postTypes, useCommunityResource } from "./community";
 import type { PostType } from "./release-data";
 import { ChatPage } from "./chat";
+import { ChatWidget } from "./chat-widget";
 import { useContentRequest, useContentSessionAttempt } from "./content-session";
 import { useAccountExit } from "./account-exit";
 import { AdminMemberDetail, AdminMembers, AdminNavigation } from "./admin-members";
@@ -64,6 +65,7 @@ export function PublicApp(){
       <Route path="*" element={<section className="panel"><h1>화면을 찾을 수 없어요</h1><Link to="/">공구 찾기</Link></section>}/>
     </Routes><BrokerFooter/></main>
     {!auth&&<nav className="bottom-nav" aria-label="주요 메뉴">{[["/","공구 찾기",IconHome],["/demands","공구 수요",IconMessages],["/calculator","단가 비교",IconCalculator],["/my/saved","저장",IconBookmark],["/my","마이",IconUser]].map(([to,label,Icon])=>{const Glyph=Icon as typeof IconHome;return <NavLink key={String(to)} end={to==="/"||to==="/my"} className={({isActive})=>isActive||(to==="/"&&location.pathname.startsWith("/groupbuys"))?"active":undefined} to={String(to)}><span className="nav-icon"><Glyph size={23} stroke={1.7} aria-hidden="true"/></span><span>{String(label)}</span></NavLink>;})}</nav>}
+    <ChatWidget key={user?.id||"guest"}/>
   </MeasurementProvider>;
 }
 function OfferCard({offer}:{offer:Offer}){
