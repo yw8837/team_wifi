@@ -111,6 +111,19 @@ def live_read(db, user, question):
             amount='금액 미확인' if entry['price'] is None else '공유 금액 '+str(entry['price'])+'원'
             provenance = '판매처 공개 페이지 수집' if entry['source_type'] == 'seller_page' else '회원 공유·판매처 확정 아님'
             notes.append('공구 '+str(position)+' · '+entry['title']+' ('+provenance+'): '+amount+' · 마감 '+groupbuys.display_time(entry['expires_at'])+' · 출처 확인 '+groupbuys.display_time(entry['source_checked_at'])+' · DB 조회 '+checked+(' · 정보 확인 필요' if entry['review_state']=='needs_review' else '')+' · 조건은 연결한 공구와 판매처에서 다시 확인하세요.')
+            for reference in entry.get('price_references', []):
+                if (entry['price'] is None or entry['shipping_fee'] is None
+                        or reference.get('shipping_fee') is None
+                        or not entry.get('comparison_quantity')
+                        or reference.get('quantity') != entry['comparison_quantity']):
+                    continue
+                regular = reference['price'] + reference['shipping_fee']
+                deal = entry['price'] + entry['shipping_fee']
+                if regular <= 0:
+                    continue
+                difference = regular - deal
+                direction = '저렴' if difference >= 0 else '비쌈'
+                notes.append(f"동일 기본 구성 비교 · {reference['seller_name']} 배송 포함 {regular:,}원 대비 공구 {deal:,}원 · {abs(difference):,}원({abs(difference)/regular*100:.1f}%) {direction} · 비교 출처 확인 {groupbuys.display_time(reference['checked_at'])}. 옵션·쿠폰·지역 배송비는 각 판매처에서 확인하세요.")
             references.append((row.id,row.revision))
         if not groupbuy_rows:notes.append('DB 조회 '+checked+' 기준 공개 가능한 진행 중 공구를 찾지 못했어요. 가격·재고·구매 가능 여부는 확정할 수 없어요.')
     unique = {(a['kind'], a['url']): a for a in actions}

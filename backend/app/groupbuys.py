@@ -135,6 +135,9 @@ def dto(db,item,user=None):
         source_type=data.get('source_type','member'),
         source_url=data.get('source_url'),
         source_fresh_until=release.timestamp(data['source_fresh_until']) if data.get('source_fresh_until') else None,
+        comparison_quantity=data.get('comparison_quantity'),
+        price_references=[{key:value for key,value in reference.items() if key != 'source_hash'}
+            for reference in data.get('price_references', []) if reference.get('fresh_until',0)>now()],
         review_state=data.get('review_state','clear'),queried_at=release.timestamp(now()),broker_notice=BROKER_NOTICE)
 
 

@@ -15,7 +15,9 @@ from .security import passwords
 
 SOURCES = (
     {'id': 'canco-222', 'url': 'https://somi9726.cafe24.com/product/detail.html?product_no=222',
-     'seller': '캔코 공식몰', 'category': '외출·안전'},
+     'seller': '캔코 공식몰', 'category': '외출·안전',
+     'comparison_url': 'https://somi9726.cafe24.com/product/detail.html?product_no=172',
+     'product_key': '캔코 모아백 기저귀가방'},
 )
 MAX_BYTES = 2_000_000
 FRESH_SECONDS = 24 * 3600
@@ -37,6 +39,28 @@ class SellerRedirect(HTTPRedirectHandler):
 
 
 def fetch(source):
+    entry = fetch_page(source)
+    entry['price_references'] = []
+    product_terms = source.get('product_key', '').split()
+    if source.get('comparison_url') and product_terms and all(term in entry['title'] for term in product_terms):
+        try:
+            reference = fetch_page({**source, 'url': source['comparison_url']}, groupbuy=False)
+            if all(term in reference['title'] for term in product_terms) and reference['availability'] == 'listed':
+                entry['comparison_quantity'] = 1
+                entry['price_references'].append({
+                    'channel': 'online', 'seller_name': source['seller'] + ' 일반 판매',
+                    'url': reference['seller_url'], 'price': reference['price'],
+                    'shipping_fee': reference['shipping_fee'], 'quantity': 1,
+                    'scope': source['product_key'] + ' 본품 1개 · 기본 옵션 가격',
+                    'checked_at': reference['source_checked_at'],
+                    'fresh_until': reference['source_fresh_until'],
+                    'source_hash': reference['source_hash']})
+        except (OSError, ValueError):
+            pass  # A failed comparison fetch must not preserve an old price as fresh.
+    return entry
+
+
+def fetch_page(source, *, groupbuy=True):
     request = Request(validate_url(source['url']), headers={
         'User-Agent': 'ModuYuga-SourceCheck/1.0', 'Accept': 'text/html'})
     with build_opener(SellerRedirect).open(request, timeout=20) as response:
@@ -45,10 +69,10 @@ def fetch(source):
         raw = response.read(MAX_BYTES + 1)
         if len(raw) > MAX_BYTES:
             raise ValueError('Seller response exceeds size limit')
-        return parse_cafe24(raw.decode('utf-8'), source)
+        return parse_cafe24(raw.decode('utf-8'), source, groupbuy=groupbuy)
 
 
-def parse_cafe24(html, source):
+def parse_cafe24(html, source, *, groupbuy=True):
     def variable(name):
         match = re.search(r'\bvar\s+' + re.escape(name) + r"\s*=\s*'([^'\r\n]*)'", html)
         if not match:
@@ -56,7 +80,7 @@ def parse_cafe24(html, source):
         return unescape(match.group(1))
 
     title = variable('product_name')
-    if '공동구매' not in title or not 3 <= len(title) <= 120:
+    if (groupbuy and '공동구매' not in title) or not 3 <= len(title) <= 120:
         raise ValueError('Seller page does not identify a group buy')
     base_price = variable('product_price')
     if not base_price.isdigit():
@@ -72,11 +96,15 @@ def parse_cafe24(html, source):
     if soldout not in ('T', 'F'):
         raise ValueError('Unknown seller availability')
     member_only = variable('sIsNonmemberLimit') == 'T'
+    shipping_rows = [unescape(re.sub('<[^>]+>', ' ', row)) for row in
+                     re.findall(r'<tr\b[^>]*>.*?</tr>', html, re.S) if '배송비' in row]
+    shipping_free = bool(shipping_rows) and all(
+        re.sub(r'\s+', '', row) == '배송비무료' for row in shipping_rows)
     stamp = now()
     return {'source_id': source['id'], 'source_url': source['url'],
             'source_hash': hashlib.sha256(html.encode()).hexdigest(),
             'title': title, 'category': source['category'], 'seller_name': source['seller'],
-            'seller_url': source['url'], 'price': price, 'shipping_fee': None,
+            'seller_url': source['url'], 'price': price, 'shipping_fee': 0 if shipping_free else None,
             'minimum_quantity': None, 'unit': '', 'expires_at': '',
             'source_checked_at': release.timestamp(stamp), 'source_fresh_until': stamp + FRESH_SECONDS,
             'source_type': 'seller_page', 'availability': 'sold_out' if soldout == 'T' else 'listed',

@@ -28,6 +28,27 @@ def test_seller_parser_requires_verified_fields_and_rejects_redirects():
             external_groupbuys.validate_url(url)
 
 
+def test_fetch_comparison_matches_campaign_title_and_drops_failed_reference(monkeypatch):
+    source = external_groupbuys.SOURCES[0]
+    def page(request, *, groupbuy=True):
+        html = seller_html().replace('캔코 모아백 기저귀가방 공동구매', '[애프리x캔코] 모아백 기저귀가방 공동구매')
+        if not groupbuy:
+            html = seller_html().replace(' 공동구매', '').replace('var product_sale_price = 109000;', '')
+        html += '<tr><th>배송비</th><td>무료</td></tr>'
+        return external_groupbuys.parse_cafe24(html, request, groupbuy=groupbuy)
+    monkeypatch.setattr(external_groupbuys, 'fetch_page', page)
+    entry = external_groupbuys.fetch(source)
+    assert entry['shipping_fee'] == 0 and entry['comparison_quantity'] == 1
+    assert entry['price_references'][0]['price'] == 129000
+    assert entry['price_references'][0]['shipping_fee'] == 0
+    def fail_reference(request, *, groupbuy=True):
+        if not groupbuy:
+            raise ValueError('Unknown seller page')
+        return page(request)
+    monkeypatch.setattr(external_groupbuys, 'fetch_page', fail_reference)
+    assert external_groupbuys.fetch(source)['price_references'] == []
+
+
 def test_import_updates_one_record_and_chat_excludes_demo_and_stale(public_mode):
     client, _, _ = public_mode
     entry = external_groupbuys.parse_cafe24(seller_html(), external_groupbuys.SOURCES[0])
