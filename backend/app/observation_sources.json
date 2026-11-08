@@ -16,14 +16,14 @@
     "guide:community-guide": "d3bfd99f49de019cfc21dd770354d837871e56f7fe45b0bd147522506a14e0eb",
     "guide:compare-unit": "2046b0d41b196f3c70dc5ce6e427d742c40801ef16621a7762577b44321a90d2",
     "guide:discount-gift": "bc295be3591fb9c422087c9eff7de1e6b14fe9a44d4a164307e48bdd35910091",
+    "guide:official-kdca-vaccination-information": "971e0b0d17acd8ee77367bccf6a455180bee378538f7b4157407afdf34bb4d7f",
+    "guide:official-safetykorea-certification-guide": "f8c5d6dfafb22be43fb2e3958b1338d4f13b0484f9e6a19cebe20f7bcf2c016e",
+    "guide:official-safetykorea-necklace-20261029": "bc2f81f918b8e837a193729a43694bef1df5bf5691c098bc5f14ecf5bb3d056c",
+    "guide:official-safetykorea-prime-desk-20261030": "f4c125f74a0a95a9e71fec521728fe50671025d1c5fa1af83e2c6cb69d1e22f1",
+    "guide:official-safetykorea-recall-search": "5f54c17bedc12fc2169ed5e6ab96689e22ef8d897fbe94758051c439d2f54823",
     "guide:privacy-chat": "7e5fe538789dc1563b82c63bbf3e54920fb0f1c23833d65513fd3fa99d4e728b",
     "guide:privacy-companions": "6989ff93294fa46f7589ec804cb24ac5faa07e6c8a302317f66c0bfe0f63495a",
     "guide:saved-guide": "be8e1f22f7f546b2a6cc3dcbbc59e5f881cee796701e768a32b29ca9f4eb5022",
-    "guide:scope-guide": "fa953feea593b76581d2457f172e4158e691441044a58d76fd1ee730adc5abf5",
-    "official:kdca-vaccination-information": "971e0b0d17acd8ee77367bccf6a455180bee378538f7b4157407afdf34bb4d7f",
-    "official:safetykorea-certification-guide": "f8c5d6dfafb22be43fb2e3958b1338d4f13b0484f9e6a19cebe20f7bcf2c016e",
-    "official:safetykorea-necklace-20261029": "bc2f81f918b8e837a193729a43694bef1df5bf5691c098bc5f14ecf5bb3d056c",
-    "official:safetykorea-prime-desk-20261030": "f4c125f74a0a95a9e71fec521728fe50671025d1c5fa1af83e2c6cb69d1e22f1",
-    "official:safetykorea-recall-search": "5f54c17bedc12fc2169ed5e6ab96689e22ef8d897fbe94758051c439d2f54823"
+    "guide:scope-guide": "fa953feea593b76581d2457f172e4158e691441044a58d76fd1ee730adc5abf5"
   }
 }

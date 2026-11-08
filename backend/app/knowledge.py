@@ -93,7 +93,7 @@ def corpus():
     external = json.loads(Path(__file__).with_name('external_knowledge.json').read_text(encoding='utf-8'))
     for source in external['sources']:
         revision = digest(source['text'])
-        key = 'official:' + source['id']
+        key = 'guide:official-' + source['id']
         chunks.append(Chunk(key, key+':'+revision[:12], source['title'], source['url'],
                             'official_public', external['checked_at'], revision,
                             source['text'], (source['text'],)))
