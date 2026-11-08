@@ -43,9 +43,15 @@ def test_import_updates_one_record_and_chat_excludes_demo_and_stale(public_mode)
         links = [action for action in result['actions'] if action['url'].startswith('/groupbuys/')]
         assert links == [{'label': entry['title'], 'url': '/groupbuys/' + identifier, 'kind': 'item'}]
         assert any('마감 미확인' in note and '109000' in note for note in result['notes'])
+        assert result['verified_offer'] is True
     response = client.get('/api/release/groupbuys/' + identifier + '/public')
     assert response.status_code == 200 and '판매처 게시 확인' in response.text
     assert 'href="' + entry['seller_url'] + '"' in response.text
+    answer = client.post('/api/release/assistant/ask', json={'question': '기저귀가방 공구 가격 얼마야?', 'remember': False})
+    assert answer.status_code == 200
+    assert answer.json()['generation']['reason'] is None
+    assert '109000' in answer.json()['answer']
+    assert '확인된 자료를 찾지 못했어요' not in answer.json()['answer']
     with SessionLocal.begin() as db:
         row = db.get(Record, identifier)
         row.ends = now() - 1

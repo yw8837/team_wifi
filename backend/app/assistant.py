@@ -337,6 +337,9 @@ def answer_request(body,request,observation,request_id,user_id,identifier,revisi
                 live=assistant_tools.live_read(db,user,effective_question)
         if restricted:
             answer='비밀번호·인증 토큰과 다른 회원의 비공개 정보는 제공할 수 없어요. 확인된 공개 안내만 제공해요.\n\n'+answer
+        if not restricted and live.get('verified_offer') and reason in ('no_evidence', 'price'):
+            answer='판매처에서 마지막으로 수집한 공구 정보를 안내해요. 최종 금액과 구매 조건은 판매처에서 확인해 주세요.'
+            mode, reason, unsupported = 'retrieval_only', None, None
         if live['notes']:
             answer += '\n\n'+'\n'.join(live['notes'])
         checked_at = knowledge.timestamp()

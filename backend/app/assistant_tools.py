@@ -27,6 +27,7 @@ def _tool_call(name,local):
 
 def live_read(db, user, question):
     actions, notes, references = [], [], []
+    verified_offer = False
     tool_calls={}
     query = question.casefold()
     chat_settings=bool(re.search(r'대화|채팅|도우미',query) and re.search(r'저장|보관|삭제|종료',query))
@@ -105,6 +106,7 @@ def live_read(db, user, question):
         groupbuy_rows=list(db.scalars(query_rows.order_by(Record.ends,Record.id).limit(3)))
         for position,row in enumerate(groupbuy_rows,1):
             entry=groupbuys.dto(db,row,user)
+            verified_offer = verified_offer or (entry['source_type'] == 'seller_page' and entry['price'] is not None)
             actions.append({'label':entry['title'],'url':'/groupbuys/'+row.id,'kind':'item'})
             amount='금액 미확인' if entry['price'] is None else '공유 금액 '+str(entry['price'])+'원'
             provenance = '판매처 공개 페이지 수집' if entry['source_type'] == 'seller_page' else '회원 공유·판매처 확정 아님'
@@ -112,4 +114,5 @@ def live_read(db, user, question):
             references.append((row.id,row.revision))
         if not groupbuy_rows:notes.append('DB 조회 '+checked+' 기준 공개 가능한 진행 중 공구를 찾지 못했어요. 가격·재고·구매 가능 여부는 확정할 수 없어요.')
     unique = {(a['kind'], a['url']): a for a in actions}
-    return {'actions': list(unique.values())[:16], 'notes': notes, 'references': references,'tool_calls':tool_calls}
+    return {'actions': list(unique.values())[:16], 'notes': notes, 'references': references,'tool_calls':tool_calls,
+            'verified_offer': verified_offer}
