@@ -60,3 +60,12 @@ Enter는 전송, Shift+Enter는 줄바꿈이다. 한글 조합 중 또는 keyCod
 | `b069f2c` | Android CI Gradle 다운로드 시간 제한 보완 |
 | `7016970` | CI Gradle 설치·캐시와 현재 API 주소 연결 |
 | `fa563ec` | 모바일 대화창 잘림 수정·입력칸 옆 전송 버튼 |
+| `c78a2eb` | 모바일 전송 버튼의 전역 최소 너비 상속 보완 |
+
+## 최종 확인
+
+최신 웹 `c78a2eb`를 Cloudflare Pages에 배포하고 앱 브라우저의 390×844 화면에서 확인했다. 팝업의 좌측은 약 12px이며 우측은 화면 안에 위치한다. 팝업과 입력 폼의 scrollWidth가 clientWidth와 같아 가로 넘침이 없다. Enter 전송, Shift+Enter 줄바꿈, Escape 닫기와 재열기 후 대화 유지도 확인했다. 캡처는 `chat-mobile-ready.png`와 `chat-desktop-ready.png`다.
+
+최신 코드의 GitHub Actions 42479011632는 API, UI, unsigned Android 작업을 모두 성공으로 완료했다. Gradle 버전 설치와 캐시를 적용한 뒤 Android 빌드·패키징까지 통과했다. 결과는 `artifacts/external-data-20261108/ci-ready.json`에 저장했다.
+
+Android 0.6.4(code 14) 서명 APK·AAB와 오프라인 검증 51개를 완료했다. 최종 설치 파일은 `artifacts/android/releases/14-0.6.4-ready/moduyuga.apk`이며 검증은 `artifacts/external-data-20261108/android-ready/android-release-verification.json`에 기록했다. 앞선 같은 버전의 중간 산출물은 보존한다. 실제 휴대폰 설치와 Play 업로드는 이번 실행 범위에 포함되지 않았다.
