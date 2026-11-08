@@ -625,7 +625,7 @@ def test_mixed_sensitive_disclosure_skips_every_live_tool_but_returns_public_gui
     c,p,_=chat
     monkeypatch.setattr(assistant_tools,'live_read',lambda *args:pytest.fail('sensitive mixed requests must skip all live tools'))
     def select(question,chunks):
-        assert all(chunk.source_type in {'service_guide','catalog_comparison','reviewed_analysis'} for chunk in chunks)
+        assert all(chunk.source_type in {'service_guide','catalog_comparison','reviewed_analysis','official_public'} for chunk in chunks)
         chunk=next(chunk for chunk in chunks if chunk.source_id=='guide:compare-unit')
         quote=model_runtime.evidence_groups(chunk)[0]
         return quote,[chunk.citation(quote)],'synthetic-model'

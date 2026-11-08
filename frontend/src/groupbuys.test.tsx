@@ -15,7 +15,7 @@ describe("current groupbuy discovery and honest external commerce",()=>{
  it("labels virtual demonstrations and suppresses the seller link",()=>{
   state.data={...item,is_demo:true,own:false};
   const html=detail();
-  expect(html).toContain("가상 시연 데이터입니다");
+  expect(html).toContain("시연용 데이터입니다");
   expect(html).not.toContain('href="https://seller.example.org/deal"');
  });
  it("lists actual supplied records with unknown amounts and distinct ended state",()=>{state.data={items:[item,{...item,id:"ended-g2",status:"ended",can_edit:false}],has_more:true,queried_at:item.queried_at};const html=feed();expect(html).toContain("공구 찾기");expect(html).toContain("가격 정보 미확인");expect(html).toContain("배송비 미확인");expect(html).not.toContain("0원");expect(html).toContain('class="groupbuy-status ended"');expect(html).toContain("종료");expect(html).toContain("공유 2026.11.06 10:00");expect(html).toContain("마감 임박순");expect(html).toContain("공구 목록 페이지");expect(state.paths[0]).toContain("status=active&sort=ending&limit=20&offset=0");});

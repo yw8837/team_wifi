@@ -35,11 +35,11 @@ def test_demo_public_detail_labels_fiction_and_has_no_seller_link(public_mode):
     response = client.get('/api/release/groupbuys/' + identifier)
     assert response.status_code == 200
     assert response.json()['is_demo'] is True
-    assert response.json()['title'].startswith('[가상]')
+    assert '[가상]' not in response.json()['title']
     page = client.get('/api/release/groupbuys/' + identifier + '/public')
     assert page.status_code == 200
     assert page.headers['x-robots-tag'] == 'noindex, nofollow'
     assert 'href="https://example.com"' not in page.text
-    assert '가상 시연 데이터' in page.text
+    assert '시연용 데이터' in page.text
     sitemap = client.get('/api/release/groupbuy-pages/sitemap.xml')
     assert '<sitemap>' not in sitemap.text

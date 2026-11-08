@@ -90,6 +90,13 @@ def corpus():
         chunks.append(Chunk('analysis:'+key, key+':'+revision[:12],
                             source['id']+' · 서비스 데이터 활용과 한계', source['url'],
                             'reviewed_analysis', CHECKED_AT, revision, text, (text,)))
+    external = json.loads(Path(__file__).with_name('external_knowledge.json').read_text(encoding='utf-8'))
+    for source in external['sources']:
+        revision = digest(source['text'])
+        key = 'official:' + source['id']
+        chunks.append(Chunk(key, key+':'+revision[:12], source['title'], source['url'],
+                            'official_public', external['checked_at'], revision,
+                            source['text'], (source['text'],)))
     return chunks
 
 
@@ -105,7 +112,7 @@ RETRIEVAL_STOP_WORDS = frozenset({
 RETRIEVAL_STOP_GRAMS = RETRIEVAL_STOP_WORDS | frozenset({
     '세요','하세','니다','습니','합니','입니','하는','하나','나요','해요','에서','으로',
     '부터','하게','하고','되고','있어','없는','없음','인지','하면','하며','이나','거나',
-    '도우','우미','알려','보여','주시','드려','대한','관련',
+    '도우','우미','알려','보여','주시','드려','대한','관련','용하',
 })
 RETRIEVAL_SUFFIXES = tuple(sorted({
     '으로부터','에서는','에게는','하려면','하나요','할까요','해주세요','알려줘',
@@ -232,7 +239,7 @@ CATEGORY_ALIASES={
     '기저귀·물티슈':('기저귀','물티슈'),
     '수유·이유식':('수유','이유식','젖병','젖꼭지'),
     '목욕·위생':('목욕','위생','탕온계','면봉','손톱','보관용품'),
-    '외출·안전':('외출','유모차'),
+    '외출·안전':('외출','유모차','기저귀가방','기저귀 가방','모아백'),
     '놀이·도서':('놀이','도서','그림책','사운드북','블루래빗'),
     '육아생활':('육아생활','세척','세탁','세척솔'),
 }
@@ -245,8 +252,12 @@ PRODUCT_TOPICS={
 
 
 def explicit_categories(question):
+    # A diaper bag belongs to outing supplies; its compound name is not a diaper request.
+    bag = bool(re.search(r'기저귀\s*가방|모아백', question))
+    normalized = re.sub(r'기저귀\s*가방', '외출가방', question)
     return [category for category,aliases in CATEGORY_ALIASES.items()
-            if category in question or any(alias in question for alias in aliases)]
+            if category in normalized or any(alias in normalized for alias in aliases)
+            or (bag and category == '외출·안전')]
 
 
 def public_topics(question):

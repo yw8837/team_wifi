@@ -119,6 +119,8 @@ def active_actor(db,user,*,operator=False):
 
 
 def display_time(value):
+    if not value:
+        return '미확인'
     return datetime.fromisoformat(value.replace('Z','+00:00')).astimezone(timezone(timedelta(hours=9))).strftime('%Y-%m-%d %H:%M (한국 시간)')
 
 
@@ -130,6 +132,9 @@ def dto(db,item,user=None):
         revision=item.revision,own=bool(user and user.id==item.owner_id),status=status,
         can_edit=bool(user and user.id==item.owner_id and status=='active'),
         is_demo=data.get('is_demo') is True,
+        source_type=data.get('source_type','member'),
+        source_url=data.get('source_url'),
+        source_fresh_until=release.timestamp(data['source_fresh_until']) if data.get('source_fresh_until') else None,
         review_state=data.get('review_state','clear'),queried_at=release.timestamp(now()),broker_notice=BROKER_NOTICE)
 
 

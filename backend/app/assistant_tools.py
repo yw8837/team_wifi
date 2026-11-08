@@ -95,7 +95,8 @@ def live_read(db, user, question):
         from . import groupbuys
         from .db import now
         checked=groupbuys.display_time(release.timestamp(now()))
-        query_rows=groupbuys.visible_query(user,Record.status=='active',Record.ends>now())
+        query_rows=groupbuys.visible_query(user,Record.status=='active',Record.ends>now(),
+            Record.data['is_demo'].as_boolean().is_not(True))
         if categories:query_rows=query_rows.where(Record.data['category'].as_string().in_(categories))
         groupbuy_terms=[term for term in terms if term not in {'공구','공동구매','마감','판매처','진행','현재','알려줘','보여줘','찾아줘','구매','정보'}]
         if groupbuy_terms:
@@ -106,7 +107,8 @@ def live_read(db, user, question):
             entry=groupbuys.dto(db,row,user)
             actions.append({'label':entry['title'],'url':'/groupbuys/'+row.id,'kind':'item'})
             amount='금액 미확인' if entry['price'] is None else '공유 금액 '+str(entry['price'])+'원'
-            notes.append('공구 '+str(position)+'(회원 공유·판매처 확정 아님): '+amount+' · 마감 '+groupbuys.display_time(entry['expires_at'])+' · 출처 확인 '+groupbuys.display_time(entry['source_checked_at'])+' · DB 조회 '+checked+(' · 정보 확인 필요' if entry['review_state']=='needs_review' else '')+' · 조건은 연결한 공구와 판매처에서 다시 확인하세요.')
+            provenance = '판매처 공개 페이지 수집' if entry['source_type'] == 'seller_page' else '회원 공유·판매처 확정 아님'
+            notes.append('공구 '+str(position)+' · '+entry['title']+' ('+provenance+'): '+amount+' · 마감 '+groupbuys.display_time(entry['expires_at'])+' · 출처 확인 '+groupbuys.display_time(entry['source_checked_at'])+' · DB 조회 '+checked+(' · 정보 확인 필요' if entry['review_state']=='needs_review' else '')+' · 조건은 연결한 공구와 판매처에서 다시 확인하세요.')
             references.append((row.id,row.revision))
         if not groupbuy_rows:notes.append('DB 조회 '+checked+' 기준 공개 가능한 진행 중 공구를 찾지 못했어요. 가격·재고·구매 가능 여부는 확정할 수 없어요.')
     unique = {(a['kind'], a['url']): a for a in actions}

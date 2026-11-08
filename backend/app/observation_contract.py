@@ -24,7 +24,7 @@ def source_map():
         if len(raw)>65536:raise ValueError()
         data=json.loads(raw)
         if set(data)!={'schema_version','sources'} or type(data['schema_version']) is not int or data['schema_version']!=1 or not isinstance(data['sources'],dict):raise ValueError()
-        if len(data['sources'])>200 or any(not isinstance(k,str) or not re.fullmatch(r'(guide|catalog|analysis):[a-z0-9-]{1,70}',k) or not isinstance(v,str) or not re.fullmatch(r'[0-9a-f]{64}',v) for k,v in data['sources'].items()):raise ValueError()
+        if len(data['sources'])>200 or any(not isinstance(k,str) or not re.fullmatch(r'(guide|catalog|analysis|official):[a-z0-9-]{1,70}',k) or not isinstance(v,str) or not re.fullmatch(r'[0-9a-f]{64}',v) for k,v in data['sources'].items()):raise ValueError()
         return data['sources']
     except (OSError,ValueError,TypeError):raise ObservationError('invalid_configuration') from None
 

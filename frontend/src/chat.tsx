@@ -10,7 +10,7 @@ import "./chat.css";
 type Message={role:"user"|"assistant";content:string;answer?:AssistantResponse};
 const basisLabels:Record<AssistantResponse["basis"],string>={public_knowledge:"검토한 공개 자료",live_data:"현재 확인한 서비스 정보",mixed:"공개 자료와 현재 서비스 정보",no_evidence:"확인할 근거가 부족해요",unsupported:"답변하기 어려운 요청이에요"};
 const generationReasons:Record<string,string>={clarification_needed:"제품이나 분야의 이름을 함께 적어 주세요.",disabled:"현재 모델 생성 기능을 사용할 수 없어 자료를 안내해요.",busy:"모델이 다른 요청을 처리하고 있어요. 잠시 후 다시 질문해 주세요.",timeout:"모델 응답 시간이 초과되어 생성 답변을 표시하지 않아요.",unavailable:"모델에 연결할 수 없어 확인한 자료만 안내해요.",no_evidence:"답변을 뒷받침할 검토 자료가 부족해요.",medical:"의료 판단은 제공하지 않아요. 의료 전문가에게 확인해 주세요.",price:"현재 가격을 확인할 근거가 없어 판매처 확인이 필요해요.",certification:"인증 여부를 확인할 근거가 없어 공식 기관 확인이 필요해요.",evidence_changed:"답변 준비 중 자료나 공개 상태가 변경됐어요. 다시 질문해 주세요.",invalid_output:"생성 결과를 검증하지 못해 표시하지 않아요.",invalid_citation:"생성 답변의 출처를 검증하지 못했어요.",unsupported_claim:"확인한 자료가 생성 답변을 충분히 뒷받침하지 않아요.",unsupported_number:"숫자 정보를 근거에서 확인하지 못했어요."};
-const sourceLabels:Record<string,string>={catalog_comparison:"육아템 비교",reviewed_analysis:"검토한 분석",service_guide:"서비스 안내",guide:"이용 안내"};
+const sourceLabels:Record<string,string>={catalog_comparison:"육아템 비교",official_public:"공공기관 공개 자료",reviewed_analysis:"검토한 분석",service_guide:"서비스 안내",guide:"이용 안내"};
 export function assistantStatusMessage(status:AssistantStatus|null):string {
  if(!status)return "연결 상태 확인 중";
  return status.available&&status.mode==="local"?"최근 로컬 모델 응답 확인 · 답변 방식은 아래에 표시":"공개 자료와 현재 정보를 확인해 안내해요";

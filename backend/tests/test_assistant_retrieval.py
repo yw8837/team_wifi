@@ -50,4 +50,4 @@ def test_frozen_retrieval_gold_recall_is_preserved():
 
 def test_retrieval_does_not_change_generation_tokenizer_or_export_unapproved_types():
     assert {'이용하나요','이용','용하','하나','나요'} <= knowledge.tokens('이용하나요')
-    assert {chunk.source_type for chunk in knowledge.corpus()} <= {'service_guide','catalog_comparison','reviewed_analysis'}
+    assert {chunk.source_type for chunk in knowledge.corpus()} <= {'service_guide','catalog_comparison','reviewed_analysis','official_public'}
