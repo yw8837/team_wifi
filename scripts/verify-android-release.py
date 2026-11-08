@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 import subprocess
 import zipfile
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
@@ -23,6 +24,10 @@ web_dir = args.web_dir.resolve()
 if not release.is_relative_to(ROOT) or not evidence.is_relative_to(ROOT) or not web_dir.is_relative_to(ROOT):
     parser.error('Release and evidence paths must stay inside this project')
 build = json.loads((release / 'build.json').read_text(encoding='utf-8-sig'))
+api_url = urlsplit(build['api'])
+if api_url.scheme != 'https' or not api_url.hostname or api_url.username or api_url.password:
+    parser.error('Release API must use an HTTPS URL without credentials')
+api_origin = f'{api_url.scheme}://{api_url.netloc}'
 evidence.mkdir(parents=True, exist_ok=True)
 checks = []
 apk_name = next(item['name'] for item in build['artifacts'] if item['name'].endswith('.apk'))
@@ -59,7 +64,14 @@ for item in build['artifacts']:
                 check(item['name'] + ': current asset '+asset_path.name,
                       archive.read(prefix+'public/assets/'+asset_path.name) == asset_path.read_bytes())
         check(item['name'] + ': CSP before script', 0 <= html.index('http-equiv="Content-Security-Policy"') < html.index('<script'))
-        check(item['name'] + ': CSP HTTPS origin', 'https://moduyuga-beta.onrender.com' in html and 'unsafe-eval' not in html and '10.0.2.2' not in html)
+        csp = re.search(r'<meta\s+http-equiv="Content-Security-Policy"\s+content="([^"]+)"', html)
+        check(item['name'] + ': CSP present', csp is not None)
+        directives = {}
+        for directive in csp.group(1).split(';'):
+            parts = directive.strip().split(None, 1)
+            if len(parts) == 2:
+                directives[parts[0]] = parts[1]
+        check(item['name'] + ': CSP HTTPS origin', api_origin in directives.get('connect-src', '').split() and 'unsafe-eval' not in html and '10.0.2.2' not in html)
         config = json.loads(archive.read(prefix + 'capacitor.config.json'))
         check(item['name'] + ': package', config['appId'] == 'kr.moduyuga.app')
         check(item['name'] + ': exact Korean name', config['appName'] == '모두의 육아 - 육아템 공동구매,핫딜')
