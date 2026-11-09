@@ -37,3 +37,8 @@
 Google 자동 사전 검사가 끝났고 Console에 `변경사항을 검토 중입니다`가 표시됐다. 프로덕션0.6.6의 전체 출시와 나머지4개 변경사항이 검토 중 목록에 있다. 승인·공개 완료로 기록하지 않는다.
 
 증거 화면 `artifacts/play-20261109/production-066-in-review.png`. 관리형 게시 사용 중지와0.6.6 전체 출시 시작 항목을 함께 확인했다.
+
+
+## 공개 완료 재확인
+
+2026-11-09 프로덕션 화면에서 최신 출시0.6.6, `Google Play에 제공됨`, 게시일11월9일 오전2:07을 확인했다. 제공 국가는 대한민국1개다. 정식 URL https://play.google.com/store/apps/details?id=kr.moduyuga.app 에서 새 출시 노트와 설치 버튼을 확인했다. 증거는 artifacts/play-20261109/production-066-published.png 및 public-store-066.png다. 다른 사람의 검색·설치 실패 원인은 해당 계정/기기 오류 화면을 확인해야 판정할 수 있다.
