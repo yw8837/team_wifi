@@ -68,12 +68,13 @@ export function SocialButtons({ to = '/', purpose = 'login', only }: { to?: stri
   const available = usePublicResource<{ providers: Provider[] }>('/auth/social/providers');
   const action = useAction();
   const providers = Array.isArray(available.data?.providers) ? available.data.providers.filter(p => p in names && (!only || only.includes(p))) : [];
-  async function begin(provider: Provider) {
+  async function begin(provider: Provider, forceLogin = false) {
     const attempt = attempts.begin(), fingerprint = await sessionFingerprint();
     const proof = await proofPair();
     if (!attempt.isCurrent()) return;
     const result = await api<{ flow_id: string; authorization_url: string }>('/auth/social/' + provider + '/start', 'POST', {
       challenge: proof.challenge, platform: Capacitor.isNativePlatform() ? 'android' : 'web', purpose,
+      ...(forceLogin ? { force_login: true } : {}),
     });
     if (!attempt.isCurrent()) return;
     // Expired client proofs are discarded; no provider/session token is placed in a URL.
@@ -87,7 +88,9 @@ export function SocialButtons({ to = '/', purpose = 'login', only }: { to?: stri
   if (available.error) return <section className="social-login" aria-label="소셜 로그인"><p role="alert">{available.error}</p><button type="button" className="secondary" onClick={available.reload}>소셜 로그인 다시 확인</button></section>;
   if (!providers.length) return purpose === 'login' ? <section className="social-login" aria-label="소셜 로그인"><p>현재 소셜 로그인을 이용할 수 없어요. 잠시 후 다시 확인하거나 이메일 로그인을 이용해 주세요.</p><button type="button" className="secondary" onClick={available.reload}>소셜 로그인 다시 확인</button></section> : null;
   return <section className="social-login" aria-label="소셜 로그인"><div className="social-buttons">{providers.map(provider => <button key={provider} type="button" className={'social-button social-' + provider} disabled={action.busy}
-    onClick={() => void action.run(() => begin(provider))}>{names[provider]}로 {purpose === 'link' ? '계정 연결' : purpose === 'reauth' ? '다시 인증' : '계속하기'}</button>)}</div><Feedback {...action}/>{purpose === 'login' && <p className="hint">기존 이메일 회원은 먼저 이메일로 로그인한 뒤 계정 관리에서 연결해 주세요. 같은 소셜 계정으로 앱과 웹의 저장·관심을 함께 이용할 수 있어요.</p>}</section>;
+    onClick={() => void action.run(() => begin(provider))}>{names[provider]}로 {purpose === 'link' ? '계정 연결' : purpose === 'reauth' ? '다시 인증' : '계속하기'}</button>)}</div>
+    {purpose === 'login' && providers.includes('kakao') && <button type="button" className="secondary" disabled={action.busy} onClick={() => void action.run(() => begin('kakao', true))}>다른 카카오 계정으로 로그인</button>}
+    <Feedback {...action}/>{purpose === 'login' && <p className="hint">기존 이메일 회원은 먼저 이메일로 로그인한 뒤 계정 관리에서 연결해 주세요. 같은 소셜 계정으로 앱과 웹의 저장·관심을 함께 이용할 수 있어요.</p>}</section>;
 }
 type Result = { status: 'pending' | 'onboarding' | 'authenticated' | 'linked' | 'reauthenticated'; user?: User; access_token?: string; reauth_token?: string };
 export function SocialReturn() {

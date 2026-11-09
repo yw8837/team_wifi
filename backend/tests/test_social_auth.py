@@ -34,6 +34,20 @@ def flow(c, provider='google', purpose='login', headers=None, code='new', platfo
     return {'flow_id': started['flow_id'], 'verifier': verifier}, query, callback
 
 
+def test_kakao_other_account_requires_provider_login(oauth):
+    client, _, _ = oauth
+    body = {'challenge': social.challenge('a'*43), 'purpose': 'login', 'platform': 'web'}
+    ordinary = client.post('/api/auth/social/kakao/start', json=body)
+    assert ordinary.status_code == 200
+    assert 'prompt' not in parse_qs(urlsplit(ordinary.json()['authorization_url']).query)
+    switched = client.post('/api/auth/social/kakao/start', json={**body, 'force_login': True})
+    assert switched.status_code == 200
+    query = parse_qs(urlsplit(switched.json()['authorization_url']).query)
+    assert query['prompt'] == ['login'] and query['scope'] == ['openid']
+    assert query['state'] and query['nonce']
+    assert client.post('/api/auth/social/kakao/start', json={**body, 'force_login': 'yes'}).status_code == 422
+
+
 def enroll(c, proof):
     assert c.post('/api/auth/social/claim', json=proof).json()['status'] == 'onboarding'
     return c.post('/api/auth/social/claim', json={**proof, 'nickname': '소셜회원', 'terms_accepted': True,

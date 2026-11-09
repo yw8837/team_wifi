@@ -73,6 +73,7 @@ class Start(Strict):
     challenge: str = Field(pattern=r'^[A-Za-z0-9_-]{43}$')
     platform: Literal['web', 'android'] = 'web'
     purpose: Literal['login', 'link', 'reauth'] = 'login'
+    force_login: StrictBool = False
 
 
 class Claim(Strict):
@@ -123,6 +124,8 @@ def start(provider: Provider, body: Start, request: Request, user=Depends(option
             params['auth_type'] = 'reauthenticate'
     if provider == 'google':
         params.update(code_challenge=challenge(verifier), code_challenge_method='S256', prompt='select_account')
+    if provider == 'kakao' and body.purpose == 'login' and body.force_login:
+        params['prompt'] = 'login'
     if body.purpose == 'reauth' and provider != 'naver':
         params['prompt'] = 'login' if provider == 'kakao' else 'select_account'
     db.commit()

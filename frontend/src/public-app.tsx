@@ -53,7 +53,7 @@ export function PublicApp(){
   useEffect(()=>{const online=()=>setOffline(false),off=()=>setOffline(true);window.addEventListener("online",online);window.addEventListener("offline",off);return()=>{window.removeEventListener("online",online);window.removeEventListener("offline",off);};},[]);
   useEffect(()=>{window.scrollTo(0,0);document.title=APP_NAME;let robots=document.querySelector<HTMLMetaElement>('meta[name="robots"]');if(!robots){robots=document.createElement("meta");robots.name="robots";document.head.appendChild(robots);}robots.content=/^\/(my|settings|admin|auth|login|signup|reset|chat|onboarding)(\/|$)/.test(location.pathname)?"noindex,nofollow":"index,follow";document.getElementById("main")?.focus({preventScroll:true});},[location.pathname]);
   const auth=["/login","/signup","/reset"].includes(location.pathname);
-  return <MeasurementProvider><NativeAuthReturn/><a className="skip-link" href="#main">본문으로 이동</a><header className="app-header public-header"><Link className="wordmark" to="/"><BrandLockup/></Link><nav className="header-tools" aria-label="챗봇과 계정"><Link className="header-chat" to="/chat">챗봇</Link><Link className="header-account" to={user?"/my":"/login"} aria-label={user?user.nickname+" · 마이페이지":"로그인"} title={user?.nickname}><span className="header-account-name">{user?user.nickname:"로그인"}</span></Link></nav></header>
+  return <MeasurementProvider><NativeAuthReturn/><a className="skip-link" href="#main">본문으로 이동</a><header className="app-header public-header"><Link className="wordmark" to="/"><BrandLockup/></Link><nav className="header-tools" aria-label="계정"><Link className="header-account" to={user?"/my":"/login"} aria-label={user?user.nickname+" · 마이페이지":"로그인"} title={user?.nickname}><span className="header-account-name">{user?user.nickname:"로그인"}</span></Link></nav></header>
     {offline&&<p className="offline" role="alert">오프라인입니다. 계산기는 계속 이용할 수 있어요. 연결 후 정보를 다시 불러와 주세요.</p>}
     <main id="main" tabIndex={-1} className={auth?"auth-main":"public-main"}>{!auth&&<ModerationNotices key={user?.id||"guest"}/>}<Routes>
       <Route path="/auth/complete" element={<SocialReturn/>}/><Route path="/" element={<GroupbuyFeed/>}/><Route path="/groupbuys/new" element={<Protected><GroupbuyEditorPage key={user?.id||"guest"}/></Protected>}/><Route path="/groupbuys/:id/edit" element={<Protected><GroupbuyEditorPage key={location.pathname+"/"+(user?.id||"guest")}/></Protected>}/><Route path="/groupbuys/:id" element={<GroupbuyDetail key={location.pathname+"/"+(user?.id||"guest")}/>}/><Route path="/my/groupbuys" element={<Protected><GroupbuyFeed mine key={user?.id||"guest"}/></Protected>}/><Route path="/admin/groupbuys" element={<Protected admin><AdminGroupbuys key={user?.id||"guest"}/></Protected>}/><Route path="/offers" element={<Offers/>}/><Route path="/offers/:id" element={<OfferDetail key={location.pathname+"/"+(user?.id||"guest")}/>}/>
@@ -121,7 +121,8 @@ function DemandDetail(){
 }
 function PublicWelcome(){return <section className="welcome"><div className="welcome-emblem"><img src="/brand/symbol.svg" alt="" width="128"/></div><p className="eyebrow">함께 고르는 육아생활</p><h1>우리에게 맞는 육아템,<br/>차근차근 골라요.</h1><p className="lead">공구 정보를 모아 보고 판매처에서 조건을 확인하세요.<br/>육아템 단가를 비교하고 수요와 경험도 나눌 수 있어요.</p><Link className="button" to="/">로그인 없이 공구 찾기</Link><p>주문·결제·배송·환불은 각 판매처에서 진행합니다.</p><LegalLinks/></section>;}
 function PublicMy() {
-  const {user}=useAuth();
+  const {user,clear}=useAuth(), nav=useNavigate(), request=useContentRequest();
+  const exit=useAccountExit(user?.id,clear);
   return <div className="my-page">
     <PageTitle title="마이페이지"><p>내가 모은 정보부터 계정 관리까지.</p></PageTitle>
     <section className="my-profile" aria-labelledby="my-profile-title">
@@ -129,6 +130,7 @@ function PublicMy() {
       <div className="my-profile-copy">
         <h2 id="my-profile-title">{user ? user.nickname+"님, 반가워요" : "함께 고르는 육아생활"}</h2>
         <p>{user ? "필요한 육아템을 모아 두고, 궁금한 점을 나눠요." : "둘러보기는 자유롭게, 저장과 글쓰기는 로그인 후에."}</p>
+        {user&&<div className="my-auth-actions"><Link className="button secondary" to="/settings">프로필 · 계정 관리</Link><button type="button" className="secondary" disabled={exit.busy} onClick={()=>void exit.run(()=>request("/auth/logout","POST"),()=>nav("/login?returnTo=%2Fmy",{replace:true}))}>{exit.busy?"로그아웃 중…":"로그아웃"}</button><Feedback {...exit}/></div>}
         {!user&&<div className="my-auth-actions"><Link className="button" to="/login?returnTo=%2Fmy">로그인</Link><Link to="/signup?returnTo=%2Fmy">회원가입</Link></div>}
       </div>
     </section>

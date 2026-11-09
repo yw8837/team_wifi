@@ -33,7 +33,7 @@
 .my-profile-copy { min-width: 0; }
 .my-profile h2 { font-size: 21px; margin: 0 0 8px; overflow-wrap: anywhere; }
 .my-profile p { margin: 0; color: var(--muted); line-height: 1.65; }
-.my-auth-actions { display: flex; align-items: center; gap: 20px; margin-top: 18px; }
+.my-auth-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 18px; }
 .my-auth-actions > a { min-height: 44px; display: inline-flex; align-items: center; }
 .my-section { margin-top: 32px; }
 .my-section > h2 { font-size: 18px; margin: 0 0 12px; }
