@@ -277,6 +277,8 @@ def claim(body: Claim, request: Request, user=Depends(optional_user), db=Depends
         raise HTTPException(400, '로그인을 시작한 기기에서 다시 진행해 주세요.')
     if flow.status in ('pending', 'processing'):
         return {'status': 'pending'}
+    if flow.status == 'failed':
+        raise HTTPException(400, '카카오 인증을 확인하지 못했어요. 로그인 화면에서 다시 시도해 주세요.' if flow.data.get('provider') == 'kakao' else '소셜 인증을 확인하지 못했어요. 로그인 화면에서 다시 시도해 주세요.')
     if flow.status != 'ready':
         raise HTTPException(400, '로그인이 취소되었거나 만료되었습니다. 다시 시작해 주세요.')
     purpose = flow.data['purpose']

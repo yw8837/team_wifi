@@ -63,12 +63,12 @@ export function socialAuthorizationUrl(value: string, provider: Provider): strin
   if (url.protocol !== 'https:' || url.username || url.password || url.port || !expected || url.hostname !== expected[0] || url.pathname !== expected[1]) throw new Error('로그인 연결 주소를 확인하지 못했습니다.');
   return url.href;
 }
-export function SocialButtons({ to = '/', purpose = 'login', only }: { to?: string; purpose?: Purpose; only?: Provider[] }) {
+export function SocialButtons({ to = '/', purpose = 'login', only, forceLogin = false }: { to?: string; purpose?: Purpose; only?: Provider[]; forceLogin?: boolean }) {
   const attempts = useSessionAttempt();
   const available = usePublicResource<{ providers: Provider[] }>('/auth/social/providers');
   const action = useAction();
   const providers = Array.isArray(available.data?.providers) ? available.data.providers.filter(p => p in names && (!only || only.includes(p))) : [];
-  async function begin(provider: Provider, forceLogin = false) {
+  async function begin(provider: Provider) {
     const attempt = attempts.begin(), fingerprint = await sessionFingerprint();
     const proof = await proofPair();
     if (!attempt.isCurrent()) return;
@@ -89,8 +89,7 @@ export function SocialButtons({ to = '/', purpose = 'login', only }: { to?: stri
   if (!providers.length) return purpose === 'login' ? <section className="social-login" aria-label="소셜 로그인"><p>현재 소셜 로그인을 이용할 수 없어요. 잠시 후 다시 확인하거나 이메일 로그인을 이용해 주세요.</p><button type="button" className="secondary" onClick={available.reload}>소셜 로그인 다시 확인</button></section> : null;
   return <section className="social-login" aria-label="소셜 로그인"><div className="social-buttons">{providers.map(provider => <button key={provider} type="button" className={'social-button social-' + provider} disabled={action.busy}
     onClick={() => void action.run(() => begin(provider))}>{names[provider]}로 {purpose === 'link' ? '계정 연결' : purpose === 'reauth' ? '다시 인증' : '계속하기'}</button>)}</div>
-    {purpose === 'login' && providers.includes('kakao') && <button type="button" className="secondary" disabled={action.busy} onClick={() => void action.run(() => begin('kakao', true))}>다른 카카오 계정으로 로그인</button>}
-    <Feedback {...action}/>{purpose === 'login' && <p className="hint">기존 이메일 회원은 먼저 이메일로 로그인한 뒤 계정 관리에서 연결해 주세요. 같은 소셜 계정으로 앱과 웹의 저장·관심을 함께 이용할 수 있어요.</p>}</section>;
+    {forceLogin && purpose === 'login' && <p className="hint">카카오 화면에서 사용할 계정으로 로그인해 주세요.</p>}<Feedback {...action}/>{purpose === 'login' && <p className="hint">기존 이메일 회원은 먼저 이메일로 로그인한 뒤 계정 관리에서 연결해 주세요. 같은 소셜 계정으로 앱과 웹의 저장·관심을 함께 이용할 수 있어요.</p>}</section>;
 }
 type Result = { status: 'pending' | 'onboarding' | 'authenticated' | 'linked' | 'reauthenticated'; user?: User; access_token?: string; reauth_token?: string };
 export function SocialReturn() {

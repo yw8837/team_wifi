@@ -82,7 +82,7 @@ export function Login() {
           돌아갑니다.
         </p>
       )}
-      {PUBLIC_RELEASE && <><RememberLogin/><SocialButtons to={to}/></>}
+      {PUBLIC_RELEASE && <><RememberLogin/><SocialButtons to={to} forceLogin={params.get("switchAccount") === "1"}/></>}
       <EmailLoginContainer className={PUBLIC_RELEASE ? "email-signup" : undefined}>
       {PUBLIC_RELEASE && <summary>이메일로 로그인하기</summary>}
       <form aria-label="이메일 로그인"
@@ -168,7 +168,7 @@ export function Signup() {
       >
         <p>{PUBLIC_RELEASE ? "정보 저장과 공구 수요·질문에 참여할 수 있어요. 로그인 후 직접 원하는 행동을 선택해 주세요." : "판매자도 같은 계정으로 구매 기능을 이용할 수 있어요."}</p>
       </PageTitle>
-      {PUBLIC_RELEASE && <><RememberLogin/><SocialButtons to={to}/><p className="hint">소셜로 가입하면 이메일과 비밀번호를 따로 입력하지 않아요.</p></>}
+      {PUBLIC_RELEASE && <><RememberLogin/><SocialButtons to={to} forceLogin={params.get("switchAccount") === "1"}/><p className="hint">소셜로 가입하면 이메일과 비밀번호를 따로 입력하지 않아요.</p></>}
       {!PUBLIC_RELEASE && <div className="segmented">
         <button
           type="button"

@@ -24,8 +24,8 @@
 .chat-form textarea { width:100%; min-height:88px; resize:vertical; }
 .chat-form>.hint { margin:6px 0; }
 .chat-compose-actions { gap:8px; margin:8px 0 0; }
-.chat-guidance,.saved-conversations { margin-top:12px; border-top:1px solid var(--line); }
-.chat-guidance>summary,.saved-conversations>summary { min-height:48px; padding:12px 0; font-weight:600; cursor:pointer; }
+.chat-guidance,.saved-conversations { margin:0; padding:0; border:0; border-top:1px solid var(--line); border-radius:0; flex-shrink:0; }
+.chat-guidance>summary,.saved-conversations>summary { box-sizing:border-box; min-height:44px; padding:12px 4px; line-height:20px; font-weight:600; cursor:pointer; }
 .chat-guidance-content,.saved-conversations-content { padding:0 0 16px; }
 .chat-guidance-content>p { line-height:1.7; margin:12px 0; }
 .chat-status-error { margin:12px 0; }

@@ -130,7 +130,7 @@ function PublicMy() {
       <div className="my-profile-copy">
         <h2 id="my-profile-title">{user ? user.nickname+"님, 반가워요" : "함께 고르는 육아생활"}</h2>
         <p>{user ? "필요한 육아템을 모아 두고, 궁금한 점을 나눠요." : "둘러보기는 자유롭게, 저장과 글쓰기는 로그인 후에."}</p>
-        {user&&<div className="my-auth-actions"><Link className="button secondary" to="/settings">프로필 · 계정 관리</Link><button type="button" className="secondary" disabled={exit.busy} onClick={()=>void exit.run(()=>request("/auth/logout","POST"),()=>nav("/login?returnTo=%2Fmy",{replace:true}))}>{exit.busy?"로그아웃 중…":"로그아웃"}</button><Feedback {...exit}/></div>}
+        {user&&<div className="my-auth-actions"><Link className="button secondary" to="/settings">프로필 · 계정 관리</Link><button type="button" className="secondary" disabled={exit.busy} onClick={()=>void exit.run(()=>request("/auth/logout","POST"),()=>nav("/login?returnTo=%2Fmy",{replace:true}))}>{exit.busy?"로그아웃 중…":"로그아웃"}</button><button type="button" className="secondary" disabled={exit.busy} onClick={()=>void exit.run(()=>request("/auth/logout","POST"),()=>nav("/login?returnTo=%2Fmy&switchAccount=1",{replace:true}))}>계정 전환</button><Feedback {...exit}/></div>}
         {!user&&<div className="my-auth-actions"><Link className="button" to="/login?returnTo=%2Fmy">로그인</Link><Link to="/signup?returnTo=%2Fmy">회원가입</Link></div>}
       </div>
     </section>

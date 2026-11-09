@@ -26,7 +26,8 @@ afterEach(()=>vi.unstubAllGlobals());
 describe("public release navigation and safe content",()=>{
  it("offers an explicit different Kakao account login",()=>{
   state.data.set("/auth/social/providers",{providers:["kakao"]});
-  expect(render("/login")).toContain("다른 카카오 계정으로 로그인");
+  expect(render("/login")).not.toContain("다른 카카오 계정으로 로그인");
+  expect(render("/login?switchAccount=1")).toContain("카카오 화면에서 사용할 계정으로 로그인해 주세요.");
  });
  it("keeps social login loading visible instead of silently hiding it",()=>{
    state.loading=true;
