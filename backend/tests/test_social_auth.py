@@ -144,3 +144,28 @@ def test_real_jwt_verification_rejects_wrong_claims(monkeypatch, change):
     monkeypatch.setattr(social.httpx, 'Client', Client)
     with pytest.raises((jwt.PyJWTError, ValueError)):
         social.exchange('google', 'code', SimpleNamespace(data={'nonce': 'nonce', 'pkce': 'proof', 'purpose': 'reauth'}))
+
+@pytest.mark.parametrize('platform', ['web', 'android'])
+def test_expired_browser_callback_has_safe_recovery(oauth, platform):
+    client, _, _ = oauth
+    started = client.post('/api/auth/social/kakao/start', json={
+        'challenge': 'a' * 43, 'platform': platform}).json()
+    state = parse_qs(urlsplit(started['authorization_url']).query)['state'][0]
+    with SessionLocal() as db:
+        record = db.get(Record, started['flow_id'])
+        record.ends = now() - 1
+        db.commit()
+    response = client.get('/api/auth/social/kakao/callback',
+        params={'state': state, 'code': 'private-provider-code'},
+        headers={'Accept': 'text/html'}, follow_redirects=False)
+    assert response.status_code == 400
+    assert response.headers['content-type'].startswith('text/html')
+    assert '로그인을 다시 시작해 주세요' in response.text
+    target = ('kr.moduyuga.app://auth/complete?flow=' + started['flow_id']
+              if platform == 'android' else 'https://app.example.com/login')
+    assert target in response.text
+    assert state not in response.text and 'private-provider-code' not in response.text
+    assert response.headers['cache-control'] == 'no-store'
+    assert response.headers['referrer-policy'] == 'no-referrer'
+    with SessionLocal() as db:
+        assert db.get(Record, started['flow_id']).status == 'pending'

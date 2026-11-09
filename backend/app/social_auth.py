@@ -11,13 +11,14 @@ import os
 import re
 import secrets
 from functools import lru_cache
+from html import escape
 from typing import Literal
 from urllib.parse import urlencode
 
 import httpx
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import Field, StrictBool
 from sqlalchemy import delete, select, update
 
@@ -211,6 +212,31 @@ def exchange_naver(code, flow, state):
     return subject
 
 
+def login_recovery(flow):
+    destination = config.PUBLIC_WEB_ORIGIN + '/login'
+    label = '로그인 다시 시작'
+    if flow and flow.data.get('platform') == 'android':
+        destination = 'kr.moduyuga.app://auth/complete?flow=' + flow.id
+        label = '앱으로 돌아가기'
+    body = f'''<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>로그인 다시 시작 | 모두의 육아</title>
+<style>body{{margin:0;background:#fffaf5;color:#4f382e;font:16px/1.6 system-ui,sans-serif}}
+main{{box-sizing:border-box;max-width:480px;margin:10vh auto;padding:24px}}
+h1{{font-size:26px;line-height:1.4}}p{{margin:16px 0}}a{{display:block;padding:14px 20px;
+background:#b83d31;color:white;text-align:center;border-radius:12px;text-decoration:none;font-weight:700}}
+a:focus-visible{{outline:3px solid #4f382e;outline-offset:4px}}</style></head>
+<body><main><p>모두의 육아</p><h1>로그인을 다시 시작해 주세요</h1>
+<p role="alert">로그인 요청의 유효시간이 지났거나 이미 사용된 요청이에요.</p>
+<p>로그인 버튼을 누른 뒤 10분 안에 인증을 마쳐 주세요. 아래 버튼에서 다시 시작할 수 있어요.</p>
+<a href="{escape(destination, quote=True)}">{label}</a></main></body></html>'''
+    return HTMLResponse(body, status_code=400, headers={
+        'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer',
+        'X-Robots-Tag': 'noindex',
+        'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'",
+    })
+
+
 @router.get('/{provider}/callback')
 def callback(provider: Provider, request: Request, state: str = '', code: str = '', error: str = '', db=Depends(get_db)):
     global_write_guard(request)
@@ -218,6 +244,8 @@ def callback(provider: Provider, request: Request, state: str = '', code: str = 
         raise HTTPException(400, '유효하지 않은 로그인 응답입니다.')
     flow = db.scalar(select(Record).where(Record.kind == FLOW, Record.unique_key == token_digest(state)))
     if not flow or flow.ends <= now() or flow.status != 'pending' or flow.data.get('provider') != provider:
+        if 'text/html' in request.headers.get('accept', ''):
+            return login_recovery(flow if flow and flow.data.get('provider') == provider else None)
         raise HTTPException(400, '로그인 요청이 만료되었거나 이미 처리되었습니다. 앱에서 다시 시작해 주세요.')
     changed = db.execute(update(Record).where(Record.id == flow.id, Record.status == 'pending').values(status='processing')).rowcount
     if changed != 1:
@@ -232,8 +260,10 @@ def callback(provider: Provider, request: Request, state: str = '', code: str = 
         result['subject'] = (exchange(provider, code, flow, state=state) if provider == 'naver'
                              else exchange(provider, code, flow))
         flow.status = 'ready'
-    except (httpx.HTTPError, jwt.PyJWTError, ValueError, KeyError, TypeError):
+    except (httpx.HTTPError, jwt.PyJWTError, ValueError, KeyError, TypeError) as exc:
         flow.status = 'failed'
+        result['failure_reason'] = ('nonce_mismatch' if isinstance(exc, ValueError) and str(exc) == 'Invalid nonce'
+                                    else 'provider_denied' if error or not code else type(exc).__name__)
     flow.data = result
     db.commit()
     destination = 'kr.moduyuga.app://auth/complete' if result['platform'] == 'android' else config.PUBLIC_WEB_ORIGIN+'/auth/complete'

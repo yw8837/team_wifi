@@ -78,7 +78,7 @@ async def security_headers(request, call_next):
                                 headers={'Retry-After': '10'})
     response = await call_next(request)
     response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['Cache-Control'] = 'no-store'
     response.headers['Permissions-Policy'] = 'camera=(), microphone=(), geolocation=()'
