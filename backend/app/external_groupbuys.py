@@ -1,5 +1,6 @@
 """Bounded collection of public seller facts, with expiring verification receipts."""
 import hashlib
+from datetime import datetime, timedelta, timezone
 import re
 import secrets
 import uuid
@@ -60,8 +61,8 @@ def fetch(source):
     return entry
 
 
-def fetch_page(source, *, groupbuy=True):
-    request = Request(validate_url(source['url']), headers={
+def read_html(url):
+    request = Request(validate_url(url), headers={
         'User-Agent': 'ModuYuga-SourceCheck/1.0', 'Accept': 'text/html'})
     with build_opener(SellerRedirect).open(request, timeout=20) as response:
         if response.headers.get_content_type() != 'text/html':
@@ -69,7 +70,11 @@ def fetch_page(source, *, groupbuy=True):
         raw = response.read(MAX_BYTES + 1)
         if len(raw) > MAX_BYTES:
             raise ValueError('Seller response exceeds size limit')
-        return parse_cafe24(raw.decode('utf-8'), source, groupbuy=groupbuy)
+        return raw.decode('utf-8')
+
+
+def fetch_page(source, *, groupbuy=True):
+    return parse_cafe24(read_html(source['url']), source, groupbuy=groupbuy)
 
 
 def parse_cafe24(html, source, *, groupbuy=True):
@@ -80,7 +85,7 @@ def parse_cafe24(html, source, *, groupbuy=True):
         return unescape(match.group(1))
 
     title = variable('product_name')
-    if (groupbuy and '공동구매' not in title) or not 3 <= len(title) <= 120:
+    if (groupbuy and not re.search(r'공동\s*구매|공구', title)) or not 3 <= len(title) <= 120:
         raise ValueError('Seller page does not identify a group buy')
     base_price = variable('product_price')
     if not base_price.isdigit():
@@ -118,19 +123,32 @@ def parse_cafe24(html, source, *, groupbuy=True):
                re.findall(r'<option\b[^>]*value="P[A-Z0-9]+"[^>]*>(.*?)</option>', ''.join(option_selects), re.S)]
     return_note = '단순 변심 교환·반품의 반송비는 구매자 부담으로 안내합니다. 적용 기한·제외 사유는 판매처 구매안내를 확인하세요.' if '상품반송 비용은 고객님께서 부담' in plain else ''
     stamp = now()
+    ended = bool(re.search(r'(?:공동\s*구매|공구)\s*(?:종료|마감)(?:\s*$|\s*[\])】])|(?:종료된|마감된)\s*공구', title))
+    deadline = None
+    # Only an explicit campaign deadline is a closing time. A sale-price validity
+    # variable may describe a discount period and must not close a campaign.
+    deadline_match = re.search(r'마감\s*[:：]\s*(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?)', title)
+    if deadline_match:
+        try:
+            deadline = datetime.fromisoformat(deadline_match.group(1))
+            if deadline.tzinfo is None:
+                deadline = deadline.replace(tzinfo=timezone(timedelta(hours=9)))
+            ended = ended or deadline.timestamp() <= stamp
+        except ValueError:
+            raise ValueError('Unrecognized campaign deadline')
     return {'source_id': source['id'], 'source_url': source['url'],
             'source_hash': hashlib.sha256(html.encode()).hexdigest(),
             'title': title, 'category': source['category'], 'seller_name': source['seller'],
             'seller_url': source['url'], 'price': price, 'shipping_fee': 0 if shipping_free else None,
-            'minimum_quantity': None, 'unit': '', 'expires_at': '',
+            'minimum_quantity': None, 'unit': '', 'expires_at': deadline.isoformat() if deadline else '',
             'order_minimum': quantity('product_min'), 'order_step': quantity('buy_unit'),
             'fulfillment_notes': fulfillment, 'option_labels': list(dict.fromkeys(options))[:30],
             'return_note': return_note,
             'source_checked_at': release.timestamp(stamp), 'source_fresh_until': stamp + FRESH_SECONDS,
-            'source_type': 'seller_page', 'availability': 'sold_out' if soldout == 'T' else 'listed',
+            'source_type': 'seller_page', 'availability': 'ended' if ended else 'sold_out' if soldout == 'T' else 'listed',
             'body': '판매처의 공동구매 페이지에서 확인한 상품입니다. 옵션별 구성과 배송비, 최종 결제금액은 판매처에서 확인하세요.',
             'price_conditions': ('판매처 회원가입·로그인 후 구매할 수 있습니다. ' if member_only else '')
-                + '판매처 표시 판매가 기준입니다. 마감 일시는 공개 페이지에서 확인되지 않았습니다.',
+                + ('판매처 표시 판매가와 마감 일시 기준입니다.' if deadline else '판매처 표시 판매가 기준입니다. 마감 일시는 공개 페이지에서 확인되지 않았습니다.'),
             'is_demo': False, 'review_state': 'clear', 'updated_at': release.timestamp(stamp)}
 
 
@@ -159,7 +177,9 @@ def store(db, entries):
             row.revision += 1
         row.data = {**entry, 'review_state': (row.data or {}).get('review_state', 'clear')}
         row.ends = entry['source_fresh_until']
-        row.status = 'ended' if entry['availability'] == 'sold_out' else 'active'
+        if entry.get('expires_at'):
+            row.ends = min(row.ends, int(datetime.fromisoformat(entry['expires_at']).timestamp()))
+        row.status = 'active' if entry['availability'] == 'listed' and row.ends > now() else 'ended'
         updated += 1
     return updated
 

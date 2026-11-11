@@ -153,6 +153,10 @@ def linked_dto(db,demand,user):
 
 def listing(db,user,q,category,status,sort,limit,offset,start_date,end_date,mine=False):
     query=visible_query(user,*( [Record.owner_id==user.id] if mine else []),own_hidden=mine)
+    if not mine:
+        query=query.where((Record.data['source_type'].as_string().is_(None)) |
+            (Record.data['source_type'].as_string()!='seller_page') |
+            ((Record.status=='active') & (Record.ends>now())))
     query=filter_created(query,start_date,end_date)
     if status=='active':query=query.where(Record.status=='active',Record.ends>now())
     elif status=='ended':query=query.where((Record.status=='ended')|((Record.status=='active')&(Record.ends<=now())))
