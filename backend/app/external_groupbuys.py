@@ -83,6 +83,23 @@ def fetch_page(source, *, groupbuy=True):
     return parse_cafe24(read_html(source['url']), source, groupbuy=groupbuy)
 
 
+def campaign_state(title, stamp):
+    ended = bool(re.search(r'\[(?:종료|마감)\]|(?:공동\s*구매|공구)\s*(?:종료|마감)(?:\s*$|\s*[\])】])|(?:종료된|마감된)\s*공구', title))
+    deadline = None
+    # Only an explicit campaign deadline is a closing time. A sale-price validity
+    # variable may describe a discount period and must not close a campaign.
+    deadline_match = re.search(r'마감\s*[:：]\s*(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?)', title)
+    if deadline_match:
+        try:
+            deadline = datetime.fromisoformat(deadline_match.group(1))
+            if deadline.tzinfo is None:
+                deadline = deadline.replace(tzinfo=timezone(timedelta(hours=9)))
+            ended = ended or deadline.timestamp() <= stamp
+        except ValueError:
+            raise ValueError('Unrecognized campaign deadline')
+    return ended, deadline
+
+
 def parse_cafe24(html, source, *, groupbuy=True):
     def variable(name):
         match = re.search(r'\bvar\s+' + re.escape(name) + r"\s*=\s*'([^'\r\n]*)'", html)
@@ -129,19 +146,7 @@ def parse_cafe24(html, source, *, groupbuy=True):
                re.findall(r'<option\b[^>]*value="P[A-Z0-9]+"[^>]*>(.*?)</option>', ''.join(option_selects), re.S)]
     return_note = '단순 변심 교환·반품의 반송비는 구매자 부담으로 안내합니다. 적용 기한·제외 사유는 판매처 구매안내를 확인하세요.' if '상품반송 비용은 고객님께서 부담' in plain else ''
     stamp = now()
-    ended = bool(re.search(r'(?:공동\s*구매|공구)\s*(?:종료|마감)(?:\s*$|\s*[\])】])|(?:종료된|마감된)\s*공구', title))
-    deadline = None
-    # Only an explicit campaign deadline is a closing time. A sale-price validity
-    # variable may describe a discount period and must not close a campaign.
-    deadline_match = re.search(r'마감\s*[:：]\s*(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?)', title)
-    if deadline_match:
-        try:
-            deadline = datetime.fromisoformat(deadline_match.group(1))
-            if deadline.tzinfo is None:
-                deadline = deadline.replace(tzinfo=timezone(timedelta(hours=9)))
-            ended = ended or deadline.timestamp() <= stamp
-        except ValueError:
-            raise ValueError('Unrecognized campaign deadline')
+    ended, deadline = campaign_state(title, stamp)
     return {'source_id': source['id'], 'source_url': source['url'],
             'source_hash': hashlib.sha256(html.encode()).hexdigest(),
             'title': title, 'category': source['category'], 'seller_name': source['seller'],

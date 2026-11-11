@@ -28,13 +28,15 @@ def seconds_until_midnight(stamp=None):
     return (midnight - current).total_seconds()
 
 
-def classify(title):
+def classify(title, fallback=None):
     # Match the specific bag category before the generic diaper keyword.
     if any(term in title for term in ('기저귀가방', '모아백')):
         return '외출·안전'
     matches = [category for category, terms in CATEGORY_TERMS.items()
                if any(term in title for term in terms)]
-    return matches[0] if len(matches) == 1 else None
+    if len(matches) == 1:
+        return matches[0]
+    return fallback if not matches else None
 
 
 class Links(HTMLParser):
@@ -110,7 +112,7 @@ def collect(db=None):
     for source in sources.values():
         try:
             entry = collector.fetch(source)
-            category = classify(entry['title']) or source.get('category')
+            category = classify(entry['title'], source.get('category'))
             if not category:
                 rejected.append({'source_id': source['id'], 'reason': 'category_unconfirmed'})
                 continue

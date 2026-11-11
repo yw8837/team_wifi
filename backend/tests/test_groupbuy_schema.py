@@ -44,3 +44,21 @@ def test_stock_status_is_preserved_and_source_content_is_not_copied():
         offers={'price': 10000, 'priceCurrency': 'KRW', 'availability': 'https://schema.org/OutOfStock'}), SOURCE)
     assert result['availability'] == 'sold_out'
     assert 'image' not in result and 'review' not in result
+
+@pytest.mark.parametrize('changes', [
+    {'name': None}, {'description': []},
+    {'offers': {'price': None, 'priceCurrency': 'KRW', 'availability': 'InStock'}},
+    {'offers': {'price': True, 'priceCurrency': 'KRW', 'availability': 'InStock'}},
+    {'offers': {'price': 100, 'priceCurrency': 'KRW', 'availability': {}}},
+])
+def test_malformed_external_fields_are_rejected(changes):
+    with pytest.raises(ValueError):
+        groupbuy_schema.parse(page(**changes), SOURCE)
+
+
+@pytest.mark.parametrize('title', [
+    '유아 칫솔 공동구매 종료', '[마감] 유아 칫솔 공동구매',
+    '유아 칫솔 공동구매 마감: 2020-01-01 00:00',
+])
+def test_explicit_campaign_closure_overrides_stock(title):
+    assert groupbuy_schema.parse(page(name=title), SOURCE)['availability'] == 'ended'

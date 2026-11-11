@@ -47,3 +47,16 @@ describe("demand linking and exact admin review",()=>{
  it("keeps report, groupbuy, source and required action distinct and does not invent completion",()=>{const report={id:"r-synthetic",groupbuy_id:item.id,reason:"합성 가격 오류 제보",status:"active" as const,created_at:item.created_at,resolved_at:null,resolved_by:null,action:null,note:"",groupbuy:item};const html=renderToStaticMarkup(<MemoryRouter><AdminGroupbuyReport report={report} reload={()=>{}}/></MemoryRouter>);expect(html).toContain("제보 ID: r-synthetic · 공구 ID: synthetic-g1");expect(html).toContain("운영자 공구 원문 검토");for(const action of ["hide","needs_review","dismiss"])expect(html).toContain('value="'+action+'"');expect(html).not.toContain('value="suspend"');expect(html).toContain('minLength="2"');expect(html).toContain('maxLength="1000"');expect(html).toContain("처리 시각: 아직 처리하지 않음");expect(html).not.toContain("실제 처리:");});
  it("renders resolved action/actor/time without repeated review controls",()=>{const report={id:"r-done",groupbuy_id:item.id,reason:"합성 제보",status:"resolved" as const,created_at:item.created_at,resolved_at:item.queried_at,resolved_by:"operator-synthetic",action:"needs_review" as const,note:"확인 필요",groupbuy:item};const html=renderToStaticMarkup(<MemoryRouter><AdminGroupbuyReport report={report} reload={()=>{}}/></MemoryRouter>);expect(html).toContain("적용한 조치: 정보 확인 필요 표시");expect(html).toContain("운영자 ID: operator-synthetic");expect(html).not.toContain("대상과 처리 확인 후 적용");});
 });
+
+it("offers category links before advanced filters and preserves the applied search",()=>{
+ const html=feed("/?q=칫솔&category=목욕·위생&page=2&sort=recent");
+ expect(html).toContain('aria-label="공구 카테고리 바로 선택"');
+ expect(html).toMatch(/<a[^>]*aria-current="true"[^>]*>목욕·위생<\/a>/);
+ expect(html).toContain('href="/?q=%EC%B9%AB%EC%86%94&amp;category=%EC%99%B8%EC%B6%9C%C2%B7%EC%95%88%EC%A0%84&amp;page=0&amp;sort=recent"');
+ expect(html).toContain('href="/demands?post_type=question"');
+});
+
+it("keeps category navigation inside the member's shared list",()=>{
+ const html=feed('/my/groupbuys?q=칫솔',true);
+ expect(html).toContain('href="/my/groupbuys?q=%EC%B9%AB%EC%86%94&amp;category=&amp;page=0"');
+});

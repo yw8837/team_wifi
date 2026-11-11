@@ -62,3 +62,29 @@ def test_expiry_soldout_hidden_and_public_exclusion(public_mode):
         row.status = 'hidden'
         collector.store(db, [entry])
         assert row.status == 'hidden'
+
+
+def test_bad_schema_does_not_stop_healthy_source(monkeypatch):
+    from app import groupbuy_schema
+    from test_groupbuy_schema import page
+    sources = [dict(collector.SOURCES[0], id='bad'), dict(collector.SOURCES[0], id='good', url='https://somi9726.cafe24.com/product/detail.html?product_no=333')]
+    monkeypatch.setattr(collector, 'SOURCES', sources)
+    monkeypatch.setattr(collector, 'SELLERS', [])
+    def fetch(source):
+        if source['id'] == 'bad':
+            return groupbuy_schema.parse(page(name=None), source)
+        return collector.parse_cafe24(seller_html(), source)
+    monkeypatch.setattr(collector, 'fetch', fetch)
+    result = discovery.collect()
+    assert [item['source_id'] for item in result['entries']] == ['good']
+    assert result['rejected'] == [{'source_id': 'bad', 'reason': 'groupbuy_fields_unconfirmed'}]
+
+
+def test_ambiguous_category_cannot_use_seller_fallback():
+    assert discovery.classify('분유와 장난감 공구', '목욕·위생') is None
+    assert discovery.classify('뉴니네 공동구매', '목욕·위생') == '목욕·위생'
+
+
+def test_cafe24_explicit_closed_prefix():
+    entry = collector.parse_cafe24(seller_html().replace('캔코 모아백 기저귀가방 공동구매', '[마감] 캔코 모아백 기저귀가방 공동구매'), collector.SOURCES[0])
+    assert entry['availability'] == 'ended'
