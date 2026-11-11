@@ -26,6 +26,8 @@ def test_discovery_deduplicates_urls_and_classifies():
 
 
 def test_collect_discovers_new_campaign_and_rejects_regular_sale(monkeypatch):
+    monkeypatch.setattr(collector, 'SELLERS', [{'host': 'somi9726.cafe24.com',
+        'seller': '캔코 공식몰', 'parser': 'cafe24', 'listing_urls': ['https://somi9726.cafe24.com/']}])
     monkeypatch.setattr(collector, 'read_html', lambda url: '<a href="/product/detail.html?product_no=333">new</a>')
     def fetch(source):
         title = '아기 물티슈 공동구매' if source['id'].endswith('333') else '기저귀가방 공동구매'

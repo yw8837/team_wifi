@@ -1,5 +1,7 @@
 """Bounded collection of public seller facts, with expiring verification receipts."""
 import hashlib
+import json
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 import re
 import secrets
@@ -22,7 +24,8 @@ SOURCES = (
 )
 MAX_BYTES = 2_000_000
 FRESH_SECONDS = 24 * 3600
-ALLOWED_HOSTS = frozenset(urlsplit(source['url']).hostname for source in SOURCES)
+SELLERS = json.loads(Path(__file__).with_name('groupbuy_sellers.json').read_text(encoding='utf-8'))
+ALLOWED_HOSTS = frozenset(seller['host'] for seller in SELLERS)
 
 
 def validate_url(url):
@@ -40,6 +43,9 @@ class SellerRedirect(HTTPRedirectHandler):
 
 
 def fetch(source):
+    if source.get('parser') == 'schema_product':
+        from .groupbuy_schema import parse
+        return parse(read_html(source['url']), source)
     entry = fetch_page(source)
     entry['price_references'] = []
     product_terms = source.get('product_key', '').split()

@@ -15,10 +15,10 @@ KST = timezone(timedelta(hours=9))
 CATEGORY_TERMS = {
     '기저귀·물티슈': ('기저귀', '물티슈'),
     '수유·이유식': ('젖병', '분유', '이유식', '수유', '턱받이'),
-    '목욕·위생': ('욕조', '목욕', '로션', '세정', '체온계'),
+    '목욕·위생': ('욕조', '목욕', '로션', '세정', '체온계', '비데', '칫솔', '치약'),
     '외출·안전': ('기저귀가방', '모아백', '유모차', '카시트', '아기띠', '안전문'),
-    '놀이·도서': ('장난감', '그림책', '동화책', '교구'),
-    '육아생활': ('아기침대', '아기이불', '수면조끼', '아기옷'),
+    '놀이·도서': ('장난감', '그림책', '동화책', '교구', '보드게임', '퍼즐', '블록', '블럭', '워크북'),
+    '육아생활': ('아기침대', '아기이불', '낮잠이불', '수면조끼', '아기옷', '베이비룸', '층간소음', '아기의자'),
 }
 
 
@@ -62,6 +62,11 @@ def product_links(html, base):
         parsed = urlsplit(url)
         if parsed.hostname != urlsplit(base).hostname:
             continue
+        if parsed.path.rstrip('/') == '/shop_view':
+            identifier = parse_qs(parsed.query).get('idx', [''])[0]
+            if identifier.isdigit():
+                products.add('https://' + parsed.hostname + '/shop_view?' + urlencode({'idx': identifier}))
+            continue
         number = parse_qs(parsed.query).get('product_no', [''])[0]
         if not number:
             match = re.match(r'^/product/[^/]+/(\d+)(?:/|$)', parsed.path)
@@ -83,24 +88,29 @@ def collect(db=None):
                 continue
             sources.setdefault(data['source_url'], {
                 'id': data['source_id'], 'url': data['source_url'],
-                'seller': data['seller_name'], 'category': data['category']})
+                'seller': data['seller_name'], 'category': data['category'],
+                'parser': data.get('source_parser', 'cafe24')})
     failures, entries, rejected, removed = [], [], [], []
-    sellers = {urlsplit(item['url']).hostname: item for item in collector.SOURCES}
-    for host, seller in sellers.items():
-        origin = 'https://' + host + '/'
-        try:
-            # The storefront and its product links stay within reviewed hosts.
-            links = product_links(collector.read_html(origin), origin)
-            for url in links[:100]:
-                number = parse_qs(urlsplit(url).query)['product_no'][0]
-                sources.setdefault(url, {'id': host + '-' + number, 'url': url,
-                                         'seller': seller['seller'], 'category': ''})
-        except (OSError, ValueError) as error:
-            failures.append({'source_id': host, 'stage': 'discovery', 'error': type(error).__name__})
+    for seller in collector.SELLERS:
+        links = set(seller.get('product_urls', []))
+        for listing in seller['listing_urls']:
+            try:
+                links.update(product_links(collector.read_html(listing), listing))
+            except (OSError, ValueError) as error:
+                failures.append({'source_id': seller['host'], 'stage': 'discovery', 'error': type(error).__name__})
+        for url in sorted(links):
+            parsed = urlsplit(url)
+            query = parse_qs(parsed.query)
+            number = (query.get('product_no') or query.get('idx') or [''])[0]
+            if not number.isdigit():
+                raise ValueError('Unsupported reviewed product URL')
+            sources.setdefault(url, {'id': seller['host'] + '-' + number, 'url': url,
+                'seller': seller['seller'], 'category': seller.get('category', ''),
+                'parser': seller['parser']})
     for source in sources.values():
         try:
             entry = collector.fetch(source)
-            category = classify(entry['title'])
+            category = classify(entry['title']) or source.get('category')
             if not category:
                 rejected.append({'source_id': source['id'], 'reason': 'category_unconfirmed'})
                 continue

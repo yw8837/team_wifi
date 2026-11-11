@@ -1,0 +1,67 @@
+[
+  {
+    "host": "somi9726.cafe24.com",
+    "seller": "캔코 공식몰",
+    "parser": "cafe24",
+    "listing_urls": [
+      "https://somi9726.cafe24.com/"
+    ]
+  },
+  {
+    "host": "poled.co.kr",
+    "seller": "폴레드 공식몰",
+    "parser": "cafe24",
+    "listing_urls": [
+      "https://poled.co.kr/product/list.html?cate_no=127",
+      "https://poled.co.kr/product/list.html?cate_no=128"
+    ]
+  },
+  {
+    "host": "upang.co.kr",
+    "seller": "유팡 공식몰",
+    "parser": "cafe24",
+    "category": "수유·이유식",
+    "listing_urls": [
+      "https://upang.co.kr/product/list_thumb.html?cate_no=92"
+    ]
+  },
+  {
+    "host": "www.doctornoah.net",
+    "seller": "닥터노아 공식몰",
+    "parser": "schema_product",
+    "category": "목욕·위생",
+    "listing_urls": [
+      "https://www.doctornoah.net/"
+    ],
+    "product_urls": [
+      "https://www.doctornoah.net/shop_view?idx=545"
+    ]
+  },
+  {
+    "host": "www.gonggan27.com",
+    "seller": "공간27 공식몰",
+    "parser": "schema_product",
+    "category": "놀이·도서",
+    "listing_urls": [
+      "https://www.gonggan27.com/"
+    ],
+    "product_urls": [
+      "https://www.gonggan27.com/shop_view?idx=2188"
+    ]
+  },
+  {
+    "host": "www.aguardmall.com",
+    "seller": "아가드 공식몰",
+    "parser": "cafe24",
+    "category": "외출·안전",
+    "listing_urls": [
+      "https://www.aguardmall.com/product/list.html?cate_no=166"
+    ],
+    "product_urls": [
+      "https://www.aguardmall.com/product/detail.html?product_no=1660",
+      "https://www.aguardmall.com/product/detail.html?product_no=1656",
+      "https://www.aguardmall.com/product/detail.html?product_no=1655",
+      "https://www.aguardmall.com/product/detail.html?product_no=1604"
+    ]
+  }
+]
