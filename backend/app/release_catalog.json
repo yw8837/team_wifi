@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-11-01T17:03:13Z",
+  "entries": [
+    {
+      "id": "momq-diapers",
+      "title": "맘큐 기저귀·물티슈",
+      "category": "기저귀·물티슈",
+      "summary": "유한킴벌리 직영몰에서 기저귀와 물티슈의 상품 구성을 살펴볼 수 있는 출처입니다.",
+      "source_name": "맘큐 · 유한킴벌리",
+      "source_url": "https://www.momq.co.kr/",
+      "comparison_notes": [
+        "기저귀는 같은 단계·밴드형 또는 팬티형끼리 비교하세요.",
+        "묶음 수와 팩당 매수를 곱한 총 매수로 1매당 금액을 계산하세요.",
+        "회원·쿠폰 조건과 배송비는 판매처의 주문 화면에서 확인하세요."
+      ],
+      "source_checked_at": "2026-11-01T17:03:13Z",
+      "entry_type": "shopping_reference",
+      "price": null,
+      "shipping_fee": null,
+      "unit": null,
+      "expires_at": null,
+      "is_affiliate": false
+    },
+    {
+      "id": "doubleheart-bottles",
+      "title": "더블하트 젖병 구성 비교",
+      "category": "수유·이유식",
+      "summary": "젖병 용량과 소재, 젖꼭지 포함 여부 등 선택 조건을 확인할 수 있는 공식 상품 목록입니다.",
+      "source_name": "더블하트 공식몰",
+      "source_url": "https://www.doubleheart.co.kr/product/list.html?cate_no=536",
+      "comparison_notes": [
+        "용량·소재·제품 세대를 동일하게 맞춘 뒤 비교하세요.",
+        "젖꼭지 포함 수량과 별도 구매해야 하는 부속품을 확인하세요.",
+        "세척·소독 방법과 교체 안내는 제품 설명서에서 확인하세요."
+      ],
+      "source_checked_at": "2026-11-01T17:03:13Z",
+      "entry_type": "shopping_reference",
+      "price": null,
+      "shipping_fee": null,
+      "unit": null,
+      "expires_at": null,
+      "is_affiliate": false
+    },
+    {
+      "id": "doubleheart-hygiene",
+      "title": "더블하트 목욕·위생용품",
+      "category": "목욕·위생",
+      "summary": "탕온계와 손톱 관리 도구 등 위생용품의 종류와 구성을 확인할 수 있는 공식 목록입니다.",
+      "source_name": "더블하트 공식몰",
+      "source_url": "https://www.doubleheart.co.kr/product/list.html?cate_no=554",
+      "comparison_notes": [
+        "사용 연령과 사용 방법을 상품별로 확인하세요.",
+        "세트와 단품의 구성품 목록을 나란히 비교하세요.",
+        "개봉 후 교환·반품 조건을 구매 전에 확인하세요."
+      ],
+      "source_checked_at": "2026-11-01T17:03:13Z",
+      "entry_type": "shopping_reference",
+      "price": null,
+      "shipping_fee": null,
+      "unit": null,
+      "expires_at": null,
+      "is_affiliate": false
+    },
+    {
+      "id": "motherk-hygiene",
+      "title": "마더케이 위생·보관용품",
+      "category": "목욕·위생",
+      "summary": "손톱 관리 도구, 면봉, 보관용 지퍼백 등의 구성과 옵션을 확인할 수 있는 공식 카테고리입니다.",
+      "source_name": "마더케이 공식몰",
+      "source_url": "https://motherkmall.co.kr/category/%EC%9C%84%EC%83%9D%EC%9A%A9%ED%92%88/23/",
+      "comparison_notes": [
+        "면봉이나 티슈는 개별 포장 여부와 총 개수를 확인하세요.",
+        "보관용품은 크기별 수량이 같은 구성인지 비교하세요.",
+        "증정품은 본품 수량과 나누어 보고 지급 조건을 확인하세요."
+      ],
+      "source_checked_at": "2026-11-01T17:03:13Z",
+      "entry_type": "shopping_reference",
+      "price": null,
+      "shipping_fee": null,
+      "unit": null,
+      "expires_at": null,
+      "is_affiliate": false
+    },
+    {
+      "id": "motherk-cleaning",
+      "title": "마더케이 세탁·세척용품",
+      "category": "육아생활",
+      "summary": "젖병 세척솔과 리필, 세정용품 등 세탁·세척 제품을 살펴볼 수 있는 공식 카테고리입니다.",
+      "source_name": "마더케이 공식몰",
+      "source_url": "https://motherkmall.co.kr/category/%EC%84%B8%ED%83%81%EC%84%B8%EC%B2%99/28/",
+      "comparison_notes": [
+        "세척솔 본체와 리필만 포함된 상품을 구분하세요.",
+        "세제는 총 용량을 같은 단위로 바꿔 100mL당 금액을 비교하세요.",
+        "사용 용도와 희석·헹굼 안내는 해당 제품의 표시를 따르세요."
+      ],
+      "source_checked_at": "2026-11-01T17:03:13Z",
+      "entry_type": "shopping_reference",
+      "price": null,
+      "shipping_fee": null,
+      "unit": null,
+      "expires_at": null,
+      "is_affiliate": false
+    },
+    {
+      "id": "ryan-strollers",
+      "title": "리안 유모차 살펴보기",
+      "category": "외출·안전",
+      "summary": "유모차 모델과 함께 제공되는 부속품을 비교할 수 있는 리안 공식 상품 목록입니다.",
+      "source_name": "리안 공식몰",
+      "source_url": "https://www.ryanbaby.co.kr/product/list.html?cate_no=416",
+      "comparison_notes": [
+        "모델명·연식·구성품을 일치시킨 뒤 판매 조건을 비교하세요.",
+        "접었을 때 크기와 무게가 보관 공간·이동 방식에 맞는지 확인하세요.",
+        "권장 사용 조건과 정품 등록·A/S 조건을 판매처에서 확인하세요."
+      ],
+      "source_checked_at": "2026-11-01T17:03:13Z",
+      "entry_type": "shopping_reference",
+      "price": null,
+      "shipping_fee": null,
+      "unit": null,
+      "expires_at": null,
+      "is_affiliate": false
+    },
+    {
+      "id": "bluerabbit-books",
+      "title": "블루래빗 도서·놀이용품",
+      "category": "놀이·도서",
+      "summary": "블루래빗이 판매자로 표시된 G마켓 공식 스토어에서 도서와 놀이용품 구성을 확인할 수 있습니다.",
+      "source_name": "G마켓 · 블루래빗공식",
+      "source_url": "https://minishop.gmarket.co.kr/brbooks",
+      "comparison_notes": [
+        "권수뿐 아니라 실제 책 제목·판본·구성품이 겹치는지 확인하세요.",
+        "사운드 제품은 배터리 포함 여부와 교체 방법을 확인하세요.",
+        "연령 표시와 작은 부품 관련 주의사항을 제품별로 확인하세요."
+      ],
+      "source_checked_at": "2026-11-01T17:03:13Z",
+      "entry_type": "shopping_reference",
+      "price": null,
+      "shipping_fee": null,
+      "unit": null,
+      "expires_at": null,
+      "is_affiliate": false
+    }
+  ]
+}

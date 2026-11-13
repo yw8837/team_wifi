@@ -1,0 +1,35 @@
+{
+  "checked_at": "2026-11-08T12:00:00+09:00",
+  "sources": [
+    {
+      "id": "safetykorea-recall-search",
+      "title": "Safety Korea 제품 리콜 확인",
+      "url": "https://www.safetykorea.kr/recall/recallBoard",
+      "text": "Safety Korea의 리콜정보 검색에서 제품명, 모델명, 사업자명, 리콜종류와 공표일을 확인할 수 있습니다. 구매하려는 제품의 모델명과 사업자명을 대조하고 상세 리콜 안내를 확인하세요. 검색에서 찾지 못한 제품의 안전성을 보장하지 않습니다."
+    },
+    {
+      "id": "safetykorea-prime-desk-20261030",
+      "title": "현대리바트 프라임 책상 리콜 공표 기록",
+      "url": "https://www.safetykorea.kr/recall/recallBoard",
+      "text": "Safety Korea의 2026년 10월 30일 공표 목록에 현대리바트 프라임 책상(올인원, 컴팩트)의 자발적 리콜이 있습니다. 목록의 모델명은 L701486, L701487, L709329, L709333, L713666, L713667, L713672, L713673, L713674, L713677입니다. 제품 라벨의 모델명과 공식 리콜 상세를 대조하세요."
+    },
+    {
+      "id": "safetykorea-necklace-20261029",
+      "title": "비단길 어린이용 목걸이 리콜 공표 기록",
+      "url": "https://www.safetykorea.kr/recall/recallBoard",
+      "text": "Safety Korea의 2026년 10월 29일 공표 목록에 주식회사 비단길의 비단길 써티 믹스컬러 비즈 목걸이 꽃이 명령에 따른 리콜로 올라와 있습니다. 바코드번호는 R253391710004입니다. 보유 제품의 정확한 모델과 공식 상세 안내를 확인하세요."
+    },
+    {
+      "id": "safetykorea-certification-guide",
+      "title": "제품 인증과 안전정보 공식 확인 경로",
+      "url": "https://www.safetykorea.kr/",
+      "text": "제품안전정보센터 Safety Korea에서 인증정보 검색, 리콜정보 검색, 제품안전 대상품목과 안전기준 열람을 제공합니다. 판매자의 KC 표시만으로 판단하지 말고 제품의 인증번호·모델명을 공식 검색 결과와 대조하세요."
+    },
+    {
+      "id": "kdca-vaccination-information",
+      "title": "질병관리청 예방접종 공공 안내",
+      "url": "https://www.kdca.go.kr/kdca/index.do",
+      "text": "질병관리청은 어린이 국가예방접종과 인플루엔자 예방접종에 관한 공공 안내를 제공합니다. 접종 대상과 일정은 해당 연도의 공식 공지와 접종 의료기관에서 확인하세요. 개인별 접종 가능 여부와 접종 간격은 의료진에게 확인하세요."
+    }
+  ]
+}

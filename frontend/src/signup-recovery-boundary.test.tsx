@@ -1,0 +1,19 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
+const state=vi.hoisted(()=>{vi.stubEnv("VITE_PUBLIC_RELEASE","1");vi.stubEnv("VITE_BETA_MODE","0");return {injected:false,pending:null as null|Record<string,unknown>,user:null as null|{id:string;nickname:string;email:string},cleanupEffect:null as null|(()=>void|(()=>void)),setPending:vi.fn(),setSession:vi.fn(),onContinue:null as null|(()=>void)};});
+vi.mock("react",async()=>{const actual=await vi.importActual<typeof import("react")>("react");return {...actual,useState:(initial:unknown)=>{if(initial===null&&!state.injected){state.injected=true;return [state.pending,state.setPending];}return actual.useState(initial);},useEffect:(effect:()=>void|(()=>void),deps?:readonly unknown[])=>{if(deps?.length===2&&deps[0]===state.pending)state.cleanupEffect=effect;}};});
+vi.mock("./shared",async()=>({...await vi.importActual<typeof import("./shared")>("./shared"),useAuth:()=>({user:state.user,setSession:state.setSession}),useSessionAttempt:()=>({begin:vi.fn()}),useAction:()=>({busy:false,error:"",message:"",run:async(work:()=>Promise<unknown>)=>{await work();return true;}})}));
+vi.mock("./beta",async()=>({...await vi.importActual<typeof import("./beta")>("./beta"),RecoveryCodeNotice:({code,onContinue}:{code:string;onContinue:()=>void})=>{state.onContinue=onContinue;return <code>{code}</code>;}}));
+import { Signup } from "./auth-pages";
+import { clearSessionToken, createSessionAttempt, writeSessionToken } from "./session-storage";
+const secret="SYNTHETIC-RECOVERY-CODE";
+function memory(){const values=new Map<string,string>();return {getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>{values.set(key,value);},removeItem:(key:string)=>{values.delete(key);}};}
+beforeEach(()=>{vi.stubGlobal("sessionStorage",memory());vi.stubGlobal("localStorage",memory());vi.stubGlobal("window",{location:{origin:"https://app.example.test"}});state.user=null;state.injected=false;state.cleanupEffect=null;state.setSession.mockReset();state.setPending.mockReset().mockImplementation(value=>{state.pending=value;});state.onContinue=null;const attempt=createSessionAttempt().begin();state.pending={access_token:"synthetic-new-A",user:{id:"new-A",nickname:"new A",email:"synthetic@example.test"},recovery_code:secret,expectedToken:attempt.expectedToken,isCurrent:attempt.isCurrent};});
+afterEach(()=>vi.unstubAllGlobals());
+function render(){state.injected=false;state.cleanupEffect=null;return renderToStaticMarkup(<MemoryRouter><Signup/></MemoryRouter>);}
+describe("Signup pending recovery render and cleanup boundary",()=>{
+ it("shows the recovery code only while its starting session is still current",()=>{expect(render()).toContain(secret);writeSessionToken("synthetic-B");state.user={id:"B",nickname:"B",email:"b@example.test"};expect(render()).not.toContain(secret);state.cleanupEffect?.();expect(state.setPending).toHaveBeenCalledWith(null);});
+ it("does not re-expose or install the pending signup after another login returned to logged-out state",async()=>{expect(render()).toContain(secret);const continueOld=state.onContinue;writeSessionToken("synthetic-B");clearSessionToken("synthetic-B");expect(render()).not.toContain(secret);continueOld?.();await Promise.resolve();expect(state.setSession).not.toHaveBeenCalled();});
+ it("hides the secret for an authenticated replacement context even when token reads fail closed",()=>{state.user={id:"B",nickname:"B",email:"b@example.test"};vi.spyOn(sessionStorage,"getItem").mockImplementation(()=>{throw new Error("synthetic denied read");});expect(render()).not.toContain(secret);state.cleanupEffect?.();expect(state.setPending).toHaveBeenCalledWith(null);});
+});

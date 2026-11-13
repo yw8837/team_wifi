@@ -1,0 +1,7 @@
+# Trusted generated public-data aggregates/model are part of this runnable feature.
+!artifacts/
+!artifacts/**
+artifacts/company_source_extract.json
+artifacts/materials_inventory.json
+artifacts/requirements_source.json
+artifacts/requirements_traceability.*

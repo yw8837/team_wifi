@@ -1,0 +1,71 @@
+# 데이터 활용 기능과 중간평가 범위 정리
+
+2026-11-04 · Team_Wifi · codex/modu-yuga
+
+## 이번 변경
+
+| 실제 위치 | 동작 | 근거/제한 |
+|---|---|---|
+| 홈 → 내 조건으로 찾기(`/advisor`) | 우리 집/선물, 최대 3분야, 비교 기준, 선택 예산으로 목록 조회 | 비회원 조건은 계정 저장 안 함. 가격/배송비 미확인 목록은 예산 결과에서 제외 |
+| 같은 화면의 저장·지우기 | 로그인하면 본인 조건 upsert·조회·삭제 | 같은 계정 API/DB 공유. 새 화면이 없는 Android 설치본에는 업데이트 필요 |
+| 상세 → 함께 살펴볼 육아템 | 서로 다른 활성 일반회원 5계정 이상 공동 저장된 목록 3개까지 표시 | 구매 이력·번들 할인 아님. 부족하면 같은 분야 공식 목록 또는 빈 상태 |
+| 상세 → 지금 가장 궁금한 건 무엇인가요 | 가격·수량 선택은 계산기, 구성·관리 선택은 공식 출처로 연결 | 사용자가 고른 기준. 종료 세션 점수·강제 팝업·뒤로 가기 감시 없음 |
+| `/items/{id}.html` | JavaScript 없이 비교 요약·출처·확인일·CTA·Article JSON-LD | 공식 목록 비교 안내. 가격·KC·호환성·구매 성과 미추정 |
+| 운영자 → 노출/클릭 분석 | advisor·companion·compare_cta 위치 추가 | 기존 명시적 동의·중복 제거·작은 집계 비공개 정책 유지 |
+
+## DB와 API
+
+신규 `records.kind=release_advisor`, `owner_id=회원 ID`, `unique_key=회원 ID`, `data={categories, priority, purpose, budget_max}`. 기존 `(kind,unique_key)` 제약으로 PostgreSQL/SQLite upsert하며 스키마 변경은 없다. 본인 권한 조회만 허용하고 삭제·회원탈퇴에서 제거한다. 아이 이름·생년월일·자유문장·스크롤/체류 특징은 받지 않는다.
+
+- `POST /api/release/advisor/preview`: 공개 조건 조회, 회원 조건 저장 없음
+- `GET/PUT/DELETE /api/release/advisor`: 인증한 본인 조건
+- `GET /api/release/offers/{id}/companions`: 현재 공동 저장 집계
+- `GET /api/release/offers/{id}/guide`: 정적 문서와 동일한 출처/구조화 데이터
+
+공동 저장은 삭제·정지·운영자 계정을 제외하고 DISTINCT 회원 수로 계산한다. 개인 ID·저장자 목록은 응답하지 않는다. 개인정보처리방침에 조건 저장·삭제와 공동 저장 안내 범위를 반영했다. 기존 보안·요청 제한을 유지한다.
+
+## 제공 자료 → 적용
+
+| 자료 | 분석 | 이번 화면 적용 |
+|---|---|---|
+| D1 1,000명, 육아 표본 41명 | 할인 민감도의 차이 | 비교 기준을 직접 선택. 통계적으로 최적화된 옵션이라는 주장 없음 |
+| D2 541,909행 | D3와 전체 중복 | 중복 합산 제외. 서비스도 반복 저장을 계정별 중복 제거 |
+| D3 1,067,371행 | 동시 출현/연관 실험 | 실제 공동 저장을 근거로 상세에 관련 목록 표시. 해외 SKU 치환 없음 |
+| D4 12,330 종료 세션 | 연구용 구매 여부 분류 | 실시간 점수 대신 명시적 기준 CTA와 동의 기반 측정 |
+
+과거 Recall@5 0.3621 vs 인기순 0.1056은 조건부 품목 복원 실험이다. LightGBM 평가 AUROC 0.7448/AP 0.2937이며 로지스틱 평가 AP 0.3054보다 낮다. 앱 CTR·전환·매출 향상이나 검색엔진 인용 성과로 해석하지 않는다. 자유대화 LLM과 예측 기반 CTA는 이번 완료 범위가 아니다.
+
+## 검증
+
+- 로컬 백엔드 전체 148개 통과. 응답 모델·정책 변경 후 관련 30개 추가 재확인.
+- 프런트 전체 164개 통과, TypeScript/Vite 빌드 통과.
+- 브라우저: 비회원 선택 → 결과 → 상세 → 비교 CTA, 예산 미확인 빈 상태·재선택, 라디오 방향키·체크박스 Space, 375px에서 문서 폭/스크롤 폭 375px 일치.
+- 운영 DB에 시험 회원이나 공동 저장 숫자를 넣지 않았다. 회원 간 격리·삭제·5계정 임계는 격리된 자동검증에서 확인한다.
+- 공개 모드 Vite 빌드 + 정적 비교/가이드 11개 내보내기 통과.
+- 커밋 `1665df0adbab011d7da1fbc5d5d9e537973f2c09` [CI 41776026741](https://github.com/yw8837/team_wifi/actions/runs/41776026741) 전체 성공: 서버 148개, 프런트 164개, PostgreSQL 79개, unsigned-android 빌드.
+- PostgreSQL은 격리 클러스터의 배포 요청 제한을 포함하여 비회원 preview, 조건 insert/update, 계정 격리·삭제, 공동 저장 쿼리까지 검증. 운영 DB 시험 쓰기와 구분한다.
+- Android CI 산출물은 미서명이며 Play 업로드/실기기 검증을 대신하지 않는다.
+
+## 시트와 남은 범위
+
+[중간평가 범위](https://docs.google.com/spreadsheets/d/15TfV_XCtgJCjMyW-cLnYF8oTbvf9ebcfqCzm69SxIrY/edit#gid=611041128): 128행 읽기 재검증 일치, P0 29 / P1 31 / P2 68. 원문 중요도 보존. 원본 파일 접근 제한은 [범위 계획](../../plans/2026-11-04-midterm-scope.md)에 명시했다.
+
+남음: 팀 UI·분석 검토와 발표 리허설, Google 프로젝트 한도 해결/활성화, 새 Android 설치본·실기기 확인, 실제 판매 SKU 확보, 주문·결제·배송·환불·정산, 무료 호스트 첫 응답 지연 대책, DB 복원 검증. 전체 346개 화면·128요구사항 완료로 보고하지 않는다. Play 업로드·main 병합·유료 전환은 하지 않았다.
+
+
+## 운영 배포 확인 — 2026-11-04 14:11 KST
+
+최종 코드 `5ee0378894de26ac0ea60237ca44b348e242909a`의 [CI 41777117967](https://github.com/yw8837/team_wifi/actions/runs/41777117967) 전체 성공(api/ui/unsigned-android). PostgreSQL 영수증 79개 pass를 다운로드해 확인했다. 비교 제목 중복을 없애고 출처 확인 시각을 KST로 명시했으며 관련 로컬 검사 17개도 통과했다.
+
+- API Render 배포: `dep-dblbrebbc2fs73dqpapg`, Deploy succeeded, 2분 57초.
+- 웹 Render 배포: `dep-dblbrvdg1s2s73e8uu20`, Deploy succeeded/Live, 43.3초.
+- 실제 웹: `https://moduyuga.onrender.com/advisor`에서 비회원 선물·수유/이유식·구성 선택 → 더블하트 목록 → 상세 → 가격 기준 CTA → 공개 비교 HTML 이동을 확인했다.
+- 공개 API의 preview 2건, guide, companions, health HTTP 200. 예산 30,000원은 가격·배송비 미확인 1개를 제외하고 빈 결과를 반환했다.
+- `/items/doubleheart-bottles.html`, sitemap, llms, 개인정보 안내와 신규 JS 제공을 확인했다. 최종 API JSON-LD와 실제 정적 HTML JSON-LD가 일치한다.
+- 운영 JS: `/assets/index-CScGOU34.js`, SHA-256 `12431d062ffe05b1ecbea884f12dd94ed3d6142f6c2cf08c440981d3441c2cba`.
+- 최종 비교 HTML SHA-256 `8ac62baf53e6bb671d923929e2d4156a3ec9a38c26bd0e0be416c81b952d62a7`.
+- 공유 시트 최종 128행을 재조회해 로컬 계획과 일치 확인. 담당자 요약·대시보드 검사 범위에 수식 오류 없음. T19·T20 완료, T21~T23은 구현/배포 후 팀 검토 필요, T24 리허설 확인 필요로 구분했다.
+
+비공개 증거: `artifacts/scope-20261104/`의 CI 영수증, live-api.json, live-web.json, final-live.json, 운영 결과/모바일/공개 안내 화면. 원본 로그·운영 회원 원문·키는 커밋하지 않았다. 이 작업에서 띄운 루프백 QA 서버 두 개는 종료했고 회의 안내 서버는 유지했다.
+
+이 조회는 상시 무중단·응답시간 보장이나 구매 전환 개선의 증거가 아니다. 운영자의 실제 로그인 정보를 새로 입력하거나 시험 계정을 운영 DB에 만들지 않았다. 인증 저장/삭제는 격리된 API·PostgreSQL 검증, 공개 동선은 실제 웹 확인으로 구분한다.

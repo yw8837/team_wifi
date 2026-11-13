@@ -1,0 +1,69 @@
+{
+  "artifacts": [
+    {
+      "file": "bundle_rules.json",
+      "sha256": "4a0818a46be4bce2d217e4509a839d3673ac71c509b27f9d742e128ca64c2cb9",
+      "bytes": 5403438
+    },
+    {
+      "file": "company_source_extract.json",
+      "sha256": "7cb2fafd90ee376c78fbcf15a3b6145bfc16577d518c32ee74960f93513af01d",
+      "bytes": 8301
+    },
+    {
+      "file": "demand_backtest.json",
+      "sha256": "6e4999624e652e65820a653b98e524ac6d0b5676dc9a1bdc7967e9b522cb4f3d",
+      "bytes": 2401
+    },
+    {
+      "file": "evaluation.json",
+      "sha256": "36f8dfb30a40e58fa778fe6c647f1804bd601935336581ff01660e5cd22368f1",
+      "bytes": 9791
+    },
+    {
+      "file": "intent_model.joblib",
+      "sha256": "6dc6e4269671949f5a5f4b80a7dc11647604a4be50647d2303534bcb19f3c0ec",
+      "bytes": 278756
+    },
+    {
+      "file": "materials_inventory.json",
+      "sha256": "651af5955feeae51d5c1d1a260e486ce675b79a2f32a290810d57ff7af437421",
+      "bytes": 112629
+    },
+    {
+      "file": "model_metadata.json",
+      "sha256": "05740e9906570f6a92d0061fe8d3bc0b79e2150ee49734b155b1fe80c722a3d4",
+      "bytes": 870
+    },
+    {
+      "file": "overlap_audit.json",
+      "sha256": "48e29a113c74031552d94cb7d65484176d3093dfdcd1d11d3656a89f0ef24d19",
+      "bytes": 965
+    },
+    {
+      "file": "requirements_source.json",
+      "sha256": "0d5d243f5a39c60329c62b79379e98e7c04798411ba5d9f497a5712c19af0d4f",
+      "bytes": 40505
+    },
+    {
+      "file": "requirements_traceability.csv",
+      "sha256": "7d12768293d82b70f9a6789e171bc83eed64f6a85eee2cbbdb124960eef323c0",
+      "bytes": 62037
+    },
+    {
+      "file": "requirements_traceability.json",
+      "sha256": "5ee2ddc838abf30ee595afaa04f952cb692585627e5fee221b8539c64c73f71d",
+      "bytes": 81063
+    },
+    {
+      "file": "requirements_traceability.md",
+      "sha256": "1847b0084c7ed5d05b7353faddc883448d2edc0dd7e39a1b3d209b0cf885ad43",
+      "bytes": 23094
+    },
+    {
+      "file": "summary.json",
+      "sha256": "ab822227e077196e3725d2235189716cc14b34ed0cc8e9d597f63f5ab5c8c3e0",
+      "bytes": 29717
+    }
+  ]
+}
