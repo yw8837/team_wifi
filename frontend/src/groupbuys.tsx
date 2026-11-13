@@ -72,17 +72,30 @@ export function PopularDemands(){
  const {user}=useAuth();const result=usePublicResource<Demand[]>("/release/demands?post_type=demand&sort=popular&limit=3&offset=0",user?.id);
  return <section className="popular-demands" aria-labelledby="popular-demands-title"><div className="groupbuy-heading"><h2 id="popular-demands-title">관심이 많은 공구 수요</h2><Link to="/demands?post_type=demand">공구 수요 모두 보기</Link></div><p className="hint">관심 수가 많은 순서로 살펴보세요. 관심은 주문이나 공구 개설 약속이 아닙니다.</p><ListFeedback loading={result.loading} error={result.error} stale={false} retry={result.reload}/>{result.data&&!result.loading&&!result.error&&(result.data.length?<div className="popular-demand-grid">{result.data.map(demand=><PopularDemandCard key={demand.id} demand={demand}/>)}</div>:<p>아직 등록된 공구 수요가 없어요. <Link to="/demands/new?post_type=demand">필요한 공구 수요 쓰기</Link></p>)}</section>;
 }
-function GroupbuyCategories({params,mine}:{params:URLSearchParams;mine:boolean}){
- const selected=params.get("category")||"";
- return <nav className="groupbuy-categories" aria-label="공구 카테고리 바로 선택">
-  {["",...categories].map(category=>{
-   const next=new URLSearchParams(params);
-   next.set("category",category);
-   next.set("page","0");
-   return <Link key={category} to={(mine?"/my/groupbuys":"/")+"?"+next.toString()} aria-current={selected===category?"true":undefined}>{category||"전체"}</Link>;
-  })}
- </nav>;
+function GroupbuyCategories({ params, mine }: { params: URLSearchParams; mine: boolean }) {
+  const selected = params.get("category") || "";
+  const pathname = mine ? "/my/groupbuys" : "/";
+
+  return (
+    <nav className="groupbuy-categories" aria-label="공구 카테고리 바로 선택">
+      {["", ...categories].map(category => {
+        const next = new URLSearchParams(params);
+        next.set("category", category);
+        next.set("page", "0");
+        return (
+          <Link
+            key={category}
+            to={pathname + "?" + next.toString()}
+            aria-current={selected === category ? "true" : undefined}
+          >
+            {category || "전체"}
+          </Link>
+        );
+      })}
+    </nav>
+  );
 }
+
 export function GroupbuyFeed({mine=false}:{mine?:boolean}){
  const {user}=useAuth(),[params,setParams]=useSearchParams();const fromUrl=()=>({q:params.get("q")||"",category:params.get("category")||"",status:params.get("status")||(mine?"all":"active"),sort:params.get("sort")||"ending"});
  const [draft,setDraft]=useState(fromUrl);const applied=JSON.stringify([params.get("q"),params.get("category"),params.get("status"),params.get("sort"),mine]);useEffect(()=>setDraft(fromUrl()),[applied]);

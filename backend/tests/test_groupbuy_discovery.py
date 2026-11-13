@@ -88,3 +88,53 @@ def test_ambiguous_category_cannot_use_seller_fallback():
 def test_cafe24_explicit_closed_prefix():
     entry = collector.parse_cafe24(seller_html().replace('캔코 모아백 기저귀가방 공동구매', '[마감] 캔코 모아백 기저귀가방 공동구매'), collector.SOURCES[0])
     assert entry['availability'] == 'ended'
+
+
+def test_truncated_seller_response_does_not_stop_collection(monkeypatch):
+    from http.client import IncompleteRead
+    sources = [dict(collector.SOURCES[0], id='truncated'), dict(collector.SOURCES[0], id='healthy', url='https://somi9726.cafe24.com/product/detail.html?product_no=333')]
+    monkeypatch.setattr(collector, 'SOURCES', sources)
+    monkeypatch.setattr(collector, 'SELLERS', [])
+    def fetch(source):
+        if source['id'] == 'truncated':
+            raise IncompleteRead(b'partial')
+        return collector.parse_cafe24(seller_html(), source)
+    monkeypatch.setattr(collector, 'fetch', fetch)
+    receipt = discovery.collect()
+    assert [entry['source_id'] for entry in receipt['entries']] == ['healthy']
+    assert receipt['failures'] == [{'source_id': 'truncated', 'stage': 'fetch', 'error': 'IncompleteRead'}]
+
+
+def test_bag_category_still_checks_other_product_types():
+    assert discovery.classify('기저귀가방 공동구매') == '외출·안전'
+    assert discovery.classify('기저귀가방 분유 공동구매', '외출·안전') is None
+    assert discovery.classify('모아백 장난감 공동구매', '외출·안전') is None
+
+
+def test_cafe24_tool_toy_is_not_a_groupbuy():
+    import pytest
+    with pytest.raises(ValueError):
+        collector.parse_cafe24(seller_html().replace('캔코 모아백 기저귀가방 공동구매', '원목 공구놀이 장난감'), collector.SOURCES[0])
+
+
+def test_ambiguous_soldout_updates_existing_listing_and_counts_once(public_mode, monkeypatch):
+    client, _, _ = public_mode
+    source = collector.SOURCES[0]
+    entry = collector.parse_cafe24(seller_html(), source)
+    with SessionLocal.begin() as db:
+        collector.store(db, [entry])
+    monkeypatch.setattr(collector, 'SELLERS', [])
+    monkeypatch.setattr(collector, 'fetch', lambda _: dict(entry, title='분유와 장난감 공동구매', availability='sold_out'))
+    receipt = discovery.collect()
+    assert len(receipt['entries']) == 1
+    with SessionLocal.begin() as db:
+        assert discovery.apply_collection(db, receipt) == {'stored': 1, 'expired': 0, 'ended': 1}
+    assert client.get('/api/release/groupbuys').json()['items'] == []
+    with SessionLocal.begin() as db:
+        assert discovery.apply_collection(db, receipt)['ended'] == 0
+
+
+def test_cafe24_attached_closure_markers_remain_supported():
+    for title in ('[공구종료] 유아 칫솔', '[공구마감] 유아 칫솔'):
+        entry = collector.parse_cafe24(seller_html().replace('캔코 모아백 기저귀가방 공동구매', title), collector.SOURCES[0])
+        assert entry['availability'] == 'ended'

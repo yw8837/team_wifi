@@ -24,6 +24,7 @@ SOURCES = (
 )
 MAX_BYTES = 2_000_000
 FRESH_SECONDS = 24 * 3600
+CAMPAIGN_EVIDENCE = re.compile(r"공동\s*구매|공구(?:종료|마감)(?![가-힣])|(?<![가-힣])공구(?![가-힣])")
 SELLERS = json.loads(Path(__file__).with_name('groupbuy_sellers.json').read_text(encoding='utf-8'))
 ALLOWED_HOSTS = frozenset(seller['host'] for seller in SELLERS)
 
@@ -108,7 +109,7 @@ def parse_cafe24(html, source, *, groupbuy=True):
         return unescape(match.group(1))
 
     title = variable('product_name')
-    if (groupbuy and not re.search(r'공동\s*구매|공구', title)) or not 3 <= len(title) <= 120:
+    if (groupbuy and not CAMPAIGN_EVIDENCE.search(title)) or not 3 <= len(title) <= 120:
         raise ValueError('Seller page does not identify a group buy')
     base_price = variable('product_price')
     if not base_price.isdigit():
@@ -163,9 +164,13 @@ def parse_cafe24(html, source, *, groupbuy=True):
             'is_demo': False, 'review_state': 'clear', 'updated_at': release.timestamp(stamp)}
 
 
-def store(db, entries):
+def lock_collection(db):
     if db.bind.dialect.name == 'postgresql':
         db.execute(text('SELECT pg_advisory_xact_lock(72411309)'))
+
+
+def store(db, entries):
+    lock_collection(db)
     actor_id = str(uuid.uuid5(uuid.NAMESPACE_URL, 'moduyuga:source-collection'))
     actor = db.get(User, actor_id)
     if actor is None:

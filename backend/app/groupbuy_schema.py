@@ -6,7 +6,7 @@ import re
 
 from . import release
 from .db import now
-from .external_groupbuys import FRESH_SECONDS, campaign_state
+from .external_groupbuys import CAMPAIGN_EVIDENCE, FRESH_SECONDS, campaign_state
 
 
 class ProductScripts(HTMLParser):
@@ -55,7 +55,7 @@ def parse(html, source):
     description = product.get('description', '')
     if not isinstance(title, str) or not isinstance(description, str):
         raise ValueError('Product text must be a string')
-    if not re.search(r'공동\s*구매|공구', title + ' ' + description):
+    if not CAMPAIGN_EVIDENCE.search(title + ' ' + description):
         raise ValueError('Product-specific campaign evidence missing')
     title = re.sub(r'최대\s*\d+%\s*할인[^\w]*', '', title).strip()
     if not 3 <= len(title) <= 120:

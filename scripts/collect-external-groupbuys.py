@@ -33,11 +33,10 @@ def collect_once():
     if args.discover:
         with SessionLocal() as db:
             receipt = groupbuy_discovery.collect(db if args.apply else None)
-        receipt.update(stored=0, expired=0, demo_changes=0)
+        receipt.update(stored=0, expired=0, ended=0, demo_changes=0)
         if args.apply:
             with SessionLocal.begin() as db:
-                receipt['stored'] = external_groupbuys.store(db, receipt['entries'])
-                receipt['expired'] = groupbuy_discovery.expire(db, receipt['removed'])
+                receipt.update(groupbuy_discovery.apply_collection(db, receipt))
         write_receipt(receipt)
         return bool(receipt['failures'])
     entries, failures = [], []
@@ -67,6 +66,7 @@ def write_receipt(receipt):
     pending.replace(args.output)
     print(json.dumps({'collected': len(receipt['entries']), 'failed': len(receipt['failures']),
                       'stored': receipt['stored'], 'expired': receipt.get('expired', 0),
+                      'ended': receipt.get('ended', 0),
                       'demo_changes': receipt['demo_changes']}), flush=True)
 
 

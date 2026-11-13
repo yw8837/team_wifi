@@ -1,12 +1,13 @@
 """Discover Cafe24 campaigns on reviewed sellers and run a midnight collection."""
 from datetime import datetime, timedelta, timezone
 from html import unescape
+from http.client import HTTPException
 from html.parser import HTMLParser
 import re
 from urllib.parse import parse_qs, urlencode, urljoin, urlsplit
 from urllib.error import HTTPError
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from . import external_groupbuys as collector
 from .db import Record, now
@@ -29,11 +30,10 @@ def seconds_until_midnight(stamp=None):
 
 
 def classify(title, fallback=None):
-    # Match the specific bag category before the generic diaper keyword.
-    if any(term in title for term in ('기저귀가방', '모아백')):
-        return '외출·안전'
+    # Remove only the bag word's generic diaper match, preserving other conflicts.
+    matching_title = title.replace('기저귀가방', '모아백')
     matches = [category for category, terms in CATEGORY_TERMS.items()
-               if any(term in title for term in terms)]
+               if any(term in matching_title for term in terms)]
     if len(matches) == 1:
         return matches[0]
     return fallback if not matches else None
@@ -98,7 +98,7 @@ def collect(db=None):
         for listing in seller['listing_urls']:
             try:
                 links.update(product_links(collector.read_html(listing), listing))
-            except (OSError, ValueError) as error:
+            except (OSError, HTTPException, ValueError) as error:
                 failures.append({'source_id': seller['host'], 'stage': 'discovery', 'error': type(error).__name__})
         for url in sorted(links):
             parsed = urlsplit(url)
@@ -112,6 +112,9 @@ def collect(db=None):
     for source in sources.values():
         try:
             entry = collector.fetch(source)
+            if entry['availability'] != 'listed':
+                entries.append(entry)
+                continue
             category = classify(entry['title'], source.get('category'))
             if not category:
                 rejected.append({'source_id': source['id'], 'reason': 'category_unconfirmed'})
@@ -125,7 +128,7 @@ def collect(db=None):
                 failures.append({'source_id': source['id'], 'stage': 'fetch', 'error': 'HTTPError', 'status': error.code})
         except ValueError:
             rejected.append({'source_id': source['id'], 'reason': 'groupbuy_fields_unconfirmed'})
-        except OSError as error:
+        except (OSError, HTTPException) as error:
             failures.append({'source_id': source['id'], 'stage': 'fetch', 'error': type(error).__name__})
     return {'entries': entries, 'failures': failures, 'rejected': rejected, 'removed': removed,
             'candidate_count': len(sources), 'checked_at': collector.release.timestamp(now())}
@@ -143,3 +146,20 @@ def expire(db, removed=()):
         row.revision += 1
         count += 1
     return count
+
+
+def apply_collection(db, receipt):
+    """Store one collection and count existing listings that actually ended."""
+    collector.lock_collection(db)
+    previously_active = list(db.scalars(select(Record.id).where(
+        Record.kind == 'release_groupbuy',
+        Record.data['source_type'].as_string() == 'seller_page',
+        Record.status == 'active',
+    )))
+    stored = collector.store(db, receipt['entries'])
+    expired = expire(db, receipt['removed'])
+    db.flush()
+    ended = db.scalar(select(func.count()).select_from(Record).where(
+        Record.id.in_(previously_active), Record.status == 'ended',
+    ))
+    return {'stored': stored, 'expired': expired, 'ended': ended}

@@ -62,3 +62,13 @@ def test_malformed_external_fields_are_rejected(changes):
 ])
 def test_explicit_campaign_closure_overrides_stock(title):
     assert groupbuy_schema.parse(page(name=title), SOURCE)['availability'] == 'ended'
+
+@pytest.mark.parametrize('title', ['원목 공구놀이 장난감', '유아 공구세트 장난감', '유아 공구함 장난감'])
+def test_tool_toys_are_not_campaign_evidence(title):
+    with pytest.raises(ValueError):
+        groupbuy_schema.parse(page(name=title, description='아이를 위한 공구놀이'), SOURCE)
+
+
+@pytest.mark.parametrize('title', ['[공구종료] 유아 칫솔', '[공구마감] 유아 칫솔'])
+def test_attached_closure_marker_remains_supported(title):
+    assert groupbuy_schema.parse(page(name=title, description='유아용 칫솔'), SOURCE)['availability'] == 'ended'
