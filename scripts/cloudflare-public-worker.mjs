@@ -34,12 +34,24 @@ export function productImageUrl(value, source) {
   }
 }
 
-async function sellerPreview(request, url, context) {
+async function sellerPreview(request, url, context, env) {
   if (!['GET', 'HEAD'].includes(request.method)) {
     return new Response(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
   }
   const source = sellerPreviewUrl(url.searchParams.get('source'));
   if (!source) return new Response(null, { status: 400 });
+  // Verified build snapshots avoid browser dependence on seller/CDN availability.
+  if (env.ASSETS) {
+    const manifestResponse = await env.ASSETS.fetch(new Request(new URL('/seller-images.json', url)));
+    if (manifestResponse.ok && manifestResponse.headers.get('content-type')?.includes('json')) {
+      const manifest = await manifestResponse.json();
+      const path = manifest[source.href]?.path;
+      if (/^\/seller-images\/[a-f0-9]{64}\.(jpg|png|webp|gif|avif)$/.test(path || '')) {
+        const snapshot = await env.ASSETS.fetch(new Request(new URL(path, url)));
+        if (snapshot.ok && snapshot.headers.get('content-type')?.startsWith('image/')) return snapshot;
+      }
+    }
+  }
   const cacheKey = new Request(url.href, { method: 'GET' });
   const cached = await caches.default.match(cacheKey);
   if (cached) return cached;
@@ -51,7 +63,8 @@ async function sellerPreview(request, url, context) {
     });
     if (!response.ok || !response.headers.get('content-type')?.includes('text/html')) {
       await response.body?.cancel();
-      return new Response(null, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+      return new Response(null, { status: response.status === 404 || response.status === 410 ? 404 : 502,
+        headers: { 'Cache-Control': 'no-store', 'X-Preview-Source-Status': String(response.status) } });
     }
     const reader = response.body.getReader();
     const chunks = [];
@@ -74,7 +87,7 @@ async function sellerPreview(request, url, context) {
         if (candidate) image = candidate;
       },
     }).transform(html).text();
-    if (!image) return new Response(null, { status: 404 });
+    if (!image) return new Response(null, { status: 404, headers: { 'Cache-Control': 'no-store', 'X-Preview-Error': 'image-metadata-missing' } });
     const imageResponse = await fetch(image, {
       redirect: 'manual', signal: AbortSignal.timeout(10000),
       headers: { Accept: 'image/avif,image/webp,image/png,image/jpeg,image/gif' },
@@ -111,7 +124,7 @@ async function sellerPreview(request, url, context) {
 export default {
   async fetch(request, env, context) {
     const url = new URL(request.url);
-    if (url.pathname === '/groupbuys/preview-image') return sellerPreview(request, url, context);
+    if (url.pathname === '/groupbuys/preview-image') return sellerPreview(request, url, context, env);
     let path;
     if (url.pathname === '/groupbuys/sitemap.xml') {
       path = '/release/groupbuy-pages/sitemap.xml';

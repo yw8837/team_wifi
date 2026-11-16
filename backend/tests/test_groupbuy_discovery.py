@@ -80,6 +80,20 @@ def test_bad_schema_does_not_stop_healthy_source(monkeypatch):
     assert result['rejected'] == [{'source_id': 'bad', 'reason': 'groupbuy_fields_unconfirmed'}]
 
 
+def test_regular_sale_replacing_existing_campaign_ends_it(public_mode, monkeypatch):
+    client, _, _ = public_mode
+    source = collector.SOURCES[0]
+    with SessionLocal.begin() as db:
+        collector.store(db, [collector.parse_cafe24(seller_html(), source)])
+    monkeypatch.setattr(collector, 'SELLERS', [])
+    monkeypatch.setattr(collector, 'read_html', lambda url: seller_html().replace('공동구매', '일반 판매'))
+    with SessionLocal.begin() as db:
+        receipt = discovery.collect(db)
+        assert source['id'] in receipt['removed']
+        assert discovery.apply_collection(db, receipt)['ended'] == 1
+    assert client.get('/api/release/groupbuys').json()['items'] == []
+
+
 def test_ambiguous_category_cannot_use_seller_fallback():
     assert discovery.classify('분유와 장난감 공구', '목욕·위생') is None
     assert discovery.classify('뉴니네 공동구매', '목욕·위생') == '목욕·위생'

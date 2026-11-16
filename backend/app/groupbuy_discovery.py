@@ -126,6 +126,9 @@ def collect(db=None):
                 removed.append(source['id'])
             else:
                 failures.append({'source_id': source['id'], 'stage': 'fetch', 'error': 'HTTPError', 'status': error.code})
+        except collector.NotGroupbuy:
+            removed.append(source['id'])
+            rejected.append({'source_id': source['id'], 'reason': 'campaign_evidence_removed'})
         except ValueError:
             rejected.append({'source_id': source['id'], 'reason': 'groupbuy_fields_unconfirmed'})
         except (OSError, HTTPException) as error:

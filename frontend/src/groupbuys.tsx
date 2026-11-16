@@ -70,7 +70,7 @@ function GroupbuyImage({ item, detail = false }: { item: Groupbuy; detail?: bool
   useEffect(() => setFailed(false), [item.seller_url]);
   if (item.is_demo || item.status === "hidden" || item.source_type !== "seller_page") return null;
   const origin = import.meta.env.VITE_PUBLIC_WEB_ORIGIN || "https://moduyuga.yeolmaeapps.kr";
-  const imageUrl = origin + "/groupbuys/preview-image?v=2&source=" + encodeURIComponent(item.seller_url);
+  const imageUrl = origin + "/groupbuys/preview-image?v=3&source=" + encodeURIComponent(item.seller_url);
   return (
     <figure className={"groupbuy-image" + (detail ? " groupbuy-image-detail" : "")}>
       {failed ? <div className="groupbuy-image-unavailable">판매처 이미지를 불러오지 못했어요</div> :

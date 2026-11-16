@@ -29,6 +29,10 @@ SELLERS = json.loads(Path(__file__).with_name('groupbuy_sellers.json').read_text
 ALLOWED_HOSTS = frozenset(seller['host'] for seller in SELLERS)
 
 
+class NotGroupbuy(ValueError):
+    """A readable product page no longer identifies a group-buy campaign."""
+
+
 def validate_url(url):
     parsed = urlsplit(url)
     if (parsed.scheme != 'https' or parsed.hostname not in ALLOWED_HOSTS
@@ -109,7 +113,9 @@ def parse_cafe24(html, source, *, groupbuy=True):
         return unescape(match.group(1))
 
     title = variable('product_name')
-    if (groupbuy and not CAMPAIGN_EVIDENCE.search(title)) or not 3 <= len(title) <= 120:
+    if groupbuy and not CAMPAIGN_EVIDENCE.search(title):
+        raise NotGroupbuy('Seller product no longer identifies a group buy')
+    if not 3 <= len(title) <= 120:
         raise ValueError('Seller page does not identify a group buy')
     base_price = variable('product_price')
     if not base_price.isdigit():
