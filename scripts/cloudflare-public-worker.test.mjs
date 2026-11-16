@@ -32,6 +32,22 @@ test('invalid source and write requests never trigger seller fetch', async () =>
   assert.equal((await worker.fetch(new Request(url, { method: 'POST' }), {}, {})).status, 405);
 });
 
+test('uses verified image snapshots without requesting the remote seller', async () => {
+  const source = 'https://poled.co.kr/product/detail.html?product_no=662';
+  const path = '/seller-images/' + 'a'.repeat(64) + '.jpg';
+  const requests = [];
+  const env = { ASSETS: { async fetch(request) {
+    requests.push(new URL(request.url).pathname);
+    if (requests.length === 1) return Response.json({ [source]: { path } });
+    return new Response(new Uint8Array([255, 216, 255]), { headers: { 'Content-Type': 'image/jpeg' } });
+  } } };
+  const response = await worker.fetch(new Request('https://moduyuga.yeolmaeapps.kr/groupbuys/preview-image?source=' + encodeURIComponent(source)), env, {});
+  assert.deepEqual(requests, ['/seller-images.json', path]);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('location'), null);
+  assert.equal((await response.arrayBuffer()).byteLength, 3);
+});
+
 test('serves image bytes on the same origin without a CSP-blocked redirect', async () => {
   const original = { fetch: globalThis.fetch, caches: globalThis.caches, HTMLRewriter: globalThis.HTMLRewriter };
   const bytes = new Uint8Array([255, 216, 255, 224, 0, 1]);
