@@ -75,9 +75,31 @@ async function sellerPreview(request, url, context) {
       },
     }).transform(html).text();
     if (!image) return new Response(null, { status: 404 });
-    const preview = new Response(null, {
-      status: 302,
-      headers: { Location: image, 'Cache-Control': 'public, max-age=3600', 'Referrer-Policy': 'no-referrer' },
+    const imageResponse = await fetch(image, {
+      redirect: 'manual', signal: AbortSignal.timeout(10000),
+      headers: { Accept: 'image/avif,image/webp,image/png,image/jpeg,image/gif' },
+    });
+    const imageType = imageResponse.headers.get('content-type')?.split(';')[0];
+    if (!imageResponse.ok || !['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'].includes(imageType)) {
+      await imageResponse.body?.cancel();
+      return new Response(null, { status: 502 });
+    }
+    const imageReader = imageResponse.body.getReader();
+    const imageChunks = [];
+    let imageSize = 0;
+    while (true) {
+      const { done, value } = await imageReader.read();
+      if (done) break;
+      imageSize += value.length;
+      if (imageSize > 5_000_000) {
+        await imageReader.cancel();
+        return new Response(null, { status: 413 });
+      }
+      imageChunks.push(value);
+    }
+    const preview = new Response(new Blob(imageChunks), {
+      headers: { 'Content-Type': imageType, 'Cache-Control': 'public, max-age=3600',
+        'X-Content-Type-Options': 'nosniff', 'Access-Control-Allow-Origin': '*' },
     });
     context.waitUntil(caches.default.put(cacheKey, preview.clone()));
     return preview;

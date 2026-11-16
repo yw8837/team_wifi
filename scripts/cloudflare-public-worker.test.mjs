@@ -31,3 +31,34 @@ test('invalid source and write requests never trigger seller fetch', async () =>
   assert.equal((await worker.fetch(new Request(url), {}, {})).status, 400);
   assert.equal((await worker.fetch(new Request(url, { method: 'POST' }), {}, {})).status, 405);
 });
+
+test('serves image bytes on the same origin without a CSP-blocked redirect', async () => {
+  const original = { fetch: globalThis.fetch, caches: globalThis.caches, HTMLRewriter: globalThis.HTMLRewriter };
+  const bytes = new Uint8Array([255, 216, 255, 224, 0, 1]);
+  const calls = [];
+  globalThis.caches = { default: { match: async () => null, put: async () => {} } };
+  globalThis.HTMLRewriter = class {
+    on(selector, handler) { this.handler = handler; return this; }
+    transform() {
+      this.handler.element({ getAttribute: () => 'https://poled.co.kr/web/product/big/product.jpg' });
+      return new Response('');
+    }
+  };
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, options });
+    return calls.length === 1
+      ? new Response('<html/>', { headers: { 'Content-Type': 'text/html' } })
+      : new Response(bytes, { headers: { 'Content-Type': 'image/jpeg' } });
+  };
+  try {
+    const source = encodeURIComponent('https://poled.co.kr/product/detail.html?product_no=662');
+    const response = await worker.fetch(new Request('https://moduyuga.yeolmaeapps.kr/groupbuys/preview-image?v=2&source=' + source), {}, { waitUntil() {} });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('location'), null);
+    assert.equal(response.headers.get('content-type'), 'image/jpeg');
+    assert.deepEqual(new Uint8Array(await response.arrayBuffer()), bytes);
+    assert.equal(calls[1].options.redirect, 'manual');
+  } finally {
+    Object.assign(globalThis, original);
+  }
+});
