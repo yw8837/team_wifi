@@ -65,10 +65,27 @@ function GroupbuyQuickFacts({ item }: { item: Groupbuy }) {
   );
 }
 
+function GroupbuyImage({ item, detail = false }: { item: Groupbuy; detail?: boolean }) {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [item.seller_url]);
+  if (item.is_demo || item.status === "hidden" || item.source_type !== "seller_page") return null;
+  const origin = import.meta.env.VITE_PUBLIC_WEB_ORIGIN || "https://moduyuga.yeolmaeapps.kr";
+  const imageUrl = origin + "/groupbuys/preview-image?source=" + encodeURIComponent(item.seller_url);
+  return (
+    <figure className={"groupbuy-image" + (detail ? " groupbuy-image-detail" : "")}>
+      {failed ? <div className="groupbuy-image-unavailable">판매처 이미지를 불러오지 못했어요</div> :
+        <img src={imageUrl} alt={item.title + " 상품 이미지"} loading={detail ? "eager" : "lazy"}
+          decoding="async" referrerPolicy="no-referrer" onError={() => setFailed(true)}/>}
+      {detail && <figcaption>이미지 출처 · {item.seller_name}</figcaption>}
+    </figure>
+  );
+}
+
 export function GroupbuyCard({ item, reload }: { item: Groupbuy; reload?: () => void }) {
   const exposure = useExposure(item.id, "groupbuy_list");
   return (
     <article className="groupbuy-card" ref={exposure.ref}>
+      {item.status !== "hidden" && item.source_type === "seller_page" && !item.is_demo && <Link className="groupbuy-image-link" to={route(item.id)} onClick={() => void exposure.click("detail")}><GroupbuyImage item={item}/></Link>}
       <div className="groupbuy-card-meta">
         <span>{item.category}</span>
         <span className={"groupbuy-status " + item.status}>{statusText(item)}</span>
@@ -97,6 +114,7 @@ export function GroupbuyCard({ item, reload }: { item: Groupbuy; reload?: () => 
 function GroupbuyOverview({ item }: { item: Groupbuy }) {
   return (
     <section className="groupbuy-overview" aria-label="공구 핵심 조건">
+      <GroupbuyImage item={item} detail/>
       <div className="groupbuy-overview-price">
         <span>판매처 표시 가격</span>
         <strong>{item.price === null ? "가격 확인 필요" : money(item.price)}</strong>
