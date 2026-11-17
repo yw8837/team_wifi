@@ -39,7 +39,7 @@
 | `utm_medium` | `share` |
 | `utm_campaign` | `groupbuy` |
 
-홍보 채널에서 직접 사용하는 링크는 `?utm_source=kakao&utm_medium=social&utm_campaign=community_launch`처럼 구분할 수 있습니다. 계정 ID, 이메일, 이름은 UTM에 넣지 않습니다. 현재 활동 통계는 노출 위치와 웹·앱별 집계이며 UTM별 방문 보고서는 아직 연결되어 있지 않습니다.
+홍보 채널에서 직접 사용하는 링크는 `?utm_source=kakao&utm_medium=social&utm_campaign=community_launch`처럼 구분할 수 있습니다. 계정 ID, 이메일, 이름은 UTM에 넣지 않습니다. 관리자 활동 통계에서 최근 30일의 UTM 유입을 확인합니다. 활동 분석에 동의한 일반 회원만 기록하며 같은 경로의 회원을 중복 제거합니다. 5명 미만인 경로는 숨깁니다. 지원 출처는 web, android, kakao, instagram, naver, google, youtube, discord, presentation, qr입니다. 방식은 share, social, search, referral, qr, presentation이며 캠페인은 groupbuy, community_launch, midterm입니다. 이 목록 밖의 태그는 수집하지 않습니다.
 
 ### 공개 전 점검
 

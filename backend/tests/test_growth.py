@@ -55,6 +55,41 @@ def test_wilson_interval_boundaries_and_no_fake_certainty():
     assert .40 < low < .41 and .59 < high < .60
 
 
+def test_campaign_consent_dedup_privacy_retention_and_withdrawal(public_mode):
+    c, people, _ = public_mode
+    body = {'source': 'kakao', 'medium': 'social', 'campaign': 'community_launch', 'channel': 'web'}
+    endpoint = '/api/release/measurement/campaign-visits'
+    report_url = '/api/release/measurement/campaign-report'
+    buyer = people['buyer']['headers']
+    admin = people['admin']['headers']
+    assert not c.post(endpoint, headers=buyer, json=body).json()['recorded']
+    assert c.post(endpoint, headers=buyer, json={**body, 'source': 'private@example.com'}).status_code == 422
+    assert c.get(report_url, headers=buyer).status_code == 403
+    for name in ('buyer', 'buyer2', 'seller', 'seller2', 'pending'):
+        headers = people[name]['headers']
+        c.put('/api/release/measurement/consent', headers=headers, json={'enabled': True})
+        for _ in range(2):
+            assert c.post(endpoint, headers=headers, json=body).json()['recorded']
+        if name == 'buyer':
+            assert c.get(report_url, headers=admin).json()['rows'] == []
+    assert c.get(report_url, headers=admin).json()['rows'] == [{**body, 'accounts': 5}]
+    assert not c.post(endpoint, headers=admin, json=body).json()['recorded']
+    with SessionLocal() as db:
+        rows = list(db.scalars(select(Record).where(Record.kind == growth.CAMPAIGN_VISIT)))
+        assert len(rows) == 5
+    c.put('/api/release/measurement/consent', headers=buyer, json={'enabled': False})
+    assert c.get(report_url, headers=admin).json()['rows'] == []
+    with SessionLocal() as db:
+        rows = list(db.scalars(select(Record).where(Record.kind == growth.CAMPAIGN_VISIT)))
+        assert len(rows) == 4
+        for row in rows:
+            row.created = now() - 31 * 86400
+        db.commit()
+    c.get(report_url, headers=admin)
+    with SessionLocal() as db:
+        assert not db.scalar(select(Record.id).where(Record.kind == growth.CAMPAIGN_VISIT))
+
+
 def test_report_unique_accounts_and_small_numerator_suppression(public_mode):
     c, p, _ = public_mode
     eligible = [p[name]['headers'] for name in ('buyer','buyer2','seller','seller2','pending')]

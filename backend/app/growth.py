@@ -14,12 +14,20 @@ from .release import public_only
 
 CONSENT = 'growth_consent'
 EXPOSURE = 'growth_exposure'
+CAMPAIGN_VISIT = 'growth_campaign_visit'
 RETENTION = 30 * 86400
 router = APIRouter(prefix='/api/release/measurement', dependencies=[Depends(public_only)])
 
 
 class Consent(Strict):
     enabled: bool
+
+
+class CampaignVisit(Strict):
+    source: Literal['web', 'android', 'kakao', 'instagram', 'naver', 'google', 'youtube', 'discord', 'presentation', 'qr']
+    medium: Literal['share', 'social', 'search', 'referral', 'qr', 'presentation']
+    campaign: Literal['groupbuy', 'community_launch', 'midterm']
+    channel: Literal['web', 'android']
 
 
 class Event(Strict):
@@ -51,17 +59,56 @@ def consent(user=Depends(current_user), db=Depends(get_db)):
 
 @router.put('/consent')
 def set_consent(body: Consent, user=Depends(current_user), db=Depends(get_db)):
+    db.scalar(select(User).where(User.id == user.id).with_for_update())
     if body.enabled and not user.is_admin:
         if not opted_in(db, user):
             db.add(Record(kind=CONSENT, owner_id=user.id, unique_key=user.id, data={'version': '20261102'}))
     else:
-        db.execute(delete(Record).where(Record.owner_id == user.id, Record.kind.in_([CONSENT, EXPOSURE])))
+        db.execute(delete(Record).where(Record.owner_id == user.id, Record.kind.in_([CONSENT, EXPOSURE, CAMPAIGN_VISIT])))
     db.commit()
     return {'enabled': body.enabled and not user.is_admin, 'eligible': not user.is_admin}
 
 
 def purge(db):
-    db.execute(delete(Record).where(Record.kind == EXPOSURE, Record.created < now()-RETENTION))
+    db.execute(delete(Record).where(Record.kind.in_([EXPOSURE, CAMPAIGN_VISIT]), Record.created < now()-RETENTION))
+
+
+@router.post('/campaign-visits', status_code=202)
+def campaign_visit(body: CampaignVisit, user=Depends(current_user), db=Depends(get_db)):
+    db.scalar(select(User).where(User.id == user.id).with_for_update())
+    if not opted_in(db, user):
+        return {'recorded': False}
+    purge(db)
+    day = (now() + 9 * 3600) // 86400
+    key = f'{user.id}:{body.source}:{body.medium}:{body.campaign}:{body.channel}:{day}'
+    from sqlalchemy.dialects.postgresql import insert as pg_insert
+    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+    insert = pg_insert if db.bind.dialect.name == 'postgresql' else sqlite_insert
+    db.execute(insert(Record).values(
+        id=uid(), kind=CAMPAIGN_VISIT, unique_key=key, owner_id=user.id,
+        created=now(), data=body.model_dump(),
+    ).on_conflict_do_nothing(index_elements=['kind', 'unique_key']))
+    db.commit()
+    return {'recorded': True}
+
+
+@router.get('/campaign-report')
+def campaign_report(user=Depends(admin_user), db=Depends(get_db)):
+    purge(db)
+    suspension = select(Record.owner_id).where(Record.kind == 'suspension')
+    consented = select(Record.owner_id).where(Record.kind == CONSENT)
+    visits = db.scalars(select(Record).join(User, User.id == Record.owner_id).where(
+        Record.kind == CAMPAIGN_VISIT, User.deleted.is_(False), User.is_admin.is_(False),
+        ~User.id.in_(suspension), User.id.in_(consented),
+    ))
+    groups = defaultdict(set)
+    for visit in visits:
+        data = visit.data
+        groups[(data['source'], data['medium'], data['campaign'], data['channel'])].add(visit.owner_id)
+    rows = [dict(zip(('source', 'medium', 'campaign', 'channel'), key), accounts=len(accounts))
+            for key, accounts in sorted(groups.items()) if len(accounts) >= 5]
+    db.commit()
+    return {'window_days': 30, 'minimum_cohort': 5, 'rows': rows}
 
 
 @router.post('/events', status_code=202)
