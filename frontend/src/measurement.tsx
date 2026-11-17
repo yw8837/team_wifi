@@ -7,12 +7,20 @@ import { usePublicResource } from './release-data';
 import { useContentRequest } from "./content-session";
 import { readSessionToken } from './session-storage';
 import { readCampaign } from './campaign';
+import { useLocation } from 'react-router-dom';
 
 const Measurement = createContext({ enabled: false, eligible: true, reload: () => {} });
 export function MeasurementProvider({ children }: { children: ReactNode }) {
+  const location = useLocation();
   const { user } = useAuth(), [version, setVersion] = useState(0);
   const [choice, setChoice] = useState({ enabled: false, eligible: true, userId: '' });
-  const [campaign] = useState(() => readCampaign(typeof window === 'undefined' ? '' : window.location.search));
+  const [campaign, setCampaign] = useState(() => readCampaign(location.search));
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (['utm_source', 'utm_medium', 'utm_campaign'].some(key => params.has(key))) {
+      setCampaign(readCampaign(location.search));
+    }
+  }, [location.search]);
   const reload = useCallback(() => setVersion(n => n + 1), []);
   useEffect(() => {
     let alive = true;
