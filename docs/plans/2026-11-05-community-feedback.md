@@ -182,3 +182,12 @@
 - 기존 서버 소스를 대조·백업한 후 groupbuys.py 및 release.py를 배포했다. health HTTP 200. 원격 보존 및 영수증 .runtime/share-review-20261117, 로컬 증거 artifacts/share-review-20261117.
 - Android 공통 소스의 카카오 공유는 등록된 운영 웹을 외부 브라우저로 열고 해당 화면에서 공유 버튼을 누르는 경로다. 이번 변경의 스토어 앱 업데이트·실기기 검증은 수행하지 않았다.
 - 최종 웹 배포 a410e760, JS index-DAaqf_l5.js, CSS index-CZ4XQJc-.css. 카카오 버튼을 노란색으로 표시하고 후기 선택 라디오를 20px, 클릭 영역을 최소 44px로 정리했다.
+
+
+## 2026-11-18 판매처 미리보기 누락 복구
+
+- 사용자 제보 상품 아가드 product_no=1509의 이미지가 기존 배포 manifest에 없었다. 11/17 공유 기능 배포에서 Vite 단독 빌드를 사용해 이미지 동기화를 누락한 것이 원인이다.
+- 기존 sync-seller-images.mjs로 현재 제공 가능한 판매처 이미지 13개를 갱신했다. failures 0. Cloudflare Pages dffe28f9에 배포했다.
+- 운영 미리보기 경로 13개를 Node fetch로 조회해 모두 HTTP 200, image MIME, 유효 크기 확인. Python urllib 검사는 HTTP 403으로 실패했으며 Node와 실제 브라우저로 재검증했다.
+- 제보 상품의 실제 브라우저 naturalWidth 628 및 도어스토퍼 사진 표시 확인. 증거 artifacts/preview-repair-20261118/product-1509.jpg 및 http-verification.json.
+- AGENTS.md에 Vite 빌드와 이미지 동기화의 차이 및 배포 직전 이미지 갱신 검증을 명시했다. 기존 build-cloudflare-web.ps1에는 해당 동기화가 포함되어 있다.
