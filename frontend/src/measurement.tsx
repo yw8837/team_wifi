@@ -1,6 +1,7 @@
+import { CampaignReport } from './campaign-report';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Capacitor } from '@capacitor/core';
+import { clientPlatform } from './client-platform';
 import { api } from './api';
 import { Feedback, ResourceState, useAction, useAuth, useSessionAttempt } from './shared';
 import { usePublicResource } from './release-data';
@@ -12,7 +13,8 @@ import { useLocation } from 'react-router-dom';
 const Measurement = createContext({ enabled: false, eligible: true, reload: () => {} });
 export function MeasurementProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const { user } = useAuth(), [version, setVersion] = useState(0);
+  const { user } = useAuth();
+  const [version, setVersion] = useState(0);
   const [choice, setChoice] = useState({ enabled: false, eligible: true, userId: '' });
   const [campaign, setCampaign] = useState(() => readCampaign(location.search));
   useEffect(() => {
@@ -30,13 +32,19 @@ export function MeasurementProvider({ children }: { children: ReactNode }) {
     }).catch(() => {});
     return () => { alive = false; };
   }, [user?.id, version]);
+  const enabled = !!user && !user.is_admin && choice.eligible
+    && choice.userId === user.id && choice.enabled;
   useEffect(() => {
-    if (!campaign || !user || user.is_admin || choice.userId !== user.id || !choice.enabled || !choice.eligible) return;
+    if (!campaign || !enabled) return;
     void api('/release/measurement/campaign-visits', 'POST', {
-      ...campaign, channel: Capacitor.isNativePlatform() ? 'android' : 'web',
+      ...campaign, channel: clientPlatform(),
     }).catch(() => {});
-  }, [campaign, user?.id, user?.is_admin, choice]);
-  return <Measurement.Provider value={{ enabled: !!user && !user.is_admin && choice.eligible && choice.userId === user.id && choice.enabled, eligible: choice.eligible, reload }}>{children}</Measurement.Provider>;
+  }, [campaign, enabled, user?.id]);
+  return (
+    <Measurement.Provider value={{ enabled, eligible: choice.eligible, reload }}>
+      {children}
+    </Measurement.Provider>
+  );
 }
 type Placement = 'catalog' | 'personal' | 'detail' | 'demand_list' | 'demand_detail' | 'companion' | 'advisor' | 'compare_cta' | 'groupbuy_list' | 'groupbuy_detail';
 type Action = 'detail' | 'source' | 'calculator' | 'save' | 'interest';
@@ -45,7 +53,7 @@ export function useExposure(offerId: string | undefined, placement: Placement) {
   const { user } = useAuth(), attempts = useSessionAttempt(), ownerToken = readSessionToken();
   const scope = useMemo(() => attempts.begin(), [attempts, user, ownerToken]);
   const viewed = useRef<Promise<boolean> | null>(null), clicked = useRef(new Set<string>());
-  const channel = Capacitor.isNativePlatform() ? 'android' : 'web';
+  const channel = clientPlatform();
   const send = useCallback(async (action: Action | 'view') => {
     if (!enabled || !offerId || !scope.isCurrent() || document.visibilityState !== 'visible') return false;
     try { return (await api<{recorded: boolean}>('/release/measurement/events', 'POST', {
@@ -83,22 +91,6 @@ export function MeasurementSettings() {
 }
 type Row = {placement: Placement; channel: string; accounts: number | null; clicked_accounts: number | null; saved_accounts: number | null; interested_accounts: number | null; interest_rate: number | null; source_accounts?: number | null; source_rate?: number | null; ctr: number | null; ctr_95_interval: number[] | null; save_rate: number | null; decision: string};
 type Report = {rows: Row[]; definition: string; limitations: string; search: string};
-type CampaignRow = { source: string; medium: string; campaign: string; channel: string; accounts: number };
-function CampaignReport() {
-  const result = usePublicResource<{ rows: CampaignRow[] }>('/release/measurement/campaign-report');
-  return <section aria-label="UTM 유입 통계">
-    <h3>공유·홍보 링크 유입</h3>
-    <p>최근 30일 동안 활동 분석에 동의한 회원을 유입 경로별로 한 번씩 셉니다. 같은 경로의 재방문은 중복 집계하지 않으며 5명 이상인 경로만 표시합니다.</p>
-    <p className="hint">여러 경로로 방문한 회원은 각 경로에 포함됩니다. 웹·앱 공유 태그는 링크를 만든 플랫폼을 뜻합니다.</p>
-    <ResourceState {...result} retry={result.reload}/>
-    {result.data?.rows.length === 0 && <p>아직 5명 이상 모인 유입 경로가 없습니다.</p>}
-    {result.data?.rows.map(row => <article key={[row.source, row.medium, row.campaign, row.channel].join(':')}>
-      <h4>{row.source} · {row.medium} · {row.campaign}</h4>
-      <p>{row.channel === 'android' ? '앱' : '웹'} 방문 회원 {row.accounts}명</p>
-    </article>)}
-    <button className="secondary" disabled={result.loading} onClick={result.reload}>유입 통계 새로고침</button>
-  </section>;
-}
 const percent = (n: number | null | undefined) => n == null ? '집계 보류' : (n * 100).toFixed(1) + '%';
 const places = {companion: '함께 살펴볼 육아템', advisor: '조건 찾기 결과', compare_cta: '비교 기준 안내', catalog: '육아템 목록', personal: '내 관심 육아템', detail: '육아템 상세', demand_list: '공구 수요 목록', demand_detail: '공구 수요 관심 버튼', groupbuy_list: '공구 정보 목록', groupbuy_detail: '공구 정보 상세'};
 export function MeasurementReport() {

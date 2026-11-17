@@ -16,6 +16,7 @@ CONSENT = 'growth_consent'
 EXPOSURE = 'growth_exposure'
 CAMPAIGN_VISIT = 'growth_campaign_visit'
 RETENTION = 30 * 86400
+MINIMUM_CAMPAIGN_ACCOUNTS = 5
 router = APIRouter(prefix='/api/release/measurement', dependencies=[Depends(public_only)])
 
 
@@ -101,14 +102,19 @@ def campaign_report(user=Depends(admin_user), db=Depends(get_db)):
         Record.kind == CAMPAIGN_VISIT, User.deleted.is_(False), User.is_admin.is_(False),
         ~User.id.in_(suspension), User.id.in_(consented),
     ))
-    groups = defaultdict(set)
+    accounts_by_campaign = defaultdict(set)
     for visit in visits:
         data = visit.data
-        groups[(data['source'], data['medium'], data['campaign'], data['channel'])].add(visit.owner_id)
-    rows = [dict(zip(('source', 'medium', 'campaign', 'channel'), key), accounts=len(accounts))
-            for key, accounts in sorted(groups.items()) if len(accounts) >= 5]
+        campaign_key = (data['source'], data['medium'], data['campaign'], data['channel'])
+        accounts_by_campaign[campaign_key].add(visit.owner_id)
+    rows = [
+        {'source': source, 'medium': medium, 'campaign': campaign,
+         'channel': channel, 'accounts': len(accounts)}
+        for (source, medium, campaign, channel), accounts in sorted(accounts_by_campaign.items())
+        if len(accounts) >= MINIMUM_CAMPAIGN_ACCOUNTS
+    ]
     db.commit()
-    return {'window_days': 30, 'minimum_cohort': 5, 'rows': rows}
+    return {'window_days': 30, 'minimum_cohort': MINIMUM_CAMPAIGN_ACCOUNTS, 'rows': rows}
 
 
 @router.post('/events', status_code=202)
