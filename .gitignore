@@ -91,3 +91,10 @@ ai-pipeline/artifacts/requirements_traceability.*
 /.superpowers/
 /.omc/
 /_workspace/
+
+# Local submission files and chart authoring scratch directories
+/output/
+/.chart-data-*/
+.env.*
+!.env.example
+!**/.env.example
