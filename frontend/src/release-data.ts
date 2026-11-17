@@ -5,7 +5,7 @@ export type Offer = { id:string; title:string; category:string; summary:string; 
 export type Author = {id:string;nickname:string};
 export type PostType = "question"|"experience"|"information"|"demand";
 export type Demand = {linked_groupbuy?:Groupbuy|null;post_type?:PostType;id:string;title:string;body:string;category:string;author:Author;created_at:string;updated_at?:string|null;revision?:number;interest_count:number;interested:boolean;comment_count:number;own:boolean};
-export type Comment = {id:string;body:string;author:Author;created_at:string;updated_at?:string|null;revision?:number;own:boolean};
+export type Comment = {comment_type?:"question"|"review";id:string;body:string;author:Author;created_at:string;updated_at?:string|null;revision?:number;own:boolean};
 export async function readPublic<T>(path:string):Promise<T> {
   try { return await api<T>(path); } catch (e) {
     if (!(e instanceof ApiError) || ![0,502,503,504].includes(e.status)) throw e;

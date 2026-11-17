@@ -211,8 +211,12 @@ def comments(id: str, limit: int = Query(20, ge=1, le=100), offset: int = Query(
     return [release.comment_dto(db, item, user) for item in rows]
 
 
+class GroupbuyCommentInput(release.CommentInput):
+    comment_type: Literal['question', 'review'] = 'question'
+
+
 @router.post('/groupbuys/{id}/comments', status_code=201)
-def create_comment(id: str, body: release.CommentInput, request: Request, user=Depends(current_user), db=Depends(get_db)):
+def create_comment(id: str, body: GroupbuyCommentInput, request: Request, user=Depends(current_user), db=Depends(get_db)):
     throttle(request, 'question', subject=user.id)
     active_actor(db, user)
     parent = content(db, id, user, lock=True)

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { groupbuyShareLink } from './share-link';
 
 describe('groupbuy campaign links', () => {
-  it.each(['web', 'android'] as const)('identifies %s sharing without account information', platform => {
+  it.each(['web', 'android', 'kakao'] as const)('identifies %s sharing without account information', platform => {
     const url = new URL(groupbuyShareLink('public-product-id', platform));
     expect(url.protocol).toBe('https:');
     expect(url.pathname).toBe('/groupbuys/public-product-id');

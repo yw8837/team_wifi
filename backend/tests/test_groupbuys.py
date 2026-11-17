@@ -228,3 +228,23 @@ def test_interest_insights_deduplicate_sharers_and_suppress_hidden_or_suspended(
     with SessionLocal() as db:
         db.add(Record(kind='suspension',owner_id=p['buyer2']['id'],unique_key=p['buyer2']['id'],data={}));db.commit()
     assert count() is None
+
+
+def test_groupbuy_review_type_survives_edit_and_legacy_comments(public_mode):
+    c, p, _ = public_mode
+    item = create(c, p)
+    path = BASE + '/' + item['id'] + '/comments'
+    assert c.post(path, json={'body': '직접 사용한 후기', 'comment_type': 'review'}).status_code == 401
+    legacy = c.post(path, headers=p['buyer']['headers'], json={'body': '기존 댓글 입력'}).json()
+    assert legacy['comment_type'] == 'question'
+    response = c.post(path, headers=p['buyer2']['headers'], json={'body': '직접 사용한 후기입니다', 'comment_type': 'review'})
+    assert response.status_code == 201
+    review = response.json()
+    assert review['comment_type'] == 'review'
+    edit_path = '/api/release/comments/' + review['id']
+    edited = c.put(edit_path, headers=p['buyer2']['headers'], json={'body': '사용 후기를 보완했습니다', 'revision': review['revision']})
+    assert edited.status_code == 200
+    assert edited.json()['comment_type'] == 'review'
+    assert c.put(edit_path, headers=p['buyer']['headers'], json={'body': '다른 사람 수정', 'revision': 2}).status_code == 404
+    assert c.post(path, headers=p['buyer']['headers'], json={'body': '잘못된 글 유형', 'comment_type': 'verified_purchase'}).status_code == 422
+    assert any(row['id'] == review['id'] and row['comment_type'] == 'review' for row in c.get(path).json())

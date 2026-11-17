@@ -10,6 +10,7 @@ import { Feedback, useAction, useAuth } from "./shared";
 export function GroupbuyComments({id}:{id:string}) {
   const {user,requireLogin}=useAuth();
   const [page,setPage]=useState(0),[body,setBody]=useState(""),[editing,setEditing]=useState<string|null>(null);
+  const [commentType,setCommentType]=useState<"question"|"review">("question");
   const action=useAction(),request=useContentRequest();
   const path="/release/groupbuys/"+encodeURIComponent(id)+"/comments";
   const result=useCommunityResource<Comment[]>(path+"?limit=20&offset="+page*20,user?.id||"guest");
@@ -19,7 +20,7 @@ export function GroupbuyComments({id}:{id:string}) {
     <Link to="/demands">커뮤니티 게시판 보기</Link>
     <ListFeedback {...result} retry={result.reload}/>
     {result.data?.map(comment=><article className="comment" id={"comment-"+comment.id} key={comment.id}>
-      <p className="muted">{comment.author.nickname} · {communityTime(comment.created_at)}{comment.updated_at&&" · 수정 "+communityTime(comment.updated_at)}</p>
+      <p className="muted">{comment.comment_type==="review"&&<strong>사용 후기 · </strong>}{comment.author.nickname} · {communityTime(comment.created_at)}{comment.updated_at&&" · 수정 "+communityTime(comment.updated_at)}</p>
       {editing===comment.id&&comment.own?<CommentEditor item={comment} onSaved={()=>{setEditing(null);result.reload();}} onCancel={()=>setEditing(null)}/>:<>
         <p className="ugc-text">{comment.body}</p>
         {comment.own&&<button type="button" className="secondary" onClick={()=>setEditing(comment.id)}>내 댓글 수정</button>}
@@ -38,11 +39,13 @@ export function GroupbuyComments({id}:{id:string}) {
     <form aria-describedby="groupbuy-comment-privacy" onSubmit={event=>{
       event.preventDefault();
       if(requireLogin())void action.run(async()=>{
-        await request(path,"POST",{body});setBody("");setPage(0);result.reload();
-      },"댓글을 등록했습니다.");
+        await request(path,"POST",{body,comment_type:commentType});setBody("");setPage(0);result.reload();
+      },commentType==="review"?"사용 후기를 등록했습니다.":"댓글을 등록했습니다.");
     }}>
-      <label className="field"><span>댓글 작성</span><textarea required minLength={2} maxLength={1000} rows={3} value={body} onChange={event=>setBody(event.target.value)}/></label>
-      <button disabled={action.busy}>{user?"댓글 등록":"로그인하고 댓글 등록"}</button>
+      <fieldset className="groupbuy-comment-type"><legend>남길 글 선택</legend><label><input type="radio" name="comment-type" checked={commentType==="question"} onChange={()=>setCommentType("question")}/> 질문·댓글</label><label><input type="radio" name="comment-type" checked={commentType==="review"} onChange={()=>setCommentType("review")}/> 사용 후기</label></fieldset>
+      {commentType==="review"&&<p className="hint">직접 사용한 제품의 장점과 아쉬운 점을 적어 주세요. 제공받은 제품이라면 함께 밝혀 주세요.</p>}
+      <label className="field"><span>{commentType==="review"?"사용 후기 작성":"댓글 작성"}</span><textarea required minLength={2} maxLength={1000} rows={3} value={body} onChange={event=>setBody(event.target.value)}/></label>
+      <button disabled={action.busy}>{commentType==="review"?(user?"후기 등록":"로그인하고 후기 등록"):(user?"댓글 등록":"로그인하고 댓글 등록")}</button>
     </form>
     <Feedback {...action}/>
   </section>;

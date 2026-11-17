@@ -324,6 +324,7 @@ def demand_dto(db, item, user):
 
 def comment_dto(db, item, user):
     return dict(id=item.id, body=item.data['body'], author=author(db, item),
+                comment_type=item.data.get('comment_type', 'question'),
                 created_at=timestamp(item.created), updated_at=item.data.get('updated_at'),
                 revision=item.revision, own=bool(user and user.id == item.owner_id))
 
@@ -339,6 +340,8 @@ def edit_owned_content(db, kind, id, body, user):
     if item.revision != body.revision:
         raise HTTPException(409, '다른 화면에서 수정된 내용이 있습니다. 작성 중인 내용은 보관한 뒤 최신 내용을 확인해 주세요.')
     values = body.model_dump(exclude={'revision'}, exclude_unset=True)
+    if kind == COMMENT and 'comment_type' in item.data:
+        values['comment_type'] = item.data['comment_type']
     if kind == DEMAND and 'post_type' not in values:
         values['post_type'] = post_type(item)
     if kind == DEMAND and post_type(item) == 'demand' and values['post_type'] != 'demand':

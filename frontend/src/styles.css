@@ -968,3 +968,8 @@ section > h2 {
     scroll-behavior: auto !important;
   }
 }
+
+.groupbuy-comment-type { display: flex; gap: 12px; margin: 16px 0; }
+.groupbuy-comment-type label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
+.groupbuy-comment-type input[type="radio"] { width: 20px; height: 20px; min-height: 20px; margin: 0; padding: 0; }
+#groupbuy-share .kakao-share { background: #fee500; color: #191919; border-color: #fee500; }
