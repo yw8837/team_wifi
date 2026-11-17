@@ -5,9 +5,15 @@ import { sellerPreviewUrl, productImageUrl } from './cloudflare-public-worker.mj
 
 const [apiBase, output] = process.argv.slice(2);
 if (!apiBase?.startsWith('https://') || !output) throw new Error('API origin and output directory required');
-const response = await fetch(apiBase + '/release/groupbuys?status=active&limit=100');
-if (!response.ok) throw new Error('Public catalogue unavailable');
-const { items } = await response.json();
+const items = [];
+for (let offset = 0; ; offset += 100) {
+  const response = await fetch(apiBase + '/release/groupbuys?status=all&limit=100&offset=' + offset);
+  if (!response.ok) throw new Error('Public catalogue unavailable');
+  const page = await response.json();
+  items.push(...page.items);
+  if (!page.has_more) break;
+  if (!page.items.length || offset >= 10000) throw new Error('Incomplete public catalogue');
+}
 const manifest = {};
 const failures = [];
 await mkdir(join(output, 'seller-images'), { recursive: true });

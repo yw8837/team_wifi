@@ -973,3 +973,52 @@ section > h2 {
 .groupbuy-comment-type label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; }
 .groupbuy-comment-type input[type="radio"] { width: 20px; height: 20px; min-height: 20px; margin: 0; padding: 0; }
 #groupbuy-share .kakao-share { background: #fee500; color: #191919; border-color: #fee500; }
+
+/* Standalone navigation links share a visible, touch-friendly treatment. */
+.actions > a:not(.button),
+.comments > a,
+.broker-footer nav > a,
+.header-account {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+.actions > a:not(.button):hover,
+.comments > a:hover,
+.broker-footer nav > a:hover,
+.header-account:hover {
+  background: #fff5e7;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.public-main > nav.actions {
+  margin: 0 0 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.public-main > nav.actions > a:first-child {
+  background: #fff5e7;
+  color: var(--primary);
+}
+.broker-footer nav { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 480px) {
+  .public-main > nav.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .public-main > nav.actions > a:last-child:nth-child(3) { grid-column: 1 / -1; }
+  .actions > a:not(.button) { min-height: 48px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .actions > a:not(.button), .comments > a, .broker-footer nav > a, .header-account { transition: none; }
+}
