@@ -210,3 +210,7 @@
 - Android는 외부 웹에서 공유 버튼을 다시 누르던 경로를 제거하고, 로컬 Capacitor 플러그인의 명시적 ACTION_SEND로 com.kakao.talk을 연다. 앱이 없을 때 설치 또는 링크 복사 안내를 제공한다. 최종 발송은 사용자가 카카오톡에서 선택한다.
 - 관련 프런트 38개 검사 및 TypeScript 검사 통과. 0.6.9(code 19) signed APK/AAB 빌드와 오프라인 검증 51개 통과. 산출물 artifacts/android/releases/19-0.6.9, 검증 artifacts/kakao-fix-20261118/android. 웹과 앱의 API 및 웹 원점은 현재 운영 도메인으로 동일하다.
 - 판매처 이미지 13개 동기화 후 Cloudflare Pages a53e2005 배포. 운영 JS index-DtdmR6La.js 확인. Google Play에 code 19 업로드 및 출시 노트 초안 저장 완료. 실기기 검사는 USB 디버깅 미승인/재연결 문제를 해결한 뒤 진행하며, 이 시점에 심사 제출·스토어 공개 완료로 표시하지 않는다.
+- USB 재승인 후 실제 SM-S938N 연결 확인. 화면 켜짐 유지 값을 0에서 USB 전용 2로 임시 변경했고, 검사 종료 후 0으로 복원 확인했다. 기존 설치본 code 18의 Google 앱 서명과 다운로드한 code 19 Google 서명이 일치했다. 데이터 삭제 없이 adb install -r 성공, 설치 버전 0.6.9/code 19 확인.
+- 실제 실행 시 Google Play 자동 보호가 직접 설치본에 대해 Play에서 다운로드하도록 요구했다. 앱 버튼→카카오 공유 대상 선택의 전체 실기 검사는 이 보호 화면에 막혔으며 성공으로 표시하지 않는다. 보호 해제나 데이터 삭제는 하지 않았다. ADB로 카카오 공유 화면을 직접 여는 추가 검사는 자동 승인 정책에 의해 차단돼 재시도하지 않았다.
+- Play 프로덕션 0.6.9 전체 출시 변경사항을 심사 요청했다. 게시 개요의 검토 중인 변경사항에 나타나며 빠른 자동 검사는 진행 중이다. 공개 완료가 아니다. 기존 code 18→19 지원 기기 제외는 0, 스토어 표시 업데이트 크기는 966KB. 경고 1개는 난독화 매핑 파일 부재이며 현재 빌드는 난독화를 사용하지 않는다.
+- 웹 배포 및 코드 커밋 750f350은 codex/modu-yuga에 푸시 완료. 휴대폰 업데이트 파일 설치와 Play 공개 승인은 별개이며, 현재 실행 제한은 Play 배포 경로로 해소 후 재검증해야 한다. 증거 device-play-protection.png, device-awake.json, android/android-release-verification.json.
