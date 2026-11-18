@@ -11,10 +11,13 @@ patterns = [re.compile(p) for p in [r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE K
               r'\bsk-(?:proj-)?[A-Za-z0-9_-]{30,}', r'\bAKIA[A-Z0-9]{16}', r'(?i)[A-Z]:[/\\]Users[/\\](?!Public[/\\])[^/\\\s]+']]
 for name in filter(None, names):
     p = Path(name)
-    if ('runtime/' in name or name.startswith('data/') and name != 'data/README.md' or p.suffix in {'.db', '.jks', '.keystore', '.p12', '.pem'}
-        or p.name.startswith('.env') and not p.name.endswith('.example')
-        or p.name in {'company_source_extract.json', 'materials_inventory.json', 'requirements_source.json'}
-        or p.name.startswith('requirements_traceability.')):
+    private_root = p.parts[0] in {'.runtime', '_archive', '_workspace', 'artifacts', 'output'}
+    raw_data = p.parts[0] == 'data' and name != 'data/README.md'
+    private_config = p.name.startswith('.env') and p.name != '.env.example'
+    private_file = p.suffix.lower() in {'.db', '.sqlite', '.sqlite3', '.jks', '.keystore', '.p12', '.pem', '.key'}
+    source_export = (p.name in {'company_source_extract.json', 'materials_inventory.json', 'requirements_source.json'}
+                     or p.name.startswith('requirements_traceability.'))
+    if private_root or 'runtime' in p.parts or raw_data or private_config or private_file or source_export:
         bad.append(name+': private file staged')
         continue
     raw = subprocess.check_output(['git', 'show', ':'+name], cwd=ROOT)

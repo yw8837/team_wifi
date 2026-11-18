@@ -14,6 +14,7 @@ describe("beta API build boundary", () => {
     expect(betaApiOrigin(true, "https://api.example.test:8443/api")).toBe("https://api.example.test:8443");
     const csp = buildCsp(true, "https://api.example.test:8443/api");
     expect(csp).toContain("connect-src 'self' https://kapi.kakao.com https://kauth.kakao.com https://api.example.test:8443;");
+    expect(csp).toContain("img-src 'self' data: https://moduyuga.yeolmaeapps.kr;");
     expect(csp).not.toMatch(/10\.0\.2\.2|127\.0\.0\.1|localhost/);
   });
   it("preserves local Android debug connectivity outside beta", () => {

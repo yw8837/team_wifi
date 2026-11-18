@@ -19,7 +19,7 @@ export function buildCsp(beta: boolean, base: string | undefined): string {
   const origin = betaApiOrigin(beta, base);
   const connections = beta ? (origin ? ` ${origin}` : "") :
     ` http://10.0.2.2:8000 http://127.0.0.1:8000${origin ? ` ${origin}` : ""}`;
-  return `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://kapi.kakao.com https://kauth.kakao.com${connections}; frame-src 'self' https://kauth.kakao.com https://sharer.kakao.com; object-src 'none'; base-uri 'none'; form-action 'self' https://sharer.kakao.com https://accounts.kakao.com`;
+  return `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://moduyuga.yeolmaeapps.kr; connect-src 'self' https://kapi.kakao.com https://kauth.kakao.com${connections}; frame-src 'self' https://kauth.kakao.com https://sharer.kakao.com; object-src 'none'; base-uri 'none'; form-action 'self' https://sharer.kakao.com https://accounts.kakao.com`;
 }
 
 export function isPublicRead(path: string, method = "GET"): boolean {

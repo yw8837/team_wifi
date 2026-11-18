@@ -16,7 +16,7 @@
 
 ## 먼저 볼 문서
 
-공개 소스의 최신 구현은 [`codex/modu-yuga`](https://github.com/yw8837/team_wifi/tree/codex/modu-yuga)에서 확인합니다. 기본 브랜치 `main`과 작업 브랜치의 구현 시점이 다릅니다.
+심사·팀 공유용 소스는 [`codex/modu-yuga`](https://github.com/yw8837/team_wifi/tree/codex/modu-yuga)에서 확인합니다. 기본 브랜치 `main`과 작업 브랜치의 구현 시점이 다릅니다.
 
 ### 기능별 코드
 
@@ -27,15 +27,15 @@
 | 공구 자동 수집 | 판매처 출처·확인 시각 표시 | `backend/app/groupbuy_discovery.py`, `external_groupbuys.py`, `groupbuy_schema.py` |
 | 선택 동의 기반 활동 통계 | `frontend/src/measurement.tsx` | `backend/app/growth.py` |
 | 공유 링크 UTM | `frontend/src/share-link.ts`, `groupbuy-share.tsx` | 공유 URL에 웹·앱 출처 표시 |
-| 챗봇 검색·도구 | `frontend/src`의 assistant 관련 파일 | `backend/app/assistant_tools.py`, `model_runtime.py` |
+| 챗봇 검색·도구 | `frontend/src/chat-widget.tsx`, `chat-transport.ts` | `backend/app/assistant_tools.py`, `model_runtime.py` |
 
 ### 공유 링크와 유입 구분
 
-공구 상세의 `공구 링크 복사`는 아래 태그를 붙입니다. `utm_source`는 공유 링크를 만든 플랫폼이며 수신자가 링크를 연 메신저를 뜻하지 않습니다.
+공구 상세에서 링크를 복사하거나 카카오톡으로 보낼 때 다음 태그를 붙입니다. `utm_source`는 공유 링크를 만든 플랫폼이며 수신자가 링크를 연 메신저를 뜻하지 않습니다.
 
 | 태그 | 값 |
 |---|---|
-| `utm_source` | `web` 또는 `android` |
+| `utm_source` | 링크 복사는 `web` 또는 `android`, 카카오톡 버튼은 `kakao` |
 | `utm_medium` | `share` |
 | `utm_campaign` | `groupbuy` |
 
@@ -84,7 +84,7 @@ cd backend
 .venv/Scripts/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log
 ```
 
-다른 터미널에서:
+저장소 루트에서 두 번째 터미널을 열어 프런트엔드를 실행합니다.
 
 ```powershell
 cd frontend

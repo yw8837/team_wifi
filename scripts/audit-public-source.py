@@ -52,8 +52,8 @@ def main():
                 binary += 1
                 continue
             scanned += 1
-            # This exact password belongs to an ephemeral CI container defined in the same file.
-            if path == '.github/workflows/container.yml':
+            # Only the CI fixture and its literal in this scanner are expected.
+            if path in {'.github/workflows/container.yml', 'scripts/audit-public-source.py'}:
                 raw = raw.replace(b'postgresql+psycopg://app:container-verification-only@moduyuga-pg-verify/app', b'')
             for label, pattern in PATTERNS.items():
                 if re.search(pattern, raw):
