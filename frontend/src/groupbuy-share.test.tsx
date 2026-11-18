@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 const state = vi.hoisted(() => ({ message: vi.fn(), native: false, open: vi.fn() }));
 vi.mock('react', async () => ({ ...await vi.importActual('react'), useState: (value: unknown) => [value, state.message] }));
 vi.mock('./client-platform', () => ({ clientPlatform: () => state.native ? 'android' : 'web' }));
-vi.mock('@capacitor/browser', () => ({ Browser: { open: state.open } }));
+vi.mock('./kakao-native', () => ({ KakaoShare: { share: state.open } }));
 import { GroupbuyShare } from './groupbuy-share';
 
 function click(node: ReactNode, label: string): void {
@@ -17,7 +17,7 @@ beforeEach(() => { state.native = false; vi.clearAllMocks(); vi.stubEnv('VITE_KA
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
 it('opens the Kakao share picker with the exact groupbuy and Kakao attribution', async () => {
-  const init = vi.fn(), sendDefault = vi.fn().mockResolvedValue(undefined);
+  const init = vi.fn(), sendDefault = vi.fn();
   vi.stubGlobal('window', { Kakao: { init, isInitialized: () => false, Share: { sendDefault } } });
   click(GroupbuyShare({ id: 'example-product', title: '육아템 공구' }), '카카오톡으로 보내기');
   await Promise.resolve();
@@ -52,11 +52,19 @@ it('offers manual copying when clipboard access fails', async () => {
   expect(state.message).toHaveBeenCalledWith('아래 주소를 길게 눌러 복사해 주세요.');
 });
 
-it('opens the registered web sharing surface from Android', async () => {
+it('opens Kakao directly from Android with the current product link', async () => {
   state.native = true;
   click(GroupbuyShare({ id: 'current-product' }), '카카오톡으로 보내기');
   await Promise.resolve();
-  const url = new URL(state.open.mock.calls[0][0].url);
+  const url = new URL(state.open.mock.calls[0][0].text.split('\n').at(-1));
   expect(url.pathname).toBe('/groupbuys/current-product');
-  expect(url.hash).toBe('#groupbuy-share');
+  expect(url.searchParams.get('utm_source')).toBe('kakao');
+});
+
+it('offers link copy when Kakao is not installed on Android', async () => {
+  state.native = true;
+  state.open.mockRejectedValueOnce({ code: 'KAKAO_NOT_INSTALLED' });
+  click(GroupbuyShare({ id: 'current-product' }), '카카오톡으로 보내기');
+  await Promise.resolve();
+  expect(state.message).toHaveBeenCalledWith('카카오톡을 설치한 뒤 다시 시도하거나 링크를 복사해 주세요.');
 });

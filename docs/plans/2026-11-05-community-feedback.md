@@ -202,3 +202,11 @@
 - 주요 고정 경로 25개를 390px 및 1280px에서 열어 검사했다. 320px에서 주요 경로 8개 추가 검사. 검사 범위에서 가로 넘침 및 없는 화면 오류 없음. 회원·관리자 경로는 비로그인 접근 안내를 확인한 것이며 로그인 후 내부 화면과 데이터 수정 동작은 이번 브라우저 검사 범위 밖이다.
 - ADB 기기 목록이 비어 있어 설치 앱 실기기 검증 및 스토어 업데이트는 수행하지 않았다. 반응형 모바일 웹 검증과 공통 소스 수정까지 반영했다.
 - 증거 artifacts/ui-audit-20261118/browser-verification.json, mobile-detail.jpg, desktop-detail.jpg, small-mobile-detail.jpg. 기존 제출 기록 변경은 보존했다.
+
+## 2026-11-18 카카오 공유 빈 창 대응 및 Android 0.6.9
+
+- 공식 Kakao JS SDK 2.7.9의 sendDefault는 Promise가 아닌 void 반환이며, 공유 팝업에 form POST를 전송한다. 비로그인 HTTP 요청은 sharer.kakao.com에서 accounts.kakao.com/login으로 이동한다. 기존 form-action 정책에 로그인 도메인이 없어 이를 명시적으로 추가했다.
+- 로컬 브라우저 회귀에서 기존 정책은 새 탭의 리디렉션이 진행되지 않았고, 변경 정책은 카카오 도메인까지 이동했다. 단순 시험 요청은 정상 인증 파라미터가 없어 카카오 400 화면에 도착했으므로 이를 실제 로그인 성공으로 간주하지 않는다. 운영 웹은 기존 카카오 로그인 세션으로 실제 상품의 공유 대상 선택 창 진입을 확인했다. 타인에게 메시지는 보내지 않았다.
+- Android는 외부 웹에서 공유 버튼을 다시 누르던 경로를 제거하고, 로컬 Capacitor 플러그인의 명시적 ACTION_SEND로 com.kakao.talk을 연다. 앱이 없을 때 설치 또는 링크 복사 안내를 제공한다. 최종 발송은 사용자가 카카오톡에서 선택한다.
+- 관련 프런트 38개 검사 및 TypeScript 검사 통과. 0.6.9(code 19) signed APK/AAB 빌드와 오프라인 검증 51개 통과. 산출물 artifacts/android/releases/19-0.6.9, 검증 artifacts/kakao-fix-20261118/android. 웹과 앱의 API 및 웹 원점은 현재 운영 도메인으로 동일하다.
+- 판매처 이미지 13개 동기화 후 Cloudflare Pages a53e2005 배포. 운영 JS index-DtdmR6La.js 확인. Google Play에 code 19 업로드 및 출시 노트 초안 저장 완료. 실기기 검사는 USB 디버깅 미승인/재연결 문제를 해결한 뒤 진행하며, 이 시점에 심사 제출·스토어 공개 완료로 표시하지 않는다.

@@ -48,3 +48,8 @@ describe("one-time recovery code acknowledgment", () => {
     expect(continued).toBe(false);
   });
 });
+
+
+it('allows the Kakao share POST to redirect to its login screen', () => {
+  expect(buildCsp(true, 'https://api.example.test/api')).toContain("form-action 'self' https://sharer.kakao.com https://accounts.kakao.com");
+});

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Browser } from '@capacitor/browser';
+import { KakaoShare } from './kakao-native';
 import { clientPlatform } from './client-platform';
 import { groupbuyShareLink } from './share-link';
 
 type KakaoSdk = {
   init(key: string): void;
   isInitialized(): boolean;
-  Share: { sendDefault(options: { objectType: 'text'; text: string; link: { webUrl: string; mobileWebUrl: string }; buttonTitle: string }): Promise<unknown> };
+  Share: { sendDefault(options: { objectType: 'text'; text: string; link: { webUrl: string; mobileWebUrl: string }; buttonTitle: string }): void };
 };
 
 export function GroupbuyShare({ id, title = '함께 볼 육아템 공구' }: { id: string; title?: string }) {
@@ -18,8 +18,7 @@ export function GroupbuyShare({ id, title = '함께 볼 육아템 공구' }: { i
     setMessage('');
     try {
       if (clientPlatform() === 'android') {
-        await Browser.open({ url: url + '#groupbuy-share' });
-        setMessage('열린 웹 화면에서 카카오톡으로 보내기를 눌러 주세요.');
+        await KakaoShare.share({ text: `${title}\n${groupbuyShareLink(id, 'kakao')}` });
         return;
       }
       const sdk = (window as Window & { Kakao?: KakaoSdk }).Kakao;
@@ -27,12 +26,14 @@ export function GroupbuyShare({ id, title = '함께 볼 육아템 공구' }: { i
       if (!sdk || !key) throw new Error('Kakao sharing unavailable');
       if (!sdk.isInitialized()) sdk.init(key);
       const kakaoUrl = groupbuyShareLink(id, 'kakao');
-      await sdk.Share.sendDefault({
+      sdk.Share.sendDefault({
         objectType: 'text', text: `${title}\n모두의 육아에서 공구 구성과 조건을 함께 확인해 보세요.`,
         link: { webUrl: kakaoUrl, mobileWebUrl: kakaoUrl }, buttonTitle: '공구 자세히 보기',
       });
-    } catch {
-      setMessage('카카오톡 공유를 열지 못했어요. 다시 시도하거나 링크를 복사해 주세요.');
+    } catch (error) {
+      setMessage((error as { code?: string })?.code === 'KAKAO_NOT_INSTALLED'
+        ? '카카오톡을 설치한 뒤 다시 시도하거나 링크를 복사해 주세요.'
+        : '카카오톡 공유를 열지 못했어요. 다시 시도하거나 링크를 복사해 주세요.');
     }
   }
 
