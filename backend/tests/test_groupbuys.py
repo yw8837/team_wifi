@@ -248,3 +248,33 @@ def test_groupbuy_review_type_survives_edit_and_legacy_comments(public_mode):
     assert c.put(edit_path, headers=p['buyer']['headers'], json={'body': '다른 사람 수정', 'revision': 2}).status_code == 404
     assert c.post(path, headers=p['buyer']['headers'], json={'body': '잘못된 글 유형', 'comment_type': 'verified_purchase'}).status_code == 422
     assert any(row['id'] == review['id'] and row['comment_type'] == 'review' for row in c.get(path).json())
+
+
+def test_private_groupbuy_saves_follow_visibility_and_account(public_mode):
+    client, people, _ = public_mode
+    buyer = people['buyer']['headers']
+    other = people['buyer2']['headers']
+    item = create(client, people)
+    url = BASE + '/' + item['id']
+    saved_url = BASE + '/saved'
+    assert client.get(saved_url).status_code == 401
+    assert client.put(url + '/saved').status_code == 401
+    for _ in range(2):
+        assert client.put(url + '/saved', headers=other).json() == {'saved': True}
+    assert not client.get(url, headers=buyer).json()['saved']
+    assert not client.get(url).json()['saved']
+    assert client.get(url, headers=other).json()['saved']
+    assert [row['id'] for row in client.get(saved_url, headers=other).json()['items']] == [item['id']]
+    assert client.get(saved_url, headers=buyer).json()['items'] == []
+    assert client.delete(url + '/saved', headers=buyer).json() == {'saved': False}
+    assert client.get(BASE, headers=other).json()['items'][0]['saved']
+    for _ in range(2):
+        assert client.delete(url + '/saved', headers=other).json() == {'saved': False}
+    assert client.get(saved_url, headers=other).json()['items'] == []
+    client.put(url + '/saved', headers=other).raise_for_status()
+    with SessionLocal() as db:
+        db.get(Record, item['id']).status = 'hidden'
+        db.commit()
+    assert client.get(saved_url, headers=other).json()['items'] == []
+    assert client.put(url + '/saved', headers=other).status_code == 404
+    assert client.delete(url + '/saved', headers=other).json() == {'saved': False}

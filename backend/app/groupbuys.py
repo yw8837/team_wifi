@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from pydantic import Field, field_validator
 from sqlalchemy import case, delete, select
+from sqlalchemy.orm import aliased
 
 from . import release
 from .community_dates import filter_created
@@ -18,6 +19,7 @@ from .schemas import Strict
 from .security import admin_user, current_user, optional_user, throttle
 
 GROUPBUY = 'release_groupbuy'
+GROUPBUY_SAVE = release.GROUPBUY_SAVE
 BROKER_NOTICE = '플랫폼은 통신판매중개자로서 거래 당사자가 아닙니다. 상품 정보와 거래 책임은 각 판매처에 있으며 결제·배송·환불은 판매처에서 진행합니다.'
 router = APIRouter(prefix='/api/release', dependencies=[Depends(release.public_only)])
 
@@ -124,12 +126,18 @@ def display_time(value):
     return datetime.fromisoformat(value.replace('Z','+00:00')).astimezone(timezone(timedelta(hours=9))).strftime('%Y-%m-%d %H:%M (한국 시간)')
 
 
-def dto(db,item,user=None):
+def saved_targets(user):
+    return select(Record.parent_id).where(Record.kind == GROUPBUY_SAVE, Record.owner_id == user.id)
+
+
+def dto(db,item,user=None,*,saved=None):
+    if saved is None:
+        saved = bool(user and db.scalar(saved_targets(user).where(Record.parent_id == item.id)))
     data=item.data
     status='hidden' if item.status=='hidden' else 'ended' if item.status=='ended' or item.ends<=now() else 'active'
     return dict(id=item.id,**{key:data.get(key) for key in GroupbuyInput.model_fields},
         author=release.author(db,item),created_at=release.timestamp(item.created),updated_at=data.get('updated_at'),
-        revision=item.revision,own=bool(user and user.id==item.owner_id),status=status,
+        revision=item.revision,saved=saved,own=bool(user and user.id==item.owner_id),status=status,
         can_edit=bool(user and user.id==item.owner_id and status=='active'),
         is_demo=data.get('is_demo') is True,
         source_type=data.get('source_type','member'),
@@ -165,7 +173,9 @@ def listing(db,user,q,category,status,sort,limit,offset,start_date,end_date,mine
     if sort=='ending':query=query.order_by(case(((Record.status=='active')&(Record.ends>now()),0),else_=1),Record.ends,Record.created.desc(),Record.id)
     else:query=query.order_by(Record.created.desc(),Record.id)
     rows=list(db.scalars(query.limit(limit+1).offset(offset)))
-    return {'items':[dto(db,row,user) for row in rows[:limit]],'has_more':len(rows)>limit,'queried_at':release.timestamp(now())}
+    page = rows[:limit]
+    saved = set(db.scalars(saved_targets(user).where(Record.parent_id.in_([row.id for row in page])))) if user and page else set()
+    return {'items':[dto(db,row,user,saved=row.id in saved) for row in page],'has_more':len(rows)>limit,'queried_at':release.timestamp(now())}
 
 
 @router.get('/groupbuys')
@@ -182,6 +192,34 @@ def mine(q:str=Query('',max_length=100),category:str=Query('',max_length=40),
     start_date:str|None=None,end_date:str|None=None,limit:int=Query(20,ge=1,le=100),offset:int=Query(0,ge=0,le=10000),
     user=Depends(current_user),db=Depends(get_db)):
     return listing(db,user,q,category,status,sort,limit,offset,start_date,end_date,True)
+
+
+@router.get('/groupbuys/saved')
+def saved_groupbuys(limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
+                    user=Depends(current_user), db=Depends(get_db)):
+    mark = aliased(Record)
+    query = visible_query(user, Record.status == 'active', Record.ends > now()).join(
+        mark, mark.parent_id == Record.id
+    ).where(mark.kind == GROUPBUY_SAVE, mark.owner_id == user.id).order_by(mark.created.desc(), mark.id)
+    rows = list(db.scalars(query.offset(offset).limit(limit + 1)))
+    return {'items': [dto(db, row, user, saved=True) for row in rows[:limit]],
+            'has_more': len(rows) > limit, 'queried_at': release.timestamp(now())}
+
+
+@router.put('/groupbuys/{id}/saved')
+def save_groupbuy(id: str, user=Depends(current_user), db=Depends(get_db)):
+    active_actor(db, user)
+    content(db, id, user, lock=True, active=True)
+    release.put_unique(db, GROUPBUY_SAVE, user.id, id)
+    return {'saved': True}
+
+
+@router.delete('/groupbuys/{id}/saved')
+def unsave_groupbuy(id: str, user=Depends(current_user), db=Depends(get_db)):
+    active_actor(db, user)
+    db.execute(delete(Record).where(Record.kind == GROUPBUY_SAVE, Record.owner_id == user.id, Record.parent_id == id))
+    db.commit()
+    return {'saved': False}
 
 
 def input_data(body):
@@ -280,7 +318,7 @@ def remove(id:str,body:Revision,request:Request,user=Depends(current_user),db=De
         Record.data['report_id'].as_string().in_(reports)))
     db.execute(delete(Record).where(Record.kind==release.NOTICE,Record.data['target_id'].as_string().in_(targets)|Record.parent_id.in_(reports)))
     db.execute(delete(Record).where(Record.kind==release.REPORT,Record.parent_id.in_(targets)))
-    db.execute(delete(Record).where(Record.kind==release.COMMENT,Record.parent_id==id))
+    db.execute(delete(Record).where(Record.kind.in_([release.COMMENT, GROUPBUY_SAVE]),Record.parent_id==id))
     db.delete(item);db.commit()
     return {'message':'공구 정보를 삭제했습니다.'}
 

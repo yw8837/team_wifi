@@ -11,6 +11,18 @@ const item:Groupbuy={id:"synthetic-g1",title:"합성 검증 공구",body:"테스
 function feed(path="/",mine=false){return renderToStaticMarkup(<MemoryRouter initialEntries={[path]}><GroupbuyFeed mine={mine}/></MemoryRouter>);}
 function detail(){return renderToStaticMarkup(<MemoryRouter initialEntries={["/groupbuys/synthetic-g1"]}><Routes><Route path="/groupbuys/:id" element={<GroupbuyDetail/>}/></Routes></MemoryRouter>);}
 beforeEach(()=>{state.data={items:[item],has_more:false,queried_at:item.queried_at};state.paths=[];state.popular=null;state.loading=false;state.error="";state.stale=false;vi.stubGlobal("sessionStorage",{getItem:()=>null,setItem:vi.fn(),removeItem:vi.fn()});});afterEach(()=>vi.unstubAllGlobals());
+describe("private groupbuy saves", () => {
+ it.each([false, true])("reflects the account save state on the card and detail (%s)", saved => {
+   state.data = {items: [{...item, saved}], has_more: false, queried_at: item.queried_at};
+   const card = feed();
+   state.data = {...item, saved};
+   for (const html of [card, detail()]) {
+     expect(html).toContain('aria-label="' + item.title + ' 찜하기"');
+     expect(html).toContain('aria-pressed="' + saved + '"');
+     expect(html).toContain(saved ? "찜했어요" : "찜하기");
+   }
+ });
+});
 describe("current groupbuy discovery and honest external commerce",()=>{
  it("shows verified order conditions and the community comment entry",()=>{
   state.data={...item,order_minimum:1,order_step:1,option_labels:["베이지 순차 출고"],fulfillment_notes:["일반 배송 1~3일"],return_note:"반송비 구매자 부담"};

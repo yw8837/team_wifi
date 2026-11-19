@@ -26,7 +26,7 @@ import { useContentRequest, useContentSessionAttempt } from "./content-session";
 import { useAccountExit } from "./account-exit";
 import { AdminMemberDetail, AdminMembers, AdminNavigation } from "./admin-members";
 import { AdminAssistant } from "./admin-assistant";
-import { AdminGroupbuys, BrokerFooter, DemandGroupbuyLink, GroupbuyDetail, GroupbuyEditorPage, GroupbuyFeed } from "./groupbuys";
+import { AdminGroupbuys, BrokerFooter, DemandGroupbuyLink, GroupbuyDetail, GroupbuyEditorPage, GroupbuyFeed, SavedGroupbuys } from "./groupbuys";
 
 const privacyNotice="아이의 이름·생일·사진, 연락처·주소, 건강정보 등 아이와 가족의 개인정보는 적지 마세요. 회원 간 계좌 이체·연락처 교환 등 직접 거래 요청과 광고·불법 정보는 신고 대상입니다.";
 function Pagination({page,count,change}:{page:number;count:number;change:(page:number)=>void}){if(page===0&&count<20)return null;return <nav className="actions" aria-label="목록 페이지"><button className="secondary" disabled={page===0} onClick={()=>change(page-1)}>이전</button><span>{page+1}페이지</span><button className="secondary" disabled={count<20||page>=500} onClick={()=>change(page+1)}>다음</button></nav>;}
@@ -58,7 +58,7 @@ export function PublicApp(){
     <main id="main" tabIndex={-1} className={auth?"auth-main":"public-main"}>{!auth&&<ModerationNotices key={user?.id||"guest"}/>}<Routes>
       <Route path="/auth/complete" element={<SocialReturn/>}/><Route path="/" element={<GroupbuyFeed/>}/><Route path="/groupbuys/new" element={<Protected><GroupbuyEditorPage key={user?.id||"guest"}/></Protected>}/><Route path="/groupbuys/:id/edit" element={<Protected><GroupbuyEditorPage key={location.pathname+"/"+(user?.id||"guest")}/></Protected>}/><Route path="/groupbuys/:id" element={<GroupbuyDetail key={location.pathname+"/"+(user?.id||"guest")}/>}/><Route path="/my/groupbuys" element={<Protected><GroupbuyFeed mine key={user?.id||"guest"}/></Protected>}/><Route path="/admin/groupbuys" element={<Protected admin><AdminGroupbuys key={user?.id||"guest"}/></Protected>}/><Route path="/offers" element={<Offers/>}/><Route path="/offers/:id" element={<OfferDetail key={location.pathname+"/"+(user?.id||"guest")}/>}/>
       <Route path="/demands" element={<Demands/>}/><Route path="/demands/new" element={<Protected><NewDemand key={user?.id||"guest"}/></Protected>}/><Route path="/demands/:id" element={<DemandDetail key={location.pathname+"/"+(user?.id||"guest")}/>}/>
-      <Route path="/chat" element={<ChatPage key={user?.id||"guest"}/>}/><Route path="/advisor" element={<AdvisorPage key={user?.id||"guest"}/>}/><Route path="/calculator" element={<Calculator/>}/><Route path="/my/activity" element={<Protected><MyActivity key={user?.id||"guest"}/></Protected>}/><Route path="/my/saved" element={<Protected><Offers saved/></Protected>}/><Route path="/my" element={<PublicMy/>}/><Route path="/settings" element={<Protected><PublicSettings key={user?.id||"guest"}/></Protected>}/>
+      <Route path="/chat" element={<ChatPage key={user?.id||"guest"}/>}/><Route path="/advisor" element={<AdvisorPage key={user?.id||"guest"}/>}/><Route path="/calculator" element={<Calculator/>}/><Route path="/my/activity" element={<Protected><MyActivity key={user?.id||"guest"}/></Protected>}/><Route path="/my/saved" element={<Protected><SavedItems key={user?.id}/></Protected>}/><Route path="/my" element={<PublicMy/>}/><Route path="/settings" element={<Protected><PublicSettings key={user?.id||"guest"}/></Protected>}/>
       <Route path="/my/policies" element={<PublicPolicies/>}/>
       <Route path="/onboarding" element={<Protected><InterestOnboardingPage key={user?.id||"guest"}/></Protected>}/><Route path="/my/preferences" element={<Protected><PreferencePage key={user?.id||"guest"}/></Protected>}/><Route path="/admin/insights" element={<Protected admin><AdminNavigation/><ServiceInsights/></Protected>}/>
       <Route path="/admin/assistant" element={<Protected admin><AdminNavigation/><AdminAssistant/></Protected>}/><Route path="/admin/members" element={<Protected admin><AdminMembers key={user?.id||"guest"}/></Protected>}/><Route path="/admin/members/:id" element={<Protected admin><AdminMemberDetail key={location.pathname+"/"+(user?.id||"guest")}/></Protected>}/><Route path="/admin" element={<Protected admin><PublicAdmin/></Protected>}/><Route path="/login" element={<Login/>}/><Route path="/signup" element={<Signup/>}/><Route path="/reset" element={<Reset/>}/><Route path="/welcome" element={<PublicWelcome/>}/>
@@ -72,6 +72,18 @@ function OfferCard({offer}:{offer:Offer}){
  const exposure=useExposure(offer.id,"catalog");
  return <article ref={exposure.ref} className="reference-card"><div className="reference-symbol"><CategoryIcon category={offer.category}/></div><div><p className="eyebrow">{offer.category} · {offer.entry_type==="verified_offer"?"확인한 판매 정보":"공식 참고 정보"}</p><h2><Link onClick={()=>void exposure.click("detail")} to={"/offers/"+routeId(offer.id)}>{offer.title}</Link></h2><p>{offer.summary}</p><p className="muted">출처 {offer.source_name} · 확인 {date(offer.source_checked_at)}</p>{offer.price!==null&&<p><strong>{money(offer.price)}</strong>{offer.unit&&" / "+offer.unit}</p>}</div></article>;
 }
+function SavedItems() {
+ const [params] = useSearchParams();
+ const offers = params.get("view") === "offers";
+ return <>
+   <nav className="actions home-navigation" aria-label="저장 목록 선택">
+     <Link to="/my/saved" aria-current={!offers ? "page" : undefined}>찜한 공구</Link>
+     <Link to="/my/saved?view=offers" aria-current={offers ? "page" : undefined}>저장한 육아템</Link>
+   </nav>
+   {offers ? <Offers saved/> : <SavedGroupbuys/>}
+ </>;
+}
+
 function Offers({saved=false}:{saved?:boolean}){
  const {user}=useAuth(),[params,setParams]=useSearchParams();
  const q=params.get("q")||"",category=params.get("category")||"";
@@ -138,7 +150,7 @@ function PublicMy() {
       <h2 id="my-activity-title">내 활동과 계정</h2>
       <nav className="my-menu" aria-label="내 활동과 계정">
         <Link to="/my/groupbuys"><IconHome size={23} aria-hidden="true"/><span><strong>내가 공유한 공구</strong><small>공유한 공구 정보 · 수정 · 종료</small></span><span className="my-chevron" aria-hidden="true">›</span></Link><Link to="/my/activity"><IconMessages size={23} aria-hidden="true"/><span><strong>내 커뮤니티 활동</strong><small>내 글 · 댓글 · 관심 공구 수요</small></span><span className="my-chevron" aria-hidden="true">›</span></Link><Link to="/my/preferences"><IconHome size={23} aria-hidden="true"/><span><strong>관심 육아템 설정</strong><small>관심 분야와 비교 기준 · 앱·웹 함께 적용</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
-        <Link to="/my/saved"><IconBookmark size={23} aria-hidden="true"/><span><strong>저장한 육아템</strong><small>다시 보고 싶은 육아템을 한곳에</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
+        <Link to="/my/saved"><IconBookmark size={23} aria-hidden="true"/><span><strong>찜한 공구와 저장한 육아템</strong><small>다시 보고 싶은 상품을 한곳에</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
         <Link to="/settings"><IconUser size={23} aria-hidden="true"/><span><strong>프로필 · 계정 관리</strong><small>닉네임 변경 · 로그인 연결 · 차단 · 계정 삭제</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>
         {user?.is_admin&&<Link to="/admin"><span><strong>콘텐츠 신고 관리</strong><small>접수된 신고 확인과 처리</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}
         {user?.is_admin&&<Link to="/admin/groupbuys"><span><strong>공구 정보 관리</strong><small>제보된 공구의 원문과 판매처 검토</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}{user?.is_admin&&<Link to="/admin/assistant"><span><strong>챗봇 품질 평가</strong><small>고정 평가·근거·지연·오류와 Opik 수집 상태</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}{user?.is_admin&&<Link to="/admin/insights"><span><strong>육아템 관심 분석</strong><small>저장·수요 현황과 제공 데이터 분석</small></span><span className="my-chevron" aria-hidden="true">›</span></Link>}

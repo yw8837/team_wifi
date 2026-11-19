@@ -21,6 +21,7 @@ DEMAND = 'release_demand'
 COMMENT = 'release_comment'
 INTEREST = 'release_interest'
 SAVE = 'release_save'
+GROUPBUY_SAVE = 'release_groupbuy_save'
 REPORT = 'release_report'
 NOTICE = 'release_notice'
 PostType = Literal['question', 'experience', 'information', 'demand']
@@ -702,7 +703,7 @@ def delete_user_content(db, user_id, owned):
          Record.data['question_id'].as_string().in_(targets) |
          Record.data['campaign_id'].as_string().in_(targets) |
          (Record.data['user_id'].as_string() == user_id))))
-    db.execute(delete(Record).where(Record.kind.in_([COMMENT, 'question', INTEREST, SAVE, REPORT,
+    db.execute(delete(Record).where(Record.kind.in_([COMMENT, 'question', INTEREST, SAVE, GROUPBUY_SAVE, REPORT,
                                                    'report', 'block', 'growth_exposure']),
                                    Record.parent_id.in_(targets)))
     db.execute(delete(Record).where(Record.kind.in_([REPORT, 'report']), Record.id.in_(reports)))

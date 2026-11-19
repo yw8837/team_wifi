@@ -161,3 +161,13 @@
  .groupbuy-full-conditions .groupbuy-conditions { padding:16px; }
  .groupbuy-card h2>a { min-height:0; }
 }
+
+.groupbuy-heart-control { margin: .35rem 0; }
+button.groupbuy-heart {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  min-height: 44px; padding: .45rem .75rem; border-radius: 999px;
+  border: 1px solid #bcb3ab; background: #fff; color: #423630;
+}
+button.groupbuy-heart[aria-pressed="true"] { background: #fff1ef; color: #9f3128; border-color: #bd655d; }
+.groupbuy-heart-control [role="alert"] { color: #9f3128; margin: .25rem 0; }
+.home-navigation a[aria-current="page"] { font-weight: 700; border-color: currentColor; }

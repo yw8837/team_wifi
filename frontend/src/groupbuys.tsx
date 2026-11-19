@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+import { IconHeart } from "@tabler/icons-react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api, categories, money } from "./api";
 import { communityTime, ListFeedback, useCommunityResource } from "./community";
 import { Feedback, Field, PageTitle, useAction, useAuth } from "./shared";
-import { useContentSessionAttempt } from "./content-session";
+import { useContentRequest, useContentSessionAttempt } from "./content-session";
 import { useGroupbuyConfirmation } from "./groupbuy-confirmation";
 import { AdminNavigation } from "./admin-members";
 import { useExposure } from "./measurement";
@@ -17,7 +18,7 @@ import type { PriceReference } from "./price-comparison";
 
 export const BROKER_NOTICE="모두의 육아는 통신판매중개자로서 거래 당사자가 아닙니다. 상품 정보와 거래 책임은 각 판매처에 있으며 주문·결제·배송·환불은 판매처에서 진행합니다.";
 export const SHARING_NOTICE="아이·가족의 이름, 생일, 사진, 연락처, 주소, 건강정보를 적지 마세요. 회원 간 계좌 이체·연락처 교환 등 직접 거래 요청과 광고·불법 정보는 신고 대상입니다.";
-export type Groupbuy={fulfillment_notes?:string[];option_labels?:string[];return_note?:string;order_minimum?:number|null;order_step?:number|null;is_demo?:boolean;comparison_quantity?:number;price_references?:PriceReference[];source_type?:string;source_url?:string;source_fresh_until?:string;id:string;title:string;body:string;category:string;seller_name:string;seller_url:string;price:number|null;shipping_fee:number|null;minimum_quantity?:number|null;unit:string;price_conditions:string;expires_at:string;source_checked_at:string;author:{id:string;nickname:string};created_at:string;updated_at:string|null;revision:number;own:boolean;can_edit?:boolean;status:"active"|"ended"|"hidden";review_state:"clear"|"needs_review";queried_at:string;broker_notice:string};
+export type Groupbuy={saved?:boolean;fulfillment_notes?:string[];option_labels?:string[];return_note?:string;order_minimum?:number|null;order_step?:number|null;is_demo?:boolean;comparison_quantity?:number;price_references?:PriceReference[];source_type?:string;source_url?:string;source_fresh_until?:string;id:string;title:string;body:string;category:string;seller_name:string;seller_url:string;price:number|null;shipping_fee:number|null;minimum_quantity?:number|null;unit:string;price_conditions:string;expires_at:string;source_checked_at:string;author:{id:string;nickname:string};created_at:string;updated_at:string|null;revision:number;own:boolean;can_edit?:boolean;status:"active"|"ended"|"hidden";review_state:"clear"|"needs_review";queried_at:string;broker_notice:string};
 type GroupbuyList={items:Groupbuy[];has_more:boolean;queried_at:string};
 export type GroupbuyInput=Pick<Groupbuy,"title"|"body"|"category"|"seller_name"|"seller_url"|"price"|"shipping_fee"|"unit"|"price_conditions"|"expires_at"|"source_checked_at"|"minimum_quantity">;
 export type GroupbuyDraft=Omit<GroupbuyInput,"price"|"shipping_fee"|"minimum_quantity">&{price:string;shipping_fee:string;minimum_quantity:string};
@@ -82,6 +83,34 @@ function GroupbuyImage({ item, detail = false }: { item: Groupbuy; detail?: bool
   );
 }
 
+function GroupbuyHeart({item, reload}: {item: Groupbuy; reload?: () => void}) {
+  const { requireLogin } = useAuth();
+  const request = useContentRequest();
+  const action = useAction();
+  const [saved, setSaved] = useState(item.saved === true);
+  useEffect(() => setSaved(item.saved === true), [item.id, item.saved]);
+  if (item.status !== "active" || typeof item.saved !== "boolean") return null;
+
+  function toggle() {
+    if (!requireLogin()) return;
+    void action.run(async () => {
+      const result = await request<{saved: boolean}>(
+        "/release/groupbuys/" + encodeURIComponent(item.id) + "/saved", saved ? "DELETE" : "PUT"
+      );
+      setSaved(result.saved);
+      reload?.();
+    });
+  }
+  return <div className="groupbuy-heart-control">
+    <button type="button" className="groupbuy-heart" aria-pressed={saved}
+      aria-label={item.title + " 찜하기"} disabled={action.busy} onClick={toggle}>
+      <IconHeart size={19} fill={saved ? "currentColor" : "none"} aria-hidden="true"/>
+      {saved ? "찜했어요" : "찜하기"}
+    </button>
+    {action.error && <p role="alert">{action.error}</p>}
+  </div>;
+}
+
 export function GroupbuyCard({ item, reload }: { item: Groupbuy; reload?: () => void }) {
   const exposure = useExposure(item.id, "groupbuy_list");
   return (
@@ -95,6 +124,7 @@ export function GroupbuyCard({ item, reload }: { item: Groupbuy; reload?: () => 
       <h2>{item.status === "hidden" ? item.title : <Link to={route(item.id)} onClick={() => void exposure.click("detail")}>{item.title}</Link>}</h2>
       <p className="groupbuy-seller">{item.seller_name}</p>
       <p className="groupbuy-price">{item.price === null ? "가격 정보 미확인" : money(item.price)}{item.unit && <span>{item.unit}</span>}</p>
+      <GroupbuyHeart key={item.id} item={item} reload={reload}/>
       <GroupbuyQuickFacts item={item}/>
       <details className="groupbuy-preview">
         <summary>조건 미리보기</summary>
@@ -209,6 +239,34 @@ export function GroupbuyFeed({mine=false}:{mine?:boolean}){
   <h2>{mine?"내 공구 목록":"공구 목록 · 마감과 조건을 확인하세요"}</h2><form className="groupbuy-filters" aria-label="공구 검색 조건" onSubmit={event=>{event.preventDefault();setParams({...draft,page:"0"});}}><div className="groupbuy-search-primary"><Field label="공구 검색" name="q" autoComplete="off" type="search" maxLength={100} value={draft.q} onChange={event=>setDraft({...draft,q:event.target.value})}/><button>검색 적용</button></div><details className="groupbuy-advanced"><summary>상세 조건 <span>{(params.get("status")||(mine?"all":"active"))==="active"?"진행 중":params.get("status")==="ended"?"종료":"전체"} · {params.get("category")||"전체 분야"} · {params.get("sort")==="recent"?"최근 공유순":"마감 임박순"}</span></summary><div className="groupbuy-advanced-fields"><label className="field"><span>카테고리</span><select value={draft.category} onChange={event=>setDraft({...draft,category:event.target.value})}><option value="">전체 분야</option>{categories.map(category=><option key={category}>{category}</option>)}</select></label><label className="field"><span>공구 상태</span><select value={draft.status} onChange={event=>setDraft({...draft,status:event.target.value})}><option value="active">진행 중</option><option value="ended">종료</option><option value="all">전체</option></select></label><label className="field"><span>정렬</span><select value={draft.sort} onChange={event=>setDraft({...draft,sort:event.target.value})}><option value="ending">마감 임박순</option><option value="recent">최근 공유순</option></select></label><div className="actions"><button>상세 조건 적용</button><button type="button" className="secondary" onClick={()=>{setParams({});setDraft({q:"",category:"",status:mine?"all":"active",sort:"ending"});}}>초기화</button></div></div></details></form>
   <ListFeedback {...result} retry={result.reload}/>{result.data&&<><div className="groupbuy-grid">{result.data.items.map(item=><GroupbuyCard key={item.id} item={item} reload={result.reload}/>)}</div>{!result.loading&&!result.error&&!result.data.items.length&&<div className="state"><p>{params.get("q")||params.get("category")?"이 조건에 맞는 공구가 없습니다.":mine?"아직 공유한 공구가 없습니다.":"등록된 공구 정보가 없습니다."}</p><p>검색 조건을 바꾸거나 판매처에서 확인한 공구 정보를 공유해 주세요.</p><div className="actions"><Link to="/demands/new?post_type=demand">필요한 공구 수요 쓰기</Link><Link to="/groupbuys/new">첫 공구 정보 공유</Link></div></div>}{result.data.items.length>0&&<p className="hint" role="status" aria-live="polite">현재 {page*20+1}–{page*20+result.data.items.length}개 표시 · 조회 {communityTime(result.data.queried_at)}</p>}<GroupbuyPages page={page} hasMore={result.data.has_more} disabled={result.loading||!!result.stale} change={next=>setParams({...Object.fromEntries(params),page:String(next)})}/></>}{!mine&&page===0&&!params.get("q")&&!params.get("category")&&!params.get("status")&&!params.get("sort")&&<div className="home-discovery-highlights"><section className="ending-groupbuys" aria-labelledby="ending-groupbuys-title"><h2 id="ending-groupbuys-title">판매처에서 확인할 공구</h2><p className="hint">조건은 공유 시점 기준이에요. 판매처에서 다시 확인하세요.</p><ListFeedback {...result} retry={result.reload}/>{result.data&&!result.loading&&!result.error&&(result.data.items.length?<ul className="plain-list">{result.data.items.filter(item=>item.status==="active").slice(0,2).map(item=><EndingGroupbuyPreview key={item.id} item={item}/>)}</ul>:<p>현재 진행 중 공구가 없어요. <Link to="/demands/new?post_type=demand">필요한 공구 수요 쓰기</Link></p>)}</section><PopularDemands/></div>}</section>;
 }
+export function SavedGroupbuys() {
+  const { user } = useAuth();
+  const [params, setParams] = useSearchParams();
+  const page = pageNumber(params.get("page"));
+  const result = useCommunityResource<GroupbuyList>(
+    "/release/groupbuys/saved?limit=20&offset=" + page * 20, user?.id || "guest"
+  );
+  function change(next: number) {
+    setParams(next ? {page: String(next)} : {});
+  }
+  const items = result.data?.items || [];
+  const reloadAfterToggle = () => {
+    if (items.length === 1 && page > 0) change(page - 1);
+    else result.reload();
+  };
+  return <section className="groupbuy-feed">
+    <PageTitle title="찜한 공구"><p>찜한 공구 중 지금 진행 중인 상품이에요.</p></PageTitle>
+    <ListFeedback {...result} retry={result.reload}/>
+    {result.data && !result.error && <>
+      <div className="groupbuy-grid">{items.map(item =>
+        <GroupbuyCard key={item.id} item={item} reload={reloadAfterToggle}/>
+      )}</div>
+      {!result.loading && !items.length && <div className="state"><p>{page ? "이 페이지에 남은 공구가 없어요." : "공구 목록이나 상세에서 하트를 눌러 보세요."}</p><Link to="/">공구 찾아보기</Link></div>}
+      <GroupbuyPages page={page} hasMore={result.data.has_more} disabled={result.loading} change={change}/>
+    </>}
+  </section>;
+}
+
 export function GroupbuyEditor({item,onSaved}:{item?:Groupbuy;onSaved:(item:Groupbuy)=>void}){
  const [draft,setDraft]=useState(()=>groupbuyDraft(item)),action=useAction(),attempts=useContentSessionAttempt();const {requireLogin}=useAuth();
  const field=(key:keyof GroupbuyDraft,value:string)=>setDraft(old=>({...old,[key]:value}));
@@ -232,7 +290,7 @@ export function GroupbuyDetail(){
  const {id=""}=useParams(),{user}=useAuth(),nav=useNavigate(),action=useAction(),attempts=useContentSessionAttempt();const result=useCommunityResource<Groupbuy>("/release/groupbuys/"+encodeURIComponent(id),user?.id||"guest"),item=result.data;const exposure=useExposure(item?.id,"groupbuy_detail");
  const confirmation=useGroupbuyConfirmation(action),latest=useRef(item);latest.current=item;
  const url=item&&!item.is_demo&&item.status==="active"?publicSellerUrl(item.seller_url):null;
- return <><nav className="actions"><Link to="/">← 공구 찾기</Link><Link to="/my/groupbuys">내 공구</Link><a href={route(id)+"/public"}>공구 공개 안내 페이지</a></nav><ListFeedback {...result} retry={result.reload}/>{item&&!result.error&&<article className="groupbuy-detail" ref={exposure.ref}><PageTitle eyebrow={statusText(item)+" · "+item.category} title={item.title}><p>{item.author.nickname} · 공유 {communityTime(item.created_at)}{item.updated_at&&" · 수정 "+communityTime(item.updated_at)}</p></PageTitle><GroupbuyOverview item={item}/><GroupbuyShare key={item.id} id={item.id} title={item.title}/>{item.is_demo&&<p className="notice">시연용 데이터입니다. 표시된 가격·판매처·마감은 기능 확인용이며 실제 구매로 연결되지 않습니다.</p>}{item.review_state==="needs_review"&&<p className="notice" role="status">정보 확인 필요: 제보된 내용이 있습니다. 현재 조건을 판매처에서 직접 확인하세요.</p>}{item.status==="ended"&&<p className="notice">종료된 공구 정보입니다. 현재 가격·재고·참여 가능 여부를 보장하지 않습니다.</p>}{item.own&&(item.can_edit??item.status==="active")&&<nav className="author-tools actions" aria-label="내 공구 관리"><Link className="button secondary" to={route(item.id)+"/edit"}>공구 정보 수정</Link><button className="secondary" disabled={action.busy||confirmation.waiting||result.loading||!!result.stale} onClick={()=>confirmation.request(()=>{const attempt=attempts.begin(),revision=item.revision;return {title:"공구 정보 종료",description:"‘"+item.title+"’ 공구 정보의 공유를 종료할까요?",details:[{label:"공구",value:item.title},{label:"종료 후",value:"수정하거나 다시 진행할 수 없습니다."}],confirmLabel:"공구 종료",isCurrent:attempt.isCurrent,validate:()=>!latest.current||latest.current.id!==item.id||latest.current.revision!==revision||latest.current.status!=="active"?"공구 정보가 변경됐어요. 취소한 뒤 최신 상태를 확인해 주세요.":"",work:()=>api("/release/groupbuys/"+encodeURIComponent(item.id)+"/end","POST",{revision}),onSuccess:()=>{result.reload();action.setMessage("공구 정보를 종료했습니다.");}};})}>공구 종료</button></nav>}{item.own&&<button className="danger secondary" disabled={action.busy||confirmation.waiting||result.loading||!!result.stale} onClick={()=>confirmation.request(()=>{const attempt=attempts.begin(),revision=item.revision;return {title:"공구 정보 삭제",description:"‘"+item.title+"’ 공구 정보를 삭제할까요?",details:[{label:"공구",value:item.title},{label:"삭제 결과",value:"공유한 정보와 수요 글의 연결이 삭제되며 복구할 수 없습니다."}],confirmLabel:"공구 영구 삭제",isCurrent:attempt.isCurrent,validate:()=>!latest.current||latest.current.id!==item.id||latest.current.revision!==revision?"공구 정보가 변경됐어요. 취소한 뒤 최신 상태를 확인해 주세요.":"",work:()=>api("/release/groupbuys/"+encodeURIComponent(item.id),"DELETE",{revision}),onSuccess:()=>nav("/my/groupbuys",{replace:true})};})}>내 공구 삭제</button>}<Feedback {...action}/><section className="groupbuy-description"><h2>공구 안내</h2><p className="ugc-text">{item.body}</p></section><details className="groupbuy-full-conditions"><summary>상품 구성·배송·반품 자세히 보기</summary><dl className="groupbuy-conditions"><dt>판매처</dt><dd>{item.seller_name}</dd><dt>표시 가격</dt><dd>{item.price===null?"미확인":money(item.price)}{item.unit&&" · "+item.unit}</dd><dt>배송비</dt><dd>{item.shipping_fee===null?"미확인":money(item.shipping_fee)}</dd>{item.order_minimum!=null&&<><dt>주문 최소 수량</dt><dd>{item.order_minimum}개</dd></>}{item.order_step!=null&&<><dt>구매 단위</dt><dd>{item.order_step}개씩</dd></>}<dt>공구 성사 수량</dt><dd>{item.minimum_quantity==null?"판매처가 공개한 성사 기준을 확인하지 못했어요.":item.minimum_quantity+"개"}</dd>{!!item.option_labels?.length&&<><dt>선택 옵션</dt><dd>{item.option_labels.join(" · ")}</dd></>}{!!item.fulfillment_notes?.length&&<><dt>배송·출고 안내</dt><dd>{item.fulfillment_notes.map(note=><p key={note}>{note}</p>)}</dd></>}{item.return_note&&<><dt>교환·반품 안내</dt><dd>{item.return_note}</dd></>}<dt>가격·참여 조건</dt><dd className="ugc-text">{item.price_conditions||"공유된 조건이 없습니다. 판매처에서 확인하세요."}</dd><dt>종료 일시</dt><dd>{item.expires_at?communityTime(item.expires_at):"판매처에 종료 일시를 확인해 주세요."}</dd><dt>출처 확인</dt><dd>{communityTime(item.source_checked_at)}</dd><dt>현재 조회</dt><dd>{communityTime(item.queried_at)}</dd></dl></details>
+ return <><nav className="actions"><Link to="/">← 공구 찾기</Link><Link to="/my/groupbuys">내 공구</Link><a href={route(id)+"/public"}>공구 공개 안내 페이지</a></nav><ListFeedback {...result} retry={result.reload}/>{item&&!result.error&&<article className="groupbuy-detail" ref={exposure.ref}><PageTitle eyebrow={statusText(item)+" · "+item.category} title={item.title}><p>{item.author.nickname} · 공유 {communityTime(item.created_at)}{item.updated_at&&" · 수정 "+communityTime(item.updated_at)}</p></PageTitle><GroupbuyHeart item={item} reload={result.reload}/><GroupbuyOverview item={item}/><GroupbuyShare key={item.id} id={item.id} title={item.title}/>{item.is_demo&&<p className="notice">시연용 데이터입니다. 표시된 가격·판매처·마감은 기능 확인용이며 실제 구매로 연결되지 않습니다.</p>}{item.review_state==="needs_review"&&<p className="notice" role="status">정보 확인 필요: 제보된 내용이 있습니다. 현재 조건을 판매처에서 직접 확인하세요.</p>}{item.status==="ended"&&<p className="notice">종료된 공구 정보입니다. 현재 가격·재고·참여 가능 여부를 보장하지 않습니다.</p>}{item.own&&(item.can_edit??item.status==="active")&&<nav className="author-tools actions" aria-label="내 공구 관리"><Link className="button secondary" to={route(item.id)+"/edit"}>공구 정보 수정</Link><button className="secondary" disabled={action.busy||confirmation.waiting||result.loading||!!result.stale} onClick={()=>confirmation.request(()=>{const attempt=attempts.begin(),revision=item.revision;return {title:"공구 정보 종료",description:"‘"+item.title+"’ 공구 정보의 공유를 종료할까요?",details:[{label:"공구",value:item.title},{label:"종료 후",value:"수정하거나 다시 진행할 수 없습니다."}],confirmLabel:"공구 종료",isCurrent:attempt.isCurrent,validate:()=>!latest.current||latest.current.id!==item.id||latest.current.revision!==revision||latest.current.status!=="active"?"공구 정보가 변경됐어요. 취소한 뒤 최신 상태를 확인해 주세요.":"",work:()=>api("/release/groupbuys/"+encodeURIComponent(item.id)+"/end","POST",{revision}),onSuccess:()=>{result.reload();action.setMessage("공구 정보를 종료했습니다.");}};})}>공구 종료</button></nav>}{item.own&&<button className="danger secondary" disabled={action.busy||confirmation.waiting||result.loading||!!result.stale} onClick={()=>confirmation.request(()=>{const attempt=attempts.begin(),revision=item.revision;return {title:"공구 정보 삭제",description:"‘"+item.title+"’ 공구 정보를 삭제할까요?",details:[{label:"공구",value:item.title},{label:"삭제 결과",value:"공유한 정보와 수요 글의 연결이 삭제되며 복구할 수 없습니다."}],confirmLabel:"공구 영구 삭제",isCurrent:attempt.isCurrent,validate:()=>!latest.current||latest.current.id!==item.id||latest.current.revision!==revision?"공구 정보가 변경됐어요. 취소한 뒤 최신 상태를 확인해 주세요.":"",work:()=>api("/release/groupbuys/"+encodeURIComponent(item.id),"DELETE",{revision}),onSuccess:()=>nav("/my/groupbuys",{replace:true})};})}>내 공구 삭제</button>}<Feedback {...action}/><section className="groupbuy-description"><h2>공구 안내</h2><p className="ugc-text">{item.body}</p></section><details className="groupbuy-full-conditions"><summary>상품 구성·배송·반품 자세히 보기</summary><dl className="groupbuy-conditions"><dt>판매처</dt><dd>{item.seller_name}</dd><dt>표시 가격</dt><dd>{item.price===null?"미확인":money(item.price)}{item.unit&&" · "+item.unit}</dd><dt>배송비</dt><dd>{item.shipping_fee===null?"미확인":money(item.shipping_fee)}</dd>{item.order_minimum!=null&&<><dt>주문 최소 수량</dt><dd>{item.order_minimum}개</dd></>}{item.order_step!=null&&<><dt>구매 단위</dt><dd>{item.order_step}개씩</dd></>}<dt>공구 성사 수량</dt><dd>{item.minimum_quantity==null?"판매처가 공개한 성사 기준을 확인하지 못했어요.":item.minimum_quantity+"개"}</dd>{!!item.option_labels?.length&&<><dt>선택 옵션</dt><dd>{item.option_labels.join(" · ")}</dd></>}{!!item.fulfillment_notes?.length&&<><dt>배송·출고 안내</dt><dd>{item.fulfillment_notes.map(note=><p key={note}>{note}</p>)}</dd></>}{item.return_note&&<><dt>교환·반품 안내</dt><dd>{item.return_note}</dd></>}<dt>가격·참여 조건</dt><dd className="ugc-text">{item.price_conditions||"공유된 조건이 없습니다. 판매처에서 확인하세요."}</dd><dt>종료 일시</dt><dd>{item.expires_at?communityTime(item.expires_at):"판매처에 종료 일시를 확인해 주세요."}</dd><dt>출처 확인</dt><dd>{communityTime(item.source_checked_at)}</dd><dt>현재 조회</dt><dd>{communityTime(item.queried_at)}</dd></dl></details>
   {!item.is_demo&&<PriceComparison key={item.id+":"+item.revision} item={item}/>}<section id="groupbuy-seller" className="groupbuy-broker" aria-label="판매처 이동과 중개 안내"><h2>거래는 판매처에서 진행해요</h2><p>{BROKER_NOTICE}</p><p className="hint">공구 조건은 공유 시점 기준입니다. 표시된 가격·재고·배송 조건은 바뀔 수 있습니다. 이동한 판매처의 조건을 다시 확인하세요.</p>{url?<div className="groupbuy-seller-action"><p>{item.seller_name} · {new URL(url).hostname}</p><a className="button" href={url} target="_blank" rel="noopener noreferrer" onClick={()=>void exposure.click("source")}>판매처에서 공구 확인 · 새 탭</a></div>:<p role="alert">현재 판매처의 공구 진행을 확인할 수 없어 이동을 제공하지 않습니다.</p>}</section><GroupbuyComments key={item.id+":"+(user?.id||"guest")} id={item.id}/><GroupbuyIssueForm key={item.id+":"+user?.id} item={item} reload={result.reload}/></article>}{confirmation.dialog}</>;
 }
 export function DemandGroupbuyLink({demand,reload}:{demand:Demand;reload:()=>void}){

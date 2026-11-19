@@ -25,7 +25,7 @@ describe("beta API build boundary", () => {
 describe("guest reads and original-page return", () => {
   it.each(["/campaigns", "/campaigns/c1?quantity=3", "/campaigns/c1/questions", "/brands/b1", "/coupons", "/config"])(
     "recognizes public read %s", (path) => expect(isPublicRead(path)).toBe(true));
-  it.each(["/me", "/wallet", "/seller/application", "/admin/reports", "/campaigns/c1/reservations"])(
+  it.each(["/me", "/wallet", "/seller/application", "/admin/reports", "/campaigns/c1/reservations", "/release/groupbuys/saved?limit=20"])(
     "keeps account read protected %s", (path) => expect(isPublicRead(path)).toBe(false));
   it("never classifies a mutation as a public read", () => {
     expect(isPublicRead("/campaigns/c1/questions", "POST")).toBe(false);
