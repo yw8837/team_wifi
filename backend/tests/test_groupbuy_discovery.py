@@ -23,6 +23,8 @@ def test_discovery_deduplicates_urls_and_classifies():
     assert discovery.classify('물티슈 공구') == '기저귀·물티슈'
     assert discovery.classify('분유와 장난감 공구') is None
     assert discovery.classify('컴퓨터 공구') is None
+    assert discovery.classify('[공구] 네일트리머 리필', '외출·안전') == '목욕·위생'
+    assert discovery.classify('[공구] 유아 디딤대', '외출·안전') == '육아생활'
 
 
 def test_collect_discovers_new_campaign_and_rejects_regular_sale(monkeypatch):

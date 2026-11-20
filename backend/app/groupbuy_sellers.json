@@ -55,7 +55,8 @@
     "parser": "cafe24",
     "category": "외출·안전",
     "listing_urls": [
-      "https://www.aguardmall.com/product/list.html?cate_no=166"
+      "https://www.aguardmall.com/product/list.html?cate_no=166",
+      "https://www.aguardmall.com/product/search.html?keyword=%EA%B3%B5%EA%B5%AC"
     ],
     "product_urls": [
       "https://www.aguardmall.com/product/detail.html?product_no=1660",
