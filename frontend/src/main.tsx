@@ -23,6 +23,7 @@ import { BrandLockup, APP_NAME } from "./brand";
 import { IconHome, IconFlame, IconBuildingStore, IconGift, IconUser } from "@tabler/icons-react";
 import { BETA_MODE, BETA_NOTICE } from "./beta";
 import { PUBLIC_RELEASE } from "./release-policy";
+import { preloadGuestFeed } from "./groupbuys";
 import { PublicApp, PublicGate } from "./public-app";
 import "./styles.css";
 import "./brand-theme.css";
@@ -199,6 +200,9 @@ function Layout() {
       </nav>
     </>
   );
+}
+if (PUBLIC_RELEASE && window.location.pathname === "/") {
+  preloadGuestFeed(new URLSearchParams(window.location.search));
 }
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

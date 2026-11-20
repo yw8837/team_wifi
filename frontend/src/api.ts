@@ -97,6 +97,8 @@ export async function api<T>(
     controller.signal.addEventListener("abort", abort, { once: true });
   });
   try {
+    const platform = clientPlatform();
+    const anonymousWebRead = platform === "web" && !token && readOnly && (bootstrap || path.startsWith("/release/groupbuys?"));
     let response: Response | undefined;
     const attempts = bootstrap ? 3 : 1;
     for (let attempt = 0; attempt < attempts; attempt++) {
@@ -104,7 +106,7 @@ export async function api<T>(
         response = await fetch(API_BASE + path, {
           method,
           headers: {
-            'X-Moduyuga-Client': clientPlatform(),
+            ...(anonymousWebRead ? {} : { 'X-Moduyuga-Client': platform }),
             ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },

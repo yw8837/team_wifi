@@ -24,15 +24,15 @@ export function communityQuery(params:URLSearchParams,activity=false):string {
 
 // Retain a previous successful list on refresh failure, only within the same account.
 // State is tagged before rendering as well as before applying asynchronous results.
-export function useCommunityResource<T>(path:string|null,identity:string) {
+export function useCommunityResource<T>(path:string|null,identity:string, load:(path:string)=>Promise<T> = readPublic<T>) {
  const [version,setVersion]=useState(0);
  const [state,setState]=useState<{identity:string;requested:string|null;dataPath:string|null;data:T|null;error:string;loading:boolean}>({identity,requested:path,dataPath:null,data:null,error:"",loading:!!path});
  useEffect(()=>{
   let live=true;
   setState(old=>({identity,requested:path,dataPath:old.identity===identity?old.dataPath:null,data:old.identity===identity?old.data:null,error:"",loading:!!path}));
-  if(path)void readPublic<T>(path).then(data=>{if(live)setState({identity,requested:path,dataPath:path,data,error:"",loading:false});}).catch(error=>{if(live)setState(old=>({...old,error:error instanceof Error?error.message:"목록을 불러오지 못했어요.",loading:false}));});
+  if(path)void load(path).then(data=>{if(live)setState({identity,requested:path,dataPath:path,data,error:"",loading:false});}).catch(error=>{if(live)setState(old=>({...old,error:error instanceof Error?error.message:"목록을 불러오지 못했어요.",loading:false}));});
   return()=>{live=false;};
- },[path,identity,version]);
+ },[path,identity,version,load]);
  const scoped=state.identity===identity&&path!==null;
  return {data:scoped?state.data:null,error:scoped?state.error:"",loading:!!path&&(!scoped||state.requested!==path||state.loading),stale:scoped&&!!state.data&&(!!state.error||state.dataPath!==path),reload:()=>setVersion(v=>v+1)};
 }

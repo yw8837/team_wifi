@@ -153,6 +153,12 @@ describe("API failures and session", () => {
     await expect(api("/campaigns")).rejects.toThrow("인터넷 연결");
     await expect(api("/campaigns")).rejects.not.toThrow("개발 서버");
   });
+  it.each(["/config", "/release/groupbuys?status=active"])("uses a simple GET for guest web startup %s", async path => {
+    const fetch = vi.fn().mockResolvedValue(new Response("{}"));
+    vi.stubGlobal("fetch", fetch);
+    await api(path);
+    expect(fetch.mock.calls[0][1].headers).toEqual({});
+  });
   it("sends session bearer but no password storage", async () => {
     sessionStorage.setItem(TOKEN_KEY, "test-session");
     const fetch = vi
