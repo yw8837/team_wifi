@@ -72,3 +72,24 @@ def test_tool_toys_are_not_campaign_evidence(title):
 @pytest.mark.parametrize('title', ['[공구종료] 유아 칫솔', '[공구마감] 유아 칫솔'])
 def test_attached_closure_marker_remains_supported(title):
     assert groupbuy_schema.parse(page(name=title, description='유아용 칫솔'), SOURCE)['availability'] == 'ended'
+
+
+def test_imweb_checkout_period_overrides_stock_but_ignores_translation_scripts():
+    closed = '판매 기간이 마감된 상품입니다.'
+    translations = f'<script>const label="{closed}"</script>'
+    assert groupbuy_schema.parse(page() + translations, SOURCE)['availability'] == 'listed'
+    for text in [closed, '이 상품은 2026년 11월 23일 00:00 부터 판매됩니다.']:
+        assert groupbuy_schema.parse(page() + f'<div>{text}</div>', SOURCE)['availability'] == 'ended'
+
+
+def test_variant_price_belongs_to_a_named_in_stock_configuration():
+    name = '두리 유아변기 공동구매'
+    def variant(label, price, state):
+        return {'name': name + ' ' + label, 'offers': {
+            'priceCurrency': 'KRW', 'price': price, 'availability': 'https://schema.org/' + state}}
+    group = {'@type': 'ProductGroup', 'name': name, 'hasVariant': [
+        variant('품절 세트', 100, 'SoldOut'), variant('휴대 세트', 52900, 'InStock')]}
+    markup = '<script type="application/ld+json">' + json.dumps(group) + '</script>'
+    assert groupbuy_schema.variant_prices(markup, name) == [('휴대 세트', 52900)]
+    with pytest.raises(ValueError):
+        groupbuy_schema.variant_prices(markup, '다른 상품')

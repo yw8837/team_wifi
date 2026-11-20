@@ -1,6 +1,7 @@
 const SELLER_HOSTS = new Set([
   'somi9726.cafe24.com', 'poled.co.kr', 'upang.co.kr',
   'www.doctornoah.net', 'www.gonggan27.com', 'www.aguardmall.com',
+  'durimall.co.kr', 'oa-mall.co.kr', 'creestyle.com', 'luciroda101.cafe24.com',
 ]);
 
 export function sellerPreviewUrl(value) {
@@ -24,7 +25,7 @@ export function productImageUrl(value, source) {
     const url = new URL(value, source);
     const host = url.hostname;
     const trusted = SELLER_HOSTS.has(host) || host === 'aguardmall.com'
-      || host === 'cdn.imweb.me' || host === 'cafe24img.poxo.com'
+      || host === 'cdn.imweb.me' || host === 'cafe24img.poxo.com' || host === 'cafe24.poxo.com'
       || host === 'ecimg.cafe24img.com';
     if (url.protocol !== 'https:' || url.username || url.password || url.port || !trusted
         || /(?:logo|favicon|banner)/i.test(url.pathname)) return null;

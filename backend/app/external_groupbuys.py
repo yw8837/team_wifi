@@ -29,6 +29,9 @@ SELLERS = json.loads(Path(__file__).with_name('groupbuy_sellers.json').read_text
 ALLOWED_HOSTS = frozenset(seller['host'] for seller in SELLERS)
 
 
+REVIEWED_CAMPAIGNS = {url: rule for seller in SELLERS for url, rule in seller.get("campaigns", {}).items()}
+
+
 class NotGroupbuy(ValueError):
     """A readable product page no longer identifies a group-buy campaign."""
 
@@ -113,7 +116,10 @@ def parse_cafe24(html, source, *, groupbuy=True):
         return unescape(match.group(1))
 
     title = variable('product_name')
-    if groupbuy and not CAMPAIGN_EVIDENCE.search(title):
+    reviewed = REVIEWED_CAMPAIGNS.get(source['url']) if groupbuy else None
+    if reviewed and title != reviewed['title']:
+        raise NotGroupbuy('Reviewed seller campaign has changed')
+    if groupbuy and not reviewed and not CAMPAIGN_EVIDENCE.search(title):
         raise NotGroupbuy('Seller product no longer identifies a group buy')
     if not 3 <= len(title) <= 120:
         raise ValueError('Seller page does not identify a group buy')
@@ -125,6 +131,11 @@ def parse_cafe24(html, source, *, groupbuy=True):
     if len(prices) > 1:
         raise ValueError('Conflicting sale prices')
     price = int(next(iter(prices), base_price))
+    variant_terms = []
+    if not price and reviewed and source['url'].startswith('https://durimall.co.kr/'):
+        from .groupbuy_schema import variant_prices
+        variant_terms = variant_prices(html, title)
+        price = variant_terms[0][1]
     if not 0 < price <= 1_000_000_000:
         raise ValueError('Seller price outside supported range')
     soldout = variable('is_soldout_icon')
@@ -154,18 +165,25 @@ def parse_cafe24(html, source, *, groupbuy=True):
     return_note = '단순 변심 교환·반품의 반송비는 구매자 부담으로 안내합니다. 적용 기한·제외 사유는 판매처 구매안내를 확인하세요.' if '상품반송 비용은 고객님께서 부담' in plain else ''
     stamp = now()
     ended, deadline = campaign_state(title, stamp)
+    price_note = '선택한 구성에 따라 가격이 달라집니다. 표시가는 위 구성의 가격입니다.' if variant_terms else ''
+    fresh_until = stamp + FRESH_SECONDS
+    if reviewed:
+        kst = timezone(timedelta(hours=9))
+        day_after = datetime.fromisoformat(reviewed['last_day']).replace(tzinfo=kst) + timedelta(days=1)
+        fresh_until = min(fresh_until, int(day_after.timestamp()))
+        ended = ended or fresh_until <= stamp
     return {'source_id': source['id'], 'source_url': source['url'],
             'source_hash': hashlib.sha256(html.encode()).hexdigest(),
             'title': title, 'category': source['category'], 'seller_name': source['seller'],
             'seller_url': source['url'], 'price': price, 'shipping_fee': 0 if shipping_free else None,
-            'minimum_quantity': None, 'unit': '', 'expires_at': deadline.isoformat() if deadline else '',
+            'minimum_quantity': None, 'unit': variant_terms[0][0] if variant_terms else '', 'expires_at': deadline.isoformat() if deadline else '',
             'order_minimum': quantity('product_min'), 'order_step': quantity('buy_unit'),
-            'fulfillment_notes': fulfillment, 'option_labels': list(dict.fromkeys(options))[:30],
+            'fulfillment_notes': fulfillment, 'option_labels': ([f'{label} · {value:,}원' for label, value in variant_terms] or list(dict.fromkeys(options)))[:30],
             'return_note': return_note,
-            'source_checked_at': release.timestamp(stamp), 'source_fresh_until': stamp + FRESH_SECONDS,
+            'source_checked_at': release.timestamp(stamp), 'source_fresh_until': fresh_until,
             'source_type': 'seller_page', 'availability': 'ended' if ended else 'sold_out' if soldout == 'T' else 'listed',
             'body': '판매처의 공동구매 페이지에서 확인한 상품입니다. 옵션별 구성과 배송비, 최종 결제금액은 판매처에서 확인하세요.',
-            'price_conditions': ('판매처 회원가입·로그인 후 구매할 수 있습니다. ' if member_only else '')
+            'price_conditions': price_note + (' 판매처 회원가입·로그인 후 구매할 수 있습니다. ' if member_only or '회원 가입 후 구매가능' in title else '')
                 + ('판매처 표시 판매가와 마감 일시 기준입니다.' if deadline else '판매처 표시 판매가 기준입니다. 마감 일시는 공개 페이지에서 확인되지 않았습니다.'),
             'is_demo': False, 'review_state': 'clear', 'updated_at': release.timestamp(stamp)}
 

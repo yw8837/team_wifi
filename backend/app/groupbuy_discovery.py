@@ -94,7 +94,7 @@ def collect(db=None):
                 'parser': data.get('source_parser', 'cafe24')})
     failures, entries, rejected, removed = [], [], [], []
     for seller in collector.SELLERS:
-        links = set(seller.get('product_urls', []))
+        links = set(seller.get('product_urls', [])) | set(seller.get('campaigns', {}))
         for listing in seller['listing_urls']:
             try:
                 links.update(product_links(collector.read_html(listing), listing))
