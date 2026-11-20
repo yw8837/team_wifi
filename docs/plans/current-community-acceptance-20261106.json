@@ -1,0 +1,1691 @@
+{
+  "schema_version": 1,
+  "date_kst": "2026-11-06",
+  "purpose": "Condition-level current-community audit; four dimensions are independent, not whole-row completion counts",
+  "source_registry": "requirements-acceptance-20261106.json",
+  "source_hashes": [
+    {
+      "path": "artifacts/drive-reference-20261103/requirements.csv",
+      "sha256": "fcfed2076b0bf8be41e4f79c86b4626c5b4026f273ac5e0a84b7f1aa15f60a7a"
+    },
+    {
+      "path": "artifacts/drive-reference-20261103/requirements.xlsx",
+      "sha256": "06d4ade8831e485c314780e3b7f9625bd8b005a3c7cd880553e3e9e27655f5f9"
+    }
+  ],
+  "source_id_count": 128,
+  "original_full_acceptance_or_deployment_claim": false,
+  "current_community_rows_with_explicit_condition_split": 50,
+  "evidence_boundary": "Local browser/real PG/model measurements are distinct. Narrow overlapping suites are not added. Final suites, deployed artifact and real Android remain root-owned.",
+  "requirements": [
+    {
+      "source_id": "signup_01",
+      "excel_row": 2,
+      "safe_summary": "이메일·복수 소셜 가입과 공통 필수 정보 확인",
+      "satisfied_current_conditions": "이메일 가입/로그인·14세 필수 확인·가입 목적/실패 반환·토큰 경합 보호 구현; 이메일 로그인 실제 관찰 네이버 frontend provider표시·정확authorize host/path 검증을 추가함(별도17개 및 포함98 tests PASS). 네이버 backend adapter·공통start/claim·reauth300초·mobile operator 차단 관련54개 합성시험 PASS는 backend 담당자 보고.",
+      "additional_software_or_execution": "frontend와 backend의 네이버 계약 일치 확인. 실제 콘솔 자격정보/승인 후 신규·기존·연결·재인증 실제 제공자 왕복 수용은 별도.",
+      "superseded_or_currently_inactive": "판매자 가입 선택은 현재 공개 가입에서 제외",
+      "genuine_external_dependencies": "네이버/구글/카카오 실제 콘솔 설정·자격정보·할당량·제공자 승인",
+      "evidence": [
+        "AUTH",
+        "UI:email_login",
+        "MEMBER98",
+        "NAVER54"
+      ]
+    },
+    {
+      "source_id": "signup_02",
+      "excel_row": 3,
+      "safe_summary": "복수 관심사 온보딩과 명시적 건너뛰기",
+      "satisfied_current_conditions": "관심사 복수 선택·저장·계정 격리; 기존 선택을 건너뛰기로 덮지 않음 실제 확인",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "배송지 선택은 비활성 상거래 분리",
+      "genuine_external_dependencies": "배송 활성화에만 실제 주문 정책 필요",
+      "evidence": [
+        "PG",
+        "UI:preference_max_three",
+        "UI:onboarding_skip_preserves_preferences"
+      ]
+    },
+    {
+      "source_id": "mypage_05",
+      "excel_row": 4,
+      "safe_summary": "계정 관심사 수정과 배송지 관련 조건 분리",
+      "satisfied_current_conditions": "관심사 복수 선택·저장·계정 격리; 기존 선택을 건너뛰기로 덮지 않음 실제 확인",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "배송지 선택은 비활성 상거래 분리",
+      "genuine_external_dependencies": "배송 활성화에만 실제 주문 정책 필요",
+      "evidence": [
+        "PG",
+        "UI:preference_max_three",
+        "UI:onboarding_skip_preserves_preferences"
+      ]
+    },
+    {
+      "source_id": "login_01",
+      "excel_row": 5,
+      "safe_summary": "이메일·소셜 로그인, 복구 진입, 앱 운영자 제한",
+      "satisfied_current_conditions": "이메일 가입/로그인·14세 필수 확인·가입 목적/실패 반환·토큰 경합 보호 구현; 이메일 로그인 실제 관찰 네이버 frontend provider표시·정확authorize host/path 검증을 추가함(별도17개 및 포함98 tests PASS). 네이버 backend adapter·공통start/claim·reauth300초·mobile operator 차단 관련54개 합성시험 PASS는 backend 담당자 보고.",
+      "additional_software_or_execution": "frontend와 backend의 네이버 계약 일치 확인. 실제 콘솔 자격정보/승인 후 신규·기존·연결·재인증 실제 제공자 왕복 수용은 별도.",
+      "superseded_or_currently_inactive": "판매자 가입 선택은 현재 공개 가입에서 제외",
+      "genuine_external_dependencies": "네이버/구글/카카오 실제 콘솔 설정·자격정보·할당량·제공자 승인",
+      "evidence": [
+        "AUTH",
+        "UI:email_login",
+        "MEMBER98",
+        "NAVER54"
+      ]
+    },
+    {
+      "source_id": "login_02",
+      "excel_row": 6,
+      "safe_summary": "로그아웃 세션 종료·기록 보존·계정별 대화 격리",
+      "satisfied_current_conditions": "독립 세션·토큰별 로그아웃·폐기 검증; 저장 대화는 명시 동의/30일/계정 격리; 이전 계정 늦은 응답 폐기",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "일괄 대화 자동보존은 현재 off 기본값+명시 저장 정책으로 대체",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "PG",
+        "AUTH",
+        "CHAT31"
+      ]
+    },
+    {
+      "source_id": "login_03",
+      "excel_row": 7,
+      "safe_summary": "메일 링크를 통한 비밀번호 변경",
+      "satisfied_current_conditions": "현행 공개 복구코드 흐름: 일회 사용·옛 세션 폐기·DB 지속성 시험",
+      "additional_software_or_execution": "원문 메일 요청/일회 링크 흐름 자체는 미구현. 현행 복구코드를 이메일 소유권·본인확인으로 설명하지 않음.",
+      "superseded_or_currently_inactive": "현재 공개 정책의 복구코드 흐름이 메일 링크 UI를 대신함; 원문 완료로 세지 않음",
+      "genuine_external_dependencies": "원문 메일 활성화 시 승인된 발송 채널/도메인/운영 정책",
+      "evidence": [
+        "PG",
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "mypage_01",
+      "excel_row": 8,
+      "safe_summary": "내 활동·계정·저장·정책/지원 푸터와 판매 진입",
+      "satisfied_current_conditions": "마이/활동/계정/정책/지원 경로와 비회원 정책 접근; 내 활동 글/댓글 실제 관찰",
+      "additional_software_or_execution": "큰글자·가로·안전영역의 모든 마이/푸터 화면 물리 검증 미기록",
+      "superseded_or_currently_inactive": "주문/배송지/마일리지·판매 업무 메뉴는 비활성",
+      "genuine_external_dependencies": "실제 회사·사업 정보는 사용자가 제공해야 함",
+      "evidence": [
+        "UI:my_activity_posts_comments",
+        "UI",
+        "MY"
+      ]
+    },
+    {
+      "source_id": "mypage_02",
+      "excel_row": 9,
+      "safe_summary": "닉네임·계정 확인과 개인 관심사 수정",
+      "satisfied_current_conditions": "프로필 nickname 전용 수정·지속성·계정 격리·권한상승 거절을 실제 PostgreSQL에서 확인",
+      "additional_software_or_execution": "서버 오류 후 프로필 편집 입력 보존의 실제 UI 조작은 미기록",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "PG",
+        "MY",
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "mypage_03",
+      "excel_row": 10,
+      "safe_summary": "최대5 배송지 관리와 원래 결제 문맥 복귀",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 배송지 CRUD·최대5·소유권·선택 복귀 전용 공개 기능 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 주문·배송 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "mypage_04",
+      "excel_row": 11,
+      "safe_summary": "탈퇴 조건과 개인정보·거래기록 보관 안내",
+      "satisfied_current_conditions": "실제 PostgreSQL 탈퇴 중 pending answer 차단·chat/토큰·작성 콘텐츠 삭제 확인; 업로드 삭제 코드/시험",
+      "additional_software_or_execution": "개인정보 최소 보존 설명과 실제 삭제 대상은 최종 정책/배포 산출물로 연결 필요",
+      "superseded_or_currently_inactive": "원문 일괄 7년 보관을 현행 최소보관 정책으로 대체; 거래가 없는 현재 계정에 거래보관을 꾸며 적용하지 않음",
+      "genuine_external_dependencies": "실제 거래 활성화 시 법적 보관 근거·진행 거래 정책",
+      "evidence": [
+        "PG",
+        "AUTH",
+        "FILE"
+      ]
+    },
+    {
+      "source_id": "mileage_01",
+      "excel_row": 12,
+      "safe_summary": "M 단위 잔액과 발생·사용·반환 내역",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 개발 장부와 실제 M 단위 지갑/기간 내역 UI는 구분",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "적립·소멸·사용 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "mileage_02",
+      "excel_row": 13,
+      "safe_summary": "확정 거래 적립과 금액 구성 표시",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 개발 주문 적립은 있음; 실제 구매확정/정책 스냅샷·표시 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실주문·적립 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "mileage_03",
+      "excel_row": 14,
+      "safe_summary": "결제 시 사용량·잔액·한도 검증",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 실결제 차감·경합·실패 원복과 M 표시 전용 흐름 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "PG·마일리지 사용 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "mileage_04",
+      "excel_row": 15,
+      "safe_summary": "취소 금액과 사용 마일리지 반환 분리",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 개발 장부 환원은 실결제 환불/정책별 반환을 대신하지 않음",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "환불·적립 취소 정책·PG",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "main_01",
+      "excel_row": 16,
+      "safe_summary": "비회원 메인·공개 탐색을 로그인 없이 제공",
+      "satisfied_current_conditions": "토큰 없는 공개 피드/참조 목록/상세 경로; 현재 루트 피드",
+      "additional_software_or_execution": "비회원 새 브라우저의 전체 catalog 상세 이동은 최종 관찰 기록에 추가 가능",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "COM",
+        "CAT",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "main_02",
+      "excel_row": 17,
+      "safe_summary": "상거래 메뉴의 순서·목록 연결",
+      "satisfied_current_conditions": "현행 5개 메뉴와 기존 /demands 링크 호환",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "과거 상거래 순서/메뉴는 커뮤니티·육아템·도우미·저장·마이로 대체",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "UI",
+        "COM",
+        "CAT"
+      ]
+    },
+    {
+      "source_id": "main_03",
+      "excel_row": 18,
+      "safe_summary": "여러 배너 자동·수동 전환과 동작 중지",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "커뮤니티 중심 현재 홈에는 원문 판매 배너 carousel을 도입하지 않음. 미구현 원문을 구현 완료로 세지 않음.",
+      "genuine_external_dependencies": "재도입한다면 검증된 실제 배너 자료 필요",
+      "evidence": [
+        "SPEC",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "browse_01",
+      "excel_row": 19,
+      "safe_summary": "최신 상품 목록과7개 정렬",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 참조 목록 검색은 있으나7개 상거래 정렬은 미충족",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "신뢰 가능한 상품·가격·마감 데이터",
+      "evidence": [
+        "CAT",
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "browse_02",
+      "excel_row": 20,
+      "safe_summary": "남은시간 0초과60분 이하의 참여 가능 공구",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 현재 공개 수요글은 모집/결제 상품이 아니며 해당 필터 없음",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 모집 회차·운영 시각 기준",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "brand_01",
+      "excel_row": 21,
+      "safe_summary": "브랜드 목록·진입과 정렬 컨트롤 분리",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 보존 브랜드 탐색 외 원문 정렬/레이아웃 공개 경로 미연결",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "승인된 실제 브랜드 정보",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "brand_02",
+      "excel_row": 22,
+      "safe_summary": "선택 브랜드와 상품 일치·7개 정렬·빈 결과",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 브랜드 기준 일치 외7정렬·공개 목록 조합 전수 미검증",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 브랜드별 상품 목록",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "timesale_01",
+      "excel_row": 23,
+      "safe_summary": "실제 기간·정상가·할인율·할인가 표시",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 참조 링크를 할인 판매로 표시하지 않음; 할인 검증 흐름 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "증명 가능한 정상가·판매 기간·판매 계약",
+      "evidence": [
+        "CAT"
+      ]
+    },
+    {
+      "source_id": "promotion_01",
+      "excel_row": 24,
+      "safe_summary": "주제별 기획전과 개별 구매조건 구분",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 공식 비교 안내와 판매 기획전은 다름; 전용 기획전 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "검증된 기획전 참여 상품·운영 조건",
+      "evidence": [
+        "CAT"
+      ]
+    },
+    {
+      "source_id": "browse_03",
+      "excel_row": 25,
+      "safe_summary": "다단계 세부 품목 카테고리 탐색",
+      "satisfied_current_conditions": "현재 참조 목록의 공개 검색/기존 category/URL 탐색 구현",
+      "additional_software_or_execution": "원문 7정렬·가격/연령 조합·대중소 확장은 현재 참조 catalog에 미제공",
+      "superseded_or_currently_inactive": "현재는 공식 참조 정보 탐색; 원문 실판매 목록/분류 확장은 비활성 상거래 backlog",
+      "genuine_external_dependencies": "가격·연령·판매 데이터를 활성화할 때 검증 자료 필요",
+      "evidence": [
+        "CAT",
+        "COM",
+        "PREF"
+      ]
+    },
+    {
+      "source_id": "browse_04",
+      "excel_row": 26,
+      "safe_summary": "비회원 상품 검색·정렬·가격·연령 조합",
+      "satisfied_current_conditions": "현재 참조 목록의 공개 검색/기존 category/URL 탐색 구현",
+      "additional_software_or_execution": "원문 7정렬·가격/연령 조합·대중소 확장은 현재 참조 catalog에 미제공",
+      "superseded_or_currently_inactive": "현재는 공식 참조 정보 탐색; 원문 실판매 목록/분류 확장은 비활성 상거래 backlog",
+      "genuine_external_dependencies": "가격·연령·판매 데이터를 활성화할 때 검증 자료 필요",
+      "evidence": [
+        "CAT",
+        "COM",
+        "PREF"
+      ]
+    },
+    {
+      "source_id": "browse_05",
+      "excel_row": 27,
+      "safe_summary": "정렬7개·가격 입력/드래그·연령·마감 필터",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 원문 전체 필터·범위 동기화·1시간 경계 전용 구현 미확인",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 상품별 정확한 필터 데이터",
+      "evidence": [
+        "CAT",
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "product_01",
+      "excel_row": 28,
+      "safe_summary": "비회원 긴 상세와 도달 시 고정되는 탭",
+      "satisfied_current_conditions": "공식 참고 상세 공개 URL·출처/checked-at·미확인 가격 구분",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "원문 긴 실판매 상세의 고정 탭은 현재 짧은 참고 상세로 대체",
+      "genuine_external_dependencies": "긴 판매 상세 활성화 시 실제 상품 자료",
+      "evidence": [
+        "CAT",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "product_02",
+      "excel_row": 29,
+      "safe_summary": "13개 고지 항목을 같은 표로 제공",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 공식 출처 안내는13항목 판매 고지표 완료가 아님",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "판매자·제조·A/S·KC 근거 자료",
+      "evidence": [
+        "CAT",
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "product_03",
+      "excel_row": 30,
+      "safe_summary": "확인되지 않은 상품정보를 확인 완료로 오인시키지 않음",
+      "satisfied_current_conditions": "알 수 없는 가격/배송/인증을 확인·0원으로 표시하지 않음; assistant 불확실성/보류 평가",
+      "additional_software_or_execution": "실판매 13항목의 전체 상태 모델은 현재 없음",
+      "superseded_or_currently_inactive": "판매 고지 스키마는 비활성",
+      "genuine_external_dependencies": "실판매 활성화에 실제 규격/KC/가격 근거 필요",
+      "evidence": [
+        "CAT",
+        "MODEL40"
+      ]
+    },
+    {
+      "source_id": "product_04",
+      "excel_row": 31,
+      "safe_summary": "동일 상품·옵션의 개별/공구 가격·배송 비교",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 계산기는 입력값 산식이며 실제 두 판매 방식/할인 보장이 아님",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "양 방식 실제 판매 조건·재고",
+      "evidence": [
+        "OLD",
+        "CAT"
+      ]
+    },
+    {
+      "source_id": "product_05",
+      "excel_row": 32,
+      "safe_summary": "구매 방식별 하단 옵션·수량·담기/결제",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 모집 수량 UI는 실제 양 방식 옵션 시트·장바구니/결제와 다름",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 판매 옵션·주문 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "groupbuy_01",
+      "excel_row": 33,
+      "safe_summary": "유효 인원·마감·가격·배송과 긴 상품명 표시",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 수량 모집과 수요 관심은 고유 결제 참여 인원이 아님",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "인원 단위·실제 모집/배송 조건",
+      "evidence": [
+        "OLD",
+        "COM",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "product_06",
+      "excel_row": 34,
+      "safe_summary": "구매 전 배송비·발송·취소·반품 조건 안내",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 참고 링크 안내 외 실제 계약별 전체 고지 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "판매자별 발송·추가비·반품 정책",
+      "evidence": [
+        "CAT",
+        "OLD",
+        "MY"
+      ]
+    },
+    {
+      "source_id": "product_07",
+      "excel_row": 35,
+      "safe_summary": "구매 인증 후기·옵션·시각·4개 정렬",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 커뮤니티 경험글을 인증 구매후기로 표시하지 않음",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 구매확정 근거·후기 정책",
+      "evidence": [
+        "MOD"
+      ]
+    },
+    {
+      "source_id": "inquiry_01",
+      "excel_row": 36,
+      "safe_summary": "문의 제목·본문·공개 여부·오류 보존·서버 등록시각",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "원문 업무 활성화 시 거래 활성화는 별도이며 검증/ACL에는 불필요",
+      "evidence": [
+        "INQ",
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "inquiry_02",
+      "excel_row": 37,
+      "safe_summary": "최신3개 미리보기와 비공개 원문 제외",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "INQ"
+      ]
+    },
+    {
+      "source_id": "inquiry_03",
+      "excel_row": 38,
+      "safe_summary": "4개 이상일 때 전체 이동·최신순10개 페이지",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "INQ"
+      ]
+    },
+    {
+      "source_id": "inquiry_04",
+      "excel_row": 39,
+      "safe_summary": "문의별 독립 답변 접기와 판매자만 등록/수정",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "INQ",
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "inquiry_05",
+      "excel_row": 40,
+      "safe_summary": "비공개 문의·답변은 허용된3주체만 읽음",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "INQ",
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "browse_06",
+      "excel_row": 41,
+      "safe_summary": "계정별 찜 동기화와 구매 방식별 장바구니 분리",
+      "satisfied_current_conditions": "상세 저장 API 멱등성·계정 격리 실제 PostgreSQL 확인",
+      "additional_software_or_execution": "모든 썸네일의 독립 하트/focus/실패 UI는 현재 미제공",
+      "superseded_or_currently_inactive": "양 방식 장바구니는 현재 비활성 상거래",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "PG",
+        "CAT"
+      ]
+    },
+    {
+      "source_id": "individual_01",
+      "excel_row": 42,
+      "safe_summary": "모집 대기 없는 복수 상품 개별 주문·결제",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 실제 복수 장바구니/주문/결제 상태 모델 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "PG·실재고·판매/배송 계약",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "groupbuy_02",
+      "excel_row": 43,
+      "safe_summary": "옵션·수량·주소·조건 확인 후 공구 선결제",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 무결제 모집/수요 관심을 결제 참여로 취급하지 않음",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "PG·실모집·배송/취소 계약",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "payment_01",
+      "excel_row": 44,
+      "safe_summary": "성공·실패·확인중을 구분하고 중복 처리 방지",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 개발 확인 주문은 실PG 상태·웹훅·멱등성 구현이 아님",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "PG 계약·공식 검증 환경",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "mypage_06",
+      "excel_row": 45,
+      "safe_summary": "상태별 본인 주문·참여와 후속 문맥 유지",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 기존 모집내역과 실제 주문/환불 상세는 분리; 공개 거래 UI 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 거래 상태·정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "delivery_01",
+      "excel_row": 46,
+      "safe_summary": "주문별 발송/배송 상태와 공구 성사조건 안내",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 실제 주문 배송 상태·운송 정보 수집/표시 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "배송사·판매자 실발송 연동",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "refund_01",
+      "excel_row": 47,
+      "safe_summary": "본인 취소/반품 접수와 금액·마일리지 분리",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 단순 모집 철회는 실주문 취소·반품 신청/정책 검증이 아님",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "환불/반품 정책·PG",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "refund_02",
+      "excel_row": 48,
+      "safe_summary": "환불 요청/처리중/완료/확인필요 구분",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 개발 장부 환원을 결제수단 환불 확인으로 세지 않음",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "PG 공식 처리 결과",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "groupbuy_03",
+      "excel_row": 49,
+      "safe_summary": "유효 참여만 집계하고 최소/최대 인원 유지",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 수량 경합 시험은 있음; 실제 고유 결제 인원·확정 정책은 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 모집·중복/인원 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "groupbuy_04",
+      "excel_row": 50,
+      "safe_summary": "최소 미달 마감 후 자동 취소·환불·반환",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 수량 미달 표시는 영속 판정/자동 실환불 작업이 아님",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "PG·마감 판정·환불 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "groupbuy_05",
+      "excel_row": 51,
+      "safe_summary": "공구 성사→배송, 미성사→환불의 결과 연결",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 결과 표시 외 실제 주문·배송·자동환불 전이는 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 결제·물류·결과 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "recommend_01",
+      "excel_row": 52,
+      "safe_summary": "탐색을 가리지 않는 챗봇 진입",
+      "satisfied_current_conditions": "/chat 진입; 320/375/769/1440 실제 폭에서 초기 composer+send·가로 넘침 없음; 키보드 focus/감소 모션 관찰",
+      "additional_software_or_execution": "가로 화면·200% 글자·실제 휴대폰 키보드 관찰 미기록",
+      "superseded_or_currently_inactive": "원문 우하단 부동 버튼은 5개 내비의 도우미 진입으로 대체",
+      "genuine_external_dependencies": "실제 Android 기기",
+      "evidence": [
+        "UI:chat_responsive_4_widths",
+        "UI:reduced_motion_keyboard"
+      ]
+    },
+    {
+      "source_id": "recommend_02",
+      "excel_row": 53,
+      "safe_summary": "상황·예산·일정을 묻는 대화형 품목 제안",
+      "satisfied_current_conditions": "승인 corpus+공개 tools·출처/checked-at·근거 선택/검색/보류 구분. 고정 합성40건 실제 local model 실행, citation validity/contract 1.0",
+      "additional_software_or_execution": "원문 단계별 선물 시나리오와 모든 조건전환의 실제 대화 수용은 전부 기록되지 않음. 자동 citation 검사는 사람의 의미적 groundedness 평가를 대신하지 않음.",
+      "superseded_or_currently_inactive": "일반 대화+기존 조건 찾기 제공. 실재고/실가격/배송/공구 성사를 보장하지 않음.",
+      "genuine_external_dependencies": "실판매 조건을 답하려면 검증된 공급 자료",
+      "evidence": [
+        "MODEL40",
+        "PG",
+        "UI:actual_model_privacy_question"
+      ]
+    },
+    {
+      "source_id": "recommend_03",
+      "excel_row": 54,
+      "safe_summary": "근거 있는 상품 링크와 조건 변경 반영",
+      "satisfied_current_conditions": "승인 corpus+공개 tools·출처/checked-at·근거 선택/검색/보류 구분. 고정 합성40건 실제 local model 실행, citation validity/contract 1.0",
+      "additional_software_or_execution": "원문 단계별 선물 시나리오와 모든 조건전환의 실제 대화 수용은 전부 기록되지 않음. 자동 citation 검사는 사람의 의미적 groundedness 평가를 대신하지 않음.",
+      "superseded_or_currently_inactive": "일반 대화+기존 조건 찾기 제공. 실재고/실가격/배송/공구 성사를 보장하지 않음.",
+      "genuine_external_dependencies": "실판매 조건을 답하려면 검증된 공급 자료",
+      "evidence": [
+        "MODEL40",
+        "PG",
+        "UI:actual_model_privacy_question"
+      ]
+    },
+    {
+      "source_id": "community_01",
+      "excel_row": 55,
+      "safe_summary": "커뮤니티 목록·내용과 일관된 최초 작성시각",
+      "satisfied_current_conditions": "유형4·기존 demand 호환·비수요 interest 거절·공개/차단 필터·KST 최초일 기간 및 filtered pagination 실제 PostgreSQL 검증; 루트320px 관찰",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "COM",
+        "PG",
+        "UI:community_mobile_overflow"
+      ]
+    },
+    {
+      "source_id": "community_02",
+      "excel_row": 56,
+      "safe_summary": "본인 글·댓글 관리와 작성/수정시각 분리",
+      "satisfied_current_conditions": "본인 글/댓글 CRUD·revision 충돌·타인 거절·interest/최초시각 보존 실제 PG; 작성/수정 분리 실제 UI 확인",
+      "additional_software_or_execution": "삭제 취소/서버 오류의 실제 브라우저 입력 보존 관찰은 추가 여지",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "PG",
+        "UI:create_and_edit_question",
+        "COM"
+      ]
+    },
+    {
+      "source_id": "community_03",
+      "excel_row": 57,
+      "safe_summary": "신고 사유 전에 정확한 원문 대상·미리보기 제시",
+      "satisfied_current_conditions": "글/댓글 exact target·안전 preview·사유 위 원문 링크·댓글 page/anchor·HTML escape; 신고 quota와 target/notice 실제 PG",
+      "additional_software_or_execution": "신고 링크→입력→실패 보존의 실제 browser 전수 흐름 미기록",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "MOD",
+        "PG",
+        "UI",
+        "REMOVE57"
+      ]
+    },
+    {
+      "source_id": "seller_apply_01",
+      "excel_row": 58,
+      "safe_summary": "판매자 정보·정산 증빙 제출과 승인 전 권한 제한",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "원문 업무 활성화 시 실제 사업자·정산·심사 계약",
+      "evidence": [
+        "OLD",
+        "FILE",
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "seller_apply_02",
+      "excel_row": 59,
+      "safe_summary": "심사중/보완/승인/반려와 승인 전 등록 차단",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 내부 상태/잠금 참조; 공개 상거래 신청 상태 UI 미연결",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "사업자 심사 정책·실제 검토",
+      "evidence": [
+        "OLD",
+        "FILE"
+      ]
+    },
+    {
+      "source_id": "product_manage_01",
+      "excel_row": 60,
+      "safe_summary": "승인 판매자의 방식별 상품 등록 입력",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 보존 모집 입력과 원문 전체 상품/옵션/고지 등록 UI는 다름",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 판매 품목·사업자·배송 계약",
+      "evidence": [
+        "OLD",
+        "FILE"
+      ]
+    },
+    {
+      "source_id": "product_manage_02",
+      "excel_row": 61,
+      "safe_summary": "본인 상품/회차 수정·재고·판매상태와 최초시각",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 모집 종료는 있음; 전체 상품 수정·옵션 재고·진행 주문 영향 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 재고·주문 상태 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "product_manage_03",
+      "excel_row": 62,
+      "safe_summary": "13개 실제 상품 고지와 증빙 일치",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 첨부 안전은 전체 고지 스키마/공개표/인증 판정 완료가 아님",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "제조·A/S·KC 등 실제 증빙",
+      "evidence": [
+        "OLD",
+        "FILE"
+      ]
+    },
+    {
+      "source_id": "product_manage_04",
+      "excel_row": 63,
+      "safe_summary": "개별/공구 등록 분기와 동일 옵션 가격 관계",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 두 판매 방식 전체 분기·동일 옵션 비교 검증 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "유효 판매가·할인 근거",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "groupbuy_06",
+      "excel_row": 64,
+      "safe_summary": "최소/최대 인원·일정·발송·재고 조건 검증",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 수량 모집 스키마가 고유 인원·실재고 정책 전부를 충족하지 않음",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 공급 재고·모집/발송 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "groupbuy_07",
+      "excel_row": 65,
+      "safe_summary": "개별 주문과 공구 회차 현황·상세·시각 구분",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 보존 판매자 모집 목록 외 실주문/회차 전체 관리 UI 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 주문·회차 데이터",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "delivery_02",
+      "excel_row": 66,
+      "safe_summary": "발송·배송·반품 목록과 송장·C/S·각 기준시각",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 송장/배송/C/S 상태 및 모든 행 기준시각 전용 기능 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "물류사·판매자·반품 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "inquiry_06",
+      "excel_row": 67,
+      "safe_summary": "정확한 판매자의 답변 등록/수정·독립 시각",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "INQ"
+      ]
+    },
+    {
+      "source_id": "reputation_01",
+      "excel_row": 68,
+      "safe_summary": "검증된 판매자 상태와 거래 후기/별점 공개",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 커뮤니티 글을 구매 평판·사업자 인증으로 대체하지 않음",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "사업자 검증·실거래/후기 정책",
+      "evidence": [
+        "MOD"
+      ]
+    },
+    {
+      "source_id": "reputation_02",
+      "excel_row": 69,
+      "safe_summary": "구매확정 거래의 해당 판매자 평가",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 실구매확정 평가 생성/대상 연결·제목 없는 후기 UI 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실주문·구매확정·평가 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "seller_manage_01",
+      "excel_row": 70,
+      "safe_summary": "PC 판매자 심사·사유·운영자·실제 처리시각",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "원문 업무 활성화 시 실제 사업 심사 자료·정책",
+      "evidence": [
+        "OLD",
+        "FILE",
+        "MOBILE"
+      ]
+    },
+    {
+      "source_id": "member_manage_01",
+      "excel_row": 71,
+      "safe_summary": "PC 회원 역할/정지·사유·가입/변경시각 구분",
+      "satisfied_current_conditions": "신규 frontend 회원목록/상세·닉네임/ID/role/status·가입일 기간·가입/최근변경 KST 분리·목록 URL/return 보존 구현. reason/revision·본인password 또는 일회socialproof·exact target/state 확인·권한확대 경고·자기변경/운영자정지 차단. 실제 form callback+SSR 회귀 포함 좁은98 tests PASS.",
+      "additional_software_or_execution": "메인 소유 backend API 통합·실제 PostgreSQL 회원변경/세션폐기·합성계정 browser 수용 및 최종suite/build/배포 연결 필요. 실제 운영계정 role grant는 실행하지 않음.",
+      "superseded_or_currently_inactive": "판매자 추가역할의 업무 활성화만 비활성 상거래로 분리",
+      "genuine_external_dependencies": "역할 부여 운영 규칙은 제품 결정이며 외부 계약은 필수가 아님",
+      "evidence": [
+        "AUTH",
+        "MOD",
+        "MOBILE",
+        "MEMBER98"
+      ]
+    },
+    {
+      "source_id": "product_manage_05",
+      "excel_row": 72,
+      "safe_summary": "상품/회차 검토와 고지·가격·안전자료 조치 기록",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 기존 게시 심사는 전체 상품 고지/안전/환불 관리 대체가 아님",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 증빙·판매/환불 검토 정책",
+      "evidence": [
+        "OLD",
+        "FILE"
+      ]
+    },
+    {
+      "source_id": "operation_01",
+      "excel_row": 73,
+      "safe_summary": "미달 취소·PG 환불·마일리지 실패 재처리",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 개발 환원은 PG 실패 조회·멱등 재처리·통합 운영 이력과 다름",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "PG·환불 정책·실제 거래",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "operation_02",
+      "excel_row": 74,
+      "safe_summary": "원문/신고 검토·조치·정지·통보와 실제시각",
+      "satisfied_current_conditions": "hide/remove/dismiss/suspend 별도 선택·사유·exact 대상/actor/time 구현. remove form 확인·취소·실패57 좁은 시험 통과",
+      "additional_software_or_execution": "추가 remove backend/공개 미노출의 최종 통합 및 실제 운영자 browser 검증은 메인 소유",
+      "superseded_or_currently_inactive": "판매자 평가는 현재 비활성",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "MOD",
+        "REMOVE57",
+        "PG"
+      ]
+    },
+    {
+      "source_id": "permission_01",
+      "excel_row": 75,
+      "safe_summary": "구매자·승인판매자·PC운영자 역할과 업무 이동",
+      "satisfied_current_conditions": "PC admin API·role 검사·공식 mobile 이메일/social claim session 차단 코드/시험; frontend Native cleanup·old token callback 회귀",
+      "additional_software_or_execution": "실제 Android 로그인·소셜 왕복 관찰은 미실행",
+      "superseded_or_currently_inactive": "판매자 업무 이동은 현재 공개 동선 제외",
+      "genuine_external_dependencies": "실제 Android 기기·실 provider credentials",
+      "evidence": [
+        "MOBILE",
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "seo_01",
+      "excel_row": 76,
+      "safe_summary": "공개 메인/상세 URL과 개인 데이터 비공개",
+      "satisfied_current_conditions": "공개 URL/SEO route·robots/sitemap·개인 conversation 제외 구현/시험",
+      "additional_software_or_execution": "실제 배포 HTML/canonical 동등성·크롤 확인은 최종 배포 단계",
+      "superseded_or_currently_inactive": "검색 결과/AI 인용 효과를 구현 결과로 주장하지 않음",
+      "genuine_external_dependencies": "소유 HTTPS 도메인·검색엔진 반영",
+      "evidence": [
+        "SEO",
+        "CAT",
+        "CHAT"
+      ]
+    },
+    {
+      "source_id": "permission_02",
+      "excel_row": 77,
+      "safe_summary": "계정·주문·주소·대화·문의·판매자료 서버 권한",
+      "satisfied_current_conditions": "교차 계정/독립 session/IDOR·revoked token·chat·private inquiry·attachment 소유권 검증 코드/시험; 실제 PG core 격리 확인",
+      "additional_software_or_execution": "최종 변경 후 전체 backend+frontend suite 및 산출물 연결은 메인 소유",
+      "superseded_or_currently_inactive": "거래/주소 공개 UI는 비활성이나 남은 서버의 ACL 의무는 유지",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "PG",
+        "AUTH",
+        "INQ",
+        "FILE"
+      ]
+    },
+    {
+      "source_id": "design_01",
+      "excel_row": 78,
+      "safe_summary": "로고·색·서체·정렬·선택기·검색행 일관성",
+      "satisfied_current_conditions": "브랜드/로고 유지·semantic details/fieldset·오류/빈 상태/stale list 분리 코드; 4폭 chat·320 feed·reduced motion·focus 실제 관찰",
+      "additional_software_or_execution": "200% 글자/가로·스크린리더·실키보드/안전영역 및 오프라인/오류 상태의 실제 관찰 미기록",
+      "superseded_or_currently_inactive": "과거 정확한 palette/픽셀배치는 현 브랜드/커뮤니티 동선으로 대체",
+      "genuine_external_dependencies": "실제 phone 관찰에 기기 필요; 브라우저 확대/가로/오류 검증은 외부 계약 불필요",
+      "evidence": [
+        "UI",
+        "COM",
+        "CHAT",
+        "UI:chat_responsive_4_widths",
+        "UI:reduced_motion_keyboard"
+      ]
+    },
+    {
+      "source_id": "state_01",
+      "excel_row": 79,
+      "safe_summary": "로딩·실패·빈 결과·저장 성공을 구분",
+      "satisfied_current_conditions": "브랜드/로고 유지·semantic details/fieldset·오류/빈 상태/stale list 분리 코드; 4폭 chat·320 feed·reduced motion·focus 실제 관찰",
+      "additional_software_or_execution": "200% 글자/가로·스크린리더·실키보드/안전영역 및 오프라인/오류 상태의 실제 관찰 미기록",
+      "superseded_or_currently_inactive": "과거 정확한 palette/픽셀배치는 현 브랜드/커뮤니티 동선으로 대체",
+      "genuine_external_dependencies": "실제 phone 관찰에 기기 필요; 브라우저 확대/가로/오류 검증은 외부 계약 불필요",
+      "evidence": [
+        "UI",
+        "COM",
+        "CHAT",
+        "UI:chat_responsive_4_widths",
+        "UI:reduced_motion_keyboard"
+      ]
+    },
+    {
+      "source_id": "usability_01",
+      "excel_row": 80,
+      "safe_summary": "모바일 긴글·오류·이미지·확대·포커스 접근성",
+      "satisfied_current_conditions": "브랜드/로고 유지·semantic details/fieldset·오류/빈 상태/stale list 분리 코드; 4폭 chat·320 feed·reduced motion·focus 실제 관찰",
+      "additional_software_or_execution": "200% 글자/가로·스크린리더·실키보드/안전영역 및 오프라인/오류 상태의 실제 관찰 미기록",
+      "superseded_or_currently_inactive": "과거 정확한 palette/픽셀배치는 현 브랜드/커뮤니티 동선으로 대체",
+      "genuine_external_dependencies": "실제 phone 관찰에 기기 필요; 브라우저 확대/가로/오류 검증은 외부 계약 불필요",
+      "evidence": [
+        "UI",
+        "COM",
+        "CHAT",
+        "UI:chat_responsive_4_widths",
+        "UI:reduced_motion_keyboard"
+      ]
+    },
+    {
+      "source_id": "product_manage_06",
+      "excel_row": 81,
+      "safe_summary": "옵션별 개별/공구 재고 배정 합계 제한",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 모집 수량 상한과 판매 방식별 공유 재고 원장은 다름",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실재고·재고 차감/복원 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "signup_03",
+      "excel_row": 82,
+      "safe_summary": "소셜 제공자·가입 목적 유지와 공통 확인",
+      "satisfied_current_conditions": "이메일 가입/로그인·14세 필수 확인·가입 목적/실패 반환·토큰 경합 보호 구현; 이메일 로그인 실제 관찰 네이버 frontend provider표시·정확authorize host/path 검증을 추가함(별도17개 및 포함98 tests PASS). 네이버 backend adapter·공통start/claim·reauth300초·mobile operator 차단 관련54개 합성시험 PASS는 backend 담당자 보고.",
+      "additional_software_or_execution": "frontend와 backend의 네이버 계약 일치 확인. 실제 콘솔 자격정보/승인 후 신규·기존·연결·재인증 실제 제공자 왕복 수용은 별도.",
+      "superseded_or_currently_inactive": "판매자 가입 선택은 현재 공개 가입에서 제외",
+      "genuine_external_dependencies": "네이버/구글/카카오 실제 콘솔 설정·자격정보·할당량·제공자 승인",
+      "evidence": [
+        "AUTH",
+        "UI:email_login",
+        "MEMBER98",
+        "NAVER54"
+      ]
+    },
+    {
+      "source_id": "mypage_07",
+      "excel_row": 83,
+      "safe_summary": "배송지5개 한도·선택·직접등록 복귀",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 배송지 전용 CRUD/선택/5개 한도 UI와 API 근거 미확인",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 주문 배송 정책",
+      "evidence": []
+    },
+    {
+      "source_id": "login_04",
+      "excel_row": 84,
+      "safe_summary": "본인확인 후 일부 가린 이메일 조회",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "본인확인 기반 아이디 조회 경로 미구현. 현재 복구코드가 이를 충족하지 않음.",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "검증된 신원확인 수단·운영 정책",
+      "evidence": [
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "login_05",
+      "excel_row": 85,
+      "safe_summary": "메일 요청과 일회용 링크의 새 비밀번호 화면 분리",
+      "satisfied_current_conditions": "현행 공개 복구코드 흐름: 일회 사용·옛 세션 폐기·DB 지속성 시험",
+      "additional_software_or_execution": "원문 메일 요청/일회 링크 흐름 자체는 미구현. 현행 복구코드를 이메일 소유권·본인확인으로 설명하지 않음.",
+      "superseded_or_currently_inactive": "현재 공개 정책의 복구코드 흐름이 메일 링크 UI를 대신함; 원문 완료로 세지 않음",
+      "genuine_external_dependencies": "원문 메일 활성화 시 승인된 발송 채널/도메인/운영 정책",
+      "evidence": [
+        "PG",
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "mypage_08",
+      "excel_row": 86,
+      "safe_summary": "판매 승인 후 구매 기능 유지·판매 메뉴 추가",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 공개 릴리스 판매 메뉴 미연결; 기본 계정 기능 보존 확인 필요",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 판매자 승인·업무 활성화",
+      "evidence": [
+        "OLD",
+        "MY",
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "main_04",
+      "excel_row": 87,
+      "safe_summary": "자동 배너와 화살표·점·정지·감소 모션",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "커뮤니티 중심 현재 홈에는 원문 판매 배너 carousel을 도입하지 않음. 미구현 원문을 구현 완료로 세지 않음.",
+      "genuine_external_dependencies": "재도입한다면 검증된 실제 배너 자료 필요",
+      "evidence": [
+        "SPEC",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "browse_07",
+      "excel_row": 88,
+      "safe_summary": "가격 최소/최대 입력과 슬라이더 동기화",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 현재 참조 목록에 원문 가격 슬라이더/범위 필터 없음",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 검증 가격 데이터",
+      "evidence": [
+        "CAT"
+      ]
+    },
+    {
+      "source_id": "browse_08",
+      "excel_row": 89,
+      "safe_summary": "상품 연령의 개월/년 단위 범위 필터",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 현재 카탈로그 연령 범위 필터 미제공; 적합성 추천 보장 금지",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "신뢰 가능한 제품 연령 자료",
+      "evidence": [
+        "CAT"
+      ]
+    },
+    {
+      "source_id": "product_08",
+      "excel_row": 90,
+      "safe_summary": "상세 탭 도달 고정·상단 복귀 시 해제",
+      "satisfied_current_conditions": "공식 참고 상세 공개 URL·출처/checked-at·미확인 가격 구분",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "원문 긴 실판매 상세의 고정 탭은 현재 짧은 참고 상세로 대체",
+      "genuine_external_dependencies": "긴 판매 상세 활성화 시 실제 상품 자료",
+      "evidence": [
+        "CAT",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "product_09",
+      "excel_row": 91,
+      "safe_summary": "긴 상세 접기/펼치기와 아래 고지표 배치",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 원문 긴 이미지·페이드·고지표 동작은 참조 상세와 다름",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 상품 상세·대체 설명",
+      "evidence": [
+        "CAT",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "product_10",
+      "excel_row": 92,
+      "safe_summary": "방식별 하단 옵션 시트와 긴 전체 상품명",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 양 방식 하단 시트·가격 문맥 전용 공개 구현 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 상품 옵션·가격",
+      "evidence": [
+        "OLD",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "product_11",
+      "excel_row": 93,
+      "safe_summary": "담기 성공 후 방식에 맞는 장바구니 이동 선택",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 실제 양 방식 담기/장바구니 완료 선택 UI 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실재고·장바구니 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "inquiry_07",
+      "excel_row": 94,
+      "safe_summary": "문의 필수 오류 보존과 등록 결과·목록 이동",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "INQ",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "inquiry_08",
+      "excel_row": 95,
+      "safe_summary": "최신순10개 문의 페이지와 현재 페이지 표시",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "INQ"
+      ]
+    },
+    {
+      "source_id": "inquiry_09",
+      "excel_row": 96,
+      "safe_summary": "해당 판매자만 답변 등록/수정·삭제 금지",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "INQ"
+      ]
+    },
+    {
+      "source_id": "browse_09",
+      "excel_row": 97,
+      "safe_summary": "장바구니 편집·선택삭제·복수 주문",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 원문 개별 장바구니 선택/복수결제 전용 기능 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 판매·PG·재고 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "groupbuy_08",
+      "excel_row": 98,
+      "safe_summary": "주문 목록에서 모집/성사/미성사 상세 연결",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 무결제 모집 내역과 실주문 배송/환불 상세 연결은 다름",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 주문·배송·PG",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "recommend_04",
+      "excel_row": 99,
+      "safe_summary": "선물 고민의 보유품·예산·일정 단계 질문",
+      "satisfied_current_conditions": "승인 corpus+공개 tools·출처/checked-at·근거 선택/검색/보류 구분. 고정 합성40건 실제 local model 실행, citation validity/contract 1.0",
+      "additional_software_or_execution": "원문 단계별 선물 시나리오와 모든 조건전환의 실제 대화 수용은 전부 기록되지 않음. 자동 citation 검사는 사람의 의미적 groundedness 평가를 대신하지 않음.",
+      "superseded_or_currently_inactive": "일반 대화+기존 조건 찾기 제공. 실재고/실가격/배송/공구 성사를 보장하지 않음.",
+      "genuine_external_dependencies": "실판매 조건을 답하려면 검증된 공급 자료",
+      "evidence": [
+        "MODEL40",
+        "PG",
+        "UI:actual_model_privacy_question"
+      ]
+    },
+    {
+      "source_id": "recommend_05",
+      "excel_row": 100,
+      "safe_summary": "조건 없는 고민에 상황·카테고리·예산·방식 안내",
+      "satisfied_current_conditions": "승인 corpus+공개 tools·출처/checked-at·근거 선택/검색/보류 구분. 고정 합성40건 실제 local model 실행, citation validity/contract 1.0",
+      "additional_software_or_execution": "원문 단계별 선물 시나리오와 모든 조건전환의 실제 대화 수용은 전부 기록되지 않음. 자동 citation 검사는 사람의 의미적 groundedness 평가를 대신하지 않음.",
+      "superseded_or_currently_inactive": "일반 대화+기존 조건 찾기 제공. 실재고/실가격/배송/공구 성사를 보장하지 않음.",
+      "genuine_external_dependencies": "실판매 조건을 답하려면 검증된 공급 자료",
+      "evidence": [
+        "MODEL40",
+        "PG",
+        "UI:actual_model_privacy_question"
+      ]
+    },
+    {
+      "source_id": "community_04",
+      "excel_row": 101,
+      "safe_summary": "본인 상단 관리와 수정/삭제 확인·독립 시각",
+      "satisfied_current_conditions": "본인 글/댓글 CRUD·revision 충돌·타인 거절·interest/최초시각 보존 실제 PG; 작성/수정 분리 실제 UI 확인",
+      "additional_software_or_execution": "삭제 취소/서버 오류의 실제 브라우저 입력 보존 관찰은 추가 여지",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "PG",
+        "UI:create_and_edit_question",
+        "COM"
+      ]
+    },
+    {
+      "source_id": "community_05",
+      "excel_row": 102,
+      "safe_summary": "신고 화면의 글/댓글 원문 링크·안전 미리보기",
+      "satisfied_current_conditions": "글/댓글 exact target·안전 preview·사유 위 원문 링크·댓글 page/anchor·HTML escape; 신고 quota와 target/notice 실제 PG",
+      "additional_software_or_execution": "신고 링크→입력→실패 보존의 실제 browser 전수 흐름 미기록",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "MOD",
+        "PG",
+        "UI",
+        "REMOVE57"
+      ]
+    },
+    {
+      "source_id": "product_manage_07",
+      "excel_row": 103,
+      "safe_summary": "상품 등록에서 개별/공구 방식별 화면 분기",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 보존 모집 등록은 양 방식 전체 상품 등록 UI가 아님",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 판매 유형·상품 정보",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "product_manage_08",
+      "excel_row": 104,
+      "safe_summary": "옵션·구성·추가금·방식별 재고 합계 검증",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 전용 옵션/판매 재고 배정 원장 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실재고·가격·판매 단위 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "product_manage_09",
+      "excel_row": 105,
+      "safe_summary": "대표/상세 파일의 실제 형식·크기·수량·해상도 검증",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "원문 업무 활성화 시 실제 상품 활성화는 별도이며 파일 안전에는 불필요",
+      "evidence": [
+        "FILE",
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "product_manage_10",
+      "excel_row": 106,
+      "safe_summary": "기본/추가 배송비·발송·반품 조건 입력/고지",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 실제 조건 입력/버전 저장·양 방식 고지 전용 UI 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "판매자 배송/반품 운영 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "product_manage_11",
+      "excel_row": 107,
+      "safe_summary": "누락 검토·등록 결과·공구 조건 보존",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 제출 시 파일/필수정보 재검증 통합 중; 전체 검토 UI/공구 조건 복귀 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 상품 검토·판매 승인",
+      "evidence": [
+        "OLD",
+        "FILE"
+      ]
+    },
+    {
+      "source_id": "groupbuy_09",
+      "excel_row": 108,
+      "safe_summary": "개별 주문 결제·발송·배송 현황과 상세",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 실제 개별 주문 판매 현황 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실결제·물류·판매자 업무",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "delivery_03",
+      "excel_row": 109,
+      "safe_summary": "택배사·운송장 필수 입력 후 발송 처리",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 원문 택배사 선택·운송장/발송 상태 전용 기능 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "택배사 목록·실발송 정책",
+      "evidence": []
+    },
+    {
+      "source_id": "delivery_04",
+      "excel_row": 110,
+      "safe_summary": "정확한 주문 배송정보와 실제 단계 시각",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 주문별 배송 이력·실제 단계 시각 미제공; 기본 예시 대체 금지 유지",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "물류 데이터·실주문",
+      "evidence": []
+    },
+    {
+      "source_id": "delivery_05",
+      "excel_row": 111,
+      "safe_summary": "취소/반품 접수·C/S메모·환불 확인 후 완료",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 실C/S 상태·처리 기록/시각·공식 환불 확인 전용 흐름 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "반품·CS·PG 운영 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "seller_manage_02",
+      "excel_row": 112,
+      "safe_summary": "PC 업무 메뉴 유지와 자료 팝업 후 심사 초안 보존",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "원문 업무 활성화 시 실제 심사 업무 활성화",
+      "evidence": [
+        "OLD",
+        "FILE",
+        "MOBILE",
+        "UI"
+      ]
+    },
+    {
+      "source_id": "seller_manage_03",
+      "excel_row": 113,
+      "safe_summary": "사업 자료 심사와 결과·사유·운영자·시각 기록",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "원문 업무 활성화 시 실제 사업자 증빙·심사 정책",
+      "evidence": [
+        "OLD",
+        "FILE"
+      ]
+    },
+    {
+      "source_id": "member_manage_02",
+      "excel_row": 114,
+      "safe_summary": "정확한 계정의 역할/정지 변경·필수 사유",
+      "satisfied_current_conditions": "신규 frontend 회원목록/상세·닉네임/ID/role/status·가입일 기간·가입/최근변경 KST 분리·목록 URL/return 보존 구현. reason/revision·본인password 또는 일회socialproof·exact target/state 확인·권한확대 경고·자기변경/운영자정지 차단. 실제 form callback+SSR 회귀 포함 좁은98 tests PASS.",
+      "additional_software_or_execution": "메인 소유 backend API 통합·실제 PostgreSQL 회원변경/세션폐기·합성계정 browser 수용 및 최종suite/build/배포 연결 필요. 실제 운영계정 role grant는 실행하지 않음.",
+      "superseded_or_currently_inactive": "판매자 추가역할의 업무 활성화만 비활성 상거래로 분리",
+      "genuine_external_dependencies": "역할 부여 운영 규칙은 제품 결정이며 외부 계약은 필수가 아님",
+      "evidence": [
+        "AUTH",
+        "MOD",
+        "MOBILE",
+        "MEMBER98"
+      ]
+    },
+    {
+      "source_id": "member_manage_03",
+      "excel_row": 115,
+      "safe_summary": "여러 운영 업무의 대상·사유·처리주체·시각 이력",
+      "satisfied_current_conditions": "기존 신고이력에 더해 frontend 회원변경 이력의 exact member/actor ID·사유·before/after·실제 처리일 KST 구현. history_limit20/offset/기간 URL/이전다음으로 오래된 기록 접근 지원. 좁은98 tests PASS.",
+      "additional_software_or_execution": "메인 소유 backend 회원변경 이력·실제 PostgreSQL·합성계정 browser 통합 검증과 최종산출물 연결 필요.",
+      "superseded_or_currently_inactive": "판매자 심사·상품 검토·PG환불의 통합이력은 현재 비활성 상거래",
+      "genuine_external_dependencies": "실거래 업무에만 실제 사업/PG 결과 필요",
+      "evidence": [
+        "MOD",
+        "PG",
+        "MEMBER98"
+      ]
+    },
+    {
+      "source_id": "product_manage_12",
+      "excel_row": 116,
+      "safe_summary": "고지·가격·인증 검토와 판매자 처리 안내",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 게시 심사 외 실제 고지/가격/인증 검토와 판매자 안내 전용 기능 미완",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실증빙·판매 검토 정책",
+      "evidence": [
+        "OLD",
+        "FILE"
+      ]
+    },
+    {
+      "source_id": "operation_03",
+      "excel_row": 117,
+      "safe_summary": "PG 확인 결과 필수·실패 재처리·중복환불 방지",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 결제사 조회·결과 필수 입력·멱등 재요청 전용 기능 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "PG 공식 조회/환불·운영 권한",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "operation_04",
+      "excel_row": 118,
+      "safe_summary": "정확한 신고 원문·대상에 숨김/삭제/무조치/정지",
+      "satisfied_current_conditions": "hide/remove/dismiss/suspend 별도 선택·사유·exact 대상/actor/time 구현. remove form 확인·취소·실패57 좁은 시험 통과",
+      "additional_software_or_execution": "추가 remove backend/공개 미노출의 최종 통합 및 실제 운영자 browser 검증은 메인 소유",
+      "superseded_or_currently_inactive": "판매자 평가는 현재 비활성",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "MOD",
+        "REMOVE57",
+        "PG"
+      ]
+    },
+    {
+      "source_id": "operation_05",
+      "excel_row": 119,
+      "safe_summary": "다음 로그인 시 안전한 조치 안내와 확인 상태",
+      "satisfied_current_conditions": "notice pending_only를 pagination 전에 서버 필터; ack 후 다음 미확인 재조회+has_more 안내; exact target·타계정 ack 거절·중복 ack PG 검증",
+      "additional_software_or_execution": "새 pending pagination의 25건 실제 UI 전수 확인은 미기록",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "MOD",
+        "NOTICE",
+        "PG"
+      ]
+    },
+    {
+      "source_id": "login_06",
+      "excel_row": 120,
+      "safe_summary": "앱 운영자 로그인/세션 차단과 PC 안내",
+      "satisfied_current_conditions": "PC admin API·role 검사·공식 mobile 이메일/social claim session 차단 코드/시험; frontend Native cleanup·old token callback 회귀",
+      "additional_software_or_execution": "실제 Android 로그인·소셜 왕복 관찰은 미실행",
+      "superseded_or_currently_inactive": "판매자 업무 이동은 현재 공개 동선 제외",
+      "genuine_external_dependencies": "실제 Android 기기·실 provider credentials",
+      "evidence": [
+        "MOBILE",
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "product_12",
+      "excel_row": 121,
+      "safe_summary": "선택 상품/판매자/방식/옵션/금액의 전 과정 일치",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 참조 상세 ID는 유지; 옵션→실결제→배송/평가 전체 문맥 미제공",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "실제 양 방식 거래 데이터",
+      "evidence": [
+        "CAT",
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "recommend_06",
+      "excel_row": 122,
+      "safe_summary": "빈/공백 질문 전송 금지·명시적 질문 흐름",
+      "satisfied_current_conditions": "공백/짧은/과대 질문을 UI와 transport/server에서 제한; 무효 질문은 POST 전 거절",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "별도 quick-question 상태 화면은 현재 일반 composer로 대체",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "CHAT31",
+        "CHAT"
+      ]
+    },
+    {
+      "source_id": "seller_apply_03",
+      "excel_row": 123,
+      "safe_summary": "정산 필수값·소유 통장 증빙과 누락 입력 보존",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "원문 업무 활성화 시 실제 정산 업무·개인정보 보관 정책",
+      "evidence": [
+        "FILE",
+        "OLD",
+        "AUTH"
+      ]
+    },
+    {
+      "source_id": "seller_apply_04",
+      "excel_row": 124,
+      "safe_summary": "심사중 신청 철회·심사 중단·재신청·구매 유지",
+      "satisfied_current_conditions": "",
+      "additional_software_or_execution": "원문 전용 구현 잔여: 기존 초안/제출 상태는 있으나 원문 철회 확인/원자적 중단·재신청 전용 근거 미확인",
+      "superseded_or_currently_inactive": "현재 공개 커뮤니티에서 비활성인 상거래 조건. 현재 커뮤니티 완료 분모에 넣지 않되 원문 미구현을 보존.",
+      "genuine_external_dependencies": "심사 철회 운영 정책",
+      "evidence": [
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "recommend_07",
+      "excel_row": 125,
+      "safe_summary": "확인 후 대화 종료/삭제·실패 시 성공 오표시 금지",
+      "satisfied_current_conditions": "종료/삭제 명시 확인·취소·실패 보존·늦은 응답 부활 차단; 실제 PostgreSQL end/optout/expiry/erase race 검증",
+      "additional_software_or_execution": "종료·삭제의 모든 실제 브라우저 확인/취소/오류 조작은 UI 기록에 미포함",
+      "superseded_or_currently_inactive": "",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "PG",
+        "CHAT",
+        "CHAT31"
+      ]
+    },
+    {
+      "source_id": "recommend_08",
+      "excel_row": 126,
+      "safe_summary": "계정별 대화 유지·재로그인 이어가기·타계정 비노출",
+      "satisfied_current_conditions": "명시 opt-in 저장·reload/resume 실제 UI; 독립 세션 재개·IDOR·30일 만료 물리 삭제·logout/erase race 실제 PostgreSQL 검증",
+      "additional_software_or_execution": "",
+      "superseded_or_currently_inactive": "원문 자동계정보관은 off 기본+30일+수동 resume으로 대체",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "PG",
+        "UI:saved_chat_reload_resume",
+        "CHAT31"
+      ]
+    },
+    {
+      "source_id": "seller_manage_04",
+      "excel_row": 127,
+      "safe_summary": "신청과 일치하는 파일 목록·원본 권한 다운로드·실패 구분",
+      "satisfied_current_conditions": "보존 API의 입력·파일바이트/소유권·비공개 문의 ACL·revision·정리 시험 참조. 현재 공개 커뮤니티 UI와 분리.",
+      "additional_software_or_execution": "공개 상거래 UI 미연결을 구현 완료로 세지 않음; 기존 API 안전 검증은 최종 backend suite에 포함.",
+      "superseded_or_currently_inactive": "상품 문의·판매자 신청/심사/파일 팝업의 업무 UI는 현재 비활성 상거래.",
+      "genuine_external_dependencies": "원문 업무 활성화 시 실제 심사 자료·업무 활성화",
+      "evidence": [
+        "FILE",
+        "OLD"
+      ]
+    },
+    {
+      "source_id": "history_01",
+      "excel_row": 128,
+      "safe_summary": "한국 날짜 양끝 포함·기준 사건별 기간·목록/입력 보존",
+      "satisfied_current_conditions": "피드/내활동/신고의 URL 기간·한국 양끝 포함·역전 기존목록/URL 보존·최초작성 기준·page reset/유지. 실제 PG와 실제 UI 양쪽 검증 회원목록 가입일/최근변경일 분리와 가입일 기간, 회원변경 이력 처리일 기간/페이지 frontend도 추가해 좁은98 tests 통과.",
+      "additional_software_or_execution": "신규 회원관리 backend/PG/UI 통합 검증은 메인 소유. 기존 stale목록의 실제 browser 오류 관찰 및 최종 배포 연결은 별도.",
+      "superseded_or_currently_inactive": "거래/송장/마일리지 기간조건은 현재 비활성",
+      "genuine_external_dependencies": "",
+      "evidence": [
+        "PG",
+        "UI:date_range_invalid",
+        "UI:date_range_inclusive",
+        "COM",
+        "MEMBER98"
+      ]
+    },
+    {
+      "source_id": "content_time_01",
+      "excel_row": 129,
+      "safe_summary": "실제 등록/가입/접수/처리/수정시각을 구분해 표시",
+      "satisfied_current_conditions": "community·activity·report·notice KST YYYY.MM.DD HH:mm 및 created/updated/action 구분. 최초시각 보존 PG+UI 확인 회원목록 가입일/최근변경일 분리와 가입일 기간, 회원변경 이력 처리일 기간/페이지 frontend도 추가해 좁은98 tests 통과.",
+      "additional_software_or_execution": "신규 회원관리 backend/PG/UI 통합 검증은 메인 소유. 기존 stale목록의 실제 browser 오류 관찰 및 최종 배포 연결은 별도.",
+      "superseded_or_currently_inactive": "실거래/심사/송장·PG완료 시각은 현재 비활성",
+      "genuine_external_dependencies": "실PG시각은 실제 PG 결과가 필요",
+      "evidence": [
+        "PG",
+        "UI:create_and_edit_question",
+        "UI:my_activity_posts_comments",
+        "MOD",
+        "MEMBER98"
+      ]
+    }
+  ]
+}

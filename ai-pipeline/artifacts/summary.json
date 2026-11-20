@@ -1,0 +1,945 @@
+{
+  "generated_at": "2026-11-01T06:58:40.525903+00:00",
+  "experimental": true,
+  "source_check_date": "2026-11-01",
+  "sources": [
+    {
+      "id": "D1",
+      "key": "01_ecommerce_behavior",
+      "name": "Ecommerce Consumer Behavior Analysis Data",
+      "url": "https://www.kaggle.com/datasets/salahuddinahmedshuvo/ecommerce-consumer-behavior-analysis-data",
+      "rows": 1000,
+      "cols": 28,
+      "period": "2024-01-01~2024-12-30",
+      "grain": "고객 1명당 1행",
+      "license": "CC BY 4.0",
+      "role": "구매성향 분류 실습",
+      "note": "실제 조사·수집 방법 미확인, 직업 컬럼 이상"
+    },
+    {
+      "id": "D2",
+      "key": "02_kaggle_retail",
+      "name": "Online Retail Transaction Data",
+      "url": "https://www.kaggle.com/datasets/thedevastator/online-retail-transaction-data",
+      "rows": 541909,
+      "cols": 9,
+      "period": "2010-12-01~2011-12-09",
+      "grain": "송장 안의 상품 1개 항목",
+      "license": "Other, 세부 조건 불명확",
+      "role": "거래 분석 CSV 실습",
+      "note": "D3의 두 번째 시트와 541,909행 전부 일치"
+    },
+    {
+      "id": "D3",
+      "key": "03_uci_retail_ii",
+      "name": "Online Retail II",
+      "url": "https://archive.ics.uci.edu/dataset/502/online+retail+ii",
+      "rows": 1067371,
+      "cols": 8,
+      "period": "2009-12-01~2011-12-09",
+      "grain": "송장 안의 상품 1개 항목",
+      "license": "CC BY 4.0",
+      "role": "인기상품·RFM·묶음 추천 주 데이터",
+      "note": "영국 선물용품 소매·도매 혼합, 2개 시트 기간 겹침"
+    },
+    {
+      "id": "D4",
+      "key": "04_uci_shoppers",
+      "name": "Online Shoppers Purchasing Intention",
+      "url": "https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset",
+      "rows": 12330,
+      "cols": 18,
+      "period": "1년간 세션, 정확한 연도 미확인",
+      "grain": "방문 세션 1개",
+      "license": "CC BY 4.0",
+      "role": "세션 구매 여부 분류 실험",
+      "note": "17개 입력 특성+Revenue 정답 1개, 상품 ID 없음"
+    }
+  ],
+  "source_hashes": [
+    {
+      "path": "raw/04_uci_shoppers/online_shoppers_intention.csv",
+      "bytes": 1072063,
+      "sha256": "b3055ee355f59134d851d32641183cb4a8b45def7124d2f50442a042f358e0d9",
+      "origin": "https://archive.ics.uci.edu/static/public/468/online%2Bshoppers%2Bpurchasing%2Bintention%2Bdataset.zip",
+      "original_download_sha256": "b3055ee355f59134d851d32641183cb4a8b45def7124d2f50442a042f358e0d9",
+      "copy_note": "original unchanged",
+      "original_download_date": "2026-10-30",
+      "current_check": "local file hash 2026-11-01; no new source download"
+    },
+    {
+      "path": "raw/03_uci_retail_ii/online_retail_II.xlsx",
+      "bytes": 39146386,
+      "sha256": "b1038e950f7d800a6dbe96104f28bdcbf7c733642964ae4476756d7b13e672d5",
+      "origin": "https://archive.ics.uci.edu/static/public/502/online%2Bretail%2Bii.zip",
+      "original_download_sha256": "bcbe73b35f5b7babf197fb0cb983a11f5d9ff929078d4aa53d171b1f2df2e980",
+      "copy_note": "사용자 절대 경로 메타데이터 absPath 1개만 제거한 사본입니다. 워크시트와 셀 데이터는 원본과 같습니다.",
+      "original_download_date": "2026-10-30",
+      "current_check": "local file hash 2026-11-01; no new source download"
+    },
+    {
+      "path": "raw/01_ecommerce_behavior/Ecommerce_Consumer_Behavior_Analysis_Data.csv",
+      "bytes": 194153,
+      "sha256": "d7b3ef48cae922ad5ee8825238c6c335b1f1486f2d45dc72d81390e32457a215",
+      "origin": "https://www.kaggle.com/api/v1/datasets/download/salahuddinahmedshuvo/ecommerce-consumer-behavior-analysis-data",
+      "original_download_sha256": "d7b3ef48cae922ad5ee8825238c6c335b1f1486f2d45dc72d81390e32457a215",
+      "copy_note": "original unchanged",
+      "original_download_date": "2026-10-30",
+      "current_check": "local file hash 2026-11-01; no new source download"
+    },
+    {
+      "path": "raw/02_kaggle_retail/online_retail.csv",
+      "bytes": 49543683,
+      "sha256": "f44850609552baed16ccd007633833246d651a906e2ef1642346c3a0aa1e4d6f",
+      "origin": "https://www.kaggle.com/api/v1/datasets/download/thedevastator/online-retail-transaction-data",
+      "original_download_sha256": "f44850609552baed16ccd007633833246d651a906e2ef1642346c3a0aa1e4d6f",
+      "copy_note": "원본 파일과 바이트 단위로 같습니다.",
+      "original_download_date": "2026-10-30",
+      "current_check": "local file hash 2026-11-01; no new source download"
+    }
+  ],
+  "materials": {
+    "files_inventoried": 229,
+    "requirements_read": 101,
+    "company_documents_read": 1
+  },
+  "d1": {
+    "rows": 1000,
+    "columns": 28,
+    "categories": [
+      {
+        "category": "Electronics",
+        "customers": 54
+      },
+      {
+        "category": "Sports & Outdoors",
+        "customers": 51
+      },
+      {
+        "category": "Home Appliances",
+        "customers": 50
+      },
+      {
+        "category": "Jewelry & Accessories",
+        "customers": 50
+      },
+      {
+        "category": "Toys & Games",
+        "customers": 47
+      },
+      {
+        "category": "Gardening & Outdoors",
+        "customers": 44
+      },
+      {
+        "category": "Food & Beverages",
+        "customers": 44
+      },
+      {
+        "category": "Animal Feed",
+        "customers": 44
+      },
+      {
+        "category": "Packages)",
+        "customers": 43
+      },
+      {
+        "category": "Software & Apps",
+        "customers": 43
+      },
+      {
+        "category": "Furniture",
+        "customers": 41
+      },
+      {
+        "category": "Mobile Accessories",
+        "customers": 41
+      },
+      {
+        "category": "Health Care",
+        "customers": 41
+      },
+      {
+        "category": "Baby Products",
+        "customers": 41
+      },
+      {
+        "category": "Health Supplements",
+        "customers": 41
+      },
+      {
+        "category": "Groceries",
+        "customers": 41
+      },
+      {
+        "category": "Office Supplies",
+        "customers": 38
+      },
+      {
+        "category": "Travel & Leisure (Flights",
+        "customers": 38
+      },
+      {
+        "category": "Books",
+        "customers": 37
+      },
+      {
+        "category": "Luxury Goods",
+        "customers": 37
+      },
+      {
+        "category": "Hotels",
+        "customers": 36
+      },
+      {
+        "category": "Arts & Crafts",
+        "customers": 34
+      },
+      {
+        "category": "Beauty & Personal Care",
+        "customers": 34
+      },
+      {
+        "category": "Clothing",
+        "customers": 30
+      }
+    ],
+    "discount_sensitivity": {
+      "Very Sensitive": 350,
+      "Not Sensitive": 331,
+      "Somewhat Sensitive": 319
+    },
+    "discount_channel": [
+      {
+        "sensitivity": "Not Sensitive",
+        "channel": "In-Store",
+        "customers": 114
+      },
+      {
+        "sensitivity": "Not Sensitive",
+        "channel": "Mixed",
+        "customers": 111
+      },
+      {
+        "sensitivity": "Not Sensitive",
+        "channel": "Online",
+        "customers": 106
+      },
+      {
+        "sensitivity": "Somewhat Sensitive",
+        "channel": "In-Store",
+        "customers": 103
+      },
+      {
+        "sensitivity": "Somewhat Sensitive",
+        "channel": "Mixed",
+        "customers": 114
+      },
+      {
+        "sensitivity": "Somewhat Sensitive",
+        "channel": "Online",
+        "customers": 102
+      },
+      {
+        "sensitivity": "Very Sensitive",
+        "channel": "In-Store",
+        "customers": 109
+      },
+      {
+        "sensitivity": "Very Sensitive",
+        "channel": "Mixed",
+        "customers": 115
+      },
+      {
+        "sensitivity": "Very Sensitive",
+        "channel": "Online",
+        "customers": 126
+      }
+    ],
+    "none_categories_preserved": {
+      "Social_Media_Influence": 247,
+      "Engagement_with_Ads": 256
+    },
+    "application": "선택 관심사·쿠폰/혜택 탐색 UI의 세분화 근거. 할인 민감도는 추정 가입 속성이 아니라 명시 선택이며 할인 효과를 주장하지 않음.",
+    "limitations": [
+      "수집·표집·실측/합성 여부 미확인",
+      "Occupation이 High/Middle이므로 직업 타기팅에서 제외",
+      "Purchase_Intent는 구매 여부가 아닌 명목 범주",
+      "국내 육아 시장으로 일반화 불가"
+    ]
+  },
+  "retail": {
+    "audit": {
+      "method": "actual exact 8-column canonical tuple multiset, multiplicity preserved; no concatenation",
+      "d2_rows": 541909,
+      "d3_rows": 1067371,
+      "d3_second_sheet_rows": 541910,
+      "matched_rows": 541909,
+      "d2_only_rows": 0,
+      "d3_second_sheet_only_rows": 1,
+      "extra_rows_nonpersonal": [
+        {
+          "InvoiceNo": "581587",
+          "StockCode": "POST",
+          "Description": "POSTAGE",
+          "quantity": "1",
+          "date": "2011-12-09 12:50:00",
+          "unit_price": "18",
+          "country": "France",
+          "multiplicity": 1
+        }
+      ],
+      "d2_duplicate_business_rows": 5268,
+      "d3_duplicate_business_rows": 34335,
+      "sheet_counts": {
+        "Year 2009-2010": 525461,
+        "Year 2010-2011": 541910
+      },
+      "normalized_sha256": "366d3fa614325357e8b235979f27b5a947cb00048b6b56bc72869a1b7fd15054",
+      "source_mapping_verified": "restored XLSX manifest hash (absPath removed) + normalized manifest hash + exact contiguous source sheet row mapping"
+    },
+    "eligible_product_rows": 1003213,
+    "invoices": 39516,
+    "products": 4877,
+    "monthly": [
+      {
+        "month": "2009-12",
+        "invoices": 1666,
+        "units": 425189,
+        "positive_sales_gbp": 797738.02,
+        "partial_month": false
+      },
+      {
+        "month": "2010-01",
+        "invoices": 1049,
+        "units": 390408,
+        "positive_sales_gbp": 612271.2,
+        "partial_month": false
+      },
+      {
+        "month": "2010-02",
+        "invoices": 1189,
+        "units": 381619,
+        "positive_sales_gbp": 537893.54,
+        "partial_month": false
+      },
+      {
+        "month": "2010-03",
+        "invoices": 1647,
+        "units": 525030,
+        "positive_sales_gbp": 761665.6199999999,
+        "partial_month": false
+      },
+      {
+        "month": "2010-04",
+        "invoices": 1435,
+        "units": 366057,
+        "positive_sales_gbp": 646233.18,
+        "partial_month": false
+      },
+      {
+        "month": "2010-05",
+        "invoices": 1484,
+        "units": 395435,
+        "positive_sales_gbp": 643474.2799999999,
+        "partial_month": false
+      },
+      {
+        "month": "2010-06",
+        "invoices": 1612,
+        "units": 406197,
+        "positive_sales_gbp": 696439.47,
+        "partial_month": false
+      },
+      {
+        "month": "2010-07",
+        "invoices": 1507,
+        "units": 337547,
+        "positive_sales_gbp": 632967.38,
+        "partial_month": false
+      },
+      {
+        "month": "2010-08",
+        "invoices": 1402,
+        "units": 471930,
+        "positive_sales_gbp": 674036.87,
+        "partial_month": false
+      },
+      {
+        "month": "2010-09",
+        "invoices": 1789,
+        "units": 583362,
+        "positive_sales_gbp": 869224.4400000001,
+        "partial_month": false
+      },
+      {
+        "month": "2010-10",
+        "invoices": 2244,
+        "units": 619493,
+        "positive_sales_gbp": 1094357.6799999997,
+        "partial_month": false
+      },
+      {
+        "month": "2010-11",
+        "invoices": 2719,
+        "units": 724226,
+        "positive_sales_gbp": 1429553.47,
+        "partial_month": false
+      },
+      {
+        "month": "2010-12",
+        "invoices": 1550,
+        "units": 357523,
+        "positive_sales_gbp": 775572.2300000001,
+        "partial_month": false
+      },
+      {
+        "month": "2011-01",
+        "invoices": 1081,
+        "units": 386736,
+        "positive_sales_gbp": 670361.99,
+        "partial_month": false
+      },
+      {
+        "month": "2011-02",
+        "invoices": 1093,
+        "units": 282622,
+        "positive_sales_gbp": 507783.42,
+        "partial_month": false
+      },
+      {
+        "month": "2011-03",
+        "invoices": 1440,
+        "units": 376144,
+        "positive_sales_gbp": 689708.4900000001,
+        "partial_month": false
+      },
+      {
+        "month": "2011-04",
+        "invoices": 1235,
+        "units": 307647,
+        "positive_sales_gbp": 515354.78,
+        "partial_month": false
+      },
+      {
+        "month": "2011-05",
+        "invoices": 1668,
+        "units": 394641,
+        "positive_sales_gbp": 739914.3500000001,
+        "partial_month": false
+      },
+      {
+        "month": "2011-06",
+        "invoices": 1525,
+        "units": 388124,
+        "positive_sales_gbp": 737558.9800000001,
+        "partial_month": false
+      },
+      {
+        "month": "2011-07",
+        "invoices": 1452,
+        "units": 399263,
+        "positive_sales_gbp": 688144.79,
+        "partial_month": false
+      },
+      {
+        "month": "2011-08",
+        "invoices": 1339,
+        "units": 420689,
+        "positive_sales_gbp": 724196.76,
+        "partial_month": false
+      },
+      {
+        "month": "2011-09",
+        "invoices": 1818,
+        "units": 568698,
+        "positive_sales_gbp": 1028313.8,
+        "partial_month": false
+      },
+      {
+        "month": "2011-10",
+        "invoices": 2005,
+        "units": 619596,
+        "positive_sales_gbp": 1103310.96,
+        "partial_month": false
+      },
+      {
+        "month": "2011-11",
+        "invoices": 2751,
+        "units": 746951,
+        "positive_sales_gbp": 1452112.69,
+        "partial_month": false
+      },
+      {
+        "month": "2011-12",
+        "invoices": 816,
+        "units": 312646,
+        "positive_sales_gbp": 614487.63,
+        "partial_month": true
+      }
+    ],
+    "rfm": {
+      "customers": 5852,
+      "reference_date": "2011-12-10",
+      "quantiles": {
+        "recency_days": {
+          "0.25": 26.0,
+          "0.5": 96.0,
+          "0.75": 380.0,
+          "0.9": 531.0
+        },
+        "frequency": {
+          "0.25": 1.0,
+          "0.5": 3.0,
+          "0.75": 7.0,
+          "0.9": 13.0
+        },
+        "monetary": {
+          "0.25": 339.575,
+          "0.5": 856.02,
+          "0.75": 2241.03,
+          "0.9": 5392.771000000007
+        }
+      },
+      "no_customer_rows_exported": true
+    },
+    "demand_backtest": {
+      "target": "monthly positive sold units, not latent market demand",
+      "test_months": 11,
+      "evaluation": "expanding rolling origin; each prediction uses only prior months; no parameter fitting or test-based model selection",
+      "observations": [
+        {
+          "month": "2011-01",
+          "actual_units": 386736,
+          "previous_month_units": 357523,
+          "seasonal_12month_units": 390408
+        },
+        {
+          "month": "2011-02",
+          "actual_units": 282622,
+          "previous_month_units": 386736,
+          "seasonal_12month_units": 381619
+        },
+        {
+          "month": "2011-03",
+          "actual_units": 376144,
+          "previous_month_units": 282622,
+          "seasonal_12month_units": 525030
+        },
+        {
+          "month": "2011-04",
+          "actual_units": 307647,
+          "previous_month_units": 376144,
+          "seasonal_12month_units": 366057
+        },
+        {
+          "month": "2011-05",
+          "actual_units": 394641,
+          "previous_month_units": 307647,
+          "seasonal_12month_units": 395435
+        },
+        {
+          "month": "2011-06",
+          "actual_units": 388124,
+          "previous_month_units": 394641,
+          "seasonal_12month_units": 406197
+        },
+        {
+          "month": "2011-07",
+          "actual_units": 399263,
+          "previous_month_units": 388124,
+          "seasonal_12month_units": 337547
+        },
+        {
+          "month": "2011-08",
+          "actual_units": 420689,
+          "previous_month_units": 399263,
+          "seasonal_12month_units": 471930
+        },
+        {
+          "month": "2011-09",
+          "actual_units": 568698,
+          "previous_month_units": 420689,
+          "seasonal_12month_units": 583362
+        },
+        {
+          "month": "2011-10",
+          "actual_units": 619596,
+          "previous_month_units": 568698,
+          "seasonal_12month_units": 619493
+        },
+        {
+          "month": "2011-11",
+          "actual_units": 746951,
+          "previous_month_units": 619596,
+          "seasonal_12month_units": 724226
+        }
+      ],
+      "models": {
+        "previous_month_units": {
+          "mae_units": 67971.27272727272,
+          "wape": 0.15286588261848894
+        },
+        "seasonal_12month_units": {
+          "mae_units": 43571.0,
+          "wape": 0.09799021122194937
+        }
+      },
+      "limitations": [
+        "24 full months only",
+        "no inventory/stockout/exposure/price covariates",
+        "aggregate UK gifts/wholesale",
+        "2011-12 excluded as partial month",
+        "no current childcare demand forecast"
+      ]
+    },
+    "bundle_rule_count": 7242,
+    "bundle_evaluation": {
+      "task": "chronological held-out UK invoice basket completion, one deterministic held-out item, top100 train universe; remaining basket known",
+      "train_invoices": 28947,
+      "test_invoices": 7237,
+      "eligible_test_baskets": 4338,
+      "train_last": "2011-08-16T13:05:00",
+      "test_first": "2011-08-16T13:12:00",
+      "rules_recall_at_5": 0.36214845550945135,
+      "popularity_recall_at_5": 0.10557860765329645,
+      "rules_mrr_at_5": 0.22760104502843206,
+      "popularity_mrr_at_5": 0.056285538650683885,
+      "limitations": [
+        "conditional on baskets with at least 2 training top100 items",
+        "same historical customer may recur; no new-customer claim",
+        "within-invoice completion is not next-order prediction",
+        "no Korean childcare validation"
+      ]
+    },
+    "limitations": [
+      "historical UK gifts including wholesale, not Korean baby goods",
+      "positive sales exclude cancellations and are not net revenue",
+      "2011-12 is partial through December 9",
+      "quantity is units, not group-buy people",
+      "D2 is not appended to D3"
+    ]
+  },
+  "intent": {
+    "rows": 12330,
+    "positive_labels": 1908,
+    "label_prevalence": 0.15474452554744525,
+    "features": [
+      "Administrative",
+      "Administrative_Duration",
+      "Informational",
+      "Informational_Duration",
+      "ProductRelated",
+      "ProductRelated_Duration",
+      "SpecialDay",
+      "Weekend"
+    ],
+    "excluded_features": [
+      "BounceRates",
+      "ExitRates",
+      "PageValues",
+      "Month",
+      "OperatingSystems",
+      "Browser",
+      "Region",
+      "TrafficType",
+      "VisitorType"
+    ],
+    "seed": 20261101,
+    "split_method": "60/20/20 grouped by all selected feature values (not label); GroupShuffleSplit; validation selects model, test never selects",
+    "duplicate_full_rows": 125,
+    "duplicate_selected_feature_rows": 846,
+    "feature_group_overlap": 0,
+    "splits": {
+      "train": {
+        "rows": 7219,
+        "positive_labels": 1076,
+        "prevalence": 0.1490511151128965,
+        "indices_sha256": "7f930647f60121c8fb46324410e36ccb3931a120b8161d1ea3e9019789f09d3c"
+      },
+      "validation": {
+        "rows": 2365,
+        "positive_labels": 414,
+        "prevalence": 0.17505285412262156,
+        "indices_sha256": "cf239ade15886cdf5aca9e70e0f87ae947afea2072cd99bc745060708741e4b1"
+      },
+      "test": {
+        "rows": 2746,
+        "positive_labels": 418,
+        "prevalence": 0.15222141296431171,
+        "indices_sha256": "4e0bb3b8050b28e3ad6d47ff5c092f0b147e38dbba11042664cd4a7dbf0ec2b6"
+      }
+    },
+    "models": {
+      "dummy_prevalence": {
+        "validation": {
+          "auroc": 0.5,
+          "pr_auc_average_precision": 0.17505285412262156,
+          "brier": 0.1450854428176756,
+          "log_loss": 0.466356275251373,
+          "ece_10bins": 0.02600173900972505,
+          "calibration_bins": [
+            {
+              "lower": 0.1,
+              "count": 2365,
+              "mean_probability": 0.1490511151128965,
+              "observed_rate": 0.17505285412262156
+            }
+          ]
+        },
+        "test": {
+          "auroc": 0.5,
+          "pr_auc_average_precision": 0.15222141296431171,
+          "brier": 0.12906010518792688,
+          "log_loss": 0.42658247184225423,
+          "ece_10bins": 0.003170297851415177,
+          "calibration_bins": [
+            {
+              "lower": 0.1,
+              "count": 2746,
+              "mean_probability": 0.14905111511289654,
+              "observed_rate": 0.15222141296431171
+            }
+          ]
+        }
+      },
+      "logistic_regression": {
+        "validation": {
+          "auroc": 0.6543089509405557,
+          "pr_auc_average_precision": 0.2757597806788971,
+          "brier": 0.1402982193689428,
+          "log_loss": 0.4494034875965609,
+          "ece_10bins": 0.02634745724121831,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "count": 213,
+              "mean_probability": 0.05297902806990191,
+              "observed_rate": 0.08450704225352113
+            },
+            {
+              "lower": 0.1,
+              "count": 1859,
+              "mean_probability": 0.1442498651374984,
+              "observed_rate": 0.16514254975793438
+            },
+            {
+              "lower": 0.2,
+              "count": 229,
+              "mean_probability": 0.2323522389297379,
+              "observed_rate": 0.28820960698689957
+            },
+            {
+              "lower": 0.3,
+              "count": 40,
+              "mean_probability": 0.3371673225956205,
+              "observed_rate": 0.325
+            },
+            {
+              "lower": 0.4,
+              "count": 16,
+              "mean_probability": 0.4426588167225206,
+              "observed_rate": 0.375
+            },
+            {
+              "lower": 0.5,
+              "count": 5,
+              "mean_probability": 0.554855089932312,
+              "observed_rate": 0.4
+            },
+            {
+              "lower": 0.6,
+              "count": 2,
+              "mean_probability": 0.6423691475054674,
+              "observed_rate": 1.0
+            },
+            {
+              "lower": 0.9,
+              "count": 1,
+              "mean_probability": 0.9066602338541317,
+              "observed_rate": 0.0
+            }
+          ]
+        },
+        "test": {
+          "auroc": 0.722320533057104,
+          "pr_auc_average_precision": 0.30541904473455433,
+          "brier": 0.12258690141165933,
+          "log_loss": 0.40339771902374055,
+          "ece_10bins": 0.013877734869249682,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "count": 238,
+              "mean_probability": 0.050618069454038725,
+              "observed_rate": 0.06302521008403361
+            },
+            {
+              "lower": 0.1,
+              "count": 2265,
+              "mean_probability": 0.13926475706830124,
+              "observed_rate": 0.13730684326710818
+            },
+            {
+              "lower": 0.2,
+              "count": 184,
+              "mean_probability": 0.23305043027771996,
+              "observed_rate": 0.33695652173913043
+            },
+            {
+              "lower": 0.3,
+              "count": 37,
+              "mean_probability": 0.33868000172689056,
+              "observed_rate": 0.5405405405405406
+            },
+            {
+              "lower": 0.4,
+              "count": 10,
+              "mean_probability": 0.4289868622186751,
+              "observed_rate": 0.5
+            },
+            {
+              "lower": 0.5,
+              "count": 4,
+              "mean_probability": 0.5410482262970691,
+              "observed_rate": 0.5
+            },
+            {
+              "lower": 0.6,
+              "count": 3,
+              "mean_probability": 0.6287704361550408,
+              "observed_rate": 0.3333333333333333
+            },
+            {
+              "lower": 0.7,
+              "count": 3,
+              "mean_probability": 0.7581349579830414,
+              "observed_rate": 0.3333333333333333
+            },
+            {
+              "lower": 0.8,
+              "count": 1,
+              "mean_probability": 0.8595640511720233,
+              "observed_rate": 1.0
+            },
+            {
+              "lower": 0.9,
+              "count": 1,
+              "mean_probability": 0.9576485420702331,
+              "observed_rate": 0.0
+            }
+          ]
+        }
+      },
+      "lightgbm": {
+        "validation": {
+          "auroc": 0.6884745095417438,
+          "pr_auc_average_precision": 0.28109382402483923,
+          "brier": 0.13645630432442166,
+          "log_loss": 0.43119012461651474,
+          "ece_10bins": 0.024602823474418417,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "count": 704,
+              "mean_probability": 0.04670464937606538,
+              "observed_rate": 0.05113636363636364
+            },
+            {
+              "lower": 0.1,
+              "count": 948,
+              "mean_probability": 0.1501998646328085,
+              "observed_rate": 0.18881856540084388
+            },
+            {
+              "lower": 0.2,
+              "count": 579,
+              "mean_probability": 0.24078862259561237,
+              "observed_rate": 0.2659758203799655
+            },
+            {
+              "lower": 0.3,
+              "count": 100,
+              "mean_probability": 0.3393582524871832,
+              "observed_rate": 0.32
+            },
+            {
+              "lower": 0.4,
+              "count": 32,
+              "mean_probability": 0.4351841797937801,
+              "observed_rate": 0.375
+            },
+            {
+              "lower": 0.5,
+              "count": 2,
+              "mean_probability": 0.5050579151961436,
+              "observed_rate": 0.5
+            }
+          ]
+        },
+        "test": {
+          "auroc": 0.744809393446127,
+          "pr_auc_average_precision": 0.2937280662857413,
+          "brier": 0.11784350964162792,
+          "log_loss": 0.37304750621741384,
+          "ece_10bins": 0.02227828604624313,
+          "calibration_bins": [
+            {
+              "lower": 0.0,
+              "count": 1122,
+              "mean_probability": 0.034248193344904476,
+              "observed_rate": 0.040106951871657755
+            },
+            {
+              "lower": 0.1,
+              "count": 914,
+              "mean_probability": 0.14767250380876185,
+              "observed_rate": 0.18161925601750548
+            },
+            {
+              "lower": 0.2,
+              "count": 579,
+              "mean_probability": 0.23914097053352604,
+              "observed_rate": 0.27461139896373055
+            },
+            {
+              "lower": 0.3,
+              "count": 104,
+              "mean_probability": 0.33630007688816926,
+              "observed_rate": 0.3557692307692308
+            },
+            {
+              "lower": 0.4,
+              "count": 25,
+              "mean_probability": 0.43882402928731173,
+              "observed_rate": 0.4
+            },
+            {
+              "lower": 0.5,
+              "count": 2,
+              "mean_probability": 0.5212720501365882,
+              "observed_rate": 0.5
+            }
+          ]
+        }
+      }
+    },
+    "selected_model": "lightgbm",
+    "selection_criterion": "maximum validation average precision among logistic and LightGBM",
+    "model_sha256": "6dc6e4269671949f5a5f4b80a7dc11647604a4be50647d2303534bcb19f3c0ec",
+    "calibration": "Uncalibrated probabilities evaluated with Brier/ECE and reliability bins on held-out test; no post-hoc calibration fit",
+    "limitations": [
+      "UCI 과거 세션의 구매 여부 분류 실험이며 한국 육아용품 구매 확률이 아닙니다.",
+      "방문 수와 체류시간은 세션 종료 집계입니다. 진행 중 세션의 실시간 성능은 검증하지 않았습니다.",
+      "확률의 국내 서비스 보정과 외부 검증이 없으며 할인·이탈·공구 성사 원인을 설명하지 않습니다.",
+      "PageValues, BounceRates, ExitRates, Revenue는 입력에서 제외했습니다."
+    ]
+  },
+  "versions": {
+    "python": "3.11.15",
+    "pandas": "3.1.0",
+    "sklearn": "1.9.1"
+  },
+  "privacy": "only aggregates/product association rules/models exported; no public customer record or app customer linkage",
+  "scope": "Historical public-data experiments with provenance, separate from current baby-product catalog and production predictions"
+}

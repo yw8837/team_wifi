@@ -1,0 +1,131 @@
+[
+  {
+    "host": "somi9726.cafe24.com",
+    "seller": "캔코 공식몰",
+    "parser": "cafe24",
+    "listing_urls": [
+      "https://somi9726.cafe24.com/"
+    ]
+  },
+  {
+    "host": "poled.co.kr",
+    "seller": "폴레드 공식몰",
+    "parser": "cafe24",
+    "listing_urls": [
+      "https://poled.co.kr/product/list.html?cate_no=127",
+      "https://poled.co.kr/product/list.html?cate_no=128"
+    ]
+  },
+  {
+    "host": "upang.co.kr",
+    "seller": "유팡 공식몰",
+    "parser": "cafe24",
+    "category": "수유·이유식",
+    "listing_urls": [
+      "https://upang.co.kr/product/list_thumb.html?cate_no=92"
+    ]
+  },
+  {
+    "host": "www.doctornoah.net",
+    "seller": "닥터노아 공식몰",
+    "parser": "schema_product",
+    "category": "목욕·위생",
+    "listing_urls": [
+      "https://www.doctornoah.net/"
+    ],
+    "product_urls": [
+      "https://www.doctornoah.net/shop_view?idx=545",
+      "https://www.doctornoah.net/shop_view?idx=540",
+      "https://www.doctornoah.net/shop_view?idx=587"
+    ]
+  },
+  {
+    "host": "www.gonggan27.com",
+    "seller": "공간27 공식몰",
+    "parser": "schema_product",
+    "category": "놀이·도서",
+    "listing_urls": [
+      "https://www.gonggan27.com/"
+    ],
+    "product_urls": [
+      "https://www.gonggan27.com/shop_view?idx=2188"
+    ]
+  },
+  {
+    "host": "www.aguardmall.com",
+    "seller": "아가드 공식몰",
+    "parser": "cafe24",
+    "category": "외출·안전",
+    "listing_urls": [
+      "https://www.aguardmall.com/product/list.html?cate_no=166",
+      "https://www.aguardmall.com/product/search.html?keyword=%EA%B3%B5%EA%B5%AC"
+    ],
+    "product_urls": [
+      "https://www.aguardmall.com/product/detail.html?product_no=1660",
+      "https://www.aguardmall.com/product/detail.html?product_no=1656",
+      "https://www.aguardmall.com/product/detail.html?product_no=1655",
+      "https://www.aguardmall.com/product/detail.html?product_no=1604"
+    ]
+  },
+  {
+    "host": "oa-mall.co.kr",
+    "seller": "오아몰",
+    "category": "수유·이유식",
+    "parser": "cafe24",
+    "listing_urls": [],
+    "campaigns": {
+      "https://oa-mall.co.kr/product/detail.html?product_no=2120": {
+        "title": "[보아르 X 우아맘 공동구매 ]보아르 아가맘마 쪽쪽이살균기",
+        "last_day": "2026-11-21",
+        "organizer_url": "https://moar.my/wooamom_"
+      }
+    }
+  },
+  {
+    "host": "luciroda101.cafe24.com",
+    "seller": "자브 공식 판매처",
+    "category": "외출·안전",
+    "parser": "cafe24",
+    "listing_urls": [],
+    "campaigns": {
+      "https://luciroda101.cafe24.com/product/detail.html?product_no=268": {
+        "title": "[🍹우아맘 x 자브🍹] 루온백 _4 Colors 특가!  <회원 가입 후 구매가능한 상품입니다>",
+        "last_day": "2026-11-22",
+        "organizer_url": "https://moar.my/wooamom_"
+      }
+    }
+  },
+  {
+    "host": "creestyle.com",
+    "seller": "크리스타일",
+    "category": "목욕·위생",
+    "parser": "cafe24",
+    "listing_urls": [],
+    "campaigns": {
+      "https://creestyle.com/product/detail.html?product_no=408": {
+        "title": "[우아맘 X 터블] 트루클린 스팟얼룩제거제",
+        "last_day": "2026-11-20",
+        "organizer_url": "https://moar.my/wooamom_"
+      },
+      "https://creestyle.com/product/detail.html?product_no=409": {
+        "title": "[우아맘 X 터블] 이지클린 텀블러 발포 세정제",
+        "last_day": "2026-11-20",
+        "organizer_url": "https://moar.my/wooamom_"
+      }
+    }
+  },
+  {
+    "host": "durimall.co.kr",
+    "seller": "두리몰",
+    "category": "목욕·위생",
+    "parser": "cafe24",
+    "listing_urls": [],
+    "campaigns": {
+      "https://durimall.co.kr/product/detail.html?product_no=1077": {
+        "title": "[공구/또후니맘] 두리 도넛 휴대용 유아변기 외 휴대템 공동구매",
+        "last_day": "2026-11-20",
+        "organizer_url": "https://link.inpock.co.kr/ddohuni_mom"
+      }
+    }
+  }
+]

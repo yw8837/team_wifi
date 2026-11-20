@@ -1,0 +1,85 @@
+# Free web service only. Use a Neon FREE project; do not create Render's 30-day DB.
+# No payment method, paid disk, paid instance, cron, or autoscaling is required.
+services:
+  - type: web
+    name: moduyuga-api
+    runtime: python
+    plan: free
+    region: singapore
+    branch: codex/modu-yuga
+    buildCommand: bash scripts/render-build.sh
+    startCommand: bash scripts/render-start.sh
+    healthCheckPath: /api/health
+    autoDeployTrigger: off
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.14
+      - key: NODE_VERSION
+        value: 24.11.0
+      - key: MODU_ENV
+        value: public_release
+      - key: PUBLIC_ORIGIN
+        fromService:
+          name: moduyuga-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: DATABASE_URL
+        sync: false
+      - key: PUBLIC_WEB_ORIGIN
+        sync: false
+      - key: RATE_LIMIT_SECRET
+        generateValue: true
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: HOSTING_LOCATION
+        value: Render · 싱가포르
+      - key: DATABASE_LOCATION
+        sync: false
+      - key: STATIC_DIR
+        value: /opt/render/project/src/frontend/dist
+      - key: RUNTIME_DIR
+        value: /tmp/moduyuga
+      - key: OMP_NUM_THREADS
+        value: '1'
+  - type: web
+    name: moduyuga
+    runtime: static
+    branch: codex/modu-yuga
+    buildCommand: bash scripts/render-web-build.sh
+    staticPublishPath: frontend/dist
+    autoDeployTrigger: off
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: SUPPORT_EMAIL
+        sync: false
+      - key: HOSTING_LOCATION
+        value: Render · 싱가포르
+      - key: DATABASE_LOCATION
+        value: Neon · AWS 싱가포르
+    routes:
+      - type: rewrite
+        source: /groupbuys/sitemap.xml
+        destination: https://moduyuga-beta.onrender.com/api/release/groupbuy-pages/sitemap.xml
+      - type: rewrite
+        source: /groupbuys/sitemaps/:page
+        destination: https://moduyuga-beta.onrender.com/api/release/groupbuy-pages/sitemaps/:page
+      - type: rewrite
+        source: /groupbuys/:id/public
+        destination: https://moduyuga-beta.onrender.com/api/release/groupbuys/:id/public
+      - type: rewrite
+        source: /legal/:kind
+        destination: /legal/:kind/index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
