@@ -35,6 +35,7 @@ class HistoryMessage(Strict):
 class Ask(Strict):
     question: str = Field(min_length=2, max_length=1200)
     conversation_id: str | None = Field(default=None, pattern=r'^[0-9a-f-]{36}$')
+    turn_id: str | None = Field(default=None, pattern=r'^[0-9a-f-]{36}$')
     remember: bool = Field(default=False, strict=True)
     history: list[HistoryMessage] = Field(default_factory=list, max_length=8)
 
@@ -202,8 +203,20 @@ def initial_state(body, request, observation):
         if (body.remember or body.conversation_id) and not user:
             current_user(user)
         cleanup_expired_conversations(db)
-        if body.conversation_id:
-            row = owned_chat(db, user, body.conversation_id)
+        conversation_id = body.conversation_id
+        if body.remember and not conversation_id:
+            db.scalar(select(User).where(User.id == user.id).with_for_update())
+        if body.remember and body.turn_id and not conversation_id:
+            prior = db.scalar(select(Record).where(Record.kind == CHAT, Record.owner_id == user.id,
+                Record.unique_key == f'{user.id}:{body.turn_id}'))
+            if prior:
+                if prior.status != 'active':
+                    raise HTTPException(409, '대화의 처리 상태를 확인한 뒤 다시 시도해 주세요.')
+                if prior.data.get('turn_ids', [])[-1:] != [body.turn_id]:
+                    raise HTTPException(409, '이후 대화가 있어요. 저장한 대화에서 이어 주세요.')
+                conversation_id = prior.id
+        if conversation_id:
+            row = owned_chat(db, user, conversation_id)
             if body.remember:
                 identifier,revision=row.id,row.revision
                 prior_questions=[message.get('content','') for message in row.data.get('messages',[]) if message.get('role')=='user']
@@ -211,8 +224,6 @@ def initial_state(body, request, observation):
                 # Before inference, invalidate every pending writer and erase all text.
                 clear_chat(db, row, 'opted_out')
         elif body.remember:
-            # Serialize account allocation on PostgreSQL; SQLite has BEGIN IMMEDIATE.
-            db.scalar(select(User).where(User.id == user.id).with_for_update())
             count = db.scalar(select(func.count()).select_from(Record).where(
                 Record.kind == CHAT, Record.owner_id == user.id, Record.status == 'active', Record.ends > now()))
             if count >= MAX_CONVERSATIONS:
@@ -221,6 +232,7 @@ def initial_state(body, request, observation):
             if pending>=MAX_PENDING:
                 raise HTTPException(429,'준비 중인 대화가 있습니다. 잠시 후 다시 시도해 주세요.',headers={'Retry-After':'5'})
             row=Record(kind=CHAT,owner_id=user.id,status='pending',data={'messages':[]},ends=now()+PENDING_TTL)
+            if body.turn_id: row.unique_key = f'{user.id}:{body.turn_id}'
             db.add(row)
             db.flush()
             identifier, revision = row.id, row.revision
@@ -231,7 +243,7 @@ def initial_state(body, request, observation):
             with observation.stage('tools'):
                 assistant_tools.live_read(db,user,effective_question)
         db.commit()
-    return user_id,identifier,revision,effective_question,needs_clarification
+    return user_id,identifier,revision,effective_question,needs_clarification,bool(body.remember and not conversation_id)
 
 
 def retrieval_answer(chunks):
@@ -270,11 +282,11 @@ def ask(body:Ask,request:Request):
     observation = RequestObservation()
     request_id = uuid4().hex
     user_id = identifier = revision = None
-    is_new = bool(body.remember and not body.conversation_id)
+    is_new = False
     try:
         with assistant_tools.capture_tool_calls(observation.tools):
             with observation.stage('validation'):
-                user_id,identifier,revision,effective_question,needs_clarification=initial_state(body,request,observation)
+                user_id,identifier,revision,effective_question,needs_clarification,is_new=initial_state(body,request,observation)
             return answer_request(body,request,observation,request_id,user_id,identifier,revision,is_new,effective_question,needs_clarification)
     except Exception as error:
         observation.error(error)
@@ -292,7 +304,8 @@ def answer_request(body,request,observation,request_id,user_id,identifier,revisi
     unsupported=knowledge.unsupported(effective_question)
     if unsupported:needs_clarification=False
     chunks=[]
-    if not needs_clarification and not unsupported:
+    direct_list = assistant_tools.list_intent(effective_question) if not restricted and not unsupported else None
+    if not needs_clarification and not unsupported and not direct_list:
         with observation.stage('retrieval'):
             chunks=knowledge.retrieve(effective_question)
     reason, model, citations = None, None, []
@@ -308,6 +321,8 @@ def answer_request(body,request,observation,request_id,user_id,identifier,revisi
             'price': '현재 가격·재고를 확인하는 연결이 없어 금액이나 구매 가능 여부를 확정할 수 없어요. 연결된 공식 판매처에서 현재 조건을 확인해 주세요.',
         }
         answer = messages[unsupported]
+    elif direct_list:
+        answer, mode, reason = '', 'retrieval_only', None
     elif chunks:
         try:
             with observation.stage('generation'):
@@ -343,7 +358,7 @@ def answer_request(body,request,observation,request_id,user_id,identifier,revisi
             answer='판매처에서 마지막으로 수집한 공구 정보를 안내해요. 최종 금액과 구매 조건은 판매처에서 확인해 주세요.'
             mode, reason, unsupported, model, citations = 'retrieval_only', None, None, None, []
         if live['notes']:
-            answer += '\n\n'+'\n'.join(live['notes'])
+            answer = '\n\n'.join(filter(None, [answer, '\n'.join(live['notes'])]))
         checked_at = knowledge.timestamp()
         basis = ('unsupported' if unsupported else 'mixed' if citations and live['notes'] else
                  'public_knowledge' if citations else 'live_data' if live['notes'] else 'no_evidence')
@@ -360,10 +375,18 @@ def answer_request(body,request,observation,request_id,user_id,identifier,revisi
                 if active_count>=MAX_CONVERSATIONS:
                     raise HTTPException(409,'저장 가능한 대화 수에 도달했습니다. 기존 대화를 정리한 후 다시 시도해 주세요.')
             stamp = now()
-            history = list(row.data.get('messages', []))[-(MAX_MESSAGES-2):]
+            history = list(row.data.get('messages', []))
+            turn_ids = list(row.data.get('turn_ids', [None] * (len(history)//2)))
+            if body.turn_id and body.turn_id in turn_ids:
+                if turn_ids[-1] != body.turn_id or history[-2]['content'] != body.question:
+                    raise HTTPException(409, '대화가 변경됐어요. 저장한 대화에서 이어 주세요.')
+                history = history[:-2]
+                turn_ids.pop()
+            history = history[-(MAX_MESSAGES-2):]
+            turn_ids = (turn_ids + [body.turn_id])[-(MAX_MESSAGES//2):]
             history.extend([{'role': 'user', 'content': body.question, 'created_at': release.timestamp(stamp)},
                             {'role': 'assistant', 'content': answer, 'created_at': checked_at}])
-            data = {'messages': history, 'title': row.data.get('title') or body.question[:70], 'updated': stamp}
+            data = {'messages': history, 'turn_ids': turn_ids, 'title': row.data.get('title') or body.question[:70], 'updated': stamp}
             changed = db.execute(update(Record).where(Record.kind == CHAT, Record.id == identifier,
                 Record.owner_id==user.id,Record.status==expected_status,Record.revision==revision,
                 Record.ends>stamp).values(data=data,status='active',ends=stamp+RETENTION,revision=Record.revision+1))

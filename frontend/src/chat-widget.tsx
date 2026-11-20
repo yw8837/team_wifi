@@ -12,7 +12,7 @@ export function ChatWidget() {
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
   useEffect(() => {
-    if (open) panel.current?.querySelector<HTMLTextAreaElement>("textarea")?.focus();
+    if (open) panel.current?.focus();
   }, [open]);
 
   function close() {
@@ -23,7 +23,7 @@ export function ChatWidget() {
   if (/^\/(chat|login|signup|reset|auth)(\/|$)/.test(location.pathname)) return null;
   return <aside className="chat-widget" aria-label="육아 도우미">
     {started && <section ref={panel} id="chat-widget-panel" className="chat-widget-panel"
-      role="dialog" aria-label="육아 도우미 대화창" hidden={!open}
+      role="dialog" tabIndex={-1} aria-label="육아 도우미 대화창" hidden={!open}
       onKeyDown={event => { if (event.key === "Escape") { event.stopPropagation(); close(); } }}>
       <header className="chat-widget-header"><strong>육아 도우미</strong>
         <button type="button" className="secondary" aria-label="대화창 닫기" onClick={close}>

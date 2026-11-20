@@ -194,14 +194,17 @@ def mine(q:str=Query('',max_length=100),category:str=Query('',max_length=40),
     return listing(db,user,q,category,status,sort,limit,offset,start_date,end_date,True)
 
 
+def saved_groupbuy_query(user):
+    mark = aliased(Record)
+    return visible_query(user, Record.status == 'active', Record.ends > now()).join(
+        mark, mark.parent_id == Record.id
+    ).where(mark.kind == GROUPBUY_SAVE, mark.owner_id == user.id).order_by(mark.created.desc(), mark.id)
+
+
 @router.get('/groupbuys/saved')
 def saved_groupbuys(limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
                     user=Depends(current_user), db=Depends(get_db)):
-    mark = aliased(Record)
-    query = visible_query(user, Record.status == 'active', Record.ends > now()).join(
-        mark, mark.parent_id == Record.id
-    ).where(mark.kind == GROUPBUY_SAVE, mark.owner_id == user.id).order_by(mark.created.desc(), mark.id)
-    rows = list(db.scalars(query.offset(offset).limit(limit + 1)))
+    rows = list(db.scalars(saved_groupbuy_query(user).offset(offset).limit(limit + 1)))
     return {'items': [dto(db, row, user, saved=True) for row in rows[:limit]],
             'has_more': len(rows) > limit, 'queried_at': release.timestamp(now())}
 

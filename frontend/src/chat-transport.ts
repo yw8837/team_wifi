@@ -18,7 +18,8 @@ function validateAskPayload(body:unknown):void {
  const fail=()=>{throw new ApiError(422,"질문과 최근 대화 입력을 확인해 주세요. 질문은 2~1,200자이며 최근 사용자 질문만 보낼 수 있어요.");};
  if(!body||typeof body!=="object"||Array.isArray(body))return fail();
  const value=body as Record<string,unknown>;
- if(Object.keys(value).some(key=>!["question","remember","conversation_id","history"].includes(key))||typeof value.question!=="string"||value.question.trim().length<2||value.question.length>1200)return fail();
+ if(Object.keys(value).some(key=>!["question","remember","conversation_id","history","turn_id"].includes(key))||typeof value.question!=="string"||value.question.trim().length<2||value.question.length>1200)return fail();
+ if(value.turn_id!==undefined&&(typeof value.turn_id!=="string"||!/^[0-9a-f-]{36}$/.test(value.turn_id)))return fail();
  if(value.remember!==undefined&&typeof value.remember!=="boolean")return fail();
  if(value.conversation_id!==undefined&&value.conversation_id!==null&&(typeof value.conversation_id!=="string"||!/^[0-9a-f-]{36}$/.test(value.conversation_id)))return fail();
  if(value.history!==undefined){

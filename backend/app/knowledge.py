@@ -225,7 +225,7 @@ def restricted_data_request(question):
         query=re.sub(r'(?:비밀번호|패스워드|password)(?:를|을)?\s*(?:안전하게\s*)?(?:변경|재설정|초기화|복구|설정)(?:하는|할)?\s*(?:방법|절차|안내)', '', query)
     disclosure=bool(re.search(r'출력|보여|알려|조회|열람|읽|전송|보내|넘겨|내놔|내놓|달라|가져|복사|dump|print|show|reveal|return|send|give|fetch|export', query))
     secret=bool(re.search(r'비밀번호|패스워드|password|토큰|token|(?:비밀|시크릿)\s*키|api[_\s-]?key|secret', query))
-    private_field=bool(re.search(r'이메일|메일|연락처|전화번호|주소|저장|관심|조건|대화|프로필', query))
+    private_field=bool(re.search(r'이메일|메일|연락처|전화번호|주소|저장|찜|관심|조건|대화|프로필', query))
     return disclosure and (secret or (other_principal and private_field))
 
 

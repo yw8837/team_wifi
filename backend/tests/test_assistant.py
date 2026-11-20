@@ -655,3 +655,47 @@ def test_retention_amount_question_reaches_public_evidence_instead_of_price_abst
     body=response.json()
     assert body['generation']['mode']=='local_extractive'
     assert '직접 선택' in body['answer'] and '30일' in body['answer']
+
+
+def test_retry_of_saved_turn_keeps_one_exchange(chat):
+    client, people, _ = chat
+    h = people['buyer']['headers']
+    body = dict(question='진행 중인 공구 보여줘', remember=True, turn_id=str(uuid4()))
+    first = ask(client, h, **body)
+    assert first.status_code == 200, first.text
+    cid = first.json()['conversation_id']
+    assert ask(client, h, **body).json()['conversation_id'] == cid
+    follow = dict(question='내가 찜한 공구 보여줘', remember=True, turn_id=str(uuid4()), conversation_id=cid)
+    assert ask(client, h, **follow).status_code == 200
+    assert ask(client, h, **follow).status_code == 200
+    messages = client.get(BASE+'/conversations/'+cid, headers=h).json()['messages']
+    assert [m['content'] for m in messages if m['role']=='user'] == [body['question'], follow['question']]
+    assert ask(client, h, **body).status_code == 409
+
+
+def test_direct_groupbuy_questions_use_visible_rows_and_own_saves(chat, monkeypatch):
+    from app import groupbuys
+    from app.db import User
+    client, people, _ = chat
+    def unexpected(*args):
+        raise AssertionError('Direct list queries must not call the language model')
+    monkeypatch.setattr(model_runtime, 'generate', unexpected)
+    with SessionLocal() as db:
+        users=list(db.scalars(select(User)))
+        author=next(u for u in users if u.id==people['buyer']['id'])
+        data=dict(title='목록 검증 유모차', category='외출·안전', source_type='member')
+        active=Record(kind=groupbuys.GROUPBUY,owner_id=author.id,status='active',ends=now()+3600,data=data)
+        ended=Record(kind=groupbuys.GROUPBUY,owner_id=author.id,status='ended',ends=now()-10,data={**data,'title':'종료 검증 상품'})
+        db.add_all([active,ended]);db.flush()
+        link='/groupbuys/'+active.id
+        release.put_unique(db,groupbuys.GROUPBUY_SAVE,author.id,active.id,commit=False)
+        release.put_unique(db,groupbuys.GROUPBUY_SAVE,author.id,ended.id)
+    def links(text,who=None):
+        result=ask(client,people[who]['headers'] if who else None,question=text)
+        assert result.status_code==200,result.text
+        return [a['url'] for a in result.json()['actions']]
+    assert link in links('진행 중인 공구 보여줘')
+    assert links('내가 찜한 공구 보여줘') == ['/login?returnTo=%2Fchat']
+    assert links('내가 찜한 공구 보여줘','buyer') == [link,'/my/saved']
+    assert links('내가 찜한 공구 보여줘','buyer2') == ['/my/saved']
+    assert link not in links('다른 회원이 찜한 공구 보여줘','buyer')

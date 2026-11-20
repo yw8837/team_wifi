@@ -59,3 +59,13 @@
  .chat-widget-launcher { min-height:48px; padding:10px 14px; }
 }
 @media(max-width:540px) { .chat-heading h1 { font-size:25px; } .chat-form { padding:12px; } .chat-message { padding:16px; } .chat-message.user { margin-left:12px; } .chat-page .actions { gap:8px; flex-wrap:wrap; } .chat-compose-actions>button[type="submit"] { flex-basis:100%; } }
+
+.chat-messages { align-content: start; }
+.chat-starters { display: flex; flex-wrap: wrap; gap: 8px; align-content: start; }
+.chat-starters button { min-height: 44px; padding: 8px 14px; text-align: left; border-radius: 18px; }
+.chat-message.user { width: fit-content; max-width: calc(100% - 24px); margin-left: auto; overflow-wrap: anywhere; }
+.chat-message.user p { margin: 0; }
+.chat-message.user h2 { font-size: 13px; margin-bottom: 4px; }
+.chat-pending { justify-self: start; margin: 0; padding: 8px 14px; background: var(--cream); border-radius: 14px; color: var(--muted); }
+.chat-retry { margin-top: 12px; }
+.chat-retry button { min-height: 44px; margin: 6px 6px 0 0; }

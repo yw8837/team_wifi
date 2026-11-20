@@ -25,11 +25,35 @@ def _tool_call(name,local):
     if captured is not None:captured[name]=min(16,captured.get(name,0)+1)
 
 
+def list_intent(question):
+    """Recognize list requests, leaving advice and follow-up questions to retrieval."""
+    text = re.sub(r'[?!.,~]+$', '', question.strip())
+    suffix = r'(?:\s*(?:목록|리스트))?\s*(?:을|를)?\s*(?:보여\s*줘|보여\s*주세요|알려\s*줘|찾아\s*줘|조회)?'
+    if re.fullmatch(r'(?:지금\s*|현재\s*)?(?:진행\s*중인?\s*)?(?:공구|공동구매)' + suffix, text):
+        return 'active'
+    if re.fullmatch(r'(?:내가?\s*)?(?:찜한|찜해\s*둔|저장한)\s*(?:공구|공동구매)' + suffix, text):
+        return 'saved'
+    return None
+
+
 def live_read(db, user, question):
     actions, notes, references = [], [], []
     verified_offer = False
     tool_calls={}
     query = question.casefold()
+    intent = list_intent(query)
+    if intent == 'saved':
+        from .groupbuys import saved_groupbuy_query
+        if user is None:
+            notes.append('찜한 공구는 로그인 후 확인할 수 있어요.')
+            actions.append({'label':'로그인하기','url':'/login?returnTo=%2Fchat','kind':'login'})
+        else:
+            _tool_call('own_saved', tool_calls)
+            rows = list(db.scalars(saved_groupbuy_query(user).limit(3)))
+            notes.append('내가 찜한 공구 중 지금 진행 중인 상품이에요.' if rows else '진행 중인 공구 중에 내가 찜한 상품이 없어요.')
+            actions.extend({'label':row.data['title'], 'url':'/groupbuys/'+row.id, 'kind':'item'} for row in rows)
+            actions.append({'label':'찜한 공구 전체 보기','url':'/my/saved','kind':'saved'})
+        return {'actions':actions,'notes':notes,'references':[], 'tool_calls':tool_calls,'verified_offer':False}
     chat_settings=bool(re.search(r'대화|채팅|도우미',query) and re.search(r'저장|보관|삭제|종료',query))
     saved_requested=not chat_settings and bool(re.search(r'저장한|저장해.?둔|저장\s*목록|내\s*저장|내 목록|찜한|찜\s*목록',query))
     preferences_requested=not chat_settings and bool(re.search(r'내 조건|내 관심|관심 분야|선택한|고른|조건 찾기',query))
@@ -77,7 +101,7 @@ def live_read(db, user, question):
     ignored.update(knowledge.RETRIEVAL_STOP_WORDS)
     terms = sorted({feature[2:] for feature in knowledge.retrieval_features(query)
                     if feature.startswith('w:') and not any(feature[2:].startswith(word) for word in ignored)})[:12]
-    if terms:
+    if terms and intent != 'active':
         conditions = [Record.data['title'].as_string().icontains(term, autoescape=True) |
                       Record.data['body'].as_string().icontains(term, autoescape=True) for term in terms]
         visible = release.visible_query(release.DEMAND, user, or_(*conditions))
@@ -100,10 +124,12 @@ def live_read(db, user, question):
             Record.data['is_demo'].as_boolean().is_not(True))
         if categories:query_rows=query_rows.where(Record.data['category'].as_string().in_(categories))
         groupbuy_terms=[term for term in terms if term not in {'공구','공동구매','마감','판매처','진행','현재','알려줘','보여줘','찾아줘','구매','정보'}]
-        if groupbuy_terms:
+        if groupbuy_terms and intent != 'active':
             query_rows=query_rows.where(or_(*[Record.data['title'].as_string().icontains(term,autoescape=True)|Record.data['body'].as_string().icontains(term,autoescape=True) for term in groupbuy_terms]))
         _tool_call('public_groupbuys',tool_calls)
         groupbuy_rows=list(db.scalars(query_rows.order_by(Record.ends,Record.id).limit(3)))
+        if intent == 'active':
+            actions.append({'label':'진행 중인 공구 전체 보기','url':'/','kind':'item'})
         for position,row in enumerate(groupbuy_rows,1):
             entry=groupbuys.dto(db,row,user)
             verified_offer = verified_offer or (entry['source_type'] == 'seller_page' and entry['price'] is not None)
