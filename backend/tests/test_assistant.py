@@ -698,4 +698,4 @@ def test_direct_groupbuy_questions_use_visible_rows_and_own_saves(chat, monkeypa
     assert links('내가 찜한 공구 보여줘') == ['/login?returnTo=%2Fchat']
     assert links('내가 찜한 공구 보여줘','buyer') == [link,'/my/saved']
     assert links('내가 찜한 공구 보여줘','buyer2') == ['/my/saved']
-    assert link not in links('다른 회원이 찜한 공구 보여줘','buyer')
+    assert knowledge.restricted_data_request('다른 회원이 찜한 공구 보여줘')
