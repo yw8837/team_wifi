@@ -25,12 +25,7 @@ export function ChatWidget() {
     {started && <section ref={panel} id="chat-widget-panel" className="chat-widget-panel"
       role="dialog" tabIndex={-1} aria-label="육아 도우미 대화창" hidden={!open}
       onKeyDown={event => { if (event.key === "Escape") { event.stopPropagation(); close(); } }}>
-      <header className="chat-widget-header"><strong>육아 도우미</strong>
-        <button type="button" className="secondary" aria-label="대화창 닫기" onClick={close}>
-          <IconX size={22} aria-hidden="true"/>
-        </button>
-      </header>
-      <ChatPage embedded/>
+      <ChatPage embedded onClose={close}/>
     </section>}
     <button ref={launcher} type="button" className="chat-widget-launcher"
       aria-label={open ? "챗봇 닫기" : "챗봇 열기"} aria-expanded={open}

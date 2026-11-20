@@ -171,3 +171,13 @@ button.groupbuy-heart {
 button.groupbuy-heart[aria-pressed="true"] { background: #fff1ef; color: #9f3128; border-color: #bd655d; }
 .groupbuy-heart-control [role="alert"] { color: #9f3128; margin: .25rem 0; }
 .home-navigation a[aria-current="page"] { font-weight: 700; border-color: currentColor; }
+
+.groupbuy-comparison { margin:12px 0; padding:12px 16px; background:var(--surface,#fff); border:1px solid var(--line); border-radius:14px; }
+.groupbuy-comparison summary { cursor:pointer; font-weight:700; padding:4px 0; }
+.compare-selectors { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.compare-selectors label { display:grid; gap:4px; min-width:0; }
+.compare-selectors select { width:100%; min-width:0; }
+.groupbuy-comparison table { width:100%; table-layout:fixed; border-collapse:collapse; margin-top:12px; font-size:.9rem; }
+.groupbuy-comparison caption { text-align:left; font-weight:700; margin-bottom:6px; }
+.groupbuy-comparison td,.groupbuy-comparison th { padding:8px 5px; border-top:1px solid var(--line); overflow-wrap:anywhere; vertical-align:top; text-align:left; }
+.groupbuy-comparison th:first-child { width:4.5em; }

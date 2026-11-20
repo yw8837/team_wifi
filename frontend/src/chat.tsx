@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { IconX } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { date, safeExternalUrl } from "./api";
@@ -22,7 +23,7 @@ export function AssistantAnswer({answer}:{answer:AssistantResponse}) {
 export function chatEnterSubmits(event:{key:string;shiftKey:boolean;isComposing:boolean;keyCode?:number}):boolean {
  return event.key==="Enter"&&!event.shiftKey&&!event.isComposing&&event.keyCode!==229;
 }
-export function ChatPage({embedded=false}:{embedded?:boolean}={}) {
+export function ChatPage({embedded=false,onClose}:{embedded?:boolean;onClose?:()=>void}={}) {
  const {user}=useAuth();
  const composing=useRef(false);
  const input=useRef<HTMLTextAreaElement>(null);
@@ -73,8 +74,7 @@ export function ChatPage({embedded=false}:{embedded?:boolean}={}) {
   }catch(reason){
    if(current(ticket))setTurn({text,id,error:reason instanceof Error?reason.message:"답변을 받지 못했어요."});
   }finally{
-   sending.current=false;
-   if(current(ticket))setBusy(false);
+   if(current(ticket)){sending.current=false;setBusy(false);}
   }
  };
  const resume=async(id:string)=>{
@@ -95,9 +95,17 @@ export function ChatPage({embedded=false}:{embedded?:boolean}={}) {
   catch(error){if(current(ticket))fail(error);}finally{if(current(ticket))setBusy(false);}
  };
  const temporaryEnd=()=>{if(!window.confirm("임시 대화를 끝내고 화면의 내용을 지울까요? 복구할 수 없어요."))return;epoch.current++;controller.current?.abort();clear();setBusy(false);setError("");setNotice("임시 대화를 지웠어요.");};
- const newConversation=()=>{if(!window.confirm("현재 화면을 닫고 새 대화를 시작할까요? 저장된 대화는 목록에 남고, 저장하지 않은 임시 내용은 사라집니다."))return;epoch.current++;controller.current?.abort();clear();setBusy(false);setError("");setNotice("새 임시 대화를 시작했어요. 저장하려면 다시 직접 선택해 주세요.");};
- return <section className="chat-page"><header className="chat-heading"><h1>육아 도우미</h1><p>육아템·공구·서비스 질문을 남겨 주세요.</p></header><p className="chat-mode" role="status">{assistantStatusMessage(status)}</p>{statusError&&<div className="chat-status-error" role="alert"><p>{statusError}</p><button className="secondary" onClick={()=>void refreshStatus()}>연결 상태 다시 확인</button></div>}
- <div ref={messageList} className="chat-messages" role="log" aria-label="도우미 대화" aria-live="polite" aria-relevant="additions text">{!messages.length&&!turn&&<div className="chat-starters" aria-label="추천 질문">{["진행 중인 공구 보여줘","기저귀를 비교할 때 뭘 봐야 해?","내가 찜한 공구 보여줘"].map(text=><button type="button" className="secondary" key={text} disabled={busy} onClick={()=>fillDraft(text)}>{text}</button>)}</div>}{(turn?messages.slice(-18):messages).map((message,index)=><article className={"chat-message "+message.role} key={index}><h2>{message.role==="user"?"내 질문":"도우미"}</h2>{message.answer?<AssistantAnswer answer={message.answer}/>:<p className="ugc-text">{message.content}</p>}{message.role==="assistant"&&!message.answer&&<p className="hint">이전 대화입니다. 현재 정보와 출처는 새 질문으로 다시 확인해 주세요.</p>}</article>)}{turn&&<>
+ const newConversation=()=>{
+  epoch.current++;
+  controller.current?.abort();
+  sending.current=false;
+  composing.current=false;
+  clear();setBusy(false);setError("");setNotice("새 대화를 시작했어요.");
+ };
+ const resetButton=<button type="button" className="secondary chat-reset" disabled={busy&&!sending.current} onClick={newConversation}>새 대화</button>;
+ return <>{embedded&&<header className="chat-widget-header"><strong>육아 도우미</strong>{resetButton}<button type="button" className="secondary" aria-label="대화창 닫기" onClick={onClose}><IconX size={22} aria-hidden="true"/></button></header>}
+ <section className="chat-page"><header className="chat-heading"><div className="chat-title-row"><h1>육아 도우미</h1>{!embedded&&resetButton}</div><p>육아템·공구·서비스 질문을 남겨 주세요.</p></header><p className="chat-mode" role="status">{assistantStatusMessage(status)}</p>{statusError&&<div className="chat-status-error" role="alert"><p>{statusError}</p><button className="secondary" onClick={()=>void refreshStatus()}>연결 상태 다시 확인</button></div>}
+ <div ref={messageList} className="chat-messages" role="log" aria-label="도우미 대화" aria-live="polite" aria-relevant="additions text">{!messages.length&&!turn&&<div className="chat-starters" aria-label="추천 질문">{["진행 중인 공구 보여줘","기저귀를 비교할 때 뭘 봐야 해?","내가 찜한 공구 보여줘"].map(text=><button type="button" className="secondary" key={text} disabled={busy} onClick={()=>void send(text)}>{text}</button>)}</div>}{(turn?messages.slice(-18):messages).map((message,index)=><article className={"chat-message "+message.role} key={index}><h2>{message.role==="user"?"내 질문":"도우미"}</h2>{message.answer?<AssistantAnswer answer={message.answer}/>:<p className="ugc-text">{message.content}</p>}{message.role==="assistant"&&!message.answer&&<p className="hint">이전 대화입니다. 현재 정보와 출처는 새 질문으로 다시 확인해 주세요.</p>}</article>)}{turn&&<>
   <article className="chat-message user"><h2>내 질문</h2><p className="ugc-text">{turn.text}</p>
    {turn.error&&<div className="chat-retry"><p role="alert">{turn.error}</p>
     {remember&&<p className="hint">이미 저장됐을 수 있어요. 저장한 대화에서 먼저 확인할 수 있어요.</p>}
@@ -107,10 +115,10 @@ export function ChatPage({embedded=false}:{embedded?:boolean}={}) {
   </article>
   {!turn.error&&<p className="chat-pending" role="status">답변 준비 중…</p>}
  </>}</div>
- <form className="chat-form" onSubmit={event=>{event.preventDefault();if(!turn)void send(question);}}><label className="field"><span>도우미에게 질문</span><textarea ref={input} rows={embedded?2:3} required minLength={2} maxLength={1200} placeholder="예: 기저귀를 비교할 때 어떤 기준을 볼까요?" disabled={busy||!!turn} value={question} onChange={event=>setQuestion(event.target.value)} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={event=>{if(chatEnterSubmits({key:event.key,shiftKey:event.shiftKey,isComposing:composing.current||event.nativeEvent.isComposing,keyCode:event.nativeEvent.keyCode})){event.preventDefault();if(!event.repeat&&!busy)event.currentTarget.form?.requestSubmit();}}} aria-describedby="chat-input-help chat-retention-help"/></label><p className="hint" id="chat-input-help">Enter 전송 · Shift+Enter 줄바꿈 · 2~1,200자</p><div className="chat-retention">{user&&<label className="chat-checkbox"><input type="checkbox" checked={remember} disabled={busy} onChange={()=>void toggleRemember()}/><span>계정에 저장하고 이어가기</span></label>}<p className="hint" id="chat-retention-help">{remember?"선택 후 성공한 대화만 저장 · 마지막 저장 활동부터 30일 보관":user?"기본은 임시 대화예요. 저장 선택 시 30일 보관해요.":(embedded?"임시 대화 · 창을 닫아도 유지되며 새로고침하면 지워져요.":"임시 대화예요. 이동·재로그인 후에는 이어볼 수 없어요.")}</p></div><div className="actions chat-compose-actions"><button type="submit" disabled={busy||!!turn||question.trim().length<2}>{embedded?(busy?"대기":"전송"):(busy?"응답을 기다리는 중…":error?"질문 직접 다시 보내기":"질문 보내기")}</button>{!embedded&&(turn||messages.length>0||conversationId)&&<button type="button" className="secondary" disabled={busy} onClick={()=>conversationId?void remove(conversationId,true):temporaryEnd()}>대화 종료·삭제</button>}{!embedded&&(turn||messages.length>0)&&<button type="button" className="secondary" disabled={busy} onClick={newConversation}>새 대화</button>}</div>{error&&<div role="alert"><p>{error}</p><p>질문은 유지되며 자동 재전송하지 않아요. 저장 여부가 불확실하면 저장 목록을 먼저 확인해 주세요.</p></div>}{notice&&<p role="status">{notice}</p>}</form>
- <ChatGuidance>{embedded&&(turn||messages.length>0||conversationId)&&<div className="actions"><button type="button" className="secondary" disabled={busy} onClick={()=>conversationId?void remove(conversationId,true):temporaryEnd()}>대화 종료·삭제</button><button type="button" className="secondary" disabled={busy} onClick={newConversation}>새 대화</button></div>}</ChatGuidance>
+ <form className="chat-form" onSubmit={event=>{event.preventDefault();if(!turn)void send(question);}}><label className="field"><span>도우미에게 질문</span><textarea ref={input} rows={embedded?2:3} required minLength={2} maxLength={1200} placeholder="예: 기저귀를 비교할 때 어떤 기준을 볼까요?" disabled={busy||!!turn} value={question} onChange={event=>setQuestion(event.target.value)} onCompositionStart={()=>{composing.current=true;}} onCompositionEnd={()=>{composing.current=false;}} onKeyDown={event=>{if(chatEnterSubmits({key:event.key,shiftKey:event.shiftKey,isComposing:composing.current||event.nativeEvent.isComposing,keyCode:event.nativeEvent.keyCode})){event.preventDefault();if(!event.repeat&&!busy)event.currentTarget.form?.requestSubmit();}}} aria-describedby="chat-input-help chat-retention-help"/></label><p className="hint" id="chat-input-help">Enter 전송 · Shift+Enter 줄바꿈 · 2~1,200자</p><div className="chat-retention">{user&&<label className="chat-checkbox"><input type="checkbox" checked={remember} disabled={busy} onChange={()=>void toggleRemember()}/><span>계정에 저장하고 이어가기</span></label>}<p className="hint" id="chat-retention-help">{remember?"선택 후 성공한 대화만 저장 · 마지막 저장 활동부터 30일 보관":user?"기본은 임시 대화예요. 저장 선택 시 30일 보관해요.":(embedded?"임시 대화 · 창을 닫아도 유지되며 새로고침하면 지워져요.":"임시 대화예요. 이동·재로그인 후에는 이어볼 수 없어요.")}</p></div><div className="actions chat-compose-actions"><button type="submit" disabled={busy||!!turn||question.trim().length<2}>{embedded?(busy?"대기":"전송"):(busy?"응답을 기다리는 중…":error?"질문 직접 다시 보내기":"질문 보내기")}</button>{!embedded&&(turn||messages.length>0||conversationId)&&<button type="button" className="secondary" disabled={busy} onClick={()=>conversationId?void remove(conversationId,true):temporaryEnd()}>대화 종료·삭제</button>}</div>{error&&<div role="alert"><p>{error}</p><p>질문은 유지되며 자동 재전송하지 않아요. 저장 여부가 불확실하면 저장 목록을 먼저 확인해 주세요.</p></div>}{notice&&<p role="status">{notice}</p>}</form>
+ <ChatGuidance>{embedded&&(turn||messages.length>0||conversationId)&&<div className="actions"><button type="button" className="secondary" disabled={busy} onClick={()=>conversationId?void remove(conversationId,true):temporaryEnd()}>대화 종료·삭제</button></div>}</ChatGuidance>
  {user&&<>{savedError&&<p role="alert">저장 목록을 불러오지 못했어요. 아래 ‘저장한 대화’를 열어 다시 확인해 주세요.</p>}<details className="saved-conversations"><summary>저장한 대화{savedLoading?" · 불러오는 중":savedError?" · 연결 확인 필요":""}</summary><div className="saved-conversations-content"><p>직접 저장한 대화는 같은 계정에서 이어볼 수 있어요. 보관 기간이 지난 대화는 표시하지 않아요.</p><button className="secondary" disabled={busy||savedLoading} onClick={()=>void loadSaved(offset)}>저장 목록 새로고침</button>{savedLoading&&<p role="status">저장 목록을 불러오고 있어요.</p>}{savedError&&<p role="alert">{savedError} 이전 목록은 최신 상태가 아닐 수 있어요.</p>}{!savedLoading&&!savedError&&!saved.length&&<p>저장한 대화가 없어요.</p>}{saved.map(item=><article key={item.id}><h3>{item.title}</h3><p className="hint">마지막 저장 {date(item.updated_at)} · 보관 기한 {date(item.expires_at)}</p><div className="actions"><button className="secondary" disabled={busy} onClick={()=>void resume(item.id)}>이 대화 이어보기</button><button className="secondary danger" disabled={busy} onClick={()=>void remove(item.id)}>이 대화 삭제</button></div></article>)}{(offset>0||more)&&<nav className="actions" aria-label="저장 대화 페이지"><button className="secondary" disabled={!offset||busy||savedLoading} onClick={()=>void loadSaved(Math.max(0,offset-20))}>이전</button><button className="secondary" disabled={!more||busy||savedLoading} onClick={()=>void loadSaved(offset+20)}>다음</button></nav>}</div></details></>}
- </section>;
+ </section></>;
 }
 
 export function ChatGuidance({children}:{children?:ReactNode}={}) {

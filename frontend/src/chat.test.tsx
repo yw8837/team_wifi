@@ -15,10 +15,11 @@ describe("assistant source and action presentation",()=>{
  it("keeps passive no-recent-request status neutral and reports each answer mode separately",()=>{const status={enabled:true,available:false,availability_basis:"no_recent_request" as const,mode:"retrieval_only" as const,model:null,history_retention_days:30,remember_default:false as const};expect(assistantStatusMessage(status)).toBe("공개 자료와 현재 정보를 확인해 안내해요");expect(assistantStatusMessage(status)).not.toContain("생성 답변 아님");expect(assistantStatusMessage({...status,available:true,mode:"local",availability_basis:"recent_request"})).toContain("최근 로컬 모델 응답 확인");});
 
  it("puts the initial question form before optional guidance without preselecting saved history",()=>{const html=renderToStaticMarkup(<MemoryRouter><AuthProvider><ChatPage/></AuthProvider></MemoryRouter>);expect(html).toContain('class="chat-form"');expect(html.indexOf('class="chat-form"')).toBeLessThan(html.indexOf('<details class="chat-guidance">'));expect(html).not.toMatch(/<details[^>]*\sopen(?:[\s=>])/);expect(html).toContain('rows="3"');expect(html).toContain('maxLength="1200"');expect(html).toContain("임시 대화예요. 이동·재로그인 후에는 이어볼 수 없어요.");expect(html).toContain('role="log"');expect(html).toContain("연결 상태 확인 중");});
- it("offers editable starter buttons in both views",()=>{
+ it("shows the reset and starter buttons in both views",()=>{
   for(const embedded of [false,true]){
    const html=renderToStaticMarkup(<MemoryRouter><AuthProvider><ChatPage embedded={embedded}/></AuthProvider></MemoryRouter>);
    expect(html).toContain('aria-label="추천 질문"');
+   expect(html.match(/>새 대화<\/button>/g)).toHaveLength(1);
    for(const text of ["진행 중인 공구 보여줘","기저귀를 비교할 때 뭘 봐야 해?","내가 찜한 공구 보여줘"])
     expect(html).toContain(text+"</button>");
    expect(html).not.toContain("답변 준비 중…");
