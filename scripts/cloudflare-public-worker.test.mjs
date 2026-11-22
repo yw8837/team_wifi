@@ -4,6 +4,7 @@ import worker, { sellerPreviewUrl, productImageUrl } from './cloudflare-public-w
 
 test('preview fetches only reviewed HTTPS product pages', () => {
   assert.ok(sellerPreviewUrl('https://poled.co.kr/product/detail.html?product_no=662'));
+  assert.equal(sellerPreviewUrl('https://yomimonshop.com/product/detail.html?product_no=2965').hostname, 'm.yomimonshop.com');
   assert.ok(sellerPreviewUrl('https://www.doctornoah.net/shop_view?idx=545'));
   assert.ok(sellerPreviewUrl('https://shop.srookpay.com/luxiai/Detail/SLU93540156'));
   for (const url of [

@@ -9,6 +9,8 @@ export function sellerPreviewUrl(value) {
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:' || url.username || url.password || url.port) return null;
+    // The storefront selects its layout by device. Fetch images from its stable mobile page.
+    if (url.hostname === 'yomimonshop.com') url.hostname = 'm.yomimonshop.com';
     if (url.hostname === 'minkang1.celebrity.place') {
       return url.pathname === '/m/goods/content.asp'
         && url.searchParams.size === 2
