@@ -25,10 +25,12 @@ for (const item of items) {
     if (!page.ok) throw new Error('Seller status ' + page.status);
     const html = await page.text();
     let image;
-    for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
+    const useGallery = source.hostname === 'minkang1.celebrity.place';
+    for (const tag of html.match(useGallery ? /<img\b[^>]*>/gi : /<meta\b[^>]*>/gi) || []) {
       const attrs = Object.fromEntries([...tag.matchAll(/([\w:-]+)\s*=\s*(["'])(.*?)\2/gs)]
         .map(match => [match[1].toLowerCase(), match[3].replaceAll('&amp;', '&')]));
-      if (attrs.property === 'og:image') image = productImageUrl(attrs.content, source) || image;
+      if (useGallery || attrs.property === 'og:image') image = productImageUrl(useGallery ? attrs.src : attrs.content, source);
+      if (image) break;
     }
     if (!image) throw new Error('No product image');
     const download = await fetch(image, { redirect: 'error', signal: AbortSignal.timeout(15000) });

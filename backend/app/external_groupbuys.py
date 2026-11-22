@@ -27,6 +27,7 @@ FRESH_SECONDS = 24 * 3600
 CAMPAIGN_EVIDENCE = re.compile(r"공동\s*구매|공구(?:종료|마감)(?![가-힣])|(?<![가-힣])공구(?![가-힣])")
 SELLERS = json.loads(Path(__file__).with_name('groupbuy_sellers.json').read_text(encoding='utf-8'))
 ALLOWED_HOSTS = frozenset(seller['host'] for seller in SELLERS)
+KIDS_CATALOG = 'https://kkulshop.kr/category/kids/monthly'
 
 
 REVIEWED_CAMPAIGNS = {url: rule for seller in SELLERS for url, rule in seller.get("campaigns", {}).items()}
@@ -51,6 +52,9 @@ class SellerRedirect(HTTPRedirectHandler):
 
 
 def fetch(source):
+    if source.get('parser') == 'celebrity':
+        from .groupbuy_celebrity import parse
+        return parse(read_html(source['url']), source)
     if source.get('parser') == 'srookpay':
         from .groupbuy_srookpay import parse
         return parse(read_html(source['url']), source)
@@ -79,7 +83,7 @@ def fetch(source):
 
 
 def read_html(url):
-    request = Request(validate_url(url), headers={
+    request = Request(url if url == KIDS_CATALOG else validate_url(url), headers={
         'User-Agent': 'ModuYuga-SourceCheck/1.0', 'Accept': 'text/html'})
     with build_opener(SellerRedirect).open(request, timeout=20) as response:
         if response.headers.get_content_type() != 'text/html':

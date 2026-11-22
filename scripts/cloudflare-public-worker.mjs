@@ -2,12 +2,18 @@ const SELLER_HOSTS = new Set([
   'somi9726.cafe24.com', 'poled.co.kr', 'upang.co.kr',
   'www.doctornoah.net', 'www.gonggan27.com', 'www.aguardmall.com',
   'joonie.kr', 'durimall.co.kr', 'oa-mall.co.kr', 'creestyle.com', 'luciroda101.cafe24.com',
+  'm.yomimonshop.com',
 ]);
 
 export function sellerPreviewUrl(value) {
   try {
     const url = new URL(value);
     if (url.protocol !== 'https:' || url.username || url.password || url.port) return null;
+    if (url.hostname === 'minkang1.celebrity.place') {
+      return url.pathname === '/m/goods/content.asp'
+        && url.searchParams.size === 2
+        && ['gc', 'guid'].every(k => /^[1-9][0-9]{0,11}$/.test(url.searchParams.get(k) || '')) ? url : null;
+    }
     if (url.hostname === 'shop.srookpay.com') {
       return /^\/luxiai\/Detail\/SLU[0-9]+$/.test(url.pathname) && !url.search ? url : null;
     }
@@ -27,7 +33,10 @@ export function productImageUrl(value, source) {
     if (!value) return null;
     const url = new URL(value, source);
     const host = url.hostname;
-    const trusted = SELLER_HOSTS.has(host) || host === 'aguardmall.com'
+    if (new URL(source).hostname === 'minkang1.celebrity.place') {
+      if (host !== 'minkang1.celebrity.place' || !/^\/data\/inflz\/goods\/[^/]+\/big\//.test(url.pathname)) return null;
+    }
+    const trusted = SELLER_HOSTS.has(host) || host === 'aguardmall.com' || host === 'minkang1.celebrity.place' && new URL(source).hostname === host
       || host === 'cdn.imweb.me' || host === 'cafe24img.poxo.com' || host === 'cafe24.poxo.com'
       || host === 'ecimg.cafe24img.com'
       || (host === 'img.srookpay.com' && url.pathname.startsWith('/data/goods/luxiai/'));
@@ -86,10 +95,11 @@ async function sellerPreview(request, url, context, env) {
     }
     let image = null;
     const html = new Response(new Blob(chunks), { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-    await new HTMLRewriter().on('meta[property="og:image"]', {
+    const useGallery = source.hostname === 'minkang1.celebrity.place';
+    await new HTMLRewriter().on(useGallery ? 'img[src]' : 'meta[property="og:image"]', {
       element(element) {
-        const candidate = productImageUrl(element.getAttribute('content'), source.href);
-        if (candidate) image = candidate;
+        const candidate = productImageUrl(element.getAttribute(useGallery ? 'src' : 'content'), source.href);
+        if (candidate && !image) image = candidate;
       },
     }).transform(html).text();
     if (!image) return new Response(null, { status: 404, headers: { 'Cache-Control': 'no-store', 'X-Preview-Error': 'image-metadata-missing' } });

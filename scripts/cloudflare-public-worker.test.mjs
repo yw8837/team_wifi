@@ -18,6 +18,11 @@ test('preview fetches only reviewed HTTPS product pages', () => {
 });
 
 test('preview accepts product CDN images and excludes logo or unsafe destinations', () => {
+  const pot = 'https://minkang1.celebrity.place/m/goods/content.asp?gc=1663&guid=783059';
+  assert.ok(sellerPreviewUrl(pot));
+  assert.equal(sellerPreviewUrl(pot + '&gc=1664'), null);
+  assert.equal(productImageUrl('/data/inflz/partner/minkang/imgSNS.gif', pot), null);
+  assert.ok(productImageUrl('/data/inflz/goods/wivva1115/big/item.jpg', pot));
   const source = 'https://poled.co.kr/product/detail.html?product_no=662';
   assert.equal(productImageUrl('/web/product/big/item.jpg', source), 'https://poled.co.kr/web/product/big/item.jpg');
   assert.ok(productImageUrl('https://cdn.imweb.me/thumbnail/item.png', source));

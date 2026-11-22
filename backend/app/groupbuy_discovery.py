@@ -51,7 +51,7 @@ class Links(HTMLParser):
                 self.urls.append(href)
 
 
-def product_links(html, base):
+def product_links(html, base, seller_host=None):
     parser = Links()
     parser.feed(html)
     products = set()
@@ -62,7 +62,13 @@ def product_links(html, base):
         except ValueError:
             continue
         parsed = urlsplit(url)
-        if parsed.hostname != urlsplit(base).hostname:
+        if parsed.hostname != (seller_host or urlsplit(base).hostname):
+            continue
+        if parsed.hostname == 'minkang1.celebrity.place':
+            from .groupbuy_celebrity import campaign_key
+            key = campaign_key(url)
+            if key:
+                products.add('https://' + parsed.hostname + parsed.path + '?' + urlencode(key))
             continue
         if parsed.path.rstrip('/') == '/shop_view':
             identifier = parse_qs(parsed.query).get('idx', [''])[0]
@@ -93,18 +99,27 @@ def collect(db=None):
                 'seller': data['seller_name'], 'category': data['category'],
                 'parser': data.get('source_parser', 'cafe24')})
     failures, entries, rejected, removed = [], [], [], []
+    listing_pages = {}
     for seller in collector.SELLERS:
         links = set(seller.get('product_urls', [])) | set(seller.get('campaigns', {}))
         for listing in seller['listing_urls']:
             try:
-                links.update(product_links(collector.read_html(listing), listing))
+                if listing not in listing_pages:
+                    listing_pages[listing] = collector.read_html(listing)
+                links.update(product_links(listing_pages[listing], listing, seller['host']))
             except (OSError, HTTPException, ValueError) as error:
                 failures.append({'source_id': seller['host'], 'stage': 'discovery', 'error': type(error).__name__})
         for url in sorted(links):
             parsed = urlsplit(url)
             query = parse_qs(parsed.query)
             number = (query.get('product_no') or query.get('idx') or [''])[0]
-            if seller['parser'] == 'srookpay' and url in seller.get('campaigns', {}):
+            if seller['parser'] == 'celebrity':
+                from .groupbuy_celebrity import campaign_key
+                key = campaign_key(url)
+                if not key:
+                    raise ValueError('Invalid campaign or product ID')
+                number = key['gc'] + '-' + key['guid']
+            elif seller['parser'] == 'srookpay' and url in seller.get('campaigns', {}):
                 match = re.fullmatch(r'/[a-z0-9_-]+/Detail/(SLU[0-9]+)', parsed.path)
                 if not match:
                     raise ValueError('Invalid reviewed seller campaign')
