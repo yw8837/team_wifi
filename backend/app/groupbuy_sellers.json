@@ -180,5 +180,56 @@
         "organizer_url": "https://gonggu.ju-talk.com/i/21292"
       }
     }
+  },
+  {
+    "host": "preorderbebe.cafe24.com",
+    "seller": "리틀피기 × 강윤맘",
+    "parser": "cafe24",
+    "category": "육아생활",
+    "listing_urls": [],
+    "campaigns": {
+      "https://preorderbebe.cafe24.com/product/detail.html?product_no=1056": {
+        "title": "강윤맘 x 뽀글이 베스트",
+        "organizer_url": "https://link.inpock.co.kr/kangyoon_mom",
+        "last_day": "2026-11-23"
+      },
+      "https://preorderbebe.cafe24.com/product/detail.html?product_no=1057": {
+        "title": "강윤맘 x 캔디 반폴라",
+        "organizer_url": "https://link.inpock.co.kr/kangyoon_mom",
+        "last_day": "2026-11-23"
+      },
+      "https://preorderbebe.cafe24.com/product/detail.html?product_no=1058": {
+        "title": "강윤맘 x 후리스 말랑 조거",
+        "organizer_url": "https://link.inpock.co.kr/kangyoon_mom",
+        "last_day": "2026-11-23"
+      },
+      "https://preorderbebe.cafe24.com/product/detail.html?product_no=1059": {
+        "title": "강윤맘 x ❤︎ 윈터팬츠",
+        "organizer_url": "https://link.inpock.co.kr/kangyoon_mom",
+        "last_day": "2026-11-23"
+      },
+      "https://preorderbebe.cafe24.com/product/detail.html?product_no=1060": {
+        "title": "강윤맘 x 월리반폴라 ❤︎",
+        "organizer_url": "https://link.inpock.co.kr/kangyoon_mom",
+        "last_day": "2026-11-23"
+      },
+      "https://preorderbebe.cafe24.com/product/detail.html?product_no=1061": {
+        "title": "강윤맘 x new ! 시그니처 골지 실내복",
+        "organizer_url": "https://link.inpock.co.kr/kangyoon_mom",
+        "last_day": "2026-11-23"
+      }
+    }
+  },
+  {
+    "host": "sharequeens.store",
+    "seller": "현브로마켓",
+    "parser": "sharequeens",
+    "listing_urls": [
+      "https://sharequeens.store/minihome/wlsdud6580/category/all",
+      "https://sharequeens.store/minihome/wlsdud6580/category/all?page=2",
+      "https://sharequeens.store/minihome/wlsdud6580/category/all?page=3",
+      "https://sharequeens.store/minihome/wlsdud6580/category/all?page=4",
+      "https://sharequeens.store/minihome/wlsdud6580/category/all?page=5"
+    ]
   }
 ]

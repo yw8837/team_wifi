@@ -52,6 +52,9 @@ class SellerRedirect(HTTPRedirectHandler):
 
 
 def fetch(source):
+    if source.get('parser') == 'sharequeens':
+        from .groupbuy_sharequeens import parse
+        return parse(read_html(source['url']), source)
     if source.get('parser') == 'celebrity':
         from .groupbuy_celebrity import parse
         return parse(read_html(source['url']), source)

@@ -2,7 +2,7 @@ const SELLER_HOSTS = new Set([
   'somi9726.cafe24.com', 'poled.co.kr', 'upang.co.kr',
   'www.doctornoah.net', 'www.gonggan27.com', 'www.aguardmall.com',
   'joonie.kr', 'durimall.co.kr', 'oa-mall.co.kr', 'creestyle.com', 'luciroda101.cafe24.com',
-  'm.yomimonshop.com',
+  'm.yomimonshop.com', 'preorderbebe.cafe24.com',
 ]);
 
 export function sellerPreviewUrl(value) {
@@ -18,6 +18,9 @@ export function sellerPreviewUrl(value) {
     }
     if (url.hostname === 'shop.srookpay.com') {
       return /^\/luxiai\/Detail\/SLU[0-9]+$/.test(url.pathname) && !url.search ? url : null;
+    }
+    if (url.hostname === 'sharequeens.store') {
+      return /^\/minihome\/wlsdud6580\/product\/[1-9][0-9]{0,10}$/.test(url.pathname) && !url.search ? url : null;
     }
     if (!SELLER_HOSTS.has(url.hostname)) return null;
     const cafeProduct = url.pathname === '/product/detail.html'
@@ -35,6 +38,13 @@ export function productImageUrl(value, source) {
     if (!value) return null;
     const url = new URL(value, source);
     const host = url.hostname;
+    if (new URL(source).hostname === 'sharequeens.store') {
+      const params = url.searchParams;
+      return url.origin === 'https://sharequeens.store' && !url.username && !url.password
+        && url.pathname === '/img/thumb' && params.size === 3
+        && /^\/uploads\/products\/[a-zA-Z0-9_-]+\.(?:webp|png|jpe?g)$/i.test(params.get('src') || '')
+        && params.get('w') === '900' && params.get('format') === 'jpeg' ? url.href : null;
+    }
     if (new URL(source).hostname === 'minkang1.celebrity.place') {
       if (host !== 'minkang1.celebrity.place' || !/^\/data\/inflz\/goods\/[^/]+\/big\//.test(url.pathname)) return null;
     }

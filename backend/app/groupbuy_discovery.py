@@ -106,6 +106,11 @@ def collect(db=None):
             try:
                 if listing not in listing_pages:
                     listing_pages[listing] = collector.read_html(listing)
+                if seller['parser'] == 'sharequeens':
+                    from .groupbuy_sharequeens import campaign_sources
+                    for source in campaign_sources(listing_pages[listing], seller['seller'], classify):
+                        sources[source['url']] = source
+                    continue
                 links.update(product_links(listing_pages[listing], listing, seller['host']))
             except (OSError, HTTPException, ValueError) as error:
                 failures.append({'source_id': seller['host'], 'stage': 'discovery', 'error': type(error).__name__})
@@ -131,11 +136,14 @@ def collect(db=None):
                 'parser': seller['parser']})
     for source in sources.values():
         try:
+            if source.get('parser') == 'sharequeens' and not source.get('dates'):
+                # A listing that fell out of the dated catalogue gets no new freshness receipt.
+                continue
             entry = collector.fetch(source)
             if entry['availability'] != 'listed':
                 entries.append(entry)
                 continue
-            category = classify(entry['title'], source.get('category'))
+            category = source['category'] if source.get('parser') == 'sharequeens' else classify(entry['title'], source.get('category'))
             if not category:
                 rejected.append({'source_id': source['id'], 'reason': 'category_unconfirmed'})
                 continue

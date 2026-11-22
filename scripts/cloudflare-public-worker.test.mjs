@@ -40,6 +40,18 @@ test('invalid source and write requests never trigger seller fetch', async () =>
   assert.equal((await worker.fetch(new Request(url, { method: 'POST' }), {}, {})).status, 405);
 });
 
+test('reviewed mini-store thumbnails use only its local product uploads', () => {
+  const source = 'https://sharequeens.store/minihome/wlsdud6580/product/916';
+  assert.ok(sellerPreviewUrl(source));
+  assert.equal(sellerPreviewUrl(source.replace('wlsdud6580', 'test456')), null);
+  assert.equal(sellerPreviewUrl(source + '?market_ref=tracker'), null);
+  const thumb = '/img/thumb?src=%2Fuploads%2Fproducts%2Fproduct_v_98.png&w=900&format=jpeg';
+  assert.ok(productImageUrl(thumb, source));
+  assert.equal(productImageUrl(thumb.replace('%2Fuploads%2Fproducts%2F', 'https://other.example/'), source), null);
+  assert.equal(productImageUrl(thumb + '&src=https://other.example/', source), null);
+  assert.equal(productImageUrl('https://other.example' + thumb, source), null);
+});
+
 test('uses verified image snapshots without requesting the remote seller', async () => {
   const source = 'https://poled.co.kr/product/detail.html?product_no=662';
   const path = '/seller-images/' + 'a'.repeat(64) + '.jpg';
