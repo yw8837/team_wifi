@@ -89,9 +89,9 @@ describe("API failures and session", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch.mock.calls[0][1].signal?.aborted).toBe(false);
   });
-  it("recovers config from a transient gateway and network failure without manual reload", async () => {
+  it.each([503, 530])("recovers config after HTTP %s and a network failure", async (status) => {
     vi.useFakeTimers();
-    const fetch = vi.fn().mockResolvedValueOnce(new Response("waking", { status: 503 }))
+    const fetch = vi.fn().mockResolvedValueOnce(new Response("waking", { status }))
       .mockRejectedValueOnce(new TypeError("Failed to fetch"))
       .mockResolvedValueOnce(new Response(JSON.stringify({ public_release: true })));
     vi.stubGlobal("fetch", fetch);
@@ -112,10 +112,10 @@ describe("API failures and session", () => {
     await rejection;
     expect(fetch).toHaveBeenCalledTimes(1);
   });
-  it("never automatically retries a mutation rejected by a gateway", async () => {
-    const fetch = vi.fn().mockResolvedValue(new Response("unavailable", { status: 503 }));
+  it.each([503, 530])("never replays a mutation after HTTP %s", async (status) => {
+    const fetch = vi.fn().mockResolvedValue(new Response("unavailable", { status }));
     vi.stubGlobal("fetch", fetch);
-    await expect(api("/release/demands", "POST", { title: "example" })).rejects.toMatchObject({ status: 503 });
+    await expect(api("/release/demands", "POST", { title: "example" })).rejects.toMatchObject({ status, message: expect.stringContaining("저장됐는지") });
     expect(fetch).toHaveBeenCalledTimes(1);
   });
   it("aborts a slow mutation after 15 seconds without replaying it", async () => {

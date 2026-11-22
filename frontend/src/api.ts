@@ -15,6 +15,7 @@ export class ApiError extends Error {
     super(message);
   }
 }
+export const gatewayUnavailable = (status: number) => [502, 503, 504, 530].includes(status);
 export function safeReturnPath(value: unknown): string {
   if (
     typeof value !== "string" ||
@@ -120,7 +121,7 @@ export async function api<T>(
         }
         throw new ApiError(0, controller.signal.aborted ? timeoutMessage : connectionMessage);
       }
-      if ([502, 503, 504].includes(response.status) && attempt + 1 < attempts) {
+      if (gatewayUnavailable(response.status) && attempt + 1 < attempts) {
         await response.body?.cancel();
         await retryDelay(1_500 * (attempt + 1));
         continue;
@@ -139,7 +140,12 @@ export async function api<T>(
           detail: { redirect: method !== "GET", publicRead: isPublicRead(path, method) },
         }));
       }
-      throw new ApiError(response.status, formatError(data.detail));
+      if (gatewayUnavailable(response.status) && !data?.detail) {
+        throw new ApiError(response.status, readOnly
+          ? "지금 서비스에 연결하기 어려워요. 잠시 후 다시 열어 주세요."
+          : "서버 응답을 받지 못했어요. 저장됐는지 확인한 뒤 다시 시도해 주세요.");
+      }
+      throw new ApiError(response.status, formatError(data?.detail));
     }
     return data;
   } finally {

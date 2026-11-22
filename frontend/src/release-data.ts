@@ -1,6 +1,6 @@
 import type { Groupbuy } from "./groupbuys";
 import { useCallback, useEffect, useState } from "react";
-import { api, ApiError } from "./api";
+import { api, ApiError, gatewayUnavailable } from "./api";
 export type Offer = { id:string; title:string; category:string; summary:string; source_name:string; source_url:string; source_checked_at:string; entry_type:"shopping_reference"|"verified_offer"; price:number|null; shipping_fee:number|null; unit:string|null; expires_at:string|null; comparison_notes:string[]; is_affiliate:boolean; saved:boolean };
 export type Author = {id:string;nickname:string};
 export type PostType = "question"|"experience"|"information"|"demand";
@@ -8,7 +8,8 @@ export type Demand = {linked_groupbuy?:Groupbuy|null;post_type?:PostType;id:stri
 export type Comment = {comment_type?:"question"|"review";id:string;body:string;author:Author;created_at:string;updated_at?:string|null;revision?:number;own:boolean};
 export async function readPublic<T>(path:string):Promise<T> {
   try { return await api<T>(path); } catch (e) {
-    if (!(e instanceof ApiError) || ![0,502,503,504].includes(e.status)) throw e;
+    // The config request already has its own retry loop and deadline.
+    if (path === "/config" || !(e instanceof ApiError) || (e.status !== 0 && !gatewayUnavailable(e.status))) throw e;
     await new Promise(resolve => setTimeout(resolve, 700));
     return api<T>(path);
   }
