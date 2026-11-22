@@ -181,3 +181,38 @@ button.groupbuy-heart[aria-pressed="true"] { background: #fff1ef; color: #9f3128
 .groupbuy-comparison caption { text-align:left; font-weight:700; margin-bottom:6px; }
 .groupbuy-comparison td,.groupbuy-comparison th { padding:8px 5px; border-top:1px solid var(--line); overflow-wrap:anywhere; vertical-align:top; text-align:left; }
 .groupbuy-comparison th:first-child { width:4.5em; }
+
+@media (max-width: 600px) {
+  .groupbuy-feed .home-navigation { display:flex; flex-wrap:wrap; gap:4px 10px; margin:4px 0; }
+  .groupbuy-feed .home-navigation a {
+    min-height:44px; padding:4px 2px; border:0; border-radius:4px;
+    font-size:14px; text-decoration:underline; text-underline-offset:4px;
+    text-decoration-color:var(--line);
+  }
+  .groupbuy-categories {
+    flex-wrap:nowrap; overflow-x:auto; gap:6px; margin:4px 0 10px;
+    padding:3px; scrollbar-width:thin;
+  }
+  .groupbuy-categories a { flex:none; padding:6px 12px; }
+  .feed-list-heading {
+    position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden;
+    clip-path:inset(50%); white-space:nowrap;
+  }
+  .groupbuy-feed .groupbuy-filters { margin:8px 0; padding:10px 12px 0; }
+  .groupbuy-feed .groupbuy-advanced { margin:0; }
+  .groupbuy-feed .groupbuy-comparison { margin:8px 0; padding:0 12px; }
+  .groupbuy-feed .groupbuy-comparison summary { min-height:44px; padding:10px 0; }
+  .groupbuy-card:has(> .groupbuy-image-link) {
+    display:grid; grid-template-columns:94px minmax(0,1fr); gap:4px 12px; padding:14px;
+  }
+  .groupbuy-card > .groupbuy-image-link { grid-column:1; grid-row:2 / 5; align-self:start; }
+  .groupbuy-card .groupbuy-image { margin:0; }
+  .groupbuy-card .groupbuy-image img { height:94px; }
+  .groupbuy-card:has(> .groupbuy-image-link) > .groupbuy-card-meta { grid-column:1 / -1; grid-row:1; }
+  .groupbuy-card:has(> .groupbuy-image-link) > h2 { grid-column:2; grid-row:2; margin:2px 0; font-size:16px; }
+  .groupbuy-card:has(> .groupbuy-image-link) > .groupbuy-seller { grid-column:2; grid-row:3; margin:0; font-size:13px; }
+  .groupbuy-card:has(> .groupbuy-image-link) > .groupbuy-price { grid-column:2; grid-row:4; margin:0; font-size:20px; }
+  .groupbuy-card:has(> .groupbuy-image-link) > :nth-child(n+6) { grid-column:1 / -1; }
+  .groupbuy-card .groupbuy-quick-facts { margin:6px 0; }
+  .groupbuy-card .groupbuy-preview { margin:0; }
+}
