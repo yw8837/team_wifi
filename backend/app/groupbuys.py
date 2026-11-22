@@ -9,7 +9,7 @@ from urllib.parse import urlsplit
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse
 from pydantic import Field, field_validator
-from sqlalchemy import case, delete, select
+from sqlalchemy import case, delete, func, select
 from sqlalchemy.orm import aliased
 
 from . import release
@@ -159,6 +159,15 @@ def linked_dto(db,demand,user):
     return dto(db,item,user) if item else None
 
 
+def counted_page(db, query, limit, offset):
+    rows = db.execute(query.add_columns(func.count().over()).limit(limit).offset(offset)).all()
+    if rows:
+        return [record for record, _ in rows], rows[0][1]
+    # A saved URL can point past the last result after a campaign closes.
+    total = db.scalar(select(func.count()).select_from(query.order_by(None).subquery())) if offset else 0
+    return [], total
+
+
 def listing(db,user,q,category,status,sort,limit,offset,start_date,end_date,mine=False):
     query=visible_query(user,*( [Record.owner_id==user.id] if mine else []),own_hidden=mine)
     if not mine:
@@ -172,10 +181,10 @@ def listing(db,user,q,category,status,sort,limit,offset,start_date,end_date,mine
     if q.strip():query=query.where((Record.data['title'].as_string()+' '+Record.data['body'].as_string()).icontains(q.strip(),autoescape=True))
     if sort=='ending':query=query.order_by(case(((Record.status=='active')&(Record.ends>now()),0),else_=1),Record.ends,Record.created.desc(),Record.id)
     else:query=query.order_by(Record.created.desc(),Record.id)
-    rows=list(db.scalars(query.limit(limit+1).offset(offset)))
-    page = rows[:limit]
+    page, total = counted_page(db, query, limit, offset)
     saved = set(db.scalars(saved_targets(user).where(Record.parent_id.in_([row.id for row in page])))) if user and page else set()
-    return {'items':[dto(db,row,user,saved=row.id in saved) for row in page],'has_more':len(rows)>limit,'queried_at':release.timestamp(now())}
+    return {'items':[dto(db,row,user,saved=row.id in saved) for row in page], 'total':total,
+            'has_more':offset + len(page) < total,'queried_at':release.timestamp(now())}
 
 
 @router.get('/groupbuys')
@@ -204,9 +213,9 @@ def saved_groupbuy_query(user):
 @router.get('/groupbuys/saved')
 def saved_groupbuys(limit: int = Query(20, ge=1, le=100), offset: int = Query(0, ge=0, le=10000),
                     user=Depends(current_user), db=Depends(get_db)):
-    rows = list(db.scalars(saved_groupbuy_query(user).offset(offset).limit(limit + 1)))
-    return {'items': [dto(db, row, user, saved=True) for row in rows[:limit]],
-            'has_more': len(rows) > limit, 'queried_at': release.timestamp(now())}
+    rows, total = counted_page(db, saved_groupbuy_query(user), limit, offset)
+    return {'items': [dto(db, row, user, saved=True) for row in rows], 'total': total,
+            'has_more': offset + len(rows) < total, 'queried_at': release.timestamp(now())}
 
 
 @router.put('/groupbuys/{id}/saved')

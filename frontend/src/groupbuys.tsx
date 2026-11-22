@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { IconHeart } from "@tabler/icons-react";
+import { GROUPBUYS_PER_PAGE, GroupbuyPages, useGroupbuyPageNavigation } from "./groupbuy-pagination";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api, categories, money } from "./api";
 import { communityTime, ListFeedback, useCommunityResource } from "./community";
@@ -20,7 +21,7 @@ import type { PriceReference } from "./price-comparison";
 export const BROKER_NOTICE="모두의 육아는 통신판매중개자로서 거래 당사자가 아닙니다. 상품 정보와 거래 책임은 각 판매처에 있으며 주문·결제·배송·환불은 판매처에서 진행합니다.";
 export const SHARING_NOTICE="아이·가족의 이름, 생일, 사진, 연락처, 주소, 건강정보를 적지 마세요. 회원 간 계좌 이체·연락처 교환 등 직접 거래 요청과 광고·불법 정보는 신고 대상입니다.";
 export type Groupbuy={saved?:boolean;fulfillment_notes?:string[];option_labels?:string[];return_note?:string;order_minimum?:number|null;order_step?:number|null;is_demo?:boolean;comparison_quantity?:number;price_references?:PriceReference[];source_type?:string;source_url?:string;source_fresh_until?:string;id:string;title:string;body:string;category:string;seller_name:string;seller_url:string;price:number|null;shipping_fee:number|null;minimum_quantity?:number|null;unit:string;price_conditions:string;expires_at:string;source_checked_at:string;author:{id:string;nickname:string};created_at:string;updated_at:string|null;revision:number;own:boolean;can_edit?:boolean;status:"active"|"ended"|"hidden";review_state:"clear"|"needs_review";queried_at:string;broker_notice:string};
-type GroupbuyList={items:Groupbuy[];has_more:boolean;queried_at:string};
+type GroupbuyList={items:Groupbuy[];has_more:boolean;total?:number;queried_at:string};
 export type GroupbuyInput=Pick<Groupbuy,"title"|"body"|"category"|"seller_name"|"seller_url"|"price"|"shipping_fee"|"unit"|"price_conditions"|"expires_at"|"source_checked_at"|"minimum_quantity">;
 export type GroupbuyDraft=Omit<GroupbuyInput,"price"|"shipping_fee"|"minimum_quantity">&{price:string;shipping_fee:string;minimum_quantity:string};
 type GroupbuyReport={id:string;groupbuy_id:string;reason:string;status:"active"|"resolved";created_at:string;resolved_at:string|null;resolved_by:string|null;action:"hide"|"needs_review"|"dismiss"|null;note:string;groupbuy:Groupbuy|null};
@@ -34,7 +35,7 @@ export function publicSellerUrl(value:string):string|null{
  }catch{return null;}
 }
 export function groupbuyListQuery(params:URLSearchParams,mine=false):string{
- const query=new URLSearchParams({q:params.get("q")||"",category:params.get("category")||"",status:["active","ended","all"].includes(params.get("status")||"")?params.get("status")!:mine?"all":"active",sort:params.get("sort")==="recent"?"recent":"ending",limit:"20",offset:String(pageNumber(params.get("page"))*20)});
+ const query=new URLSearchParams({q:params.get("q")||"",category:params.get("category")||"",status:["active","ended","all"].includes(params.get("status")||"")?params.get("status")!:mine?"all":"active",sort:params.get("sort")==="recent"?"recent":"ending",limit:String(GROUPBUYS_PER_PAGE),offset:String(pageNumber(params.get("page"))*GROUPBUYS_PER_PAGE)});
  return query.toString();
 }
 // A one-use guest request overlaps the server mode check on the initial home view.
@@ -75,7 +76,6 @@ export function validateGroupbuyDraft(draft:GroupbuyDraft,now=Date.now()):Groupb
  return {title:text(draft.title,3,120,"제목"),body:text(draft.body,10,3000,"공구 내용"),category:text(draft.category,1,40,"카테고리"),seller_name:text(draft.seller_name,1,100,"판매처 이름"),seller_url:sellerUrl,price:amount(draft.price,"가격"),shipping_fee:amount(draft.shipping_fee,"배송비"),minimum_quantity:minimumQuantity,unit:text(draft.unit,0,100,"수량·단위"),price_conditions:text(draft.price_conditions,0,1000,"가격·참여 조건"),expires_at:expires,source_checked_at:checked};
 }
 export function BrokerFooter(){return <footer className="broker-footer"><p>{BROKER_NOTICE}</p><nav aria-label="공개 서비스 안내"><Link to="/my/policies">약관·개인정보·삭제 안내</Link><Link to="/offers">육아템 공식 정보</Link><Link to="/my">도움말·문의 안내</Link></nav></footer>;}
-function GroupbuyPages({page,hasMore,change,disabled=false}:{page:number;hasMore:boolean;change:(page:number)=>void;disabled?:boolean}){if(!page&&!hasMore)return null;return <nav className="actions" aria-label="공구 목록 페이지"><button className="secondary" disabled={disabled||!page} onClick={()=>change(page-1)}>이전</button><span>{page+1}페이지</span><button className="secondary" disabled={disabled||!hasMore||page>=500} onClick={()=>change(page+1)}>다음</button></nav>;}
 function HiddenGroupbuyDelete({item,reload}:{item:Groupbuy;reload:()=>void}){
  const action=useAction(),attempts=useContentSessionAttempt(),confirmation=useGroupbuyConfirmation(action);
  return <><button className="danger secondary" disabled={action.busy||confirmation.waiting} onClick={()=>confirmation.request(()=>{const attempt=attempts.begin();return {title:"숨긴 공구 정보 삭제",description:"‘"+item.title+"’ 공구 정보를 삭제할까요?",details:[{label:"공구",value:item.title},{label:"삭제 결과",value:"공유한 정보와 수요 글의 연결이 삭제되며 복구할 수 없습니다."}],confirmLabel:"공구 영구 삭제",isCurrent:attempt.isCurrent,work:()=>api("/release/groupbuys/"+encodeURIComponent(item.id),"DELETE",{revision:item.revision}),onSuccess:()=>{reload();action.setMessage("공구 정보를 삭제했습니다.");}};})}>내 숨긴 공구 삭제</button><Feedback {...action}/>{confirmation.dialog}</>;
@@ -281,34 +281,33 @@ export function GroupbuyFeed({mine=false}:{mine?:boolean}){
  const {user}=useAuth(),[params,setParams]=useSearchParams();const fromUrl=()=>({q:params.get("q")||"",category:params.get("category")||"",status:params.get("status")||(mine?"all":"active"),sort:params.get("sort")||"ending"});
  const [draft,setDraft]=useState(fromUrl);const applied=JSON.stringify([params.get("q"),params.get("category"),params.get("status"),params.get("sort"),mine]);useEffect(()=>setDraft(fromUrl()),[applied]);
  const result=useCommunityResource<GroupbuyList>("/release/groupbuys"+(mine?"/mine":"")+"?"+groupbuyListQuery(params,mine),user?.id||"guest",loadGroupbuyFeed);const page=pageNumber(params.get("page"));
+ const navigation=useGroupbuyPageNavigation(page,result.data?.total,!!result.data&&!result.loading&&!result.stale&&!result.error);
  return <section className="groupbuy-feed"><header className="groupbuy-heading"><div><h1>{mine?"내가 공유한 공구":"공구 찾기"}</h1><Link className="button" to="/groupbuys/new">공구 정보 공유</Link></div></header><nav className="actions home-navigation" aria-label="공구와 육아템 탐색"><Link to="/demands">커뮤니티 게시판</Link><Link to="/demands?post_type=question">질문·답변</Link><Link to="/offers">육아템 정보</Link>{mine?<Link to="/">전체 공구</Link>:<Link to="/my/groupbuys">내 공구</Link>}</nav><GroupbuyCategories params={params} mine={mine}/>
   <h2 className="feed-list-heading">{mine?"내 공구 목록":"공구 목록"}</h2><form className="groupbuy-filters" aria-label="공구 검색 조건" onSubmit={event=>{event.preventDefault();setParams({...draft,page:"0"});}}><div className="groupbuy-search-primary"><Field label="공구 검색" name="q" autoComplete="off" type="search" maxLength={100} value={draft.q} onChange={event=>setDraft({...draft,q:event.target.value})}/><button>검색 적용</button></div><details className="groupbuy-advanced"><summary>상세 조건 <span>{(params.get("status")||(mine?"all":"active"))==="active"?"진행 중":params.get("status")==="ended"?"종료":"전체"} · {params.get("category")||"전체 분야"} · {params.get("sort")==="recent"?"최근 공유순":"마감 임박순"}</span></summary><div className="groupbuy-advanced-fields"><label className="field"><span>카테고리</span><select value={draft.category} onChange={event=>setDraft({...draft,category:event.target.value})}><option value="">전체 분야</option>{categories.map(category=><option key={category}>{category}</option>)}</select></label><label className="field"><span>공구 상태</span><select value={draft.status} onChange={event=>setDraft({...draft,status:event.target.value})}><option value="active">진행 중</option><option value="ended">종료</option><option value="all">전체</option></select></label><label className="field"><span>정렬</span><select value={draft.sort} onChange={event=>setDraft({...draft,sort:event.target.value})}><option value="ending">마감 임박순</option><option value="recent">최근 공유순</option></select></label><div className="actions"><button>상세 조건 적용</button><button type="button" className="secondary" onClick={()=>{setParams({});setDraft({q:"",category:"",status:mine?"all":"active",sort:"ending"});}}>초기화</button></div></div></details></form>
-  <ListFeedback {...result} retry={result.reload}/>{result.data&&<>{!mine&&!result.stale&&<CompareGroupbuys key={applied+":"+page} items={result.data.items}/>}<div className="groupbuy-grid">{result.data.items.map(item=><GroupbuyCard key={item.id} item={item} reload={result.reload}/>)}</div>{!result.loading&&!result.error&&!result.data.items.length&&<div className="state"><p>{params.get("q")||params.get("category")?"이 조건에 맞는 공구가 없습니다.":mine?"아직 공유한 공구가 없습니다.":"등록된 공구 정보가 없습니다."}</p><p>검색 조건을 바꾸거나 판매처에서 확인한 공구 정보를 공유해 주세요.</p><div className="actions"><Link to="/demands/new?post_type=demand">필요한 공구 수요 쓰기</Link><Link to="/groupbuys/new">첫 공구 정보 공유</Link></div></div>}{result.data.items.length>0&&<p className="hint" role="status" aria-live="polite">현재 {page*20+1}–{page*20+result.data.items.length}개 표시 · 조회 {communityTime(result.data.queried_at)}</p>}<GroupbuyPages page={page} hasMore={result.data.has_more} disabled={result.loading||!!result.stale} change={next=>setParams({...Object.fromEntries(params),page:String(next)})}/></>}{!mine&&page===0&&!params.get("q")&&!params.get("category")&&!params.get("status")&&!params.get("sort")&&<div className="home-discovery-highlights"><section className="ending-groupbuys" aria-labelledby="ending-groupbuys-title"><h2 id="ending-groupbuys-title">판매처에서 확인할 공구</h2><p className="hint">조건은 공유 시점 기준이에요. 판매처에서 다시 확인하세요.</p><ListFeedback {...result} retry={result.reload}/>{result.data&&!result.loading&&!result.error&&(result.data.items.length?<ul className="plain-list">{result.data.items.filter(item=>item.status==="active").slice(0,2).map(item=><EndingGroupbuyPreview key={item.id} item={item}/>)}</ul>:<p>현재 진행 중 공구가 없어요. <Link to="/demands/new?post_type=demand">필요한 공구 수요 쓰기</Link></p>)}</section><PopularDemands/></div>}</section>;
+  <ListFeedback {...result} retry={result.reload}/>{result.data&&<>{!mine&&!result.stale&&<CompareGroupbuys key={applied+":"+page} items={result.data.items}/>}<div className="groupbuy-grid" ref={navigation.grid} tabIndex={-1} role="region" aria-label="공구 검색 결과">{result.data.items.map(item=><GroupbuyCard key={item.id} item={item} reload={result.reload}/>)}</div>{!result.loading&&!result.error&&!result.data.items.length&&<div className="state"><p>{params.get("q")||params.get("category")?"이 조건에 맞는 공구가 없습니다.":mine?"아직 공유한 공구가 없습니다.":"등록된 공구 정보가 없습니다."}</p><p>검색 조건을 바꾸거나 판매처에서 확인한 공구 정보를 공유해 주세요.</p><div className="actions"><Link to="/demands/new?post_type=demand">필요한 공구 수요 쓰기</Link><Link to="/groupbuys/new">첫 공구 정보 공유</Link></div></div>}{result.data.items.length>0&&<p className="hint" role="status" aria-live="polite">{result.data.total !== undefined && `전체 ${result.data.total}개 중 `}{page*GROUPBUYS_PER_PAGE+1}–{page*GROUPBUYS_PER_PAGE+result.data.items.length}개 표시 · 조회 {communityTime(result.data.queried_at)}</p>}<GroupbuyPages page={page} total={result.data.total} hasMore={result.data.has_more} disabled={result.loading||!!result.stale} change={navigation.go}/></>}{!mine&&page===0&&!params.get("q")&&!params.get("category")&&!params.get("status")&&!params.get("sort")&&<div className="home-discovery-highlights"><section className="ending-groupbuys" aria-labelledby="ending-groupbuys-title"><h2 id="ending-groupbuys-title">판매처에서 확인할 공구</h2><p className="hint">조건은 공유 시점 기준이에요. 판매처에서 다시 확인하세요.</p><ListFeedback {...result} retry={result.reload}/>{result.data&&!result.loading&&!result.error&&(result.data.items.length?<ul className="plain-list">{result.data.items.filter(item=>item.status==="active").slice(0,2).map(item=><EndingGroupbuyPreview key={item.id} item={item}/>)}</ul>:<p>현재 진행 중 공구가 없어요. <Link to="/demands/new?post_type=demand">필요한 공구 수요 쓰기</Link></p>)}</section><PopularDemands/></div>}</section>;
 }
 export function SavedGroupbuys() {
   const { user } = useAuth();
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const page = pageNumber(params.get("page"));
   const result = useCommunityResource<GroupbuyList>(
-    "/release/groupbuys/saved?limit=20&offset=" + page * 20, user?.id || "guest"
+    "/release/groupbuys/saved?limit=" + GROUPBUYS_PER_PAGE + "&offset=" + page * GROUPBUYS_PER_PAGE, user?.id || "guest"
   );
-  function change(next: number) {
-    setParams(next ? {page: String(next)} : {});
-  }
+  const navigation = useGroupbuyPageNavigation(page, result.data?.total, !!result.data && !result.loading && !result.stale && !result.error);
   const items = result.data?.items || [];
   const reloadAfterToggle = () => {
-    if (items.length === 1 && page > 0) change(page - 1);
+    if (items.length === 1 && page > 0) navigation.go(page - 1);
     else result.reload();
   };
   return <section className="groupbuy-feed">
     <PageTitle title="찜한 공구"><p>찜한 공구 중 지금 진행 중인 상품이에요.</p></PageTitle>
     <ListFeedback {...result} retry={result.reload}/>
     {result.data && !result.error && <>
-      <div className="groupbuy-grid">{items.map(item =>
+      <div className="groupbuy-grid" ref={navigation.grid} tabIndex={-1} role="region" aria-label="찜한 공구 결과">{items.map(item =>
         <GroupbuyCard key={item.id} item={item} reload={reloadAfterToggle}/>
       )}</div>
       {!result.loading && !items.length && <div className="state"><p>{page ? "이 페이지에 남은 공구가 없어요." : "공구 목록이나 상세에서 하트를 눌러 보세요."}</p><Link to="/">공구 찾아보기</Link></div>}
-      <GroupbuyPages page={page} hasMore={result.data.has_more} disabled={result.loading} change={change}/>
+      <GroupbuyPages page={page} total={result.data.total} hasMore={result.data.has_more} disabled={result.loading||!!result.stale} change={navigation.go}/>
     </>}
   </section>;
 }
@@ -360,5 +359,5 @@ export function AdminGroupbuyReport({report,reload}:{report:GroupbuyReport;reloa
 export function AdminGroupbuys(){
  const {user}=useAuth(),[params,setParams]=useSearchParams(),page=pageNumber(params.get("page"));const status=["active","resolved","all"].includes(params.get("status")||"")?params.get("status")!:"active";
  const result=useCommunityResource<{items:GroupbuyReport[];has_more:boolean}>("/release/admin/groupbuys/reports?"+new URLSearchParams({status,limit:"30",offset:String(page*30)}),user?.id||"guest");
- return <><AdminNavigation/><PageTitle title="공구 정보 관리"><p>제보된 공구의 원문과 판매처를 확인하고 조치를 기록합니다. 운영 검토는 상품·판매처의 품질이나 거래 안전을 보증하지 않습니다.</p></PageTitle><label className="field"><span>처리 상태</span><select value={status} onChange={event=>setParams({status:event.target.value,page:"0"})}><option value="active">검토 필요</option><option value="resolved">처리 완료</option><option value="all">전체</option></select></label><button className="secondary" onClick={result.reload}>제보 새로고침</button><ListFeedback {...result} retry={result.reload}/>{result.data?.items.map(report=><AdminGroupbuyReport key={report.id} report={report} reload={result.reload}/>)}{result.data&&!result.loading&&!result.error&&!result.data.items.length&&<p className="state">이 조건에 맞는 공구 제보가 없습니다.</p>}{result.data&&<GroupbuyPages page={page} hasMore={result.data.has_more} disabled={result.loading||!!result.stale} change={next=>setParams({...Object.fromEntries(params),page:String(next)})}/>}</>;
+return <><AdminNavigation/><PageTitle title="공구 정보 관리"><p>제보된 공구의 원문과 판매처를 확인하고 조치를 기록합니다. 운영 검토는 상품·판매처의 품질이나 거래 안전을 보증하지 않습니다.</p></PageTitle><label className="field"><span>처리 상태</span><select value={status} onChange={event=>setParams({status:event.target.value,page:"0"})}><option value="active">검토 필요</option><option value="resolved">처리 완료</option><option value="all">전체</option></select></label><button className="secondary" onClick={result.reload}>제보 새로고침</button><ListFeedback {...result} retry={result.reload}/>{result.data?.items.map(report=><AdminGroupbuyReport key={report.id} report={report} reload={result.reload}/>)}{result.data&&!result.loading&&!result.error&&!result.data.items.length&&<p className="state">이 조건에 맞는 공구 제보가 없습니다.</p>}{result.data&&<GroupbuyPages page={page} hasMore={result.data.has_more} disabled={result.loading||!!result.stale} change={next=>setParams({...Object.fromEntries(params),page:String(next)})}/>}</>;
 }

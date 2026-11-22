@@ -80,9 +80,13 @@ def test_visibility_precedes_pagination_search_status_and_sort(public_mode):
         db.get(Record,hidden['id']).status='hidden';db.get(User,p['pending']['id']).deleted=True;db.commit()
     listing=c.get(BASE,headers=p['buyer']['headers'],params={'limit':1,'q':'물티슈','category':'기저귀·물티슈'}).json()
     assert [r['id'] for r in listing['items']]==[visible['id']] and not listing['has_more']
+    assert listing['total'] == 1
+    beyond = c.get(BASE, headers=p['buyer']['headers'], params={'offset': 100, 'q': '물티슈'}).json()
+    assert beyond['items'] == [] and beyond['total'] == 1 and not beyond['has_more']
     for item in (blocked,suspended,hidden,deleted):assert c.get(BASE+'/'+item['id'],headers=p['buyer']['headers']).status_code==404
     ordered=c.get(BASE,headers=p['buyer']['headers'],params={'limit':1}).json()
     assert ordered['items'][0]['id']==visible['id'] and ordered['has_more']
+    assert ordered['total'] == 2
     assert c.post(BASE+'/'+visible['id']+'/end',headers=p['buyer']['headers'],json={'revision':1}).status_code==200
     assert visible['id'] not in {row['id'] for row in c.get(BASE).json()['items']}
     assert [r['id'] for r in c.get(BASE,headers=p['buyer']['headers'],params={'status':'ended'}).json()['items']]==[visible['id']]
@@ -265,6 +269,8 @@ def test_private_groupbuy_saves_follow_visibility_and_account(public_mode):
     assert not client.get(url).json()['saved']
     assert client.get(url, headers=other).json()['saved']
     assert [row['id'] for row in client.get(saved_url, headers=other).json()['items']] == [item['id']]
+    assert client.get(saved_url, headers=other, params={'offset': 20}).json()['total'] == 1
+    assert client.get(saved_url, headers=buyer).json()['total'] == 0
     assert client.get(saved_url, headers=buyer).json()['items'] == []
     assert client.delete(url + '/saved', headers=buyer).json() == {'saved': False}
     assert client.get(BASE, headers=other).json()['items'][0]['saved']

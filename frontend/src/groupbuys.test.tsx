@@ -24,6 +24,22 @@ describe("private groupbuy saves", () => {
  });
 });
 describe("current groupbuy discovery and honest external commerce",()=>{
+ it("numbers real pages, marks the current page and hides controls for one page", () => {
+   state.data = {items: [item], total: 37, has_more: false, queried_at: item.queried_at};
+   const second = feed("/?page=1");
+   expect(second).toContain('aria-label="2페이지" aria-current="page"');
+   expect(second).not.toContain('aria-label="3페이지"');
+   expect(second).toContain("전체 37개 중 21–21개 표시");
+   state.data = {items: [item], total: 1, has_more: false, queried_at: item.queried_at};
+   expect(feed()).not.toContain('aria-label="공구 목록 페이지"');
+ });
+ it("keeps the number row bounded and offers a direct jump to the last page", () => {
+   state.data = {items: [item], total: 200, has_more: true, queried_at: item.queried_at};
+   const middle = feed("/?page=5");
+   expect(middle.match(/aria-label="\d+페이지"/g)).toHaveLength(5);
+   expect(middle).toContain('aria-label="6페이지" aria-current="page"');
+   expect(middle).toContain('<option value="9">10 / 10</option>');
+ });
  it("shows verified order conditions and the community comment entry",()=>{
   state.data={...item,order_minimum:1,order_step:1,option_labels:["베이지 순차 출고"],fulfillment_notes:["일반 배송 1~3일"],return_note:"반송비 구매자 부담"};
   const html=detail();
