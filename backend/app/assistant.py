@@ -354,9 +354,17 @@ def answer_request(body,request,observation,request_id,user_id,identifier,revisi
         if restricted:
             answer='비밀번호·인증 토큰과 다른 회원의 비공개 정보는 제공할 수 없어요. 확인된 공개 안내만 제공해요.\n\n'+answer
         if (not restricted and live.get('verified_offer') and unsupported in (None, 'price')
-                and reason != 'evidence_changed' and re.search(r'공구|공동.?구매|가격|얼마', effective_question)):
+                and reason != 'evidence_changed' and (live.get('named_price_lookup') or re.search(r'공구|공동.?구매|가격|얼마', effective_question))):
             answer='판매처에서 마지막으로 수집한 공구 정보를 안내해요. 최종 금액과 구매 조건은 판매처에서 확인해 주세요.'
             mode, reason, unsupported, model, citations = 'retrieval_only', None, None, None, []
+        elif (live.get('named_price_lookup') and not live.get('verified_offer')
+              and unsupported in (None, 'price') and reason != 'evidence_changed'):
+            # The live notes already identify unconfirmed prices or a missing product.
+            answer, citations, model = '', [], None
+            mode, reason = 'retrieval_only', 'no_evidence'
+        elif live.get('community_search_only') and not unsupported and reason != 'evidence_changed':
+            answer, citations, model = '', [], None
+            mode, reason = 'retrieval_only', None
         if live['notes']:
             answer = '\n\n'.join(filter(None, [answer, '\n'.join(live['notes'])]))
         checked_at = knowledge.timestamp()

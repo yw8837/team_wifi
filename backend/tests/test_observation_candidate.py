@@ -210,13 +210,14 @@ def test_observation_failure_never_changes_caller_return(remote_telemetry,monkey
     assert obs.delivery_snapshot()['failed']==1 and obs.status()=='unavailable'
 
 
-def test_tool_capture_keeps_attempted_query_on_failure_and_resets():
+@pytest.mark.parametrize(('question','tool'), [('기저귀 공구', 'public_groupbuys'), ('기저귀 후기', 'public_community')])
+def test_tool_capture_keeps_attempted_query_on_failure_and_resets(question, tool):
     from app import assistant_tools
     database=Mock();database.scalars.side_effect=RuntimeError('private database detail')
     captured={}
     with pytest.raises(RuntimeError):
-        with assistant_tools.capture_tool_calls(captured):assistant_tools.live_read(database,None,'기저귀 공구')
-    assert captured=={'public_community':1}
+        with assistant_tools.capture_tool_calls(captured):assistant_tools.live_read(database,None,question)
+    assert captured=={tool:1}
     assert assistant_tools._TOOL_CALLS.get() is None
 
 

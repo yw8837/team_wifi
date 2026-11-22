@@ -699,3 +699,35 @@ def test_direct_groupbuy_questions_use_visible_rows_and_own_saves(chat, monkeypa
     assert links('내가 찜한 공구 보여줘','buyer') == [link,'/my/saved']
     assert links('내가 찜한 공구 보여줘','buyer2') == ['/my/saved']
     assert knowledge.restricted_data_request('다른 회원이 찜한 공구 보여줘')
+
+
+def test_product_price_and_community_use_the_requested_subject(chat):
+    from app import groupbuys
+    client, people, _ = chat
+    author = people['buyer']['id']
+    with SessionLocal.begin() as db:
+        product = Record(kind=groupbuys.GROUPBUY, owner_id=author, status='active', ends=now()+3600, data={
+            'title':'별빛 캘린더 공동구매', 'seller_name':'별빛상점', 'category':'놀이·도서',
+            'body':'공구 판매 안내', 'source_type':'seller_page', 'price':12000, 'unit':'달빛 단품',
+            'option_labels':['달빛 단품 · 12,000원', '햇살 기차 두 개입 · 21,000원']})
+        related = Record(kind=release.DEMAND, owner_id=author, data={
+            'title':'별빛 캘린더 사용 후기', 'category':'놀이·도서','body':'아이와 열어 봤어요.'})
+        unrelated = Record(kind=release.DEMAND, owner_id=author, data={
+            'title':'젖병 공구 후기', 'category':'놀이·도서', 'body':'가격 궁금해요.'})
+        db.add_all([product, related, unrelated])
+        db.flush()
+        product_url, related_url = '/groupbuys/'+product.id, '/demands/'+related.id
+    def answer(text):
+        result = ask(client, question=text)
+        assert result.status_code == 200, result.text
+        return result.json()
+    for question in ['햇살 기차 가격이 궁금해요', '별빛 캘린더 햇살 공구는 얼마예요?']:
+        found = answer(question)
+        assert [a['url'] for a in found['actions']] == [product_url]
+        assert '21,000원' in found['answer'] and '12,000원' not in found['answer']
+        assert found['generation']['reason'] is None and found['basis'] == 'live_data'
+    missing = answer('없는브랜드 캘린더 공구는 얼마예요?')
+    assert missing['actions'] == [] and '진행 중 공구를 찾지 못했어요' in missing['answer']
+    assert not any(price in missing['answer'] for price in ('12,000원', '21,000원'))
+    assert [a['url'] for a in answer('별빛 캘린더 공구 후기 보여줘')['actions']] == [related_url]
+    assert [a['url'] for a in answer('별빛 캘린더 공구 후기와 가격 알려줘')['actions']] == [product_url, related_url]
