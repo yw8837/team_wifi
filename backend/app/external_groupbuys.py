@@ -51,6 +51,9 @@ class SellerRedirect(HTTPRedirectHandler):
 
 
 def fetch(source):
+    if source.get('parser') == 'srookpay':
+        from .groupbuy_srookpay import parse
+        return parse(read_html(source['url']), source)
     if source.get('parser') == 'schema_product':
         from .groupbuy_schema import parse
         return parse(read_html(source['url']), source)
@@ -171,6 +174,11 @@ def parse_cafe24(html, source, *, groupbuy=True):
         kst = timezone(timedelta(hours=9))
         day_after = datetime.fromisoformat(reviewed['last_day']).replace(tzinfo=kst) + timedelta(days=1)
         fresh_until = min(fresh_until, int(day_after.timestamp()))
+        if not deadline and reviewed.get('ends_at'):
+            deadline = datetime.fromisoformat(reviewed['ends_at'])
+            if deadline.tzinfo is None:
+                raise ValueError('Reviewed deadline must include timezone')
+            fresh_until = min(fresh_until, int(deadline.timestamp()))
         ended = ended or fresh_until <= stamp
     return {'source_id': source['id'], 'source_url': source['url'],
             'source_hash': hashlib.sha256(html.encode()).hexdigest(),

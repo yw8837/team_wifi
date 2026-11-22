@@ -5,7 +5,9 @@ import worker, { sellerPreviewUrl, productImageUrl } from './cloudflare-public-w
 test('preview fetches only reviewed HTTPS product pages', () => {
   assert.ok(sellerPreviewUrl('https://poled.co.kr/product/detail.html?product_no=662'));
   assert.ok(sellerPreviewUrl('https://www.doctornoah.net/shop_view?idx=545'));
+  assert.ok(sellerPreviewUrl('https://shop.srookpay.com/luxiai/Detail/SLU93540156'));
   for (const url of [
+    'https://shop.srookpay.com/other/Detail/SLU93540156',
     'https://127.0.0.1/product/detail.html?product_no=1',
     'https://poled.co.kr.attacker.example/product/detail.html?product_no=1',
     'https://user:pass@poled.co.kr/product/detail.html?product_no=1',

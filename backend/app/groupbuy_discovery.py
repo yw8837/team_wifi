@@ -104,7 +104,12 @@ def collect(db=None):
             parsed = urlsplit(url)
             query = parse_qs(parsed.query)
             number = (query.get('product_no') or query.get('idx') or [''])[0]
-            if not number.isdigit():
+            if seller['parser'] == 'srookpay' and url in seller.get('campaigns', {}):
+                match = re.fullmatch(r'/[a-z0-9_-]+/Detail/(SLU[0-9]+)', parsed.path)
+                if not match:
+                    raise ValueError('Invalid reviewed seller campaign')
+                number = match.group(1)
+            elif not number.isdigit():
                 raise ValueError('Unsupported reviewed product URL')
             sources.setdefault(url, {'id': seller['host'] + '-' + number, 'url': url,
                 'seller': seller['seller'], 'category': seller.get('category', ''),

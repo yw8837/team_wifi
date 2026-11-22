@@ -127,5 +127,35 @@
         "organizer_url": "https://link.inpock.co.kr/ddohuni_mom"
       }
     }
+  },
+  {
+    "host": "joonie.kr",
+    "seller": "주니 공식몰",
+    "parser": "cafe24",
+    "category": "수유·이유식",
+    "listing_urls": [],
+    "campaigns": {
+      "https://joonie.kr/product/detail.html?product_no=2124": {
+        "title": "[용감이네X주니] 입모아 텀블러 특별할인! 11월 19일 ~ 11월 22일",
+        "last_day": "2026-11-22",
+        "organizer_url": "https://gonggu.ju-talk.com/i/20932",
+        "ends_at": "2026-11-22T23:59:59+09:00"
+      }
+    }
+  },
+  {
+    "host": "shop.srookpay.com",
+    "seller": "루시아이",
+    "parser": "srookpay",
+    "category": "놀이·도서",
+    "listing_urls": [],
+    "campaigns": {
+      "https://shop.srookpay.com/luxiai/Detail/SLU93540156": {
+        "title": "[하다X루시아이] 크리스마스 어드벤트 캘린더 (11/22~11/27)",
+        "option_group": "어드벤트 캘린더 2종",
+        "last_day": "2026-11-27",
+        "organizer_url": "https://gonggu.ju-talk.com/i/21292"
+      }
+    }
   }
 ]

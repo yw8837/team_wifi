@@ -1,14 +1,17 @@
 const SELLER_HOSTS = new Set([
   'somi9726.cafe24.com', 'poled.co.kr', 'upang.co.kr',
   'www.doctornoah.net', 'www.gonggan27.com', 'www.aguardmall.com',
-  'durimall.co.kr', 'oa-mall.co.kr', 'creestyle.com', 'luciroda101.cafe24.com',
+  'joonie.kr', 'durimall.co.kr', 'oa-mall.co.kr', 'creestyle.com', 'luciroda101.cafe24.com',
 ]);
 
 export function sellerPreviewUrl(value) {
   try {
     const url = new URL(value);
-    if (url.protocol !== 'https:' || url.username || url.password || url.port
-        || !SELLER_HOSTS.has(url.hostname)) return null;
+    if (url.protocol !== 'https:' || url.username || url.password || url.port) return null;
+    if (url.hostname === 'shop.srookpay.com') {
+      return /^\/luxiai\/Detail\/SLU[0-9]+$/.test(url.pathname) && !url.search ? url : null;
+    }
+    if (!SELLER_HOSTS.has(url.hostname)) return null;
     const cafeProduct = url.pathname === '/product/detail.html'
       && /^\d+$/.test(url.searchParams.get('product_no') || '');
     const imwebProduct = /^\/shop_view\/?$/.test(url.pathname)
@@ -26,7 +29,8 @@ export function productImageUrl(value, source) {
     const host = url.hostname;
     const trusted = SELLER_HOSTS.has(host) || host === 'aguardmall.com'
       || host === 'cdn.imweb.me' || host === 'cafe24img.poxo.com' || host === 'cafe24.poxo.com'
-      || host === 'ecimg.cafe24img.com';
+      || host === 'ecimg.cafe24img.com'
+      || (host === 'img.srookpay.com' && url.pathname.startsWith('/data/goods/luxiai/'));
     if (url.protocol !== 'https:' || url.username || url.password || url.port || !trusted
         || /(?:logo|favicon|banner)/i.test(url.pathname)) return null;
     return url.href;
