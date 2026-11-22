@@ -179,7 +179,7 @@ button.groupbuy-heart[aria-pressed="true"] { background: #fff1ef; color: #9f3128
 .groupbuy-pagination button.secondary {
   min-width:44px; min-height:44px; width:auto; margin:0; padding:6px 9px;
 }
-.groupbuy-pagination button[aria-current="page"] {
+.groupbuy-pagination button.secondary[aria-current="page"] {
   background:var(--cocoa); color:#fff; border-color:var(--cocoa); font-weight:700;
 }
 .groupbuy-page-jump { flex-basis:100%; margin-top:4px; gap:8px; }
