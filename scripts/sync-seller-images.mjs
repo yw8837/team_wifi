@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
-import { sellerPreviewUrl, productImageUrl } from './cloudflare-public-worker.mjs';
+import { sellerPreviewUrl, productImageUrl, fetchSellerPage } from './cloudflare-public-worker.mjs';
 
 const [apiBase, output] = process.argv.slice(2);
 if (!apiBase?.startsWith('https://') || !output) throw new Error('API origin and output directory required');
@@ -21,7 +21,7 @@ for (const item of items) {
   const source = sellerPreviewUrl(item.seller_url);
   if (!source || item.is_demo || item.source_type !== 'seller_page') continue;
   try {
-    const page = await fetch(source, { redirect: 'error', signal: AbortSignal.timeout(15000) });
+    const page = await fetchSellerPage(source, { signal: AbortSignal.timeout(15000) });
     if (!page.ok) throw new Error('Seller status ' + page.status);
     const html = await page.text();
     let image;

@@ -60,6 +60,19 @@ export function productImageUrl(value, source) {
   }
 }
 
+export async function fetchSellerPage(source, init, fetchPage = fetch) {
+  const options = { ...init, redirect: 'manual' };
+  const response = await fetchPage(source.href, options);
+  if (source.hostname !== 'sharequeens.store' || ![301, 302, 303, 307, 308].includes(response.status)) return response;
+  const location = response.headers.get('Location');
+  if (!location) return response;
+  const target = new URL(location, source);
+  if (target.origin !== source.origin || target.pathname !== source.pathname || target.username || target.password
+      || target.searchParams.size !== 1 || !/^[A-Za-z0-9_.-]{1,1200}$/.test(target.searchParams.get('market_ref') || '')) return response;
+  await response.body?.cancel();
+  return fetchPage(target.href, options);
+}
+
 async function sellerPreview(request, url, context, env) {
   if (!['GET', 'HEAD'].includes(request.method)) {
     return new Response(null, { status: 405, headers: { Allow: 'GET, HEAD' } });
@@ -82,9 +95,8 @@ async function sellerPreview(request, url, context, env) {
   const cached = await caches.default.match(cacheKey);
   if (cached) return cached;
   try {
-    const response = await fetch(source.href, {
+    const response = await fetchSellerPage(source, {
       headers: { Accept: 'text/html', 'User-Agent': 'ModuYuga-SourceCheck/1.0' },
-      redirect: 'manual',
       signal: AbortSignal.timeout(10000),
     });
     if (!response.ok || !response.headers.get('content-type')?.includes('text/html')) {

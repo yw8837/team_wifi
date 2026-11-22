@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 from html import unescape
 from html.parser import HTMLParser
+from http.client import HTTPException
 import re
 from urllib.parse import urlsplit
 
@@ -13,11 +14,13 @@ from .external_groupbuys import FRESH_SECONDS, NotGroupbuy
 KST = timezone(timedelta(hours=9))
 STORE = 'https://sharequeens.store/minihome/wlsdud6580'
 # Separate listings for the same player and high chair share the same configurations.
-ALTERNATE_IDS = {'558', '850'}
+PRIMARY_IDS = {'558': '866', '850': '616'}
+CHILD_TERMS = ('기저귀', '이유식', '수유', '젖병', '분유', '유모차', '카시트', '아기', '유아',
+               '어린이', '신생아', '아동', '키즈', '놀이', '그림책', '동화책')
 TERMS = {
     '수유·이유식': ('하이체어', '컵빨대캡', '아넬라 퓨레', '키디밀', '마이키즈'),
     '외출·안전': ('알파카 인피니티 킥보드',),
-    '놀이·도서': ('레인보우 피아노', '디즈니 그림명작', '생활동화', '세이펜',
+    '놀이·도서': ('레인보우 피아노', '디즈니 그림명작', '생활동화', '세이펜', '베어블리 소프트 블럭', '물노리 실리콘',
                 '사파 플레이어', '마이 비지북', '마이베이비북'),
     '육아생활': ('미꼬밴드', '장난감정리함'),
 }
@@ -29,11 +32,12 @@ def campaign_sources(html, seller, classify):
         number = card.partition('"')[0]
         title = re.search(r'<p class="pl-card-name">([^<]+)</p>', card)
         dates = re.search(r'<p class="pl-card-date">\s*(\d{4}\.\d{2}\.\d{2})\s*~\s*(\d{4}\.\d{2}\.\d{2})\s*</p>', card)
-        if not number.isdecimal() or number in ALTERNATE_IDS or not (title and dates):
+        if not number.isdecimal() or not (title and dates):
             continue
         name = unescape(title[1]).strip()
         category = next((key for key, values in TERMS.items() if any(v in name for v in values)), None)
-        category = category or classify(name)
+        if not category and any(v in name for v in CHILD_TERMS):
+            category = classify(name)
         if not category:
             continue
         try:
@@ -41,9 +45,28 @@ def campaign_sources(html, seller, classify):
         except ValueError:
             continue
         if start <= today <= end:
-            yield {'id': 'sharequeens.store-' + number, 'url': STORE + '/product/' + number,
+            yield {'id': 'sharequeens.store-' + PRIMARY_IDS.get(number, number), 'url': STORE + '/product/' + number,
                    'seller': seller, 'category': category, 'parser': 'sharequeens',
                    'listed_title': name, 'dates': (start, end)}
+
+
+def discover(seller, classify, read_html):
+    products, failures = {}, []
+    for url in seller['listing_urls']:
+        try:
+            html = read_html(url)
+            if '<div class="pl-card" data-product-id="' not in html:
+                if '<p>등록된 상품이 없습니다.</p>' in html:
+                    return list(products.values()), not failures, failures
+                raise ValueError('Unrecognized campaign listing')
+            for item in campaign_sources(html, seller['seller'], classify):
+                number = item['url'].rsplit('/', 1)[-1]
+                if number not in PRIMARY_IDS or item['id'] not in products:
+                    products[item['id']] = item
+        except (OSError, HTTPException, ValueError) as error:
+            failures.append({'source_id': seller['host'], 'stage': 'discovery', 'error': type(error).__name__})
+    # Last page may be beyond the configured bound. A missing item is inconclusive.
+    return list(products.values()), False, failures
 
 
 class Product(HTMLParser):

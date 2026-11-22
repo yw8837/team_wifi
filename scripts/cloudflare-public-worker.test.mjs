@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import worker, { sellerPreviewUrl, productImageUrl } from './cloudflare-public-worker.mjs';
+import worker, { sellerPreviewUrl, productImageUrl, fetchSellerPage } from './cloudflare-public-worker.mjs';
 
 test('preview fetches only reviewed HTTPS product pages', () => {
   assert.ok(sellerPreviewUrl('https://poled.co.kr/product/detail.html?product_no=662'));
@@ -50,6 +50,23 @@ test('reviewed mini-store thumbnails use only its local product uploads', () => 
   assert.equal(productImageUrl(thumb.replace('%2Fuploads%2Fproducts%2F', 'https://other.example/'), source), null);
   assert.equal(productImageUrl(thumb + '&src=https://other.example/', source), null);
   assert.equal(productImageUrl('https://other.example' + thumb, source), null);
+});
+
+test('the mini-store can redirect once to its own product with a market reference', async () => {
+  const source = new URL('https://sharequeens.store/minihome/wlsdud6580/product/916');
+  for (const [destination, expectedCalls] of [
+    ['?market_ref=example.ref', 2], ['/login?market_ref=x', 1], ['//example.org/?market_ref=x', 1],
+    ['?market_ref=x&next=other', 1], ['?market_ref=', 1],
+  ]) {
+    let calls = 0;
+    const get = async (_url, options) => {
+      assert.equal(options.redirect, 'manual');
+      return ++calls === 1 ? new Response(null, { status: 302, headers: { Location: destination } }) : new Response('ok');
+    };
+    const result = await fetchSellerPage(source, {}, get);
+    assert.equal(calls, expectedCalls);
+    assert.equal(result.status, expectedCalls === 2 ? 200 : 302);
+  }
 });
 
 test('uses verified image snapshots without requesting the remote seller', async () => {

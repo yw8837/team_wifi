@@ -18,11 +18,24 @@ def sources(monkeypatch, html):
 
 
 def test_discovers_only_current_parenting_products(monkeypatch):
-    html = (card() + card('850') + card('102', '보리 소고기') + card('103', dates='2025.12.30 ~ 2026.01.01')
+    html = (card() + card('101', '성인용 로션') + card('102', '보리 소고기') + card('103', dates='2025.12.30 ~ 2026.01.01')
             + card('104', dates='2027.01.01 ~ 2027.01.02'))
     [item] = sources(monkeypatch, html)
     assert item['url'] == store.STORE + '/product/916'
     assert item['category'] == '외출·안전'
+
+
+def test_mirrors_preserve_identity_and_missing_pages_do_not_imply_closure(monkeypatch):
+    sources(monkeypatch, '')
+    seller = {'host': 'sharequeens.store', 'seller': '현브로마켓', 'listing_urls': ['a', 'b']}
+    empty = '<p>등록된 상품이 없습니다.</p>'
+    def discover(first, last):
+        return store.discover(seller, groupbuy_discovery.classify, {'a': first, 'b': last}.__getitem__)
+    [item], complete, errors = discover(card('850', '리브 하이체어') + card('616', '리브 하이체어'), empty)
+    assert complete and not errors and item['url'].endswith('/616')
+    [mirror], complete, errors = discover(card('850', '리브 하이체어'), '<html>maintenance</html>')
+    assert mirror['id'] == item['id'] and mirror['url'].endswith('/850')
+    assert not complete and len(errors) == 1
 
 
 def test_confirm_identity_order_controls_period_and_price(monkeypatch):

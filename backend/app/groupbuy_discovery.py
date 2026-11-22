@@ -101,16 +101,21 @@ def collect(db=None):
     failures, entries, rejected, removed = [], [], [], []
     listing_pages = {}
     for seller in collector.SELLERS:
+        if seller['parser'] == 'sharequeens':
+            from .groupbuy_sharequeens import discover
+            products, complete, errors = discover(seller, classify, collector.read_html)
+            failures.extend(errors)
+            active_ids = {item['id'] for item in products}
+            if complete:
+                removed.extend(item['id'] for item in sources.values()
+                               if item.get('parser') == 'sharequeens' and item['id'] not in active_ids)
+            sources.update({item['url']: item for item in products})
+            continue
         links = set(seller.get('product_urls', [])) | set(seller.get('campaigns', {}))
         for listing in seller['listing_urls']:
             try:
                 if listing not in listing_pages:
                     listing_pages[listing] = collector.read_html(listing)
-                if seller['parser'] == 'sharequeens':
-                    from .groupbuy_sharequeens import campaign_sources
-                    for source in campaign_sources(listing_pages[listing], seller['seller'], classify):
-                        sources[source['url']] = source
-                    continue
                 links.update(product_links(listing_pages[listing], listing, seller['host']))
             except (OSError, HTTPException, ValueError) as error:
                 failures.append({'source_id': seller['host'], 'stage': 'discovery', 'error': type(error).__name__})
