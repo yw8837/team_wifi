@@ -1,4 +1,3 @@
-import { CampaignReport } from './campaign-report';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { clientPlatform } from './client-platform';
@@ -100,5 +99,5 @@ export function MeasurementReport() {
     {data.data.rows.map(row => <article className="measurement-row" key={row.placement + row.channel}><h3>{places[row.placement]} · {row.channel === 'android' ? '앱' : '웹'}</h3><dl className="account-summary"><div><dt>노출 계정</dt><dd>{row.accounts ?? '5명 미만'}</dd></div><div><dt>클릭 계정</dt><dd>{row.clicked_accounts ?? '소수 집계 숨김'}</dd></div><div><dt>{row.placement.startsWith("groupbuy_")?"판매처 이동 계정":row.placement.startsWith("demand_")?"관심 완료 계정":"저장 완료 계정"}</dt><dd>{(row.placement.startsWith("groupbuy_")?row.source_accounts:row.placement.startsWith("demand_")?row.interested_accounts:row.saved_accounts) ?? '소수 집계 숨김'}</dd></div></dl>
       <p>계정 기준 CTR {percent(row.ctr)} · {row.placement.startsWith("groupbuy_")?"판매처 이동률":"전환율 ("+(row.placement.startsWith("demand_")?"관심":"저장")+")"} {percent(row.placement.startsWith("groupbuy_")?row.source_rate:row.placement.startsWith("demand_")?row.interest_rate:row.save_rate)}</p>{row.ctr_95_interval && <p className="hint">CTR 95% Wilson 구간 {percent(row.ctr_95_interval[0])}~{percent(row.ctr_95_interval[1])}. 동의 회원의 관찰 집단에 대한 구간이며 인과 효과 검정이 아닙니다.</p>}<p>{row.decision}</p></article>)}
     <p className="hint">저장·관심은 측정된 클릭 이후 30분 안에 서버가 신규 행동을 완료했을 때 마지막 클릭에 연결합니다. 단순 버튼 클릭·기존 행동 반복은 전환이 아닙니다. 판매처 이동은 외부 페이지로 이동한 행동이며 구매 완료·결제·매출을 뜻하지 않습니다.</p><p>{data.data.limitations}</p><h3>검색·AI 답변 노출</h3><p>{data.data.search}</p></>}
-    <button className="secondary" disabled={data.loading} onClick={data.reload}>측정 결과 새로고침</button><CampaignReport/></section>;
+    <button className="secondary" disabled={data.loading} onClick={data.reload}>측정 결과 새로고침</button></section>;
 }

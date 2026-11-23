@@ -1,6 +1,7 @@
 """Opt-in first-party measurement. Reports are account cohorts, never purchase scores."""
 import math
 from collections import defaultdict
+from datetime import date, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -93,28 +94,80 @@ def campaign_visit(body: CampaignVisit, user=Depends(current_user), db=Depends(g
     return {'recorded': True}
 
 
+KST_OFFSET = 9 * 3600
+DAY = 86400
+EPOCH_DATE = date(1970, 1, 1)
+
+
+def kst_date(stamp):
+    return EPOCH_DATE + timedelta(days=(stamp + KST_OFFSET) // DAY)
+
+
+def dashboard_period(period, start, end, checked_at):
+    today = kst_date(checked_at)
+    cutoff = checked_at - RETENTION
+    earliest = kst_date(cutoff)
+    if period == 'custom':
+        if not start or not end or not earliest <= start <= end <= today:
+            raise HTTPException(422, '보관 기간 안에서 시작일과 종료일을 선택해 주세요.')
+    else:
+        if start or end:
+            raise HTTPException(422, '직접 선택한 기간에만 날짜를 지정할 수 있어요.')
+        end = today
+        start = earliest if period == 'all' else today - timedelta(days={'today': 0, 'week': 6, 'month': 29}[period])
+    after = max(cutoff, (start - EPOCH_DATE).days * DAY - KST_OFFSET)
+    before = min(checked_at, ((end - EPOCH_DATE).days + 1) * DAY - KST_OFFSET - 1)
+    return start, end, after, before
+
+
+def display_count(count):
+    return count if count == 0 or count >= MINIMUM_CAMPAIGN_ACCOUNTS else None
+
+
 @router.get('/campaign-report')
-def campaign_report(user=Depends(admin_user), db=Depends(get_db)):
+def campaign_report(period: Literal['today', 'week', 'month', 'all', 'custom'] = 'all',
+                    start: date | None = None, end: date | None = None,
+                    user=Depends(admin_user), db=Depends(get_db)):
+    checked_at = now()
+    start, end, after, before = dashboard_period(period, start, end, checked_at)
     purge(db)
-    suspension = select(Record.owner_id).where(Record.kind == 'suspension')
+    suspension = select(Record.owner_id).where(Record.kind == 'suspension', Record.owner_id.is_not(None))
     consented = select(Record.owner_id).where(Record.kind == CONSENT)
-    visits = db.scalars(select(Record).join(User, User.id == Record.owner_id).where(
-        Record.kind == CAMPAIGN_VISIT, User.deleted.is_(False), User.is_admin.is_(False),
-        ~User.id.in_(suspension), User.id.in_(consented),
-    ))
-    accounts_by_campaign = defaultdict(set)
-    for visit in visits:
-        data = visit.data
-        campaign_key = (data['source'], data['medium'], data['campaign'], data['channel'])
-        accounts_by_campaign[campaign_key].add(visit.owner_id)
+    records = select(Record.owner_id, Record.kind, Record.created, Record.data).join(User, User.id == Record.owner_id).where(
+        Record.kind.in_([EXPOSURE, CAMPAIGN_VISIT]), Record.created.between(after, before),
+        User.deleted.is_(False), User.is_admin.is_(False), ~User.id.in_(suspension), User.id.in_(consented),
+    )
+    visitors, detail_readers, outbound = set(), set(), set()
+    by_day, by_campaign = defaultdict(set), defaultdict(set)
+    for owner, kind, created, data in db.execute(records):
+        visitors.add(owner)
+        by_day[kst_date(created)].add(owner)
+        if kind == CAMPAIGN_VISIT:
+            key = (data['source'], data['medium'], data['campaign'], data['channel'])
+            by_campaign[key].add(owner)
+        elif data.get('placement') == 'groupbuy_detail':
+            detail_readers.add(owner)
+            source_click = data.get('clicks', {}).get('source', 0)
+            if created <= source_click <= before:
+                outbound.add(owner)
+
     rows = [
         {'source': source, 'medium': medium, 'campaign': campaign,
          'channel': channel, 'accounts': len(accounts)}
-        for (source, medium, campaign, channel), accounts in sorted(accounts_by_campaign.items())
+        for (source, medium, campaign, channel), accounts in sorted(by_campaign.items())
         if len(accounts) >= MINIMUM_CAMPAIGN_ACCOUNTS
     ]
+    days = []
+    for offset in range((end - start).days + 1):
+        day = start + timedelta(days=offset)
+        days.append({'date': day, 'accounts': display_count(len(by_day[day]))})
+    dashboard = {
+        'checked_at': checked_at, 'start': start, 'end': end, 'minimum_date': kst_date(checked_at - RETENTION),
+        'visitors': display_count(len(visitors)), 'detail_readers': display_count(len(detail_readers)),
+        'outbound': display_count(len(outbound)), 'days': days,
+    }
     db.commit()
-    return {'window_days': 30, 'minimum_cohort': MINIMUM_CAMPAIGN_ACCOUNTS, 'rows': rows}
+    return {'window_days': 30, 'minimum_cohort': MINIMUM_CAMPAIGN_ACCOUNTS, 'dashboard': dashboard, 'rows': rows}
 
 
 @router.post('/events', status_code=202)

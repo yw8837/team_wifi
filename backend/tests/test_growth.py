@@ -123,3 +123,49 @@ def test_demand_interest_confirmed_and_deleted_target_erases_measurement(public_
     assert c.delete('/api/release/demands/'+demand['id'], headers=p['buyer']['headers']).status_code == 200
     with SessionLocal() as db:
         assert not db.scalar(select(Record).where(Record.kind == growth.EXPOSURE, Record.parent_id == demand['id']))
+
+
+def test_visitor_dashboard_kst_period_dedup_funnel_and_privacy(public_mode, monkeypatch):
+    from datetime import datetime
+    c, people, _ = public_mode
+    url = '/api/release/measurement/campaign-report'
+    admin = people['admin']['headers']
+    stamp = int(datetime.fromisoformat('2026-11-23T00:15:00+09:00').timestamp())
+    monkeypatch.setattr(growth, 'now', lambda: stamp)
+    assert c.get(url).status_code == 401
+    assert c.get(url, headers=people['buyer']['headers']).status_code == 403
+    assert c.get(url+'?period=today', headers=admin).json()['dashboard']['visitors'] == 0
+    for name in ('buyer', 'buyer2', 'seller', 'seller2', 'pending'):
+        h = people[name]['headers']
+        c.put('/api/release/measurement/consent', headers=h, json={'enabled': True})
+    with SessionLocal() as db:
+        accounts = list(db.scalars(select(Record.owner_id).where(Record.kind == growth.CONSENT)))
+        for i, account in enumerate(accounts):
+            for label, ts in [('today', stamp-60), ('yesterday', stamp-3600), ('lastmonth', stamp-14*86400)]:
+                db.add(Record(kind=growth.EXPOSURE, owner_id=account, unique_key=f'{i}:{label}', created=ts,
+                              data={'placement':'groupbuy_detail', 'clicks':{'source':ts+10} if i == 0 else {}}))
+            db.add(Record(kind=growth.CAMPAIGN_VISIT, owner_id=account, unique_key=f'campaign:{i}', created=stamp-100,
+                          data={'source':'kakao','medium':'share','campaign':'groupbuy','channel':'web'}))
+        db.commit()
+    report = c.get(url+'?period=week', headers=admin).json()
+    data = report['dashboard']
+    assert (data['visitors'], data['detail_readers'], data['outbound']) == (5, 5, None)
+    assert (data['start'], data['end']) == ('2026-11-17','2026-11-23')
+    assert [d['accounts'] for d in data['days']] == [0,0,0,0,0,5,5]
+    assert report['rows'][0]['accounts'] == 5
+    prev = c.get(url+'?period=custom&start=2026-11-22&end=2026-11-22', headers=admin).json()
+    assert prev['rows'] == [] and prev['dashboard']['days'] == [{'date':'2026-11-22','accounts':5}]
+    assert len(c.get(url+'?period=month',headers=admin).json()['dashboard']['days']) == 30
+    assert c.get(url+'?period=all',headers=admin).json()['dashboard']['start'] == '2026-10-24'
+    for params in ('period=custom', 'period=custom&start=2026-11-24&end=2026-11-23',
+                   'period=custom&start=2026-10-10&end=2026-11-23', 'period=today&start=2026-11-23'):
+        assert c.get(url+'?'+params,headers=admin).status_code == 422
+    with SessionLocal() as db:
+        for row in db.scalars(select(Record).where(Record.kind == growth.EXPOSURE, Record.created == stamp-60)):
+            row.data = {**row.data, 'clicks': {'source': stamp-5}}
+        db.commit()
+    assert c.get(url+'?period=today',headers=admin).json()['dashboard']['outbound'] == 5
+    c.put('/api/release/measurement/consent',headers=people['buyer']['headers'],json={'enabled':False})
+    hidden = c.get(url+'?period=today',headers=admin).json()
+    assert hidden['dashboard']['visitors'] is None and hidden['dashboard']['days'][0]['accounts'] is None
+    assert hidden['rows'] == []
