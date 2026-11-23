@@ -37,7 +37,7 @@ function VisitorMetrics({ data }: { data: Dashboard }) {
   const openCount = (count: Count) => count == null ? '집계 전' : count.toLocaleString('ko-KR') + '회';
   return <>
     <section className="visit-panel" aria-label="기간별 방문 지표">
-      <p className="visit-range">{data.start === data.end ? shortDate(data.end) : shortDate(data.start) + ' ~ ' + shortDate(data.end)} <small>한국 시간</small></p>
+      <p className="visit-range">{data.start === data.end ? shortDate(data.end) : shortDate(data.start) + ' ~ ' + shortDate(data.end)} <small>한국 시간{campaign && ' · 팀 보고서 기준'}</small></p>
       <dl className="visit-metrics">
         <div><dt>{campaign ? '일방문' : '로그인 방문 회원'}</dt><dd>{countText(visitors)}</dd></div>
         <div><dt>{campaign ? '공유 링크 유입' : '공개 웹 열람'}</dt><dd>{campaign ? countText(single?.link_estimate ?? null) : openCount(data.web_opens)}</dd></div>
@@ -116,12 +116,12 @@ export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
     <ResourceState {...result} retry={result.reload}/>
     {data && <><VisitorMetrics data={data}/><DailyVisits data={data} sessionKey={sessionKey}/></>}
     {result.data && !data && <p role="status">방문 지표를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>}
-    {data && <section className="visit-panel"><h3>웹 접속 경로</h3>
+    {data && <section className="visit-panel"><header className="visit-heading"><h3>경로별 웹 열람</h3><strong>{data.web_opens == null ? '집계 전' : '총 ' + data.web_opens.toLocaleString('ko-KR') + '회'}</strong></header>
       <ul className="visit-sources">{sources.map(([source, count]) =>
         <li key={source}><span>{sourceNames[source] ?? source}</span><b>{count.toLocaleString()}회</b></li>)}
         {unknown > 0 && <li><span>경로 미확인</span><b>{unknown.toLocaleString()}회</b></li>}
       </ul>
-      <p className="visit-note">{data.web_opens ? '공유·홍보 링크를 연 횟수입니다. 경로 미확인에는 UTM이 없는 접속과 경로 수집 이전 기록이 포함됩니다.' : '이 기간에 기록된 웹 열람이 없습니다.'}</p>
+      <p className="visit-note">{data.web_opens == null ? '이 기간은 웹 열람 집계를 시작하기 전입니다.' : '공개 페이지를 열 때마다 1회로 셉니다. 새로고침도 포함합니다. 경로 미확인은 출처 표식이 없거나 출처 수집 전에 열린 횟수입니다.'}</p>
     </section>}
     {rows.length > 0 && <section className="visit-panel"><h3>유입 경로별 방문 회원</h3>
       <ul className="visit-sources">{rows.map(row =>
