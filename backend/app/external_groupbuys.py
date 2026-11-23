@@ -141,16 +141,21 @@ def parse_cafe24(html, source, *, groupbuy=True):
     if len(prices) > 1:
         raise ValueError('Conflicting sale prices')
     price = int(next(iter(prices), base_price))
-    variant_terms = []
-    if not price and reviewed and source['url'].startswith('https://durimall.co.kr/'):
-        from .groupbuy_schema import variant_prices
-        variant_terms = variant_prices(html, title)
-        price = variant_terms[0][1]
-    if not 0 < price <= 1_000_000_000:
-        raise ValueError('Seller price outside supported range')
     soldout = variable('is_soldout_icon')
     if soldout not in ('T', 'F'):
         raise ValueError('Unknown seller availability')
+    variant_terms = []
+    if reviewed and (reviewed.get('use_variant_price') or (not price and source['url'].startswith('https://durimall.co.kr/'))):
+        if soldout == 'T':
+            raise NotGroupbuy('Seller marks the whole campaign as sold out')
+        from .groupbuy_schema import variant_prices
+        variant_terms = variant_prices(html, title)
+        default = next((option for option in variant_terms if option[1] == price), variant_terms[0])
+        match = next((option for option in variant_terms if option[0] == reviewed.get('price_option')), default)
+        variant_terms = [match] + [option for option in variant_terms if option != match]
+        price = match[1]
+    if not 0 < price <= 1_000_000_000:
+        raise ValueError('Seller price outside supported range')
     member_only = variable('sIsNonmemberLimit') == 'T'
     def quantity(name):
         matches = re.findall(r'\bvar\s+' + re.escape(name) + r"\s*=\s*'(\d+)'", html)
@@ -200,7 +205,7 @@ def parse_cafe24(html, source, *, groupbuy=True):
             'source_type': 'seller_page', 'availability': 'ended' if ended else 'sold_out' if soldout == 'T' else 'listed',
             'body': '판매처의 공동구매 페이지에서 확인한 상품입니다. 옵션별 구성과 배송비, 최종 결제금액은 판매처에서 확인하세요.',
             'price_conditions': price_note + (' 판매처 회원가입·로그인 후 구매할 수 있습니다. ' if member_only or '회원 가입 후 구매가능' in title else '')
-                + ('판매처 표시 판매가와 마감 일시 기준입니다.' if deadline else '판매처 표시 판매가 기준입니다. 마감 일시는 공개 페이지에서 확인되지 않았습니다.'),
+                + ('판매처 표시 판매가와 마감 일시 기준입니다.' if deadline else f'공구 마감일은 {reviewed["last_day"]}입니다.' if reviewed else '판매처 표시 판매가 기준입니다. 마감 일시는 공개 페이지에서 확인되지 않았습니다.'),
             'is_demo': False, 'review_state': 'clear', 'updated_at': release.timestamp(stamp)}
 
 

@@ -12,21 +12,21 @@ from .db import now
 from .external_groupbuys import FRESH_SECONDS, NotGroupbuy
 
 KST = timezone(timedelta(hours=9))
-STORE = 'https://sharequeens.store/minihome/wlsdud6580'
-# Separate listings for the same player and high chair share the same configurations.
-PRIMARY_IDS = {'558': '866', '850': '616'}
+# The player is mirrored under two IDs. The high-chair offers have distinct dates and colours.
+PRIMARY_IDS = {'558': '866'}
 CHILD_TERMS = ('기저귀', '이유식', '수유', '젖병', '분유', '유모차', '카시트', '아기', '유아',
                '어린이', '신생아', '아동', '키즈', '놀이', '그림책', '동화책')
 TERMS = {
-    '수유·이유식': ('하이체어', '컵빨대캡', '아넬라 퓨레', '키디밀', '마이키즈'),
+    '수유·이유식': ('하이체어', '컵빨대캡', '아넬라 퓨레', '아넬라퓨레', '키디밀', '마이키즈', '아기 음료 파우치',
+                 '오가닉스 퓨레', '아기김', '아기상어 스트로우', '아기상어 스트로우타입'),
     '외출·안전': ('알파카 인피니티 킥보드',),
     '놀이·도서': ('레인보우 피아노', '디즈니 그림명작', '생활동화', '세이펜', '베어블리 소프트 블럭', '물노리 실리콘',
-                '사파 플레이어', '마이 비지북', '마이베이비북'),
+                '사파 플레이어', '마이 비지북', '마이베이비북', '미니 깜찍 팝업북', '추피보드북'),
     '육아생활': ('미꼬밴드', '장난감정리함'),
 }
 
 
-def campaign_sources(html, seller, classify):
+def campaign_sources(html, seller, classify, store_url):
     today = datetime.fromtimestamp(now(), KST).date()
     for card in re.split(r'<div\s+class="pl-card"\s+data-product-id="', html)[1:]:
         number = card.partition('"')[0]
@@ -45,28 +45,35 @@ def campaign_sources(html, seller, classify):
         except ValueError:
             continue
         if start <= today <= end:
-            yield {'id': 'sharequeens.store-' + PRIMARY_IDS.get(number, number), 'url': STORE + '/product/' + number,
+            yield {'id': 'sharequeens.store-' + PRIMARY_IDS.get(number, number), 'url': store_url + '/product/' + number,
                    'seller': seller, 'category': category, 'parser': 'sharequeens',
                    'listed_title': name, 'dates': (start, end)}
 
 
 def discover(seller, classify, read_html):
     products, failures = {}, []
-    for url in seller['listing_urls']:
-        try:
-            html = read_html(url)
-            if '<div class="pl-card" data-product-id="' not in html:
-                if '<p>등록된 상품이 없습니다.</p>' in html:
-                    return list(products.values()), not failures, failures
-                raise ValueError('Unrecognized campaign listing')
-            for item in campaign_sources(html, seller['seller'], classify):
-                number = item['url'].rsplit('/', 1)[-1]
-                if number not in PRIMARY_IDS or item['id'] not in products:
-                    products[item['id']] = item
-        except (OSError, HTTPException, ValueError) as error:
-            failures.append({'source_id': seller['host'], 'stage': 'discovery', 'error': type(error).__name__})
-    # Last page may be beyond the configured bound. A missing item is inconclusive.
-    return list(products.values()), False, failures
+    complete = True
+    for shop in (seller, *seller.get('other_stores', [])):
+        for url in shop['listing_urls']:
+            try:
+                html = read_html(url)
+                if '<div class="pl-card" data-product-id="' not in html:
+                    if '<p>등록된 상품이 없습니다.</p>' in html:
+                        break
+                    raise ValueError('Unrecognized campaign listing')
+                for item in campaign_sources(html, shop['seller'], classify, shop['store_url']):
+                    # Identical platform campaign IDs in affiliate storefronts are one offer.
+                    number = item['url'].rsplit('/', 1)[-1]
+                    previous = products.get(item['id'])
+                    if not previous or (number not in PRIMARY_IDS and previous['url'].rsplit('/', 1)[-1] in PRIMARY_IDS):
+                        products[item['id']] = item
+            except (OSError, HTTPException, ValueError) as error:
+                complete = False
+                failures.append({'source_id': shop['store_url'], 'stage': 'discovery', 'error': type(error).__name__})
+        else:
+            # An exhausted page budget cannot prove that an offer disappeared.
+            complete = False
+    return list(products.values()), complete, failures
 
 
 class Product(HTMLParser):

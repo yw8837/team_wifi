@@ -2,7 +2,8 @@ const SELLER_HOSTS = new Set([
   'somi9726.cafe24.com', 'poled.co.kr', 'upang.co.kr',
   'www.doctornoah.net', 'www.gonggan27.com', 'www.aguardmall.com',
   'joonie.kr', 'durimall.co.kr', 'oa-mall.co.kr', 'creestyle.com', 'luciroda101.cafe24.com',
-  'm.yomimonshop.com', 'preorderbebe.cafe24.com',
+  'm.yomimonshop.com', 'preorderbebe.cafe24.com', 'bellamama.cafe24.com',
+  'careprin.co.kr', 'misoda.kr', 'verynature.co.kr',
 ]);
 
 export function sellerPreviewUrl(value) {
@@ -20,7 +21,7 @@ export function sellerPreviewUrl(value) {
       return /^\/luxiai\/Detail\/SLU[0-9]+$/.test(url.pathname) && !url.search ? url : null;
     }
     if (url.hostname === 'sharequeens.store') {
-      return /^\/minihome\/wlsdud6580\/product\/[1-9][0-9]{0,10}$/.test(url.pathname) && !url.search ? url : null;
+      return /^\/minihome\/(?:wlsdud6580|risa0826)\/product\/[1-9][0-9]{0,10}$/.test(url.pathname) && !url.search ? url : null;
     }
     if (!SELLER_HOSTS.has(url.hostname)) return null;
     const cafeProduct = url.pathname === '/product/detail.html'

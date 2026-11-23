@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from sqlalchemy import select
 
@@ -10,6 +12,27 @@ def seller_html(soldout='F'):
     return """var product_name = '캔코 모아백 기저귀가방 공동구매';
     var product_price = '129000'; var product_sale_price = 109000;
     var is_soldout_icon = '%s'; var sIsNonmemberLimit = 'T';""" % soldout
+
+
+def test_reviewed_price_and_label_follow_available_option(monkeypatch):
+    source = external_groupbuys.SOURCES[0]
+    name = '캔코 모아백 기저귀가방 공동구매'
+    rule = {'title': name, 'last_day': '2099-12-31', 'use_variant_price': True, 'price_option': '소형'}
+    monkeypatch.setitem(external_groupbuys.REVIEWED_CAMPAIGNS, source['url'], rule)
+    variants = [{'name': name + ' ' + size, 'offers': {'priceCurrency': 'KRW', 'price': price,
+                'availability': 'https://schema.org/InStock'}} for size, price in [('대형', 109000), ('소형', 89000)]]
+    group = {'@type': 'ProductGroup', 'name': name, 'hasVariant': variants}
+    def parse():
+        html = seller_html() + '<script type="application/ld+json">' + json.dumps(group) + '</script>'
+        return external_groupbuys.parse_cafe24(html, source)
+    preferred = parse()
+    assert (preferred['unit'], preferred['price']) == ('소형', 89000)
+    variants[1]['offers']['availability'] = 'https://schema.org/SoldOut'
+    available = parse()
+    assert (available['availability'], available['unit'], available['price']) == ('listed', '대형', 109000)
+    assert rule['last_day'] in available['price_conditions']
+    with pytest.raises(external_groupbuys.NotGroupbuy):
+        external_groupbuys.parse_cafe24(seller_html('T'), source)
 
 
 def test_seller_parser_requires_verified_fields_and_rejects_redirects():

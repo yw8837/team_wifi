@@ -7,6 +7,9 @@ test('preview fetches only reviewed HTTPS product pages', () => {
   assert.equal(sellerPreviewUrl('https://yomimonshop.com/product/detail.html?product_no=2965').hostname, 'm.yomimonshop.com');
   assert.ok(sellerPreviewUrl('https://www.doctornoah.net/shop_view?idx=545'));
   assert.ok(sellerPreviewUrl('https://shop.srookpay.com/luxiai/Detail/SLU93540156'));
+  for (const host of ['careprin.co.kr', 'misoda.kr', 'verynature.co.kr', 'bellamama.cafe24.com']) {
+    assert.ok(sellerPreviewUrl('https://' + host + '/product/detail.html?product_no=123'));
+  }
   for (const url of [
     'https://shop.srookpay.com/other/Detail/SLU93540156',
     'https://127.0.0.1/product/detail.html?product_no=1',
@@ -43,6 +46,7 @@ test('invalid source and write requests never trigger seller fetch', async () =>
 test('reviewed mini-store thumbnails use only its local product uploads', () => {
   const source = 'https://sharequeens.store/minihome/wlsdud6580/product/916';
   assert.ok(sellerPreviewUrl(source));
+  assert.ok(sellerPreviewUrl(source.replace('wlsdud6580', 'risa0826')));
   assert.equal(sellerPreviewUrl(source.replace('wlsdud6580', 'test456')), null);
   assert.equal(sellerPreviewUrl(source + '?market_ref=tracker'), null);
   const thumb = '/img/thumb?src=%2Fuploads%2Fproducts%2Fproduct_v_98.png&w=900&format=jpeg';
