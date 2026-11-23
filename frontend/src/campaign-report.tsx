@@ -27,22 +27,16 @@ const kstDate = (stamp: number) => new Date(stamp + 9 * 3600 * 1000).toISOString
 function VisitorMetrics({ data }: { data: Dashboard }) {
   const { days } = data;
   const single = days.length === 1 ? days[0] : undefined;
-  const [automatic, setAutomatic] = useState(false);
-  const campaign = automatic ? undefined : single?.campaign_estimate;
+  const campaign = single?.campaign_estimate;
   const visitors = campaign?.visitors ?? data.visitors;
   const detail = campaign?.detail ?? data.detail_readers;
   const outbound = campaign?.outbound ?? data.outbound;
   const steps: [string, Count][] = [[campaign ? '방문자' : '방문 회원', visitors], ['공구 상세 열람', detail], ['판매처 이동', outbound]];
   const rate = visitors && outbound != null ? (100 * outbound / visitors).toLocaleString('ko-KR', {maximumFractionDigits:1}) + '%' : '—';
   const openCount = (count: Count) => count == null ? '집계 전' : count.toLocaleString('ko-KR') + '회';
-  const graph = days.map(day => ({ date: day.date, count: campaign ? day.campaign_estimate?.visitors ?? null : day.accounts }));
-  const maximum = Math.max(1, ...graph.map(day => day.count ?? 0));
   return <>
     <section className="visit-panel" aria-label="기간별 방문 지표">
-      <header className="visit-heading"><h3>{campaign ? '홍보 유입 현황 · 팀 추산' : '자동 집계'}</h3>
-        {single?.campaign_estimate && <button type="button" className="secondary" onClick={() => setAutomatic(!automatic)}>{automatic ? '홍보 기록 보기' : '자동 집계 보기'}</button>}
-      </header>
-      <p className="visit-range">{shortDate(data.start)} ~ {shortDate(data.end)} <small>한국 시간</small></p>
+      <p className="visit-range">{data.start === data.end ? shortDate(data.end) : shortDate(data.start) + ' ~ ' + shortDate(data.end)} <small>한국 시간</small></p>
       <dl className="visit-metrics">
         <div><dt>{campaign ? '일방문' : '로그인 방문 회원'}</dt><dd>{countText(visitors)}</dd></div>
         <div><dt>{campaign ? '공유 링크 유입' : '공개 웹 열람'}</dt><dd>{campaign ? countText(single?.link_estimate ?? null) : openCount(data.web_opens)}</dd></div>
@@ -57,15 +51,32 @@ function VisitorMetrics({ data }: { data: Dashboard }) {
         <span>{label}</span><span className="visit-track" aria-hidden="true"><i style={{width: visitors && count != null ? (100 * count / visitors) + '%' : '0%'}}/></span>
         <strong>{countText(count)}</strong></li>)}</ul>
     </section>
-    <section className="visit-panel"><h3>{campaign ? '일별 방문자' : '일별 방문 회원'}</h3>
-      <div className="visit-history"><ol className="visit-chart" aria-label="일별 방문 그래프" style={{ minWidth: graph.length > 7 ? graph.length * 43 : undefined }}>
-        {graph.map(day => <li key={day.date}><strong>{day.count === null ? '＊' : countText(day.count)}</strong>
-          <div className="visit-column" aria-hidden="true"><i style={{ height: (day.count ?? 0) / maximum * 100 + '%' }}/></div>
+  </>;
+}
+
+function DailyVisits({ data, sessionKey }: { data: Dashboard; sessionKey?: string }) {
+  const weekStart = new Date(Date.parse(data.end + 'T00:00:00Z') - 6 * 86400000).toISOString().slice(0, 10);
+  const start = weekStart < data.minimum_date ? data.minimum_date : weekStart;
+  const extend = start < data.start;
+  const history = usePublicResource<Report>(extend
+    ? '/release/measurement/campaign-report?' + new URLSearchParams({ period: 'custom', start, end: data.end })
+    : null, sessionKey);
+  const days = extend ? history.data?.dashboard?.days ?? [] : data.days;
+  const counts = days.map(day => day.campaign_estimate?.visitors ?? day.accounts);
+  const maximum = Math.max(1, ...counts.map(count => count ?? 0));
+  const estimates = days.filter(day => day.campaign_estimate).map(day => shortDate(day.date));
+  return <section className="visit-panel"><h3>일별 방문자</h3>
+    {extend && <ResourceState {...history} retry={history.reload}/>}
+    {days.length > 0 && <>
+      <div className="visit-history"><ol className="visit-chart" aria-label="일별 방문 그래프" style={{ minWidth: days.length > 7 ? days.length * 43 : undefined }}>
+        {days.map((day, index) => <li key={day.date}><strong>{counts[index] === null ? '＊' : countText(counts[index])}</strong>
+          <div className="visit-column" aria-hidden="true"><i style={{ height: (counts[index] ?? 0) / maximum * 100 + '%' }}/></div>
           <time dateTime={day.date}>{shortDate(day.date)}</time></li>)}
       </ol></div>
-      {!campaign && <p className="visit-note">＊는 1~4명이 방문한 날입니다.</p>}
-    </section>
-  </>;
+      {estimates.length > 0 && <p className="visit-note">{estimates.join(', ')} 방문 수치는 팀이 작성한 보고서 기준입니다. 다른 날짜는 통계 수집에 동의한 방문 회원 수입니다.</p>}
+      {counts.includes(null) && <p className="visit-note">＊는 1~4명이 방문한 날입니다.</p>}
+    </>}
+  </section>;
 }
 
 export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
@@ -98,15 +109,15 @@ export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
       </form>
     </div>
     <ResourceState {...result} retry={result.reload}/>
-    {data && <VisitorMetrics key={data.start + data.end} data={data}/>}
+    {data && <><VisitorMetrics data={data}/><DailyVisits data={data} sessionKey={sessionKey}/></>}
     {result.data && !data && <p role="status">방문 지표를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>}
-    {result.data && <section className="visit-panel"><h3>회원이 방문한 공유·홍보 경로</h3>
-      {rows.length ? <ul className="visit-sources">{rows.map(row =>
+    {rows.length > 0 && <section className="visit-panel"><h3>유입 경로별 방문 회원</h3>
+      <ul className="visit-sources">{rows.map(row =>
         <li key={[row.source, row.medium, row.campaign, row.channel].join('/')}>
           <div><strong>{sourceNames[row.source] ?? row.source}</strong>
             <small>{campaignNames[row.campaign] ?? row.campaign} · {mediumNames[row.medium] ?? row.medium} · {row.channel === 'android' ? '앱' : '웹'}에서 열람</small></div>
           <b>{countText(row.accounts)}</b>
-        </li>)}</ul> : <p>이 기간에 회원 5명 이상이 방문한 공유·홍보 경로가 없습니다.</p>}
+        </li>)}</ul>
     </section>}
     <p className="visit-note">전체는 보관 중인 최근 30일입니다.{data && ' 마지막 조회 ' + new Date(data.checked_at * 1000).toLocaleTimeString('ko-KR', {timeZone:'Asia/Seoul', hour:'2-digit', minute:'2-digit'})}</p>
   </section>;
