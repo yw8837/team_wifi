@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
+import { catalogueSnapshot } from './public-catalogue-snapshot.mjs';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { sellerPreviewUrl, productImageUrl, fetchSellerPage } from './cloudflare-public-worker.mjs';
@@ -46,6 +47,7 @@ for (const item of items) {
     failures.push({ id: item.id, reason: error.message });
   }
 }
+await writeFile(join(output, 'recent-groupbuys.json'), JSON.stringify(catalogueSnapshot(items)));
 await writeFile(join(output, 'seller-images.json'), JSON.stringify(manifest));
 console.log(JSON.stringify({ saved: Object.keys(manifest).length, failures }));
 if (failures.length) process.exitCode = 1;

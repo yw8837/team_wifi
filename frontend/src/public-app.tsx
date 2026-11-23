@@ -1,3 +1,4 @@
+import { RecentCatalogue } from "./recent-catalogue";
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -38,17 +39,19 @@ export function PublicGate({enabled,children}:{enabled:boolean;children:ReactNod
   useEffect(()=>{
     setSlow(false);
     if(!config.loading)return;
-    const timer=window.setTimeout(()=>setSlow(true),10_000);
+    const timer=window.setTimeout(()=>setSlow(true),1_500);
     return()=>window.clearTimeout(timer);
   },[config.loading]);
   const reload = config.reload;
   useEffect(() => {
     if (!enabled || !config.error) return;
+    const timer = window.setTimeout(reload, 30_000);
     window.addEventListener("online", reload);
-    return () => window.removeEventListener("online", reload);
+    return () => {window.clearTimeout(timer); window.removeEventListener("online", reload);};
   }, [enabled, config.error, reload]);
   if(!enabled)return children;
   if((config.loading||config.error||!publicConfigMatches(config.data))&&location.pathname==="/calculator")return <main className="public-main"><Link className="wordmark" to="/"><BrandLockup/></Link><Calculator/><p><Link to="/">공구 찾기로 돌아가기 · 서버 연결 확인</Link></p></main>;
+  if(config.error || (config.loading && slow))return <RecentCatalogue retry={reload}/>;
   if(config.loading)return <main className="narrow public-gate"><BrandLockup stacked/><h1>서비스 정보를 불러오고 있어요</h1><p role="status">{slow?"연결이 평소보다 늦어지고 있어요. 연결되면 자동으로 열립니다.":"잠시만 기다려 주세요."}</p><Link to="/calculator">기다리는 동안 단가 비교하기</Link><p><a href={legalUrl("support")}>도움말과 문의</a></p></main>;
   if(config.error || !publicConfigMatches(config.data))return <main className="narrow public-gate"><BrandLockup stacked/><h1>서비스 연결을 확인해 주세요</h1><p role="alert">{config.error || "현재 서버와 앱 버전이 맞지 않아 정보를 안전하게 표시할 수 없습니다."}</p><button onClick={config.reload}>연결 다시 확인</button><Link to="/calculator">연결 없이 단가 비교 계산기 이용</Link><p><a href={legalUrl("support")}>도움말과 문의</a></p></main>;
   return children;

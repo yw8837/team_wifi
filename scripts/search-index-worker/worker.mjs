@@ -48,4 +48,23 @@ export async function notifyChanges(env) {
   await env.STATE.put('last-run', JSON.stringify(summary));
   return summary;
 }
-export default {async scheduled(_event, env) { await notifyChanges(env); }};
+// Check the same public product document a visitor opens. A static home page can stay
+// healthy throughout an origin outage. Keep health checks separate from indexing.
+export async function checkPublicProduct(env) {
+  const checked_at = new Date().toISOString();
+  try {
+    const xml = await read(origin + '/groupbuys/sitemaps/1');
+    const path = /<loc>([^<]+\/groupbuys\/[a-f0-9-]{36}\/public)<\/loc>/.exec(xml)?.[1];
+    if (!path) throw Error('No public product in sitemap');
+    const page = await read(path);
+    if (!/<h1>[^<]+<\/h1>/.test(page) || !page.includes('판매처에서 현재 조건 확인')) throw Error('Missing product or seller link');
+    await env.STATE.put('catalogue-health', JSON.stringify({checked_at, ok:true, product:path}));
+  } catch (error) {
+    await env.STATE.put('catalogue-health', JSON.stringify({checked_at, ok:false, error:error.message}));
+    throw error;
+  }
+}
+export default {async scheduled(event, env) {
+  if (event.cron === '*/10 * * * *') await checkPublicProduct(env);
+  else await notifyChanges(env);
+}};

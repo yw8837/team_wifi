@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { api, categories } from "./api";
+import { api, ApiError, categories, gatewayUnavailable } from "./api";
 import { Field, PageTitle, useAction, Feedback, useAuth, useSessionAttempt } from "./shared";
 import { readPublic } from "./release-data";
 import type { Comment, Demand, PostType } from "./release-data";
@@ -26,15 +26,15 @@ export function communityQuery(params:URLSearchParams,activity=false):string {
 // State is tagged before rendering as well as before applying asynchronous results.
 export function useCommunityResource<T>(path:string|null,identity:string, load:(path:string)=>Promise<T> = readPublic<T>) {
  const [version,setVersion]=useState(0);
- const [state,setState]=useState<{identity:string;requested:string|null;dataPath:string|null;data:T|null;error:string;loading:boolean}>({identity,requested:path,dataPath:null,data:null,error:"",loading:!!path});
+ const [state,setState]=useState<{identity:string;requested:string|null;dataPath:string|null;data:T|null;unavailable?:boolean;error:string;loading:boolean}>({identity,requested:path,dataPath:null,data:null,error:"",loading:!!path});
  useEffect(()=>{
   let live=true;
   setState(old=>({identity,requested:path,dataPath:old.identity===identity?old.dataPath:null,data:old.identity===identity?old.data:null,error:"",loading:!!path}));
-  if(path)void load(path).then(data=>{if(live)setState({identity,requested:path,dataPath:path,data,error:"",loading:false});}).catch(error=>{if(live)setState(old=>({...old,error:error instanceof Error?error.message:"목록을 불러오지 못했어요.",loading:false}));});
+  if(path)void load(path).then(data=>{if(live)setState({identity,requested:path,dataPath:path,data,error:"",loading:false});}).catch(error=>{if(live)setState(old=>({...old,unavailable:error instanceof ApiError && (error.status===0 || gatewayUnavailable(error.status)),error:error instanceof Error?error.message:"목록을 불러오지 못했어요.",loading:false}));});
   return()=>{live=false;};
  },[path,identity,version,load]);
  const scoped=state.identity===identity&&path!==null;
- return {data:scoped?state.data:null,error:scoped?state.error:"",loading:!!path&&(!scoped||state.requested!==path||state.loading),stale:scoped&&!!state.data&&(!!state.error||state.dataPath!==path),reload:()=>setVersion(v=>v+1)};
+ return {unavailable:scoped && state.unavailable,data:scoped?state.data:null,error:scoped?state.error:"",loading:!!path&&(!scoped||state.requested!==path||state.loading),stale:scoped&&!!state.data&&(!!state.error||state.dataPath!==path),reload:()=>setVersion(v=>v+1)};
 }
 
 const communityClock=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
