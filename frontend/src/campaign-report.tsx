@@ -29,8 +29,7 @@ function PrivateLinkEstimate({ day, reload }: { day: Day; reload: () => void }) 
   const request = useContentRequest(), action = useAction();
   const [value, setValue] = useState(day.link_estimate?.toString() ?? '');
   return <div className="link-estimate">
-    {day.link_estimate !== undefined && <p>공유 링크 유입 추정 <strong>약 {day.link_estimate.toLocaleString('ko-KR')}명</strong> · 나만 보기</p>}
-    <details><summary>{day.link_estimate !== undefined ? '추정치 수정' : '내 공유 링크 유입 추정치 추가'}</summary>
+    <details><summary>{day.link_estimate !== undefined ? '추정치 수정' : '공유 링크 방문자 추정치 추가'}</summary>
       <form onSubmit={event => {
         event.preventDefault();
         void action.run(async () => {
@@ -40,7 +39,7 @@ function PrivateLinkEstimate({ day, reload }: { day: Day; reload: () => void }) 
       }}>
         <label>추정 인원 <input type="number" min="0" max="1000000" step="1" value={value} onChange={e => setValue(e.target.value)}/></label>
         <button type="submit" className="secondary" disabled={action.busy}>저장</button>
-        <small>내 계정에서만 보입니다. 값을 비워 저장하면 삭제됩니다.</small>
+        <small>값을 비워 저장하면 추정치를 삭제합니다.</small>
       </form><Feedback {...action}/>
     </details>
   </div>;
@@ -48,15 +47,18 @@ function PrivateLinkEstimate({ day, reload }: { day: Day; reload: () => void }) 
 
 function VisitorMetrics({ data, reload }: { data: Dashboard; reload: () => void }) {
   const { visitors, detail_readers, outbound, days } = data;
-  const steps: [string, Count][] = [['방문 회원', visitors], ['공구 상세 열람', detail_readers], ['판매처 이동', outbound]];
+  const singleDay = days.length === 1 ? days[0] : undefined;
+  const showEstimates = days.some(day => day.link_estimate !== undefined);
+  const steps: [string, Count][] = [['동의 회원 방문', visitors], ['공구 상세 열람', detail_readers], ['판매처 이동', outbound]];
   const rate = visitors && outbound !== null ? (100 * outbound / visitors).toFixed(1) + '%' : '—';
   const openCount = (count: Count) => count == null ? '집계 전' : count.toLocaleString('ko-KR') + '회';
   return <>
     <section className="visit-panel" aria-label="기간별 방문 지표">
       <p className="visit-range">{shortDate(data.start)} ~ {shortDate(data.end)} <small>한국 시간</small></p>
-      <dl className="visit-metrics visit-summary">
+      <dl className={'visit-metrics visit-summary' + (singleDay?.link_estimate !== undefined ? ' with-estimate' : '')}>
+        {singleDay?.link_estimate !== undefined && <div><dt>공유 링크 방문자 (추정)</dt><dd>약 {singleDay.link_estimate.toLocaleString('ko-KR')}명</dd></div>}
         <div><dt>공개 웹 열람</dt><dd>{openCount(data.web_opens)}</dd><small>비회원·새로고침 포함{data.shared_opens != null && <> · 이 중 공유 링크 {openCount(data.shared_opens)}</>}</small></div>
-        <div><dt>{data.start === data.end ? '일방문 회원' : '기간 내 방문 회원'}</dt><dd>{countText(visitors)}</dd><small>활동 분석 동의 회원 · 계정당 한 번</small></div>
+        <div><dt>로그인 방문 회원</dt><dd>{countText(visitors)}</dd><small>통계 동의 회원 · 계정당 한 번</small></div>
       </dl>
       <p className="visit-note">{data.web_opens_from ? '웹 열람은 ' + data.web_opens_from + ' 첫 집계부터 표시합니다.' : '첫 공개 웹 열람을 기다리고 있습니다.'} 공유 링크 횟수는 서비스 공유 버튼으로 만든 주소를 열 때 집계합니다. 운영 화면과 링크 미리보기 요청은 제외합니다.</p>
       {days.length === 1 && data.start >= kstDate(data.checked_at * 1000 - 29 * 86400000) &&
@@ -70,8 +72,8 @@ function VisitorMetrics({ data, reload }: { data: Dashboard; reload: () => void 
       </li>)}</ul>
     </section>
     <section className="visit-panel"><h3>날짜별 접속 기록</h3>
-      <div className="visit-history"><table><thead><tr><th scope="col">날짜</th><th scope="col">공개 웹 열람</th><th scope="col">일방문 회원</th></tr></thead>
-        <tbody>{[...days].reverse().map(day => <tr key={day.date}><th scope="row"><time dateTime={day.date}>{shortDate(day.date)}</time>{days.length > 1 && day.link_estimate !== undefined && <small>링크 유입 추정 약 {day.link_estimate}명 · 나만 보기</small>}</th>
+      <div className="visit-history"><table><thead><tr><th scope="col">날짜</th>{showEstimates && <th scope="col">공유 링크 방문자 (추정)</th>}<th scope="col">공개 웹 열람</th><th scope="col">로그인 방문 회원</th></tr></thead>
+        <tbody>{[...days].reverse().map(day => <tr key={day.date}><th scope="row"><time dateTime={day.date}>{shortDate(day.date)}</time></th>{showEstimates && <td>{day.link_estimate === undefined ? '—' : '약 ' + day.link_estimate.toLocaleString('ko-KR') + '명'}</td>}
           <td>{openCount(day.web_opens)}</td><td>{countText(day.accounts)}</td></tr>)}</tbody></table></div>
       <p className="visit-note">회원 1~4명은 ‘5명 미만’으로 표시합니다. 같은 회원이 다른 날 다시 오면 각 날짜에 한 번씩 셉니다.</p>
     </section>
@@ -97,7 +99,7 @@ export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
   return <section className="visit-report" aria-labelledby="visit-title">
     <header className="visit-heading"><h2 id="visit-title">방문 현황</h2>
       <button type="button" className="secondary" disabled={result.loading} onClick={result.reload}>새로고침</button></header>
-    <p>링크를 열어 들어온 비회원은 공개 웹 열람에 포함됩니다. 방문 회원 수는 로그인한 동의 회원의 기록으로 계산합니다.</p>
+    <p>공개 웹 열람에는 비회원도 포함됩니다. 로그인 방문 회원은 활동 통계에 동의한 계정을 기간 중 한 번씩 셉니다.</p>
     <div className="visit-controls">
       <div role="group" aria-label="조회 기간">{(Object.keys(presets) as (keyof typeof presets)[]).map(key =>
         <button type="button" className="secondary" key={key} aria-pressed={range.period === key} onClick={() => selectPeriod(key)}>{presets[key]}</button>)}</div>

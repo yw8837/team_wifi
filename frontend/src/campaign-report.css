@@ -41,8 +41,15 @@
 .visit-history th:first-child { text-align: left; }
 .visit-history thead th { position: sticky; top: 0; background: white; }
 .link-estimate { border-top: 1px solid #ece6e1; margin-top: .8rem; padding-top: .5rem; }
-.link-estimate p { margin: .35rem 0; }
 .link-estimate summary { cursor: pointer; width: fit-content; padding: .55rem 0; color: #664737; }
 .link-estimate form { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
 .link-estimate input { width: 7rem; }
-.link-estimate small, .visit-history small { display: block; color: #665c55; font-weight: normal; }
+.link-estimate small { display: block; color: #665c55; font-weight: normal; }
+
+.visit-summary.with-estimate { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 580px) {
+  .visit-summary.with-estimate { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .visit-summary.with-estimate > div:first-child { grid-column: 1 / -1; }
+  .visit-summary.with-estimate > div:nth-child(2) { border: 0; padding-left: 0; }
+  .visit-summary.with-estimate > div:nth-child(3) { border-left: 1px solid #e4dfda; padding-inline: .85rem; }
+}
