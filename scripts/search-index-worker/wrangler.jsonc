@@ -1,0 +1,9 @@
+{
+  "name": "moduyuga-search-index",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": {"crons": ["17 * * * *"]},
+  "kv_namespaces": [{"binding": "STATE", "id": "ba75e99f41a44a9e925fd33bd42d71c3"}]
+}
