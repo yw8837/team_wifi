@@ -172,7 +172,7 @@ export default {
         name: '모두의 육아', alternateName: 'ModuYuga', url: origin, inLanguage: 'ko',
         publisher: {'@type': 'Organization', name: 'Team_Wifi'}});
       return new HTMLRewriter().on('head', {element(el) {
-        el.append('<link rel="canonical" href="' + origin + '"><script type="application/ld+json">' + schema + '</script>', {html: true});
+        el.append('<meta name="google-site-verification" content="G6iw65W4Gm78r41JUAwpP4me4FM2uJUKnOtm3WYb1fw"><link rel="canonical" href="' + origin + '"><script type="application/ld+json">' + schema + '</script>', {html: true});
       }}).on('#root', {element(el) {
         el.append('<main><h1>모두의 육아</h1><p>모두의 육아(ModuYuga)는 여러 판매처의 육아용품 공동구매 정보를 모아 가격과 배송 조건을 비교하고, 보호자끼리 질문과 후기를 나누는 서비스입니다.</p><h2>공구는 어디에서 구매하나요?</h2><p>상품 상세에서 판매처와 확인된 마감·배송 조건을 살펴본 뒤 판매처에서 주문합니다.</p><h2>기저귀는 어떻게 비교하나요?</h2><p>같은 단계와 규격에서 배송비를 포함한 금액을 총 매수로 나누세요.</p><a href="/guides/diaper-unit-price">기저귀 단가 계산 예시</a> · <a href="/guides">육아템 비교 가이드</a> · <a href="https://play.google.com/store/apps/details?id=kr.moduyuga.app">모두의 육아 Android 앱</a></main>', {html:true});
       }}).transform(home);
