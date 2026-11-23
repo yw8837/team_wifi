@@ -6,13 +6,14 @@ import { Feedback, ResourceState, useAction, useAuth, useSessionAttempt } from '
 import { usePublicResource } from './release-data';
 import { useContentRequest } from "./content-session";
 import { readSessionToken } from './session-storage';
+import { useVisitTracking } from './visit-tracking';
 import { readCampaign } from './campaign';
 import { useLocation } from 'react-router-dom';
 
 const Measurement = createContext({ enabled: false, eligible: true, reload: () => {} });
 export function MeasurementProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [version, setVersion] = useState(0);
   const [choice, setChoice] = useState({ enabled: false, eligible: true, userId: '' });
   const [campaign, setCampaign] = useState(() => readCampaign(location.search));
@@ -33,6 +34,7 @@ export function MeasurementProvider({ children }: { children: ReactNode }) {
   }, [user?.id, version]);
   const enabled = !!user && !user.is_admin && choice.eligible
     && choice.userId === user.id && choice.enabled;
+  useVisitTracking(location.pathname, loading, !!user?.is_admin, enabled ? user?.id : undefined);
   useEffect(() => {
     if (!campaign || !enabled) return;
     void api('/release/measurement/campaign-visits', 'POST', {
@@ -82,7 +84,7 @@ export function useExposure(offerId: string | undefined, placement: Placement) {
 }
 export function MeasurementSettings() {
   const { enabled, eligible, reload } = useContext(Measurement), action = useAction(), request = useContentRequest();
-  return <section className="panel"><h2>서비스 개선 통계</h2><p>선택하면 보인 공구·육아템·수요 글, 버튼 클릭·판매처 이동, 저장·관심 완료를 계정별로 중복 제거해 30일간 분석합니다. 이메일·닉네임·검색어·아이 정보는 분석 항목에 넣지 않습니다.</p>
+  return <section className="panel"><h2>서비스 개선 통계</h2><p>선택하면 방문 날짜와 보인 공구·육아템·수요 글, 버튼 클릭·판매처 이동, 저장·관심 완료를 계정별로 중복 제거해 30일간 분석합니다. 이메일·닉네임·검색어·아이 정보는 분석 항목에 넣지 않습니다.</p>
     <p>공유·홍보 링크로 방문하면 정해진 유입 출처·공유 방식·캠페인 이름도 함께 집계합니다. 주소 전체는 저장하지 않습니다.</p>
     <p className="hint">화면의 50% 이상이 1초 연속 보일 때 노출로 기록합니다. 동의한 회원의 활동만 분석하므로 전체 이용자의 성향을 뜻하지 않습니다. 해제하면 내 분석 기록도 삭제합니다.</p>
     <label className="check"><input type="checkbox" checked={enabled} disabled={action.busy || !eligible} onChange={e => { const checked = e.target.checked; void action.run(async () => { await request('/release/measurement/consent', 'PUT', { enabled: checked }); reload(); }, checked ? '통계 참여를 켰습니다.' : '통계 참여를 끄고 분석 기록을 삭제했습니다.'); }}/><span>[선택] 서비스 개선을 위한 활동 분석에 참여</span></label>

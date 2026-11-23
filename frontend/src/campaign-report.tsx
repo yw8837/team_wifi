@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { ResourceState } from './shared';
+import { useContentRequest } from './content-session';
+import { Feedback, ResourceState, useAction } from './shared';
 import { usePublicResource } from './release-data';
 import './campaign-report.css';
 
 type Count = number | null;
-type Day = { date: string; accounts: Count };
+type Day = { date: string; accounts: Count; web_opens: Count; link_estimate?: number };
 type Dashboard = {
   start: string; end: string; minimum_date: string; checked_at: number;
+  shared_opens: Count; web_opens: Count; web_opens_from: string | null;
   visitors: Count; detail_readers: Count; outbound: Count; days: Day[];
 };
 type CampaignRow = { source: string; medium: string; campaign: string; channel: string; accounts: number };
@@ -23,44 +25,62 @@ const shortDate = (iso: string) => iso.slice(5).replace('-', '/');
 const countText = (count: Count) => count === null ? '5명 미만' : count.toLocaleString('ko-KR') + '명';
 const kstDate = (stamp: number) => new Date(stamp + 9 * 3600 * 1000).toISOString().slice(0, 10);
 
-function VisitorMetrics({ data }: { data: Dashboard }) {
+function PrivateLinkEstimate({ day, reload }: { day: Day; reload: () => void }) {
+  const request = useContentRequest(), action = useAction();
+  const [value, setValue] = useState(day.link_estimate?.toString() ?? '');
+  return <div className="link-estimate">
+    {day.link_estimate !== undefined && <p>공유 링크 유입 추정 <strong>약 {day.link_estimate.toLocaleString('ko-KR')}명</strong> · 나만 보기</p>}
+    <details><summary>{day.link_estimate !== undefined ? '추정치 수정' : '내 공유 링크 유입 추정치 추가'}</summary>
+      <form onSubmit={event => {
+        event.preventDefault();
+        void action.run(async () => {
+          await request('/release/measurement/link-estimates/' + day.date, 'PUT', {count: value === '' ? null : Number(value)});
+          reload();
+        });
+      }}>
+        <label>추정 인원 <input type="number" min="0" max="1000000" step="1" value={value} onChange={e => setValue(e.target.value)}/></label>
+        <button type="submit" className="secondary" disabled={action.busy}>저장</button>
+        <small>내 계정에서만 보입니다. 값을 비워 저장하면 삭제됩니다.</small>
+      </form><Feedback {...action}/>
+    </details>
+  </div>;
+}
+
+function VisitorMetrics({ data, reload }: { data: Dashboard; reload: () => void }) {
   const { visitors, detail_readers, outbound, days } = data;
   const steps: [string, Count][] = [['방문 회원', visitors], ['공구 상세 열람', detail_readers], ['판매처 이동', outbound]];
   const rate = visitors && outbound !== null ? (100 * outbound / visitors).toFixed(1) + '%' : '—';
-  const maxDay = Math.max(1, ...days.map(day => day.accounts ?? 0));
+  const openCount = (count: Count) => count == null ? '집계 전' : count.toLocaleString('ko-KR') + '회';
   return <>
     <section className="visit-panel" aria-label="기간별 방문 지표">
       <p className="visit-range">{shortDate(data.start)} ~ {shortDate(data.end)} <small>한국 시간</small></p>
-      <dl className="visit-metrics">
-        {steps.map(([label, count]) => <div key={label}><dt>{label}</dt><dd>{countText(count)}</dd></div>)}
-        <div><dt>판매처 이동률</dt><dd>{rate}</dd></div>
+      <dl className="visit-metrics visit-summary">
+        <div><dt>공개 웹 열람</dt><dd>{openCount(data.web_opens)}</dd><small>비회원·새로고침 포함{data.shared_opens != null && <> · 이 중 공유 링크 {openCount(data.shared_opens)}</>}</small></div>
+        <div><dt>{data.start === data.end ? '일방문 회원' : '기간 내 방문 회원'}</dt><dd>{countText(visitors)}</dd><small>활동 분석 동의 회원 · 계정당 한 번</small></div>
       </dl>
+      <p className="visit-note">{data.web_opens_from ? '웹 열람은 ' + data.web_opens_from + ' 첫 집계부터 표시합니다.' : '첫 공개 웹 열람을 기다리고 있습니다.'} 공유 링크 횟수는 서비스 공유 버튼으로 만든 주소를 열 때 집계합니다. 운영 화면과 링크 미리보기 요청은 제외합니다.</p>
+      {days.length === 1 && data.start >= kstDate(data.checked_at * 1000 - 29 * 86400000) &&
+        <PrivateLinkEstimate key={data.start} day={days[0]} reload={reload}/>}
     </section>
     <section className="visit-panel"><h3>방문에서 판매처 이동까지</h3>
-      <p>방문 회원 중 공구 상세를 보고 판매처 링크를 누른 회원의 비율입니다.</p>
+      <p>활동 분석에 동의한 회원 중 공구 상세를 본 인원과 판매처로 이동한 인원입니다. 판매처 이동률 {rate}</p>
       <ul className="visit-funnel">{steps.map(([label, count]) => <li key={label}>
         <span>{label}</span><span className="visit-track" aria-hidden="true"><i style={{ width: visitors && count !== null ? (100 * count / visitors) + '%' : '0%' }}/></span>
         <strong>{countText(count)}</strong>
       </li>)}</ul>
     </section>
-    <section className="visit-panel"><h3>일별 방문 회원</h3>
-      <div className="visit-chart-scroll" tabIndex={days.length > 7 ? 0 : undefined} role="region" aria-label="날짜별 방문 회원 그래프">
-        <ol className="visit-chart" style={{ minWidth: days.length > 7 ? days.length * 46 : undefined }}>
-          {days.map(day => <li key={day.date} aria-label={day.date + ' ' + countText(day.accounts)}>
-            <span aria-hidden="true">{day.accounts === null ? '＊' : day.accounts.toLocaleString('ko-KR')}</span>
-            <div className="visit-column" aria-hidden="true"><i style={{ height: ((day.accounts ?? 0) / maxDay * 100) + '%' }}/></div>
-            <time dateTime={day.date}>{shortDate(day.date)}</time>
-          </li>)}
-        </ol>
-      </div>
-      <p className="visit-note">하루에 여러 번 방문해도 한 명으로 셉니다. ＊는 1~4명으로 인원수를 숨긴 날입니다.</p>
+    <section className="visit-panel"><h3>날짜별 접속 기록</h3>
+      <div className="visit-history"><table><thead><tr><th scope="col">날짜</th><th scope="col">공개 웹 열람</th><th scope="col">일방문 회원</th></tr></thead>
+        <tbody>{[...days].reverse().map(day => <tr key={day.date}><th scope="row"><time dateTime={day.date}>{shortDate(day.date)}</time>{days.length > 1 && day.link_estimate !== undefined && <small>링크 유입 추정 약 {day.link_estimate}명 · 나만 보기</small>}</th>
+          <td>{openCount(day.web_opens)}</td><td>{countText(day.accounts)}</td></tr>)}</tbody></table></div>
+      <p className="visit-note">회원 1~4명은 ‘5명 미만’으로 표시합니다. 같은 회원이 다른 날 다시 오면 각 날짜에 한 번씩 셉니다.</p>
     </section>
   </>;
 }
 
 export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
-  const [range, setRange] = useState<{ period: Period; start?: string; end?: string }>({ period: 'week' });
-  const [start, setStart] = useState(() => kstDate(Date.now() - 6 * 86400000));
+  const [range, setRange] = useState<{ period: Period; start?: string; end?: string }>({ period: 'today' });
+  const [start, setStart] = useState(() => kstDate(Date.now()));
   const [end, setEnd] = useState(() => kstDate(Date.now()));
   const query = new URLSearchParams({ ...range });
   const result = usePublicResource<Report>('/release/measurement/campaign-report?' + query, sessionKey);
@@ -77,7 +97,7 @@ export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
   return <section className="visit-report" aria-labelledby="visit-title">
     <header className="visit-heading"><h2 id="visit-title">방문 현황</h2>
       <button type="button" className="secondary" disabled={result.loading} onClick={result.reload}>새로고침</button></header>
-    <p>활동 분석에 동의한 회원의 화면 열람과 공유 링크 방문을 집계합니다. 비회원과 운영자는 제외합니다.</p>
+    <p>링크를 열어 들어온 비회원은 공개 웹 열람에 포함됩니다. 방문 회원 수는 로그인한 동의 회원의 기록으로 계산합니다.</p>
     <div className="visit-controls">
       <div role="group" aria-label="조회 기간">{(Object.keys(presets) as (keyof typeof presets)[]).map(key =>
         <button type="button" className="secondary" key={key} aria-pressed={range.period === key} onClick={() => selectPeriod(key)}>{presets[key]}</button>)}</div>
@@ -89,9 +109,9 @@ export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
       </form>
     </div>
     <ResourceState {...result} retry={result.reload}/>
-    {data && <VisitorMetrics data={data}/>}
+    {data && <VisitorMetrics data={data} reload={result.reload}/>}
     {result.data && !data && <p role="status">방문 지표를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>}
-    {result.data && <section className="visit-panel"><h3>어디에서 들어왔나요?</h3>
+    {result.data && <section className="visit-panel"><h3>회원이 방문한 공유·홍보 경로</h3>
       {rows.length ? <ul className="visit-sources">{rows.map(row =>
         <li key={[row.source, row.medium, row.campaign, row.channel].join('/')}>
           <div><strong>{sourceNames[row.source] ?? row.source}</strong>

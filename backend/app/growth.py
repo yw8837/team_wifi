@@ -4,10 +4,14 @@ from collections import defaultdict
 from datetime import date, timedelta
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import Field, model_validator
 from sqlalchemy import delete, or_, select
 
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+
+from . import config
 from .db import Record, User, get_db, now, uid
 from .schemas import Strict
 from .security import admin_user, current_user
@@ -16,6 +20,11 @@ from .release import public_only
 CONSENT = 'growth_consent'
 EXPOSURE = 'growth_exposure'
 CAMPAIGN_VISIT = 'growth_campaign_visit'
+MEMBER_DAY = 'growth_member_day'
+WEB_OPENS = 'growth_web_opens'
+SHARED_OPENS = 'growth_shared_opens'
+WEB_START = 'growth_web_start'
+LINK_ESTIMATE = 'growth_link_estimate'
 RETENTION = 30 * 86400
 MINIMUM_CAMPAIGN_ACCOUNTS = 5
 router = APIRouter(prefix='/api/release/measurement', dependencies=[Depends(public_only)])
@@ -66,13 +75,57 @@ def set_consent(body: Consent, user=Depends(current_user), db=Depends(get_db)):
         if not opted_in(db, user):
             db.add(Record(kind=CONSENT, owner_id=user.id, unique_key=user.id, data={'version': '20261102'}))
     else:
-        db.execute(delete(Record).where(Record.owner_id == user.id, Record.kind.in_([CONSENT, EXPOSURE, CAMPAIGN_VISIT])))
+        db.execute(delete(Record).where(Record.owner_id == user.id, Record.kind.in_([CONSENT, EXPOSURE, CAMPAIGN_VISIT, MEMBER_DAY])))
     db.commit()
     return {'enabled': body.enabled and not user.is_admin, 'eligible': not user.is_admin}
 
 
 def purge(db):
-    db.execute(delete(Record).where(Record.kind.in_([EXPOSURE, CAMPAIGN_VISIT]), Record.created < now()-RETENTION))
+    db.execute(delete(Record).where(Record.kind.in_([EXPOSURE, CAMPAIGN_VISIT, MEMBER_DAY]), Record.created < now()-RETENTION))
+
+
+def record_insert(db):
+    return pg_insert if db.bind.dialect.name == 'postgresql' else sqlite_insert
+
+
+@router.post('/member-visits', status_code=202)
+def member_visit(user=Depends(current_user), db=Depends(get_db)):
+    db.scalar(select(User).where(User.id == user.id).with_for_update())
+    if not opted_in(db, user):
+        return {'recorded': False}
+    stamp = now()
+    db.execute(record_insert(db)(Record).values(
+        kind=MEMBER_DAY, owner_id=user.id, created=stamp,
+        unique_key=f'{user.id}:{kst_date(stamp)}',
+    ).on_conflict_do_nothing(index_elements=['kind', 'unique_key']))
+    purge(db)
+    db.commit()
+    return {'recorded': True}
+
+
+@router.post('/web-opens', status_code=202)
+def web_open(request: Request, shared: bool = False, db=Depends(get_db)):
+    # The browser sends no body, credentials, referrer or page address.
+    origin = request.headers.get('origin')
+    allowed = [config.PUBLIC_WEB_ORIGIN] if config.PUBLIC_WEB_ORIGIN else config.ORIGINS
+    if (not origin or origin not in allowed or request.headers.get('x-moduyuga-client') != 'web'
+            or request.headers.get('authorization') or request.headers.get('cookie')):
+        raise HTTPException(403, '공개 웹에서만 집계합니다.')
+    if db.bind.dialect.name == 'postgresql':
+        # Concurrent increments of the same daily total should wait on the row.
+        db.connection(execution_options={'isolation_level': 'READ COMMITTED'})
+    day = kst_date(now())
+    midnight = (day - EPOCH_DATE).days * DAY - KST_OFFSET
+    insert = record_insert(db)
+    db.execute(insert(Record).values(kind=WEB_START, unique_key='first-day', created=midnight)
+               .on_conflict_do_nothing(index_elements=['kind', 'unique_key']))
+    kinds = [WEB_OPENS, SHARED_OPENS] if shared else [WEB_OPENS]
+    for kind in kinds:
+        db.execute(insert(Record).values(kind=kind, unique_key=day.isoformat(), created=midnight, counter=1)
+                   .on_conflict_do_update(index_elements=['kind', 'unique_key'], set_={'counter': Record.counter + 1}))
+    db.execute(delete(Record).where(Record.kind.in_([WEB_OPENS, SHARED_OPENS]), Record.created <= midnight - RETENTION))
+    db.commit()
+    return {'recorded': True}
 
 
 @router.post('/campaign-visits', status_code=202)
@@ -83,9 +136,7 @@ def campaign_visit(body: CampaignVisit, user=Depends(current_user), db=Depends(g
     purge(db)
     day = (now() + 9 * 3600) // 86400
     key = f'{user.id}:{body.source}:{body.medium}:{body.campaign}:{body.channel}:{day}'
-    from sqlalchemy.dialects.postgresql import insert as pg_insert
-    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
-    insert = pg_insert if db.bind.dialect.name == 'postgresql' else sqlite_insert
+    insert = record_insert(db)
     db.execute(insert(Record).values(
         id=uid(), kind=CAMPAIGN_VISIT, unique_key=key, owner_id=user.id,
         created=now(), data=body.model_dump(),
@@ -124,6 +175,27 @@ def display_count(count):
     return count if count == 0 or count >= MINIMUM_CAMPAIGN_ACCOUNTS else None
 
 
+class LinkEstimate(Strict):
+    count: int | None = Field(..., ge=0, le=1000000, strict=True)
+
+
+@router.put('/link-estimates/{day}')
+def save_link_estimate(day: date, body: LinkEstimate, user=Depends(admin_user), db=Depends(get_db)):
+    today = kst_date(now())
+    if not today - timedelta(days=29) <= day <= today:
+        raise HTTPException(422, '최근 30일 안에서 날짜를 선택해 주세요.')
+    key = f'{user.id}:{day}'
+    if body.count is None:
+        db.execute(delete(Record).where(Record.kind == LINK_ESTIMATE, Record.unique_key == key))
+    else:
+        db.execute(record_insert(db)(Record).values(
+            kind=LINK_ESTIMATE, unique_key=key, owner_id=user.id, counter=body.count,
+            created=(day - EPOCH_DATE).days * DAY - KST_OFFSET,
+        ).on_conflict_do_update(index_elements=['kind', 'unique_key'], set_={'counter': body.count}))
+    db.commit()
+    return {'count': body.count}
+
+
 @router.get('/campaign-report')
 def campaign_report(period: Literal['today', 'week', 'month', 'all', 'custom'] = 'all',
                     start: date | None = None, end: date | None = None,
@@ -134,7 +206,7 @@ def campaign_report(period: Literal['today', 'week', 'month', 'all', 'custom'] =
     suspension = select(Record.owner_id).where(Record.kind == 'suspension', Record.owner_id.is_not(None))
     consented = select(Record.owner_id).where(Record.kind == CONSENT)
     records = select(Record.owner_id, Record.kind, Record.created, Record.data).join(User, User.id == Record.owner_id).where(
-        Record.kind.in_([EXPOSURE, CAMPAIGN_VISIT]), Record.created.between(after, before),
+        Record.kind.in_([EXPOSURE, CAMPAIGN_VISIT, MEMBER_DAY]), Record.created.between(after, before),
         User.deleted.is_(False), User.is_admin.is_(False), ~User.id.in_(suspension), User.id.in_(consented),
     )
     visitors, detail_readers, outbound = set(), set(), set()
@@ -161,7 +233,32 @@ def campaign_report(period: Literal['today', 'week', 'month', 'all', 'custom'] =
     for offset in range((end - start).days + 1):
         day = start + timedelta(days=offset)
         days.append({'date': day, 'accounts': display_count(len(by_day[day]))})
+    day_min = kst_date(checked_at) - timedelta(days=29)
+    first_open = db.scalar(select(Record.created).where(Record.kind == WEB_START))
+    coverage = max(kst_date(first_open), day_min) if first_open is not None else None
+    db.execute(delete(Record).where(Record.kind.in_([WEB_OPENS, SHARED_OPENS]), Record.unique_key < day_min.isoformat()))
+    public_days = dict(db.execute(select(Record.unique_key, Record.counter).where(
+        Record.kind == WEB_OPENS, Record.unique_key.between(start.isoformat(), end.isoformat())
+    )).all())
+    shared_days = dict(db.execute(select(Record.unique_key, Record.counter).where(
+        Record.kind == SHARED_OPENS, Record.unique_key.between(start.isoformat(), end.isoformat())
+    )).all())
+    cutoff_midnight = (day_min - EPOCH_DATE).days * DAY - KST_OFFSET
+    db.execute(delete(Record).where(Record.kind == LINK_ESTIMATE, Record.created < cutoff_midnight))
+    estimates = dict(db.execute(select(Record.created, Record.counter).where(
+        Record.kind == LINK_ESTIMATE, Record.owner_id == user.id,
+        Record.created.between((start - EPOCH_DATE).days * DAY - KST_OFFSET, before),
+    )).all())
+    for item in days:
+        day = item['date']
+        estimate = estimates.get((day - EPOCH_DATE).days * DAY - KST_OFFSET)
+        if estimate is not None:
+            item['link_estimate'] = estimate
+        item['web_opens'] = public_days.get(day.isoformat(), 0) if coverage and day >= coverage else None
     dashboard = {
+        'shared_opens': sum(shared_days.values()) if coverage and end >= coverage else None,
+        'web_opens_from': kst_date(first_open) if first_open is not None else None,
+        'web_opens': sum(public_days.values()) if coverage and end >= coverage else None,
         'checked_at': checked_at, 'start': start, 'end': end, 'minimum_date': kst_date(checked_at - RETENTION),
         'visitors': display_count(len(visitors)), 'detail_readers': display_count(len(detail_readers)),
         'outbound': display_count(len(outbound)), 'days': days,
@@ -198,9 +295,7 @@ def event(body: Event, user=Depends(current_user), db=Depends(get_db)):
         if body.visible_ms < 1000:
             return {'recorded': False}
         if not row:
-            from sqlalchemy.dialects.postgresql import insert as pg_insert
-            from sqlalchemy.dialects.sqlite import insert as sqlite_insert
-            insert = pg_insert if db.bind.dialect.name == 'postgresql' else sqlite_insert
+            insert = record_insert(db)
             db.execute(insert(Record).values(id=uid(), kind=EXPOSURE, unique_key=key, owner_id=user.id,
                 parent_id=target, created=now(), data={'placement': body.placement, 'channel': body.channel, 'clicks': {}, 'saved': False, 'interested': False})
                 .on_conflict_do_nothing(index_elements=['kind', 'unique_key']))

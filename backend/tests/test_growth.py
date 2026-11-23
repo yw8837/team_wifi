@@ -154,7 +154,7 @@ def test_visitor_dashboard_kst_period_dedup_funnel_and_privacy(public_mode, monk
     assert [d['accounts'] for d in data['days']] == [0,0,0,0,0,5,5]
     assert report['rows'][0]['accounts'] == 5
     prev = c.get(url+'?period=custom&start=2026-11-22&end=2026-11-22', headers=admin).json()
-    assert prev['rows'] == [] and prev['dashboard']['days'] == [{'date':'2026-11-22','accounts':5}]
+    assert prev['rows'] == [] and prev['dashboard']['days'] == [{'date':'2026-11-22','accounts':5,'web_opens':None}]
     assert len(c.get(url+'?period=month',headers=admin).json()['dashboard']['days']) == 30
     assert c.get(url+'?period=all',headers=admin).json()['dashboard']['start'] == '2026-10-24'
     for params in ('period=custom', 'period=custom&start=2026-11-24&end=2026-11-23',
@@ -169,3 +169,66 @@ def test_visitor_dashboard_kst_period_dedup_funnel_and_privacy(public_mode, monk
     hidden = c.get(url+'?period=today',headers=admin).json()
     assert hidden['dashboard']['visitors'] is None and hidden['dashboard']['days'][0]['accounts'] is None
     assert hidden['rows'] == []
+
+def test_public_web_opens_and_opt_in_daily_members_are_separate(public_mode, monkeypatch):
+    from datetime import datetime
+    c, people, _ = public_mode
+    window = '/api/release/measurement/campaign-report?period='
+    opens = '/api/release/measurement/web-opens'
+    member = '/api/release/measurement/member-visits'
+    buyer, admin = people['buyer']['headers'], people['admin']['headers']
+    origin = 'https://public.example'
+    monkeypatch.setattr(growth.config, 'PUBLIC_WEB_ORIGIN', origin)
+    stamp = int(datetime.fromisoformat('2026-11-23T23:59:30+09:00').timestamp())
+    monkeypatch.setattr(growth, 'now', lambda: stamp)
+    web = {'Origin': origin, 'X-Moduyuga-Client': 'web'}
+    assert c.get(window + 'today', headers=admin).json()['dashboard']['web_opens'] is None
+    assert c.post(opens).status_code == 403
+    assert c.post(opens, headers={**web, 'Origin':'https://other.example'}).status_code == 403
+    assert c.post(opens, headers={**web, **buyer}).status_code == 403
+    assert c.post(opens, headers=web).status_code == 202
+    assert c.post(opens + '?shared=true', headers=web).status_code == 202
+    assert c.post(member).status_code == 401
+    assert not c.post(member, headers=buyer).json()['recorded']
+    assert not c.post(member, headers=admin).json()['recorded']
+    before = c.get(window + 'week', headers=admin).json()['dashboard']
+    assert before['visitors'] == 0 and before['web_opens'] == 2 and before['shared_opens'] == 1
+    assert [d['web_opens'] for d in before['days']] == [None] * 6 + [2]
+    c.put('/api/release/measurement/consent', headers=buyer, json={'enabled': True})
+    for _ in range(2):
+        assert c.post(member, headers=buyer).json()['recorded']
+    with SessionLocal() as db:
+        assert len(list(db.scalars(select(Record).where(Record.kind == growth.MEMBER_DAY)))) == 1
+        daily = db.scalar(select(Record).where(Record.kind == growth.WEB_OPENS))
+        assert daily.owner_id is None and daily.unique_key == '2026-11-23' and daily.data == {}
+    stamp += 60
+    next_day = c.get(window + 'today', headers=admin).json()['dashboard']
+    assert next_day['visitors'] == next_day['web_opens'] == 0
+    assert c.post(member, headers=buyer).json()['recorded']
+    both = c.get(window + 'week', headers=admin).json()['dashboard']
+    assert both['visitors'] is None and [d['accounts'] for d in both['days'][-2:]] == [None, None]
+    assert c.put('/api/release/measurement/consent', headers=buyer, json={'enabled': False}).status_code == 200
+    after = c.get(window + 'week', headers=admin).json()['dashboard']
+    assert after['visitors'] == 0 and after['web_opens'] == 2
+
+
+def test_personal_link_estimate_is_private_and_never_adds_to_measured_visits(public_mode):
+    from app.db import User
+    c, people, _ = public_mode
+    admin, buyer = people['admin']['headers'], people['buyer']['headers']
+    day = growth.kst_date(now()).isoformat()
+    target = '/api/release/measurement/link-estimates/' + day
+    url = '/api/release/measurement/campaign-report?period=today'
+    assert c.put(target, headers=buyer, json={'count':9}).status_code == 403
+    assert c.put(target, headers=admin, json={'count':-1}).status_code == 422
+    assert c.put(target, headers=admin, json={'count':9}).status_code == 200
+    data = c.get(url, headers=admin).json()['dashboard']
+    assert data['days'][0]['link_estimate'] == 9
+    assert data['visitors'] == 0 and data['web_opens'] is None
+    buyer_id = c.get('/api/me', headers=buyer).json()['id']
+    with SessionLocal() as db:
+        db.get(User, buyer_id).is_admin = True
+        db.commit()
+    assert 'link_estimate' not in c.get(url, headers=buyer).json()['dashboard']['days'][0]
+    assert c.put(target, headers=admin, json={'count':None}).status_code == 200
+    assert 'link_estimate' not in c.get(url, headers=admin).json()['dashboard']['days'][0]

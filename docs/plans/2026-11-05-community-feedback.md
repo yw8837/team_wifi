@@ -326,3 +326,9 @@ PC와 모바일 웹에서 진행 중인 53건의 목록을 모두 확인했다. 
 [09 공식 일정 표시 예시](https://www.09now.com/family) · [상윤맘 일정](https://link.inpock.co.kr/with_syoon) · [워니럽마켓 일정](https://link.inpock.co.kr/seonju0815) · [보드북 일정 교차 확인](https://momcalendar.com/g/%EA%B3%B5%EB%A3%A1.html)
 
 [지금하는공구 앱 소개](https://play.google.com/store/apps/details?id=com.hulta.app) · [판매자용 패밀리](https://www.09now.com/family) · [자동 수집 정책](https://09now.com/robots.txt)
+
+### 2026-11-23 · 공유 링크를 열어도 방문이 0명으로 보인 문제
+
+- 기존 방문 회원 지표는 동의 회원의 상품 노출 또는 지정 캠페인 방문으로만 계산해 홈을 열고 나간 회원과 비회원 열람이 빠졌다.
+- 첫 화면을 오늘(한국시간)로 바꾸고, 화면이 실제 보일 때 공개 웹 열람과 동의 회원 일방문을 각각 기록한다. 웹 열람은 날짜별 횟수만, 회원은 계정당 하루 한 번 집계한다. 웹 집계 시작 전 날짜는 ‘집계 전’으로 표시한다.
+- 운영자 개인의 날짜별 공유 링크 유입 추정치는 본인에게만 보이며 자동 측정 지표에는 합산하지 않는다.
