@@ -118,6 +118,41 @@ def campaign_state(title, stamp):
     return ended, deadline
 
 
+def cafe24_shipping(html):
+    """Use only an unambiguous fee from the seller's labelled delivery row."""
+    rows = re.findall(r'<tr\b[^>]*>(.*?)</tr>', html, re.S | re.I)
+    terms = set()
+    for row in rows:
+        if '배송비' not in row:
+            continue
+        cells = re.findall(r'<t[hd]\b[^>]*>(.*?)</t[hd]>', row, re.S | re.I)
+        if len(cells) != 2:
+            continue
+        label, value = [re.sub(r'\s+', ' ', unescape(re.sub('<[^>]+>', '', cell))).strip() for cell in cells]
+        if label == '배송비':
+            terms.add(value)
+    if len(terms) != 1:
+        return None, ''
+    value = terms.pop()
+    if value in ('무료', '무료배송', '무료 배송'):
+        return 0, ''
+    amount = r'(?:\d{1,3}(?:,\d{3}){1,3}|\d{1,10})'
+    value = re.sub(r'[₩￦]\s*(' + amount + r')(?![\d,])', r'\1원', value)
+    match = re.fullmatch(rf'({amount})\s*원(?:\s*\(\s*({amount})\s*원\s*이상\s*구매\s*시\s*무료(?:배송)?\s*\))?', value)
+    if not match:
+        return None, ''
+    fee = int(match[1].replace(',', ''))
+    if fee > 1_000_000_000:
+        return None, ''
+    if match[2]:
+        threshold = int(match[2].replace(',', ''))
+        if not 0 < threshold <= 1_000_000_000:
+            return None, ''
+        # Do not supply one numeric fee for orders with a free-delivery threshold.
+        return None, f'배송비 {fee:,}원 · {threshold:,}원 이상 구매 시 무료'
+    return fee, ''
+
+
 def parse_cafe24(html, source, *, groupbuy=True):
     def variable(name):
         match = re.search(r'\bvar\s+' + re.escape(name) + r"\s*=\s*'([^'\r\n]*)'", html)
@@ -161,13 +196,10 @@ def parse_cafe24(html, source, *, groupbuy=True):
         matches = re.findall(r'\bvar\s+' + re.escape(name) + r"\s*=\s*'(\d+)'", html)
         values = set(matches)
         return int(matches[0]) if len(values) == 1 and 0 < int(matches[0]) <= 1_000_000_000 else None
-    shipping_rows = [unescape(re.sub('<[^>]+>', ' ', row)) for row in
-                     re.findall(r'<tr\b[^>]*>.*?</tr>', html, re.S) if '배송비' in row]
-    shipping_free = bool(shipping_rows) and all(
-        re.sub(r'\s+', '', row) == '배송비무료' for row in shipping_rows)
+    shipping_fee, shipping_note = cafe24_shipping(html)
     plain = re.sub(r'\s+', ' ', unescape(re.sub('<[^>]+>', ' ', html)))
     delivery = re.search(r'배송 기간\s*:\s*(\d+일\s*~\s*\d+일)', plain)
-    fulfillment = []
+    fulfillment = [shipping_note] if shipping_note else []
     if delivery:
         fulfillment.append('판매처 일반 배송 안내 ' + delivery.group(1) + ' · 옵션별 출고 일정은 별도 확인')
     if '산간벽지나 도서지방은 별도의 추가금액' in plain:
@@ -196,7 +228,7 @@ def parse_cafe24(html, source, *, groupbuy=True):
             'source_hash': hashlib.sha256(html.encode()).hexdigest(),
             'title': title, 'category': source['category'], 'seller_name': source['seller'],
             'seller_url': (reviewed or {}).get('seller_url', source['url']), 'price': price,
-            'shipping_fee': 0 if shipping_free else None,
+            'shipping_fee': shipping_fee,
             'minimum_quantity': None, 'unit': variant_terms[0][0] if variant_terms else '', 'expires_at': deadline.isoformat() if deadline else '',
             'order_minimum': quantity('product_min'), 'order_step': quantity('buy_unit'),
             'fulfillment_notes': fulfillment, 'option_labels': ([f'{label} · {value:,}원' for label, value in variant_terms] or list(dict.fromkeys(options)))[:30],

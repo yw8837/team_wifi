@@ -52,7 +52,23 @@ describe("current groupbuy discovery and honest external commerce",()=>{
   expect(html).toContain("시연용 데이터입니다");
   expect(html).not.toContain('href="https://seller.example.org/deal"');
  });
- it("lists actual supplied records with unknown amounts and distinct ended state",()=>{state.data={items:[item,{...item,id:"ended-g2",status:"ended",can_edit:false}],has_more:true,queried_at:item.queried_at};const html=feed();expect(html).toContain("공구 찾기");expect(html).toContain("가격 정보 미확인");expect(html).toContain("<dt>배송비</dt><dd>판매처 확인</dd>");expect(html).not.toContain("0원");expect(html).toContain('class="groupbuy-status ended"');expect(html).toContain("종료");expect(html).toContain("공유 2026.11.06 10:00");expect(html).toContain("마감 임박순");expect(html).toContain("공구 목록 페이지");expect(state.paths[0]).toContain("status=active&sort=ending&limit=20&offset=0");});
+ it("only shows known shipping terms and respects date-only seller deadlines",()=>{
+   function card(extra: Partial<Groupbuy>) {
+     state.data={items:[{...item,expires_at:"",source_type:"seller_page",...extra}],has_more:false,queried_at:item.queried_at};
+     return feed();
+   }
+   expect(card({source_fresh_until:"2099-01-01T13:00:00Z"})).not.toContain("groupbuy-quick-facts");
+   expect(card({shipping_fee:0})).toContain("<dt>배송비</dt><dd>무료배송</dd>");
+   expect(card({shipping_fee:3000})).toContain("<dt>배송비</dt><dd>3,000원</dd>");
+   const conditional=card({fulfillment_notes:["배송비 3,000원 · 100,000원 이상 구매 시 무료"]});
+   expect(conditional).toContain("<dd>3,000원 · 100,000원 이상 구매 시 무료</dd>");
+   for(const terms of ["공구 마감일은 2026-11-25입니다.", "기본형 기준입니다. 판매처 공구 기간은 2026.11.20~2026.11.25입니다."]){
+     expect(card({price_conditions:terms})).toContain("<dt>마감</dt><dd>2026.11.25</dd>");
+   }
+   expect(card({price_conditions:"공구 마감일은 2026-02-30입니다."})).not.toContain("<dt>마감</dt>");
+   expect(card({expires_at:"2026-11-25T14:59:00Z"})).toContain("<dt>마감</dt><dd>2026.11.25 23:59</dd>");
+ });
+ it("lists actual supplied records with unknown amounts and distinct ended state",()=>{state.data={items:[item,{...item,id:"ended-g2",status:"ended",can_edit:false}],has_more:true,queried_at:item.queried_at};const html=feed();expect(html).toContain("공구 찾기");expect(html).toContain("가격 정보 미확인");expect(html).not.toContain("<dt>배송비</dt>");expect(html).not.toContain("0원");expect(html).toContain('class="groupbuy-status ended"');expect(html).toContain("종료");expect(html).toContain("공유 2026.11.06 10:00");expect(html).toContain("마감 임박순");expect(html).toContain("공구 목록 페이지");expect(state.paths[0]).toContain("status=active&sort=ending&limit=20&offset=0");});
  it("keeps searchable listings ahead of editorial highlights on home",()=>{state.popular=[{id:"d-popular",title:"합성 인기 수요",category:"수유·이유식",author:item.author,created_at:item.created_at,interest_count:12,comment_count:2,linked_groupbuy:item}];const html=feed();expect(html.indexOf("판매처에서 확인할 공구")).toBeGreaterThan(html.indexOf("공구 검색 조건"));expect(html.indexOf("관심이 많은 공구 수요")).toBeGreaterThan(html.indexOf("공구 검색 조건"));expect(html).toContain('href="/demands/d-popular"');expect(html).toContain("관심 12명");expect(html).toContain("연결된 공구: "+item.title);expect(feed("/?q=검색")).not.toContain("관심이 많은 공구 수요");});
  it("keeps search, category, status, sorting and bounded page in the API query",()=>{const params=new URLSearchParams("q=기저귀&category=위생&status=ended&sort=recent&page=2");expect(Object.fromEntries(new URLSearchParams(groupbuyListQuery(params)))).toEqual({q:"기저귀",category:"위생",status:"ended",sort:"recent",limit:"20",offset:"40"});expect(groupbuyListQuery(new URLSearchParams(),true)).toContain("status=all");expect(groupbuyListQuery(new URLSearchParams("status=private&sort=price&page=-4"))).toContain("status=active&sort=ending&limit=20&offset=0");});
  it("has no fabricated fallback when no groupbuys exist and distinguishes network errors",()=>{state.data={items:[],has_more:false,queried_at:item.queried_at};let html=feed();expect(html).toContain("등록된 공구 정보가 없습니다.");expect(html).not.toContain(item.title);state.error="네트워크 오류";html=feed();expect(html).toContain("네트워크 오류");expect(html).not.toContain("등록된 공구 정보가 없습니다.");});

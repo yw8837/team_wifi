@@ -14,6 +14,23 @@ def seller_html(soldout='F'):
     var is_soldout_icon = '%s'; var sIsNonmemberLimit = 'T';""" % soldout
 
 
+@pytest.mark.parametrize(('terms', 'expected'), [
+    (['무료'], (0, '')),
+    (['￦3,000'], (3000, '')),
+    (['3,000원'], (3000, '')),
+    (['<strong>3,000원</strong> (100,000원 이상 구매 시 무료)'] * 2,
+     (None, '배송비 3,000원 · 100,000원 이상 구매 시 무료')),
+    (['3,000원', '무료'], (None, '')),
+    (['주문 수량별 차등'], (None, '')),
+    (['3,000원 (지역별 추가)'], (None, '')),
+    ([], (None, '')),
+])
+def test_cafe24_base_and_conditional_shipping(terms, expected):
+    html = ''.join(f'<tr><th>배송비</th><td>{value}</td></tr>' for value in terms)
+    html += '<tr><th>반품 배송비</th><td>8,000원</td></tr>'
+    assert external_groupbuys.cafe24_shipping(html) == expected
+
+
 def test_reviewed_price_and_label_follow_available_option(monkeypatch):
     source = external_groupbuys.SOURCES[0]
     name = '캔코 모아백 기저귀가방 공동구매'
