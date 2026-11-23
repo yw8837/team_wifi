@@ -1,4 +1,5 @@
 import { renderToStaticMarkup } from 'react-dom/server';
+import { MemoryRouter } from 'react-router-dom';
 import { expect, it, vi } from 'vitest';
 import { CampaignReport } from './campaign-report';
 
@@ -15,7 +16,7 @@ vi.mock('./release-data', () => ({
 }));
 
 it('shows one daily summary and all seven dates, preserving suppressed counts and the report source', () => {
-  const html = renderToStaticMarkup(<CampaignReport sessionKey="owner"/>);
+  const html = renderToStaticMarkup(<MemoryRouter><CampaignReport sessionKey="owner"/></MemoryRouter>);
   for (const date of dates) expect(html).toContain('dateTime="' + date + '"');
   expect(html).toContain('공유 링크 유입</dt><dd>7명');
   expect(html).toContain('8명'); expect(html).toContain('25%');

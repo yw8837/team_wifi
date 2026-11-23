@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ResourceState } from './shared';
 import { usePublicResource } from './release-data';
 import './campaign-report.css';
@@ -80,32 +81,34 @@ function DailyVisits({ data, sessionKey }: { data: Dashboard; sessionKey?: strin
 }
 
 export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
-  const [range, setRange] = useState<{ period: Period; start?: string; end?: string }>({ period: 'today' });
-  const [start, setStart] = useState(() => kstDate(Date.now()));
-  const [end, setEnd] = useState(() => kstDate(Date.now()));
-  const query = new URLSearchParams({ ...range });
+  const [params, setParams] = useSearchParams();
+  const selected = params.get('period') ?? 'today';
+  const period: Period = selected === 'custom' || Object.hasOwn(presets, selected) ? selected as Period : 'today';
+  const query = new URLSearchParams({ period });
+  if (period === 'custom') {
+    query.set('start', params.get('start') ?? '');
+    query.set('end', params.get('end') ?? '');
+  }
   const result = usePublicResource<Report>('/release/measurement/campaign-report?' + query, sessionKey);
   const data = result.data?.dashboard;
   const today = kstDate((data?.checked_at ?? Date.now() / 1000) * 1000);
   const minimum = data?.minimum_date ?? kstDate(Date.now() - 30 * 86400000);
-  function selectPeriod(period: keyof typeof presets) {
-    const lookback = { today: 0, week: 6, month: 29, all: 30 }[period];
-    setStart(period === 'all' ? minimum : kstDate((data?.checked_at ?? Date.now() / 1000) * 1000 - lookback * 86400000));
-    setEnd(today);
-    setRange({ period });
-  }
+  const [draft, setDraft] = useState<{ scope: string; start: string; end: string } | null>(null);
+  const scope = query.toString();
+  const start = draft?.scope === scope ? draft.start : data?.start ?? query.get('start') ?? today;
+  const end = draft?.scope === scope ? draft.end : data?.end ?? query.get('end') ?? today;
   const rows = [...(result.data?.rows ?? [])].sort((a, b) => b.accounts - a.accounts);
   return <section className="visit-report" aria-labelledby="visit-title">
     <header className="visit-heading"><h2 id="visit-title">방문 현황</h2>
       <button type="button" className="secondary" disabled={result.loading} onClick={result.reload}>새로고침</button></header>
     <div className="visit-controls">
       <div role="group" aria-label="조회 기간">{(Object.keys(presets) as (keyof typeof presets)[]).map(key =>
-        <button type="button" className="secondary" key={key} aria-pressed={range.period === key} onClick={() => selectPeriod(key)}>{presets[key]}</button>)}</div>
-      <form aria-label="직접 기간 선택" onSubmit={event => { event.preventDefault(); setRange({ period: 'custom', start, end }); }}>
-        <input required type="date" aria-label="시작일" min={minimum} max={end || today} value={start} onChange={e => setStart(e.target.value)}/>
+        <Link className="secondary visit-preset" key={key} aria-current={period === key ? 'page' : undefined} to={'?period=' + key} onClick={() => setDraft(null)}>{presets[key]}</Link>)}</div>
+      <form aria-label="직접 기간 선택" onSubmit={event => { event.preventDefault(); setParams({ period: 'custom', start, end }); setDraft(null); }}>
+        <input required type="date" aria-label="시작일" min={minimum} max={end || today} value={start} onChange={e => setDraft({ scope, start: e.target.value, end })}/>
         <span aria-hidden="true">~</span>
-        <input required type="date" aria-label="종료일" min={start || minimum} max={today} value={end} onChange={e => setEnd(e.target.value)}/>
-        <button className="secondary" aria-pressed={range.period === 'custom'}>기간 보기</button>
+        <input required type="date" aria-label="종료일" min={start || minimum} max={today} value={end} onChange={e => setDraft({ scope, start, end: e.target.value })}/>
+        <button className="secondary" aria-pressed={period === 'custom'}>기간 보기</button>
       </form>
     </div>
     <ResourceState {...result} retry={result.reload}/>

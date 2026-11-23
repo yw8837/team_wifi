@@ -6,7 +6,8 @@
 .visit-heading h2, .visit-panel h3 { margin: 0; }
 .visit-report > p, .visit-panel > p { margin: .45rem 0 .85rem; line-height: 1.5; }
 .visit-report .secondary { width: auto; margin: 0; min-height: 44px; padding: .35rem .8rem; }
-.visit-report button.secondary[aria-pressed="true"] { color: white; background: #543b30; border-color: #543b30; }
+.visit-preset { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none; border: 1px solid #ded8d1; border-radius: .7rem; background: white; }
+.visit-report .visit-preset[aria-current="page"], .visit-report button.secondary[aria-pressed="true"] { color: white; background: #543b30; border-color: #543b30; }
 .visit-controls { margin: .85rem 0; gap: .65rem 1rem; }
 .visit-controls form { margin: 0; }
 .visit-controls input[type="date"] { width: auto; min-width: 0; min-height: 44px; padding: .3rem .4rem; font: inherit; }
