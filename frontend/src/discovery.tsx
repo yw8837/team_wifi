@@ -113,22 +113,16 @@ export function InsightsView({ data }: { data: Insights }) {
 
 export function ServiceInsights() {
   const { user } = useAuth();
-  const [dataset,setDataset]=useState<"service"|"demo">("service");
-  const result = usePublicResource<Insights>("/release/admin/insights"+(dataset==="demo"?"?dataset=demo":""), user?.id);
+  const result = usePublicResource<Insights>("/release/admin/insights", user?.id);
   return <section>
     <Link to="/my">← 마이페이지</Link>
     <PageTitle eyebrow="운영자 전용" title="방문·활동 대시보드"/>
-    {dataset === "service" && <CampaignReport sessionKey={user?.id}/>}
+    <CampaignReport sessionKey={user?.id}/>
     <h2>육아템 관심 분석</h2>
-    <label className="field"><span>분석할 데이터</span>
-      <select value={dataset} onChange={event => setDataset(event.target.value as "service" | "demo")}>
-        <option value="service">실제 서비스 활동</option><option value="demo">시연용 데이터</option>
-      </select>
-    </label>
     <ResourceState {...result} retry={result.reload}/>
     {result.data && !result.loading && !result.error && <InsightsView data={result.data}/>}
     <button className="secondary" disabled={result.loading} onClick={result.reload}>최신 활동으로 새로고침</button>
-    {dataset === "service" && <MeasurementReport/>}
+    <MeasurementReport/>
   </section>;
 }
 

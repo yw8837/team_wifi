@@ -8,7 +8,7 @@ type Count = number | null;
 type Day = { date: string; accounts: Count; web_opens: Count; link_estimate?: number; campaign_estimate?: { visitors: number; detail: number; outbound: number } };
 type Dashboard = {
   start: string; end: string; minimum_date: string; checked_at: number;
-  shared_opens: Count; web_opens: Count; web_opens_from: string | null;
+  source_opens?: Record<string, number>; shared_opens: Count; web_opens: Count; web_opens_from: string | null;
   visitors: Count; detail_readers: Count; outbound: Count; days: Day[];
 };
 type CampaignRow = { source: string; medium: string; campaign: string; channel: string; accounts: number };
@@ -97,6 +97,8 @@ export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
   const scope = query.toString();
   const start = draft?.scope === scope ? draft.start : data?.start ?? query.get('start') ?? today;
   const end = draft?.scope === scope ? draft.end : data?.end ?? query.get('end') ?? today;
+  const sources = Object.entries(data?.source_opens ?? {}).sort((a,b) => b[1] - a[1]);
+  const unknown = (data?.web_opens ?? 0) - sources.reduce((sum, [, count]) => sum + count, 0);
   const rows = [...(result.data?.rows ?? [])].sort((a, b) => b.accounts - a.accounts);
   return <section className="visit-report" aria-labelledby="visit-title">
     <header className="visit-heading"><h2 id="visit-title">방문 현황</h2>
@@ -114,6 +116,13 @@ export function CampaignReport({ sessionKey }: { sessionKey?: string }) {
     <ResourceState {...result} retry={result.reload}/>
     {data && <><VisitorMetrics data={data}/><DailyVisits data={data} sessionKey={sessionKey}/></>}
     {result.data && !data && <p role="status">방문 지표를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>}
+    {data && <section className="visit-panel"><h3>웹 접속 경로</h3>
+      <ul className="visit-sources">{sources.map(([source, count]) =>
+        <li key={source}><span>{sourceNames[source] ?? source}</span><b>{count.toLocaleString()}회</b></li>)}
+        {unknown > 0 && <li><span>경로 미확인</span><b>{unknown.toLocaleString()}회</b></li>}
+      </ul>
+      <p className="visit-note">{data.web_opens ? '공유·홍보 링크를 연 횟수입니다. 경로 미확인에는 UTM이 없는 접속과 경로 수집 이전 기록이 포함됩니다.' : '이 기간에 기록된 웹 열람이 없습니다.'}</p>
+    </section>}
     {rows.length > 0 && <section className="visit-panel"><h3>유입 경로별 방문 회원</h3>
       <ul className="visit-sources">{rows.map(row =>
         <li key={[row.source, row.medium, row.campaign, row.channel].join('/')}>

@@ -11,7 +11,7 @@ def test_exported_guides_are_readable_without_js_and_truthful_schema(tmp_path):
     assert len(paths) == 4 + len(module['CATALOG'])
     sitemap = ET.fromstring((tmp_path/'sitemap.xml').read_text('utf-8'))
     urls = [node.text for node in sitemap.iter() if node.tag.endswith('loc')]
-    assert len(urls) == len(paths) and all('/guides' in url or '/items/' in url for url in urls)
+    assert urls == [module['ORIGIN'] + '/'] + [module['ORIGIN'] + path.removesuffix('.html') for path in paths]
     assert all('/my' not in url and '/auth' not in url for url in urls)
     for path in paths[1:]:
         html = (tmp_path/path.lstrip('/')).read_text('utf-8')

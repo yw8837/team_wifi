@@ -26,7 +26,7 @@ it('counts a visible guest share once without sending identity, URL or referrer'
   expect(fetch).not.toHaveBeenCalled();
   doc.visibilityState = 'visible'; doc.dispatchEvent(new Event('visibilitychange')); win.dispatchEvent(new Event('focus'));
   useVisitTracking('/', false, false);
-  expect(fetch).toHaveBeenCalledExactlyOnceWith('https://api.example/release/measurement/web-opens?shared=true', {
+  expect(fetch).toHaveBeenCalledExactlyOnceWith('https://api.example/release/measurement/web-opens?source=kakao&shared=true', {
     method: 'POST', credentials: 'omit', referrerPolicy: 'no-referrer', headers: {'X-Moduyuga-Client':'web'}, keepalive:true,
   });
   expect(state.memberVisit).not.toHaveBeenCalled();

@@ -11,7 +11,7 @@ import runpy
 from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parents[1]
-ORIGIN = 'https://moduyuga.onrender.com'
+ORIGIN = 'https://moduyuga.yeolmaeapps.kr'
 UPDATED = '2026-11-04'
 CATALOG = json.loads((ROOT/'backend/app/release_catalog.json').read_text('utf-8'))['entries']
 CONTENT = runpy.run_path(str(ROOT/'backend/app/catalog_content.py'))
@@ -43,7 +43,7 @@ STYLE = '''body{margin:0;background:#fffcf8;color:#49362d;font:17px/1.8 system-u
 
 def page(title, description, path, content, structured=None):
     schema = '' if not structured else '<script type="application/ld+json">'+json.dumps(structured, ensure_ascii=False).replace('<', '\\u003c')+'</script>'
-    canonical = ORIGIN+path
+    canonical = ORIGIN+path.removesuffix('.html')
     return f'''<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{escape(title)} | 모두의 육아</title>
 <meta name="description" content="{escape(description, quote=True)}"><meta name="robots" content="index,follow"><link rel="canonical" href="{canonical}">
 <meta property="og:type" content="article"><meta property="og:title" content="{escape(title, quote=True)}"><meta property="og:description" content="{escape(description, quote=True)}"><meta property="og:url" content="{canonical}"><style>{STYLE}</style>{schema}</head>
@@ -93,8 +93,10 @@ def export(output):
     content += '<h2>품목별 비교 안내</h2><ul>'+''.join('<li><a href="'+CONTENT['guide_path'](entry)+'">'+escape(entry['title'])+'</a></li>' for entry in CATALOG if CONTENT['active'](entry))+'</ul>'
     (output/'guides.html').write_text(page('육아템 선택 가이드', '기저귀 단가, 젖병 구성, 데이터 활용 근거를 출처와 함께 확인하세요.', '/guides.html', content), 'utf-8')
     (output/'robots.txt').write_text('User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /auth/\nDisallow: /admin\nDisallow: /settings\nDisallow: /my\nDisallow: /login\nDisallow: /signup\nDisallow: /reset\nSitemap: '+ORIGIN+'/sitemap.xml\nSitemap: '+ORIGIN+'/groupbuys/sitemap.xml\n', 'utf-8')
-    (output/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+''.join('<url><loc>'+ORIGIN+p+'</loc><lastmod>'+UPDATED+'</lastmod></url>' for p in paths)+'</urlset>', 'utf-8')
+    (output/'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+'<url><loc>'+ORIGIN+'/</loc></url>'+''.join('<url><loc>'+ORIGIN+p.removesuffix('.html')+'</loc><lastmod>'+UPDATED+'</lastmod></url>' for p in paths)+'</urlset>', 'utf-8')
     (output/'llms.txt').write_text('# 모두의 육아\n\n육아용품 비교·공구 정보 공유·수요 커뮤니티. 회원가입은 만 14세 이상. 주문·결제·배송·환불은 외부 판매처에서 진행.\n\n'+''.join('- ['+g['title']+']('+ORIGIN+'/guides/'+g['slug']+'.html)\n' for g in GUIDES)+''.join('- ['+entry['title']+']('+ORIGIN+CONTENT['guide_path'](entry)+')\n' for entry in CATALOG if CONTENT['active'](entry))+'\n출처 확인일과 자료의 한계를 각 문서에 표시합니다. 이 목록은 AI 인용이나 노출을 보장하지 않습니다.\n', 'utf-8')
+    llms = output/'llms.txt'
+    llms.write_text(llms.read_text('utf8').replace('.html)', ')') + '\n서비스 홈: '+ORIGIN+'/\n공동구매 공개 페이지 목록: '+ORIGIN+'/groupbuys/sitemap.xml\n', 'utf8')
     return paths
 
 

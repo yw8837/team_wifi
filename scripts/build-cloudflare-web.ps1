@@ -40,7 +40,7 @@ Get-ChildItem -LiteralPath $output -Recurse -File | Where-Object Extension -In '
 Copy-Item -LiteralPath "$PSScriptRoot/cloudflare-public-worker.mjs" -Destination "$output/_worker.js"
 & node "$PSScriptRoot/sync-seller-images.mjs" $ApiBase $output
 if ($LASTEXITCODE) { throw 'Seller image snapshot verification failed.' }
-@{ version = 1; include = @('/groupbuys/*'); exclude = @() } | ConvertTo-Json | Set-Content "$output/_routes.json"
+@{ version = 1; include = @('/', '/groupbuys/*'); exclude = @() } | ConvertTo-Json | Set-Content "$output/_routes.json"
 @'
 /legal/:kind /legal/:kind/index.html 200
 /* /index.html 200

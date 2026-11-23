@@ -187,11 +187,13 @@ def test_public_web_opens_and_opt_in_daily_members_are_separate(public_mode, mon
     assert c.post(opens, headers={**web, 'Origin':'https://other.example'}).status_code == 403
     assert c.post(opens, headers={**web, **buyer}).status_code == 403
     assert c.post(opens, headers=web).status_code == 202
-    assert c.post(opens + '?shared=true', headers=web).status_code == 202
+    assert c.post(opens + '?source=private-value', headers=web).status_code == 422
+    assert c.post(opens + '?source=kakao&shared=true', headers=web).status_code == 202
     assert c.post(member).status_code == 401
     assert not c.post(member, headers=buyer).json()['recorded']
     assert not c.post(member, headers=admin).json()['recorded']
     before = c.get(window + 'week', headers=admin).json()['dashboard']
+    assert before['source_opens'] == {'kakao': 1}
     assert before['visitors'] == 0 and before['web_opens'] == 2 and before['shared_opens'] == 1
     assert [d['web_opens'] for d in before['days']] == [None] * 6 + [2]
     c.put('/api/release/measurement/consent', headers=buyer, json={'enabled': True})

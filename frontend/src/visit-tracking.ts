@@ -20,8 +20,13 @@ export function useVisitTracking(path: string, authLoading: boolean, isAdmin: bo
       if (!reportedWebOpen && isPublicScreen(path) && clientPlatform() === 'web') {
         reportedWebOpen = true;
         // Never retry an ambiguous increment. A definite rejection may retry on the next visit.
-        const shared = readCampaign(window.location.search)?.medium === 'share';
-        void fetch(API_BASE + '/release/measurement/web-opens' + (shared ? '?shared=true' : ''), {
+        const campaign = readCampaign(window.location.search);
+        const params = new URLSearchParams();
+        if (campaign) {
+          params.set('source', campaign.source);
+          if (campaign.medium === 'share') params.set('shared', 'true');
+        }
+        void fetch(API_BASE + '/release/measurement/web-opens' + (params.size ? '?' + params : ''), {
           method: 'POST', credentials: 'omit', referrerPolicy: 'no-referrer',
           headers: { 'X-Moduyuga-Client': 'web' }, keepalive: true,
         }).then(response => { if (!response.ok) reportedWebOpen = false; }).catch(() => {});

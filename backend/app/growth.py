@@ -23,6 +23,7 @@ CAMPAIGN_VISIT = 'growth_campaign_visit'
 MEMBER_DAY = 'growth_member_day'
 WEB_OPENS = 'growth_web_opens'
 SHARED_OPENS = 'growth_shared_opens'
+SOURCE_OPENS = 'growth_source_opens'
 WEB_START = 'growth_web_start'
 LINK_ESTIMATE = 'growth_link_estimate'
 RETENTION = 30 * 86400
@@ -34,8 +35,11 @@ class Consent(Strict):
     enabled: bool
 
 
+CampaignSource = Literal['web', 'android', 'kakao', 'instagram', 'naver', 'google', 'youtube', 'discord', 'presentation', 'qr']
+
+
 class CampaignVisit(Strict):
-    source: Literal['web', 'android', 'kakao', 'instagram', 'naver', 'google', 'youtube', 'discord', 'presentation', 'qr']
+    source: CampaignSource
     medium: Literal['share', 'social', 'search', 'referral', 'qr', 'presentation']
     campaign: Literal['groupbuy', 'community_launch', 'midterm']
     channel: Literal['web', 'android']
@@ -104,7 +108,7 @@ def member_visit(user=Depends(current_user), db=Depends(get_db)):
 
 
 @router.post('/web-opens', status_code=202)
-def web_open(request: Request, shared: bool = False, db=Depends(get_db)):
+def web_open(request: Request, shared: bool = False, source: CampaignSource | None = None, db=Depends(get_db)):
     # The browser sends no body, credentials, referrer or page address.
     origin = request.headers.get('origin')
     allowed = [config.PUBLIC_WEB_ORIGIN] if config.PUBLIC_WEB_ORIGIN else config.ORIGINS
@@ -120,10 +124,13 @@ def web_open(request: Request, shared: bool = False, db=Depends(get_db)):
     db.execute(insert(Record).values(kind=WEB_START, unique_key='first-day', created=midnight)
                .on_conflict_do_nothing(index_elements=['kind', 'unique_key']))
     kinds = [WEB_OPENS, SHARED_OPENS] if shared else [WEB_OPENS]
-    for kind in kinds:
-        db.execute(insert(Record).values(kind=kind, unique_key=day.isoformat(), created=midnight, counter=1)
+    counters = [(kind, day.isoformat()) for kind in kinds]
+    if source:
+        counters.append((SOURCE_OPENS, f"{day}:{source}"))
+    for kind, key in counters:
+        db.execute(insert(Record).values(kind=kind, unique_key=key, created=midnight, counter=1)
                    .on_conflict_do_update(index_elements=['kind', 'unique_key'], set_={'counter': Record.counter + 1}))
-    db.execute(delete(Record).where(Record.kind.in_([WEB_OPENS, SHARED_OPENS]), Record.created <= midnight - RETENTION))
+    db.execute(delete(Record).where(Record.kind.in_([WEB_OPENS, SHARED_OPENS, SOURCE_OPENS]), Record.created <= midnight - RETENTION))
     db.commit()
     return {'recorded': True}
 
@@ -262,7 +269,7 @@ def campaign_report(period: Literal['today', 'week', 'month', 'all', 'custom'] =
     day_min = kst_date(checked_at) - timedelta(days=29)
     first_open = db.scalar(select(Record.created).where(Record.kind == WEB_START))
     coverage = max(kst_date(first_open), day_min) if first_open is not None else None
-    db.execute(delete(Record).where(Record.kind.in_([WEB_OPENS, SHARED_OPENS]), Record.unique_key < day_min.isoformat()))
+    db.execute(delete(Record).where(Record.kind.in_([WEB_OPENS, SHARED_OPENS, SOURCE_OPENS]), Record.unique_key < day_min.isoformat()))
     public_days = dict(db.execute(select(Record.unique_key, Record.counter).where(
         Record.kind == WEB_OPENS, Record.unique_key.between(start.isoformat(), end.isoformat())
     )).all())
@@ -284,7 +291,13 @@ def campaign_report(period: Literal['today', 'week', 'month', 'all', 'custom'] =
             if funnel:
                 item['campaign_estimate'] = CampaignCounts.model_validate(funnel).model_dump()
         item['web_opens'] = public_days.get(day.isoformat(), 0) if coverage and day >= coverage else None
+    source_opens = defaultdict(int)
+    for key, count in db.execute(select(Record.unique_key, Record.counter).where(
+        Record.kind == SOURCE_OPENS, Record.unique_key >= str(start), Record.unique_key < str(end + timedelta(days=1)),
+    )):
+        source_opens[key.split(':', 1)[1]] += count
     dashboard = {
+        'source_opens': dict(source_opens),
         'shared_opens': sum(shared_days.values()) if coverage and end >= coverage else None,
         'web_opens_from': kst_date(first_open) if first_open is not None else None,
         'web_opens': sum(public_days.values()) if coverage and end >= coverage else None,
