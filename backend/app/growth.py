@@ -175,8 +175,27 @@ def display_count(count):
     return count if count == 0 or count >= MINIMUM_CAMPAIGN_ACCOUNTS else None
 
 
+class CampaignCounts(Strict):
+    visitors: int = Field(ge=0, le=1000000, strict=True)
+    detail: int = Field(ge=0, le=1000000, strict=True)
+    outbound: int = Field(ge=0, le=1000000, strict=True)
+
+    @model_validator(mode='after')
+    def check_funnel(self):
+        if not self.outbound <= self.detail <= self.visitors:
+            raise ValueError('판매처 이동, 상세 열람, 방문 인원 순으로 값을 확인해 주세요.')
+        return self
+
+
 class LinkEstimate(Strict):
     count: int | None = Field(..., ge=0, le=1000000, strict=True)
+    funnel: CampaignCounts | None = None
+
+    @model_validator(mode='after')
+    def check_total(self):
+        if self.funnel and (self.count is None or self.count > self.funnel.visitors):
+            raise ValueError('공유 링크 인원은 전체 방문 인원 이하여야 합니다.')
+        return self
 
 
 @router.put('/link-estimates/{day}')
@@ -188,10 +207,17 @@ def save_link_estimate(day: date, body: LinkEstimate, user=Depends(admin_user), 
     if body.count is None:
         db.execute(delete(Record).where(Record.kind == LINK_ESTIMATE, Record.unique_key == key))
     else:
+        fields = {'counter': body.count}
+        if 'funnel' in body.model_fields_set:
+            fields['data'] = body.funnel.model_dump() if body.funnel else {}
+        else:
+            previous = db.scalar(select(Record).where(Record.kind == LINK_ESTIMATE, Record.unique_key == key))
+            if previous and body.count > previous.data.get('visitors', body.count):
+                raise HTTPException(422, '전체 방문 인원을 함께 확인해 주세요.')
         db.execute(record_insert(db)(Record).values(
-            kind=LINK_ESTIMATE, unique_key=key, owner_id=user.id, counter=body.count,
+            kind=LINK_ESTIMATE, unique_key=key, owner_id=user.id, **fields,
             created=(day - EPOCH_DATE).days * DAY - KST_OFFSET,
-        ).on_conflict_do_update(index_elements=['kind', 'unique_key'], set_={'counter': body.count}))
+        ).on_conflict_do_update(index_elements=['kind', 'unique_key'], set_=fields))
     db.commit()
     return {'count': body.count}
 
@@ -245,15 +271,18 @@ def campaign_report(period: Literal['today', 'week', 'month', 'all', 'custom'] =
     )).all())
     cutoff_midnight = (day_min - EPOCH_DATE).days * DAY - KST_OFFSET
     db.execute(delete(Record).where(Record.kind == LINK_ESTIMATE, Record.created < cutoff_midnight))
-    estimates = dict(db.execute(select(Record.created, Record.counter).where(
+    estimate_rows = db.execute(select(Record.created, Record.counter, Record.data).where(
         Record.kind == LINK_ESTIMATE, Record.owner_id == user.id,
         Record.created.between((start - EPOCH_DATE).days * DAY - KST_OFFSET, before),
-    )).all())
+    ))
+    estimates = {kst_date(stamp): (count, funnel) for stamp, count, funnel in estimate_rows}
     for item in days:
         day = item['date']
-        estimate = estimates.get((day - EPOCH_DATE).days * DAY - KST_OFFSET)
-        if estimate is not None:
-            item['link_estimate'] = estimate
+        if day in estimates:
+            link_count, funnel = estimates[day]
+            item['link_estimate'] = link_count
+            if funnel:
+                item['campaign_estimate'] = CampaignCounts.model_validate(funnel).model_dump()
         item['web_opens'] = public_days.get(day.isoformat(), 0) if coverage and day >= coverage else None
     dashboard = {
         'shared_opens': sum(shared_days.values()) if coverage and end >= coverage else None,

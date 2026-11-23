@@ -225,6 +225,12 @@ def test_personal_link_estimate_is_private_and_never_adds_to_measured_visits(pub
     data = c.get(url, headers=admin).json()['dashboard']
     assert data['days'][0]['link_estimate'] == 9
     assert data['visitors'] == 0 and data['web_opens'] is None
+    counts = {'visitors': 10, 'detail': 4, 'outbound': 3}
+    assert c.put(target, headers=admin, json={'count':9, 'funnel':{**counts, 'outbound':8}}).status_code == 422
+    assert c.put(target, headers=admin, json={'count':9, 'funnel':counts}).status_code == 200
+    report = c.get(url, headers=admin).json()['dashboard']
+    assert report['days'][0]['campaign_estimate'] == counts and report['visitors'] == 0
+    assert c.put(target, headers=admin, json={'count':11}).status_code == 422
     buyer_id = c.get('/api/me', headers=buyer).json()['id']
     with SessionLocal() as db:
         db.get(User, buyer_id).is_admin = True

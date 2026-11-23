@@ -14,7 +14,7 @@
 .visit-report .visit-range { font-weight: 650; margin-top: 0; }
 .visit-range small, .visit-note, .visit-panel > p, .visit-sources small { color: #665c55; }
 .visit-range small { font-weight: normal; }
-.visit-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; gap: .85rem 0; }
+.visit-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; gap: .85rem 0; }
 .visit-metrics div { padding-inline: .85rem; border-left: 1px solid #e4dfda; }
 .visit-metrics div:first-child { border: 0; padding-left: 0; }
 .visit-metrics dt { font-size: .88rem; }
@@ -34,22 +34,9 @@
   .visit-controls form { display: grid; width: 100%; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); }
   .visit-controls form button { justify-self: start; grid-column: 1/-1; }
 }
-.visit-summary small { display: block; margin-top: .35rem; color: #665c55; }
-.visit-history { max-height: 20rem; overflow-y: auto; margin-top: .75rem; }
-.visit-history table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-.visit-history th, .visit-history td { text-align: right; padding: .5rem .25rem; border-bottom: 1px solid #ece6e1; }
-.visit-history th:first-child { text-align: left; }
-.visit-history thead th { position: sticky; top: 0; background: white; }
-.link-estimate { border-top: 1px solid #ece6e1; margin-top: .8rem; padding-top: .5rem; }
-.link-estimate summary { cursor: pointer; width: fit-content; padding: .55rem 0; color: #664737; }
-.link-estimate form { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
-.link-estimate input { width: 7rem; }
-.link-estimate small { display: block; color: #665c55; font-weight: normal; }
-
-.visit-summary.with-estimate { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-@media (max-width: 580px) {
-  .visit-summary.with-estimate { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .visit-summary.with-estimate > div:first-child { grid-column: 1 / -1; }
-  .visit-summary.with-estimate > div:nth-child(2) { border: 0; padding-left: 0; }
-  .visit-summary.with-estimate > div:nth-child(3) { border-left: 1px solid #e4dfda; padding-inline: .85rem; }
-}
+.visit-history { overflow-x: auto; }
+.visit-chart { display: flex; margin: 1rem 0 0; padding: 0; list-style: none; }
+.visit-chart li { flex: 1 0 0; display: grid; justify-items: center; gap: .35rem; font-size: .85rem; }
+.visit-column { width: 100%; height: 5rem; display: flex; align-items: end; justify-content: center; border-bottom: 1px solid #ded8d1; }
+.visit-column i { display: block; width: 52%; max-width: 42px; border-radius: 4px 4px 0 0; background: #95634b; }
+.visit-chart time { white-space: nowrap; }
