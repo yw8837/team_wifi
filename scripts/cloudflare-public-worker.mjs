@@ -191,13 +191,6 @@ export default {
     if (!['GET', 'HEAD'].includes(request.method)) {
       return new Response('Method not allowed', { status: 405, headers: { Allow: 'GET, HEAD' } });
     }
-    const publicDetailFallback = () => {
-      if (request.method !== 'GET' || !url.pathname.endsWith('/public') ||
-          !request.headers.get('Accept')?.includes('text/html')) return null;
-      return new Response(null, {status:302, headers:{
-        Location:url.pathname.slice(0,-'/public'.length), 'Cache-Control':'no-store',
-      }});
-    };
     try {
       const base = new URL(env.PUBLIC_API_BASE);
       if (base.protocol !== 'https:' || base.username || base.password || base.search || base.hash) {
@@ -209,10 +202,6 @@ export default {
         redirect: 'manual',
         signal: AbortSignal.timeout(15000),
       });
-      if (response.status >= 500) {
-        const fallback = publicDetailFallback();
-        if (fallback) return fallback;
-      }
       const headers = new Headers(response.headers);
       headers.delete('set-cookie');
       headers.set('Cache-Control', 'no-store');
@@ -220,7 +209,7 @@ export default {
       headers.set('X-Frame-Options', 'DENY');
       return new Response(response.body, { status: response.status, headers });
     } catch {
-      return publicDetailFallback() ?? new Response('잠시 후 다시 시도해 주세요.', {
+      return new Response('잠시 후 다시 시도해 주세요.', {
         status: 503,
         headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' },
       });
