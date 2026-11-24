@@ -7,7 +7,10 @@ import sys
 import time
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--environment', type=Path)
+scope = parser.add_mutually_exclusive_group()
+scope.add_argument('--environment', type=Path)
+scope.add_argument('--service-environment', action='store_true',
+                   help='Use the public service PostgreSQL configuration inherited from the host')
 parser.add_argument('--apply', action='store_true')
 parser.add_argument('--retire-demo', action='store_true')
 parser.add_argument('--output', required=True, type=Path)
@@ -21,8 +24,11 @@ if args.interval_seconds and not 3600 <= args.interval_seconds <= 86400:
     parser.error('Refresh interval must be between one hour and one day')
 if (args.interval_seconds or args.daily_midnight) and args.retire_demo:
     parser.error('Demo migration is a one-time operation')
-if args.apply and not args.environment:
-    parser.error('--apply requires --environment')
+if args.service_environment and not (os.getenv('MODU_ENV') == 'public_release' and
+                                     os.getenv('DATABASE_URL', '').startswith('postgresql+psycopg://')):
+    parser.error('--service-environment requires the configured public PostgreSQL service')
+if args.apply and not (args.environment or args.service_environment):
+    parser.error('--apply requires an explicit environment')
 if args.environment:
     os.environ.update(json.loads(args.environment.read_text(encoding='utf-8-sig')))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'backend'))
