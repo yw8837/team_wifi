@@ -73,8 +73,10 @@ export async function api<T>(
   if (import.meta.env.VITE_PUBLIC_RELEASE === "1" || import.meta.env.VITE_BETA_MODE === "1") {
     validateRuntimeApiOrigin(API_BASE);
   }
-  const token = readSessionToken();
   const bootstrap = method === "GET" && path === "/config";
+  // The public configuration is identical for guests and members. Sending a
+  // token here adds a preflight before the first request can reach the server.
+  const token = bootstrap ? null : readSessionToken();
   const authentication = method === "POST" && ['/auth/register', '/auth/login'].includes(path);
   const measurement = method === 'POST' && path === '/release/measurement/events';
   const readOnly = method === "GET";
@@ -99,15 +101,15 @@ export async function api<T>(
   });
   try {
     const platform = clientPlatform();
-    const anonymousWebRead = platform === "web" && !token && readOnly && (bootstrap || path.startsWith("/release/groupbuys?"));
-    let response: Response | undefined;
-    const attempts = bootstrap ? 3 : 1;
-    for (let attempt = 0; attempt < attempts; attempt++) {
+    const simpleRead = bootstrap || (platform === "web" && !token && readOnly && path.startsWith("/release/groupbuys?"));
+    let response: Response;
+    for (let attempt = 0; ; attempt++) {
+      const backoff = Math.min(1_500 * 2 ** attempt, 15_000);
       try {
         response = await fetch(API_BASE + path, {
           method,
           headers: {
-            ...(anonymousWebRead ? {} : { 'X-Moduyuga-Client': platform }),
+            ...(simpleRead ? {} : { 'X-Moduyuga-Client': platform }),
             ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
@@ -115,20 +117,23 @@ export async function api<T>(
           signal: controller.signal,
         });
       } catch {
-        if (!controller.signal.aborted && attempt + 1 < attempts) {
-          await retryDelay(1_500 * (attempt + 1));
+        if (bootstrap && !controller.signal.aborted && navigator.onLine !== false) {
+          await retryDelay(backoff);
           continue;
         }
         throw new ApiError(0, controller.signal.aborted ? timeoutMessage : connectionMessage);
       }
-      if (gatewayUnavailable(response.status) && attempt + 1 < attempts) {
+      if (bootstrap && (gatewayUnavailable(response.status) || response.status === 429 ||
+          (response.ok && response.headers.get("content-type")?.includes("text/html")))) {
+        const after = response.headers.get("retry-after")?.trim();
+        const wait = !after ? 0 : /^\d+$/.test(after) ? Number(after) * 1000 : Date.parse(after) - Date.now();
         await response.body?.cancel();
-        await retryDelay(1_500 * (attempt + 1));
+        // The shared deadline aborts the wait if the host asks for longer.
+        await retryDelay(Math.min(90_000, Math.max(backoff, wait || 0)));
         continue;
       }
       break;
     }
-    if (!response) throw new ApiError(0, connectionMessage);
     const data = await response.json().catch(() => {
       if (controller.signal.aborted) throw new ApiError(0, timeoutMessage);
       return {};

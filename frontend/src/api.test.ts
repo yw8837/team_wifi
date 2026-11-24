@@ -100,6 +100,24 @@ describe("API failures and session", () => {
     await expect(result).resolves.toEqual({ public_release: true });
     expect(fetch).toHaveBeenCalledTimes(3);
   });
+  it("opens a signed-in page after a rate-limited cold start without preflighting the config read", async () => {
+    vi.useFakeTimers();
+    sessionStorage.setItem(TOKEN_KEY, "existing-session");
+    const fetch = vi.fn()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValueOnce(new Response("busy", { status: 429, headers: { "Retry-After": "45" } }))
+      .mockResolvedValueOnce(new Response("starting", { headers: { "Content-Type": "text/html" } }))
+      .mockResolvedValueOnce(Response.json({ public_release: true }));
+    vi.stubGlobal("fetch", fetch);
+    const result = api("/config");
+    await vi.advanceTimersByTimeAsync(46_499);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(6_001);
+    await expect(result).resolves.toEqual({ public_release: true });
+    expect(fetch).toHaveBeenCalledTimes(4);
+    expect(fetch.mock.calls.every(([, init]) => Object.keys(init.headers).length === 0)).toBe(true);
+    expect(sessionStorage.getItem(TOKEN_KEY)).toBe("existing-session");
+  });
   it("bounds an unavailable config server at 90 seconds with a read-only message", async () => {
     vi.useFakeTimers();
     const fetch = vi.fn((_url: string, init: RequestInit) => new Promise<Response>((_resolve, reject) => {

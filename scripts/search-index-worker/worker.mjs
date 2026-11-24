@@ -4,7 +4,7 @@ const ownershipKey = 'c70b27f9540e408d84d201bbd264a1cc';
 async function read(url) {
   const parsed = new URL(url);
   if (parsed.origin !== origin || parsed.search || parsed.hash || parsed.username || parsed.password) throw Error('Invalid public URL');
-  const response = await fetch(url, {headers:{'User-Agent':'ModuYuga-IndexCheck/1.0'}, redirect:'error', signal:AbortSignal.timeout(18000)});
+  const response = await fetch(url, {headers:{'User-Agent':'ModuYuga-IndexCheck/1.0'}, redirect:'manual', signal:AbortSignal.timeout(18000)});
   if (!response.ok) throw Error('Failed to read ' + parsed.pathname + ' (' + response.status + ')');
   return response.text();
 }
@@ -53,6 +53,14 @@ export async function notifyChanges(env) {
 export async function checkPublicProduct(env) {
   const checked_at = new Date().toISOString();
   try {
+    const config = await fetch('https://moduyuga-api.yeolmaeapps.kr/api/config', {
+      headers: {Origin: origin}, redirect: 'manual', signal: AbortSignal.timeout(18000),
+    });
+    if (!config.ok || config.headers.get('access-control-allow-origin') !== origin) {
+      throw Error('Startup config unavailable to the website (' + config.status + ')');
+    }
+    const mode = await config.json();
+    if (mode.public_release !== true || mode.beta_mode !== false) throw Error('Unexpected startup configuration');
     const xml = await read(origin + '/groupbuys/sitemaps/1');
     const path = /<loc>([^<]+\/groupbuys\/[a-f0-9-]{36}\/public)<\/loc>/.exec(xml)?.[1];
     if (!path) throw Error('No public product in sitemap');
