@@ -58,21 +58,9 @@ services:
       - key: DATABASE_LOCATION
         value: Neon · AWS 싱가포르
     routes:
-      - type: rewrite
-        source: /groupbuys/sitemap.xml
-        destination: https://moduyuga-beta.onrender.com/api/release/groupbuy-pages/sitemap.xml
-      - type: rewrite
-        source: /groupbuys/sitemaps/:page
-        destination: https://moduyuga-beta.onrender.com/api/release/groupbuy-pages/sitemaps/:page
-      - type: rewrite
-        source: /groupbuys/:id/public
-        destination: https://moduyuga-beta.onrender.com/api/release/groupbuys/:id/public
-      - type: rewrite
-        source: /legal/:kind
-        destination: /legal/:kind/index.html
-      - type: rewrite
+      - type: redirect
         source: /*
-        destination: /index.html
+        destination: https://moduyuga.yeolmaeapps.kr/*
     headers:
       - path: /*
         name: X-Content-Type-Options
