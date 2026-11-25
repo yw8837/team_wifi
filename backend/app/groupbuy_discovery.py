@@ -29,6 +29,23 @@ def seconds_until_midnight(stamp=None):
     return (midnight - current).total_seconds()
 
 
+def retry_delay(attempt, until_next):
+    """Wait after a run that crashed before finishing: 5 minutes, doubling to an hour.
+
+    Listings stay public for one day after their last check, so a crashed
+    midnight run must not wait a whole day for the next one.
+    """
+    return min(300 * 2 ** min(max(attempt, 1) - 1, 4), 3600, until_next)
+
+
+def next_wait(crashes, until_next, limit=5):
+    """Retry early after the first few consecutive crashes, then keep the schedule.
+
+    A fault that never clears would otherwise refetch every seller each hour.
+    """
+    return retry_delay(crashes, until_next) if 0 < crashes <= limit else until_next
+
+
 def classify(title, fallback=None):
     # Remove only the bag word's generic diaper match, preserving other conflicts.
     matching_title = title.replace('기저귀가방', '모아백')

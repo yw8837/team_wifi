@@ -76,12 +76,23 @@ def write_receipt(receipt):
                       'demo_changes': receipt['demo_changes']}), flush=True)
 
 
+crashes = 0
 while True:
     try:
         failed = collect_once()
+        crashes = 0
     except Exception as error:
+        crashes += 1
         print(json.dumps({"collection_error": type(error).__name__}), flush=True)
         failed = True
     if not args.interval_seconds and not args.daily_midnight:
         raise SystemExit(1 if failed else 0)
-    time.sleep(groupbuy_discovery.seconds_until_midnight() if args.daily_midnight else args.interval_seconds)
+    wait = groupbuy_discovery.seconds_until_midnight() if args.daily_midnight else args.interval_seconds
+    if args.daily_midnight:
+        # Pages that fail one by one are normal and wait for the next run.
+        # Only a midnight-mode run that never finished is repeated early.
+        early = groupbuy_discovery.next_wait(crashes, wait)
+        if early < wait:
+            print(json.dumps({"collection_retry_in_seconds": int(early)}), flush=True)
+        wait = early
+    time.sleep(wait)

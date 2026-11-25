@@ -14,6 +14,23 @@ def test_midnight_uses_korean_calendar():
     assert discovery.seconds_until_midnight(stamp + 10) == 86400
 
 
+def test_crashed_collection_retries_before_the_next_schedule():
+    waits = [discovery.retry_delay(attempt, 86400) for attempt in range(1, 7)]
+    assert waits == [300, 600, 1200, 2400, 3600, 3600]
+    # A retry never postpones the regular run that is already due sooner.
+    assert discovery.retry_delay(1, 120) == 120
+    assert discovery.retry_delay(40, 86400) == 3600
+    assert discovery.retry_delay(0, 86400) == 300
+
+
+def test_only_a_few_consecutive_crashes_are_retried_early():
+    assert discovery.next_wait(0, 86400) == 86400
+    assert [discovery.next_wait(crashes, 86400) for crashes in range(1, 6)] == [300, 600, 1200, 2400, 3600]
+    # A fault that never clears goes back to the regular schedule.
+    assert discovery.next_wait(6, 86400) == 86400
+    assert discovery.next_wait(2, 90.5) == 90.5
+
+
 def test_discovery_deduplicates_urls_and_classifies():
     base = 'https://somi9726.cafe24.com/'
     html = '''<a href="/product/detail.html?product_no=333&amp;tracking=x">공구</a>
