@@ -1,0 +1,13 @@
+
+> modu-yuga@0.1.0 build
+> tsc -b && vite build
+
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 49 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.97 kB │ gzip:   0.56 kB
+dist/assets/index-CLcQ-1ae.css   12.96 kB │ gzip:   3.49 kB
+dist/assets/index-D1g2UQoj.js   329.34 kB │ gzip: 102.18 kB
+✓ built in 873ms

@@ -1,0 +1,13 @@
+{
+  "name": "moduyuga-api-gateway",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "moduyuga-api.yeolmaeapps.kr/api/*",
+      "zone_name": "yeolmaeapps.kr"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+.price-comparison { margin:24px 0; border-top:1px solid var(--line); padding-top:20px; }
+.price-reference-grid,.price-manual-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:16px; }
+.price-reference { padding:18px; background:var(--cream); border:1px solid var(--line); border-radius:14px; min-width:0; overflow-wrap:anywhere; }
+.price-reference h3 { margin-top:0; }
+.price-saving { display:grid; gap:6px; margin:16px 0; }
+.price-saving strong { font-size:22px; color:var(--cocoa); }
+.price-saving span { font-size:14px; }
+.price-reference>a { display:inline-flex; align-items:center; min-height:44px; }
+.price-manual { margin-top:16px; }
+.price-manual summary { cursor:pointer; min-height:48px; padding:12px 0; font-weight:600; }
+.price-inputs { display:grid; gap:8px; }
+.price-inputs .field,.price-manual-grid>div { min-width:0; }
+.price-manual input,.price-manual select { min-width:0; max-width:100%; }
+.price-match { display:flex; gap:10px; align-items:center; min-height:48px; margin:16px 0; }
+.price-match input { width:22px; height:22px; flex:0 0 22px; }

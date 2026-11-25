@@ -1,0 +1,62 @@
+name: API container verification
+on:
+  push:
+    branches: ['codex/**']
+    paths: ['backend/**', 'ai-pipeline/**', '.dockerignore', 'railway.json', '.github/workflows/container.yml']
+  pull_request:
+    paths: ['backend/**', 'ai-pipeline/**', '.dockerignore', 'railway.json', '.github/workflows/container.yml']
+permissions:
+  contents: read
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build portable API image
+        run: docker build -f backend/Dockerfile -t moduyuga-api:verify .
+      - name: Verify dynamic port and API without model service
+        run: |
+          docker network create moduyuga-verification
+          docker run -d --name moduyuga-pg-verify --network moduyuga-verification -e POSTGRES_USER=app -e POSTGRES_PASSWORD=container-verification-only -e POSTGRES_DB=app postgres:16
+          for attempt in $(seq 1 30); do
+            if docker exec moduyuga-pg-verify pg_isready -U app; then break; fi
+            sleep 1
+          done
+          docker run -d --name moduyuga-api-verify --network moduyuga-verification -p 127.0.0.1:18080:8080 \
+            -e PORT=8080 -e MODU_ENV=public_release -e ASSISTANT_MODEL_ENABLED=false \
+            -e DATABASE_URL=postgresql+psycopg://app:container-verification-only@moduyuga-pg-verify/app \
+            -e PUBLIC_ORIGIN=https://api.example.test -e PUBLIC_WEB_ORIGIN=https://web.example.test \
+            -e RATE_LIMIT_SECRET=container-verification-only-0123456789 \
+            -e SUPPORT_EMAIL=support@example.test -e HOSTING_LOCATION=CI -e DATABASE_LOCATION=CI \
+            -e RAILWAY_PROJECT_ID=container-verification moduyuga-api:verify
+          python - <<'PY'
+          import json, time, urllib.request
+          for attempt in range(30):
+              try:
+                  with urllib.request.urlopen('http://127.0.0.1:18080/api/health', timeout=2) as response:
+                      assert json.load(response)['status'] == 'ok'
+                  break
+              except OSError:
+                  time.sleep(1)
+          else:
+              raise SystemExit('Container health check failed')
+          for origin in ('https://web.example.test', 'https://localhost'):
+              request = urllib.request.Request('http://127.0.0.1:18080/api/config', headers={'Host':'api.example.test', 'Origin':origin})
+              with urllib.request.urlopen(request, timeout=2) as response:
+                  assert json.load(response)['public_release'] is True
+                  assert response.headers['Access-Control-Allow-Origin'] == origin
+          request = urllib.request.Request('http://127.0.0.1:18080/api/health', headers={'Host':'healthcheck.railway.app'})
+          with urllib.request.urlopen(request, timeout=2) as response:
+              assert json.load(response)['status'] == 'ok'
+          try:
+              request = urllib.request.Request('http://127.0.0.1:18080/api/health', headers={'Host':'untrusted.example.test'})
+              urllib.request.urlopen(request, timeout=2)
+              raise AssertionError('Unexpected Host accepted')
+          except urllib.error.HTTPError as error:
+              assert error.code == 400
+          print('CONTAINER_PUBLIC_MODE_POSTGRES_APP_WEB_CORS_AND_HEALTH_PASS')
+          PY
+      - name: Container diagnostics
+        if: failure()
+        run: docker logs --tail 50 moduyuga-api-verify

@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "source_hashes": {
+    "raw/04_uci_shoppers/online_shoppers_intention.csv": "b3055ee355f59134d851d32641183cb4a8b45def7124d2f50442a042f358e0d9",
+    "raw/03_uci_retail_ii/online_retail_II.xlsx": "b1038e950f7d800a6dbe96104f28bdcbf7c733642964ae4476756d7b13e672d5",
+    "raw/01_ecommerce_behavior/Ecommerce_Consumer_Behavior_Analysis_Data.csv": "d7b3ef48cae922ad5ee8825238c6c335b1f1486f2d45dc72d81390e32457a215",
+    "raw/02_kaggle_retail/online_retail.csv": "f44850609552baed16ccd007633833246d651a906e2ef1642346c3a0aa1e4d6f"
+  },
+  "d1": {
+    "rows": 1000,
+    "baby_rows": 41,
+    "discount_sensitivity": {
+      "Not Sensitive": 331,
+      "Somewhat Sensitive": 319,
+      "Very Sensitive": 350
+    },
+    "baby_discount_sensitivity": {
+      "Not Sensitive": 15,
+      "Somewhat Sensitive": 11,
+      "Very Sensitive": 15
+    },
+    "application": "가격 관심이 서로 달라 비교 기준을 직접 고르게 하고, 같은 계정의 관심 카테고리를 앱·웹에 적용합니다.",
+    "limitation": "관측 표본의 요약입니다. 국내 육아 구매자를 대표하거나 할인 효과를 입증하지 않습니다."
+  },
+  "d2": {
+    "rows": 541909,
+    "matched_rows": 541909,
+    "application": "D3와 같은 거래를 합산하지 않습니다. 서비스의 저장·관심도 계정별 중복을 제거해 셉니다."
+  },
+  "d3": {
+    "rows": 1067371,
+    "bundle_evaluation": {
+      "task": "chronological held-out UK invoice basket completion, one deterministic held-out item, top100 train universe; remaining basket known",
+      "train_invoices": 28947,
+      "test_invoices": 7237,
+      "eligible_test_baskets": 4338,
+      "train_last": "2011-08-16T13:05:00",
+      "test_first": "2011-08-16T13:12:00",
+      "rules_recall_at_5": 0.36214845550945135,
+      "popularity_recall_at_5": 0.10557860765329645,
+      "rules_mrr_at_5": 0.22760104502843206,
+      "popularity_mrr_at_5": 0.056285538650683885,
+      "limitations": [
+        "conditional on baskets with at least 2 training top100 items",
+        "same historical customer may recur; no new-customer claim",
+        "within-invoice completion is not next-order prediction",
+        "no Korean childcare validation"
+      ]
+    },
+    "application": "동시구매 분석의 집계 방법을 실제 앱의 함께 저장한 육아템에 적용합니다. 최소 5계정의 신호만 운영자에게 표시합니다.",
+    "limitation": "과거 영국 상품을 육아템으로 치환하지 않습니다. 함께 저장은 구매 실적이나 수요 예측이 아닙니다."
+  },
+  "d4": {
+    "rows": 12330,
+    "purchased_sessions": 1908,
+    "product_duration_median_seconds": {
+      "purchased": 1109.90625,
+      "not_purchased": 510.19
+    },
+    "selected_model": "lightgbm",
+    "test_auroc": 0.744809393446127,
+    "test_average_precision": 0.2937280662857413,
+    "application": "종료된 세션 특성을 현재 이용자의 구매 확률로 쓰지 않습니다. 비교 도움은 이용자가 선택해 열도록 제공합니다.",
+    "automatic_behavior_scoring": false,
+    "limitation": "구매한 뒤의 체류시간도 포함합니다. 실시간 구매 의도·인과 효과·한국 서비스 성능으로 해석할 수 없습니다."
+  },
+  "sources": [
+    {
+      "id": "D1",
+      "name": "Ecommerce Consumer Behavior Analysis Data",
+      "url": "https://www.kaggle.com/datasets/salahuddinahmedshuvo/ecommerce-consumer-behavior-analysis-data",
+      "rows": 1000
+    },
+    {
+      "id": "D2",
+      "name": "Online Retail Transaction Data",
+      "url": "https://www.kaggle.com/datasets/thedevastator/online-retail-transaction-data",
+      "rows": 541909
+    },
+    {
+      "id": "D3",
+      "name": "Online Retail II",
+      "url": "https://archive.ics.uci.edu/dataset/502/online+retail+ii",
+      "rows": 1067371
+    },
+    {
+      "id": "D4",
+      "name": "Online Shoppers Purchasing Intention",
+      "url": "https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset",
+      "rows": 12330
+    }
+  ]
+}
