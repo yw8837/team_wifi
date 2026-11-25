@@ -48,7 +48,7 @@
 원본 제공 데이터, 운영 DB, 인증 키와 서명키는 로컬에서 관리합니다. `.env.example`에서 설정 이름을 확인할 수 있습니다. 저장소에 별도 라이선스 파일은 없으며 코드 재사용·재배포 허용 범위는 팀과 확인해야 합니다.
 
 
-**현재 운영과 변경 상태:** [피드백 반영 기록](docs/plans/2026-11-05-community-feedback.md), [가입 연령 변경](docs/build/release-20261105/SIGNUP-AGE.md), [커뮤니티 수정·서버 이전](docs/build/release-20261105/COMMUNITY-AND-SERVER.md). 웹은 Cloudflare Pages, 공개 API는 `https://moduyuga-api.yeolmaeapps.kr/api`를 사용합니다.
+**현재 운영과 변경 상태:** [피드백 반영 기록](docs/plans/2026-11-05-community-feedback.md), [가입 연령 변경](docs/build/release-20261105/SIGNUP-AGE.md), [커뮤니티 수정·서버 이전](docs/build/release-20261105/COMMUNITY-AND-SERVER.md). 웹은 Cloudflare Pages, 공개 API는 `https://moduyuga-api.yeolmaeapps.kr/api`를 사용합니다. 11월 24일 서버 복구 뒤 API는 Render에서 제공하며, 챗봇은 운영에서 모델 없이 승인 자료를 발췌해 답합니다. 최종발표 전 점검 결과는 피드백 반영 기록의 2026-11-25 항목에 있습니다.
 
 이 PC의 작업 경로는 **`E:/Team_Wifi`**로 통일했습니다. 이전 기획·회의·데이터는 `_archive/legacy-project`에 보존했습니다. 새 터미널에서는 `. ./scripts/use-workspace.ps1`로 프로젝트 캐시·임시 경로를 설정합니다. 기존 SDK/JDK를 재사용하며 에뮬레이터를 자동 기동하지 않습니다.
 
