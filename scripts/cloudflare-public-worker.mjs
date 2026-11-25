@@ -37,7 +37,7 @@ export function sellerPreviewUrl(value) {
 export function productImageUrl(value, source) {
   try {
     if (!value) return null;
-    const url = new URL(value, source);
+    const url = new URL(value.replaceAll('&amp;', '&'), source);
     const host = url.hostname;
     if (new URL(source).hostname === 'sharequeens.store') {
       const params = url.searchParams;

@@ -51,6 +51,7 @@ test('reviewed mini-store thumbnails use only its local product uploads', () => 
   assert.equal(sellerPreviewUrl(source + '?market_ref=tracker'), null);
   const thumb = '/img/thumb?src=%2Fuploads%2Fproducts%2Fproduct_v_98.png&w=900&format=jpeg';
   assert.ok(productImageUrl(thumb, source));
+  assert.equal(productImageUrl(thumb.replaceAll('&', '&amp;'), source), productImageUrl(thumb, source));
   assert.equal(productImageUrl(thumb.replace('%2Fuploads%2Fproducts%2F', 'https://other.example/'), source), null);
   assert.equal(productImageUrl(thumb + '&src=https://other.example/', source), null);
   assert.equal(productImageUrl('https://other.example' + thumb, source), null);
